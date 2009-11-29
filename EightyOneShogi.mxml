@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
+
+	<mx:Script>
+	  <![CDATA[
+		import flash.display.*;
+		import mx.controls.*;
+		import CsaShogiClient;
+    import Board;
+
+    private var _client:CsaShogiClient;
+    private var _currentPosition:Kyokumen;
+
+		private function initApp():void
+		{
+		  trace("application initialized..");
+		  _client = new CsaShogiClient();
+      _currentPosition = new Kyokumen();
+      board.setCallback(playerMove);
+		}
+
+    private function connectAndLogin():void{
+		  trace("logging in");
+      _client.addEventListener(CsaShogiClient.CONNECTED,handleConnected);
+      _client.addEventListener(CsaShogiClient.SERVER_MESSAGE,handleUserMessage);
+      _client.connect();
+    } 
+    
+    private function handleConnected(e:Event):void{
+		  trace("connected. try login.");
+      _client.login(loginname.text, "password");
+    } 
+
+    private function handleUserMessage(e:ServerMessageEvent):void{
+      writeUserMessage(e.message);
+      trace("handle server message");
+      if(e.message.charAt(0) == '+' || e.message.charAt(0) == '-'){
+        trace("move "+e.message);
+        var mv:Movement = _currentPosition.generateMovementFromString(e.message);
+        _currentPosition.move(mv.from,mv.to);
+        board.setPosition(_currentPosition);
+      } else if(e.message.indexOf("START") >= 0){
+        if(_client.isSente){
+          writeUserMessage("You are Sente(White).");
+          writeUserMessage("Your turn.");
+        } else {
+          writeUserMessage("You are Gote(Black).");
+        }
+      }
+    }
+
+    private function writeUserMessage(message:String):void{
+      userMessage.text += message + "\n";
+      userMessage.callLater(scrollDown);
+    }
+
+    private function scrollDown():void{
+      userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
+    }
+    
+    private function waitForGame():void{
+      writeUserMessage("Waiting for other player to join...");
+      _client.waitForGame();
+    }
+
+    private function agree():void{
+      _client.agree();
+    }
+
+    private function resign():void{
+      _client.resign();
+    }
+
+    private function playerMove(from:Point,to:Point):void{
+      trace("callback called");
+      var mv:Movement = _currentPosition.generateMovementFromCoordinates(from,to);
+      _client.move(mv.toCSA());
+    }
+
+	  ]]>
+	</mx:Script>
+  <mx:HBox>
+  <mx:VBox id="loginBox">
+    <mx:Form>
+      <mx:FormItem label="loginname">
+          <mx:TextInput id="loginname" width="200"/>
+	    </mx:FormItem>
+	    <mx:FormItem label="password">
+          <mx:TextInput id="password" width="200" displayAsPassword="true"/>
+	    </mx:FormItem>
+	    <mx:FormItem>
+          <mx:Button id="loginButton" label="Login" y="400" click="connectAndLogin();"/>
+	    </mx:FormItem>
+	  </mx:Form>
+    <mx:Button id="startButton" label="Start" y="400" click="waitForGame();"/>
+    <mx:Button id="resignButton" label="Resign" y="400" click="resign();"/>
+	  <mx:Label id="errorMessage"/>
+    <mx:Label text="Message"/>
+    <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="300" height="400"/>
+  </mx:VBox>
+    <mx:VBox>
+      <eightyOneSquare:Board id="board" width="600" height="454"/>
+      <mx:Label text="How to use."/>
+      <mx:Label text="1. Enter loginname (leave password blank) and press Login button."/>
+      <mx:Label text='2. A message from the shogi-server will be apper on the Message area. It will say something like "LOGIN:YOUR_LOGINNAME OK ##[LOGIN] +OK x1"'/>
+      <mx:Label text='* If no message appears, it means my server is dead for somereason. If that is the case, Please let me know.'/>
+      <mx:Label text="3. Press Start Button. Now you are waiting for a challenger."/>
+      <mx:Label text="4. If someone else is also waiting, then the game will be started. "/>
+      <mx:Label text="5. If nobody's waiting, you can open this page with another window, and repeat 1,2 above with another loginname. "/>
+      <mx:Label text="6. After the game is started, you can move your pieces by clicking one of them, and then cliking the board where you want to put you piece on."/>
+    </mx:VBox>
+  </mx:HBox>
+
+</mx:Application>
