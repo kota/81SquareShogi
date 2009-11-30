@@ -31,7 +31,12 @@ package  {
     }
 
     public function toCSA():String{
-      var from:Point = toHumanCoordinates(_from);
+      var from:Point;
+      if(_from.x > Kyokumen.HAND){
+        from = new Point(0,0);
+      } else {
+        from = toHumanCoordinates(_from);
+      }
       var to:Point = toHumanCoordinates(_to);
       var buff:String = _turn == 0 ? "+" : "-"
       buff += from.x.toString() + from.y.toString() + to.x.toString() + to.y.toString();
@@ -58,6 +63,7 @@ package  {
 		public function get turn():int {
 			return this._turn;
 		}
+
 	}
 	
 }

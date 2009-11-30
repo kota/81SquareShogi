@@ -2,12 +2,20 @@ package {
 	import mx.controls.Image;
 
   public class Square extends Image {
-    public var coord_x:int;
-    public var coord_y:int;
+    private var _coord_x:int;
+    private var _coord_y:int;
 
     public function Square(x:int,y:int):void{
-       coord_x = x; 
-       coord_y = y; 
+       _coord_x = x; 
+       _coord_y = y; 
+    }
+
+    public function get coord_x():int{
+      return _coord_x;
+    }
+
+    public function get coord_y():int{
+      return _coord_y;
     }
   }
 

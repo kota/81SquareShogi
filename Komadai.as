@@ -13,7 +13,7 @@ package  {
 		
 		public function Komadai() {
 			for (var i:int = 0; i < 8; i++ ) {
-				koma_list[i] = 0;
+				koma_list[i] = 0; 
 			}
 		}
 		
@@ -21,12 +21,12 @@ package  {
 			koma_list[koma.type]++;
 		}
 		
-		public function removeKoma(koma:Koma):void {
-			koma_list[koma.type]--;
+		public function removeKoma(koma_type:int):void {
+		  koma_list[koma_type]--;
 		}
 		
-		public function getNumOfKoma(type:int):int {
-			return koma_list[type];
+		public function getNumOfKoma(koma_type:int):int {
+			return koma_list[koma_type];
 		}
 	}
 }

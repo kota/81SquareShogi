@@ -29,7 +29,8 @@ package  {
 		private var _images:Array;
 		private var _nari:int;
 		private var _id:int;
-		
+	  
+    //TODO replace x,y with Point
 		public function Koma(type:int = 0, x:int = 0, y:int = 0, ownerPlayer:int = 0,id:int=0) {
 			this._type = type;
 			this._x = x;

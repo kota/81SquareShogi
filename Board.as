@@ -9,7 +9,9 @@ package  {
   import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import mx.controls.Image;
+  import mx.controls.Alert;
 	import mx.containers.Canvas;
+  import mx.containers.Box;
   import Square;
   import Kyokumen;
   import Koma;
@@ -96,6 +98,8 @@ package  {
 
     private var koma_images_gote:Array = new Array(gou,ghi,gkaku,gkin,ggin,gkei,gkyo,gfu,null,gryu,guma,null,gngin,gnkei,gnkyo,gto);
 
+    public var handBoxes:Array;
+
 		private var cells:Array;
 		private var board_back_image:Image = new Image();
 		private var board_masu_image:Image = new Image();
@@ -108,6 +112,7 @@ package  {
     private var position:Kyokumen;
 
 		public function Board() {
+      super();
 			cells = new Array(9);
 			for (var i:int; i < 9; i++ ) {
 				cells[i] = new Array(9);
@@ -129,6 +134,18 @@ package  {
 			
 			board_back_image.addChild(board_masu_image);
 			addChild(board_back_image);
+
+      handBoxes = new Array(2);
+      for(i=0;i<2;i++){
+        var hand:Box = new Box();
+        hand.width = 90;
+        hand.height = 200;
+        hand.setStyle('borderStyle','solid');
+        hand.setStyle('borderThickness',2);
+        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
+        handBoxes[i] = hand;
+        addChild(hand);
+      }
 
 			for (i = 0; i < 9; i++ ) {
 				for (var j:int = 0; j < 9;j++ ){
@@ -162,6 +179,21 @@ package  {
           }
         }
       }
+      for(var i:int=0;i<2;i++){
+        handBoxes[i].removeAllChildren();
+        var hand:Komadai = position.getKomadai(i);
+        for(var j:int=0;j<8;j++){
+          if(hand.getNumOfKoma(j) > 0){
+            for(var k:int=0;k<hand.getNumOfKoma(j);k++){
+              var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
+              handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
+              images = i == Kyokumen.SENTE ? koma_images_sente : koma_images_gote;
+              handPiece.source = images[j];
+              handBoxes[i].addChild(handPiece);
+            }
+          }
+        }
+      }
     }
 
     public function setCallback(callback:Function):void{
@@ -182,5 +214,13 @@ package  {
         this.from = null;
       }
     }
+
+    private function _handMouseUpHandler(e:MouseEvent):void{
+      if(this.from == null){
+        trace(e.target.coord_x.toString()+","+e.target.coord_y.toString());
+        this.from = new Point(e.target.coord_x,e.target.coord_y);
+      }
+    }
+
 	}
 }

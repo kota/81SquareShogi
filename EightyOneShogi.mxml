@@ -37,7 +37,7 @@
       if(e.message.charAt(0) == '+' || e.message.charAt(0) == '-'){
         trace("move "+e.message);
         var mv:Movement = _currentPosition.generateMovementFromString(e.message);
-        _currentPosition.move(mv.from,mv.to);
+        _currentPosition.move(mv);
         board.setPosition(_currentPosition);
       } else if(e.message.indexOf("START") >= 0){
         if(_client.isSente){
@@ -72,7 +72,6 @@
     }
 
     private function playerMove(from:Point,to:Point):void{
-      trace("callback called");
       var mv:Movement = _currentPosition.generateMovementFromCoordinates(from,to);
       _client.move(mv.toCSA());
     }
@@ -99,7 +98,8 @@
     <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="300" height="400"/>
   </mx:VBox>
     <mx:VBox>
-      <eightyOneSquare:Board id="board" width="600" height="454"/>
+      <eightyOneSquare:Board id="board" width="700" height="454"/> 
+
       <mx:Label text="How to use."/>
       <mx:Label text="1. Enter loginname (leave password blank) and press Login button."/>
       <mx:Label text='2. A message from the shogi-server will be apper on the Message area. It will say something like "LOGIN:YOUR_LOGINNAME OK ##[LOGIN] +OK x1"'/>

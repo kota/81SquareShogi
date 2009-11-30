@@ -38,7 +38,15 @@ package  {
       return tmp;
     }
 
-    private static const HAND:int = 99;
+    public static const HAND:int = 100;
+    public static const HAND_OU:int = HAND+0;
+    public static const HAND_HI:int = HAND+1;
+    public static const HAND_KA:int = HAND+2;
+    public static const HAND_KI:int = HAND+3;
+    public static const HAND_GI:int = HAND+4;
+    public static const HAND_KE:int = HAND+5;
+    public static const HAND_KY:int = HAND+6;
+    public static const HAND_FU:int = HAND+7;
 
 		public function Kyokumen():void {
 			this._komas = new Array(40);
@@ -153,9 +161,14 @@ package  {
     }
 
     public function generateMovementFromCoordinates(from:Point,to:Point):Movement{
-      from = translateHumanCoordinates(from);
+      var koma:Koma;
+      if(from.x > HAND){
+        koma = new Koma(from.x-HAND,from.x,from.y,_teban);
+      } else {
+        from = translateHumanCoordinates(from);
+        koma = getKomaAt(from);
+      }
       to = translateHumanCoordinates(to);
-      var koma:Koma = getKomaAt(from);
       var capture:Boolean = getKomaAt(to) != null
 
       return new Movement(_teban,from,to,koma,false,capture);
@@ -164,7 +177,12 @@ package  {
     public function generateMovementFromString(moveStr:String):Movement{
       var turn:int = moveStr.charAt(0) == "+" ? 0 : 1;
       var from:Point = new Point(parseInt(moveStr.charAt(1)),parseInt(moveStr.charAt(2)));
-      from = translateHumanCoordinates(from);
+      if(from.x == 0){
+        from.x = HAND;
+        from.y = HAND;
+      } else {
+        from = translateHumanCoordinates(from);
+      }
       var to:Point = new Point(parseInt(moveStr.charAt(3)),parseInt(moveStr.charAt(4)));
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
@@ -172,35 +190,35 @@ package  {
       return new Movement(turn,from,to,koma,false,capture);
     }
 		
-		public function move(from:Point,to:Point):void {
-			var koma:Koma = getKomaAt(from); 
+		public function move(mv:Movement):void {
+			var koma:Koma = mv.koma; 
 			//drop
-			if(from.x == HAND){
-				_komadai[koma.ownerPlayer].removeKoma(koma);
+			if(mv.from.x == HAND){
+				_komadai[koma.ownerPlayer].removeKoma(koma.type);
 			}
 			//put piece into hand if capturing.
-			if (getKomaAt(to) != null) {
-				if(from.x == HAND){
+			if (getKomaAt(mv.to) != null) {
+				if(mv.from.x == HAND){
 					return; //illegal
 				} else {
-					var captured_koma:Koma = getKomaAt(to);
+					var captured_koma:Koma = getKomaAt(mv.to);
 					_captureKoma(captured_koma,_teban);
 				}
 			}
 			//move piece
-			if(from.x != HAND){
+			if(mv.from.x != HAND){
 				//_ban[mv.from.x - 1][mv.from.y - 1] = null;
-        setKomaAt(from,null);
+        setKomaAt(mv.from,null);
 			}
-			koma.x = to.x;
-			koma.y = to.y;
+			koma.x = mv.to.x;
+			koma.y = mv.to.y;
       //TODO handle promotion
       /*
 			if(promote){
 				koma.promote();
 			}
       */
-			setKomaAt(to,koma);
+			setKomaAt(mv.to,koma);
 			komas[koma.id] = koma;
 			_teban = _teban == SENTE ? GOTE : SENTE;
 		}
@@ -208,13 +226,13 @@ package  {
 		private function _captureKoma(koma:Koma,teban:int):void {
       setKomaAt(new Point(koma.x,koma.y),null);
 			var new_owner:int = teban;
-			_komadai[new_owner].addKoma(koma);
 			koma.ownerPlayer = new_owner;
 			koma.x = HAND;
 			koma.y = HAND;
 			if (koma.isPromoted()) {
 				koma.depromote();
 			}
+			_komadai[new_owner].addKoma(koma);
 			komas[koma.id] = koma;
 		}
 	}
