@@ -10,6 +10,7 @@ package{
 		import mx.controls.Alert;
 
 		public static var CONNECTED:String = 'connected';
+		public static var LOGIN:String = 'login';
 		public static var GAME_STARTED:String = 'game_started';
 		public static var SERVER_MESSAGE:String = 'receive_message';
     
@@ -19,6 +20,7 @@ package{
     public static var STATE_START_WAITING:int = 3;
     public static var STATE_GAME:int          = 4;
     public static var STATE_FINISHED:int      = 5;
+    public static var STATE_NOT_CONNECTED:int = 6;
 
 		private var _socket:Socket;
 		
@@ -30,6 +32,7 @@ package{
     private var _my_turn:int;
 
 		public function CsaShogiClient(){
+      _current_state = STATE_NOT_CONNECTED;
 		}
 
 		public function connect():void{
@@ -77,6 +80,10 @@ package{
       send("%TORYO");
     }
 
+    public function who():void{
+      send("%%WHO");
+    }
+
 		private function handleConnect(e:Event):void{
 			trace("connected.");
 			dispatchEvent(new Event(CsaShogiClient.CONNECTED));
@@ -94,6 +101,12 @@ package{
       trace(response);
       switch(_current_state)
       {
+        case STATE_NOT_CONNECTED:
+          if(response.indexOf("LOGIN") >= 0 && response.indexOf("OK") >= 0){
+            _current_state = STATE_CONNECTED;
+			      dispatchEvent(new Event(CsaShogiClient.LOGIN));
+          }
+          break;
         case STATE_CONNECTED:
           break;
         case STATE_GAME_WAITING:

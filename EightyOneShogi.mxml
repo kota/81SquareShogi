@@ -22,6 +22,7 @@
     private function connectAndLogin():void{
 		  trace("logging in");
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
+      _client.addEventListener(CsaShogiClient.CONNECTED,_handleLoggedIn);
       _client.addEventListener(CsaShogiClient.SERVER_MESSAGE,_handleServerMessage);
       _client.addEventListener(CsaShogiClient.SERVER_MESSAGE,_handleGameStarted);
       _client.connect();
@@ -31,6 +32,10 @@
 		  trace("connected. try login.");
       _client.login(loginname.text, "password");
     } 
+
+    private function _handleLoggedIn(e:Event):void{
+      mainViewStack.selectedIndex = 1;
+    }
 
     private function _handleServerMessage(e:ServerMessageEvent):void{
       _writeUserMessage(e.message);
@@ -76,6 +81,10 @@
       _client.resign();
     }
 
+    private function who():void{
+      _client.who();
+    }
+
     private function playerMove(from:Point,to:Point,promote:Boolean=false):void{
       var mv:Movement = _currentPosition.generateMovementFromCoordinates(from,to,promote);
       _client.move(mv.toCSA());
@@ -83,37 +92,31 @@
 
 	  ]]>
 	</mx:Script>
-  <mx:HBox>
-  <mx:VBox id="loginBox">
-    <mx:Form>
-      <mx:FormItem label="loginname">
-          <mx:TextInput id="loginname" width="200"/>
-	    </mx:FormItem>
-	    <mx:FormItem label="password">
-          <mx:TextInput id="password" width="200" displayAsPassword="true"/>
-	    </mx:FormItem>
-	    <mx:FormItem>
-          <mx:Button id="loginButton" label="Login" y="400" click="connectAndLogin();"/>
-	    </mx:FormItem>
-	  </mx:Form>
-    <mx:Button id="startButton" label="Start" y="400" click="waitForGame();"/>
-    <mx:Button id="resignButton" label="Resign" y="400" click="resign();"/>
-	  <mx:Label id="errorMessage"/>
-    <mx:Label text="Message"/>
-    <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="300" height="400"/>
-  </mx:VBox>
+  <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
+    <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+      <mx:Form>
+        <mx:FormItem label="loginname">
+            <mx:TextInput id="loginname" width="200"/>
+	      </mx:FormItem>
+	      <mx:FormItem label="password">
+            <mx:TextInput id="password" width="200" displayAsPassword="true"/>
+	      </mx:FormItem>
+	      <mx:FormItem>
+            <mx:Button id="loginButton" label="Login" y="400" click="connectAndLogin();"/>
+	      </mx:FormItem>
+	    </mx:Form>
+    <mx:Label id="errorMessage"/>
+      <mx:Label text="Message"/>
+    </mx:VBox>
     <mx:VBox>
       <eightyOneSquare:Board id="board" width="800" height="454"/> 
-
-      <mx:Label text="How to use."/>
-      <mx:Label text="1. Enter loginname (leave password blank) and press Login button."/>
-      <mx:Label text='2. A message from the shogi-server will be apper on the Message area. It will say something like "LOGIN:YOUR_LOGINNAME OK ##[LOGIN] +OK x1"'/>
-      <mx:Label text='* If no message appears, it means my server is dead for somereason. If that is the case, Please let me know.'/>
-      <mx:Label text="3. Press Start Button. Now you are waiting for a challenger."/>
-      <mx:Label text="4. If someone else is also waiting, then the game will be started. "/>
-      <mx:Label text="5. If nobody's waiting, you can open this page with another window, and repeat 1,2 above with another loginname. "/>
-      <mx:Label text="6. After the game is started, you can move your pieces by clicking one of them, and then cliking the board where you want to put you piece on."/>
+      <mx:HBox>
+      <mx:Button id="startButton" label="Start" y="400" click="waitForGame();"/>
+      <mx:Button id="resignButton" label="Resign" y="400" click="resign();"/>
+      <mx:Button id="whoButton" label="Who's online" y="400" click="who();"/>
+      </mx:HBox>
+      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="500" height="200"/>
     </mx:VBox>
-  </mx:HBox>
+  </mx:ViewStack>
 
 </mx:Application>
