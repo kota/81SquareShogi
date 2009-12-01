@@ -8,6 +8,7 @@ package  {
 	import flash.events.Event;
   import flash.events.MouseEvent;
 	import flash.geom.Point;
+	import mx.events.CloseEvent;
 	import mx.controls.Image;
   import mx.controls.Alert;
 	import mx.containers.Canvas;
@@ -20,7 +21,7 @@ package  {
 		
 		public static const BAN_WIDTH:int = 410;
 		public static const BAN_HEIGHT:int = 454;
-		public static const BAN_LEFT_MARGIN:int = 100;
+		public static const BAN_LEFT_MARGIN:int = 150;
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
@@ -106,10 +107,16 @@ package  {
 		
 		private var board_coordinate:Array = new Array();
 
-    private var callback:Function;
+    private var _playerMoveCallback:Function;
 
-    private var from:Point;
-    private var position:Kyokumen;
+    private var _from:Point;
+    private var _to:Point;
+    private var _position:Kyokumen;
+
+    private var _my_turn:int;
+    private var _game_started:Boolean;
+
+    private var _selected_square:Square;
 
 		public function Board() {
       super();
@@ -138,8 +145,8 @@ package  {
       handBoxes = new Array(2);
       for(i=0;i<2;i++){
         var hand:Box = new Box();
-        hand.width = 90;
-        hand.height = 200;
+        hand.width = 150;
+        hand.height = 300;
         hand.setStyle('borderStyle','solid');
         hand.setStyle('borderThickness',2);
         hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
@@ -154,25 +161,23 @@ package  {
           //square.source = sfu;
           square.x = BAN_LEFT_MARGIN + 10 + j * KOMA_WIDTH;
           square.y = 10 + i * KOMA_HEIGHT;
-          square.width = KOMA_WIDTH;
-          square.height = KOMA_HEIGHT;
           addChild(square);
 					cells[i][j] = square;
 				}
 			}
 
-      position = new Kyokumen();
-      setPosition(position);
+      _position = new Kyokumen();
+      setPosition(_position);
 		}
 
     public function setPosition(pos:Kyokumen):void{
-      position = pos
+      _position = pos
       for(var y:int=0;y<9;y++){
         for(var x:int=0;x<9;x++){
-          var koma:Koma = position.getKomaAt(new Point(x,y));
+          var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
             var images:Array = koma.ownerPlayer == Kyokumen.SENTE ? koma_images_sente : koma_images_gote;
-            var image_index:int = koma.type + (koma.isPromoted() ? 8 : 0)
+            var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
             cells[y][x].source = images[image_index];
           } else {
             cells[y][x].source = emptyImage;
@@ -181,7 +186,7 @@ package  {
       }
       for(var i:int=0;i<2;i++){
         handBoxes[i].removeAllChildren();
-        var hand:Komadai = position.getKomadai(i);
+        var hand:Komadai = _position.getKomadai(i);
         for(var j:int=0;j<8;j++){
           if(hand.getNumOfKoma(j) > 0){
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
@@ -197,28 +202,67 @@ package  {
     }
 
     public function setCallback(callback:Function):void{
-      this.callback = callback;
+      _playerMoveCallback = callback;
+    }
+
+    public function startGame(my_turn:int):void{
+      this._my_turn = my_turn;
+      this._game_started = true;
+    }
+
+    public function endGame():void{
+      this._game_started = false;
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      var x:int = e.target.coord_x;
-      var y:int = e.target.coord_y;
-      trace(x.toString() + "," + y.toString());
-      if(this.from == null){
-        if(position.getKomaAt(position.translateHumanCoordinates(new Point(x,y))) != null){
-          this.from = new Point(x,y);
+      if(_game_started && _position.turn == _my_turn){
+        var x:int = e.currentTarget.coord_x;
+        var y:int = e.currentTarget.coord_y;
+        if(_from == null){
+          var koma:Koma = _position.getKomaAt(_position.translateHumanCoordinates(new Point(x,y)));
+          if( koma != null && koma.ownerPlayer == _my_turn){
+            e.currentTarget.setStyle('backgroundColor','0x33CCCC');
+            _selected_square = Square(e.currentTarget);
+            _from = new Point(x,y);
+          }
+        } else {
+          _selected_square.setStyle('backgroundColor',undefined);
+          if(_selected_square == e.currentTarget){
+            _from = null;
+            _selected_square = null;
+          } else {
+            _to = new Point(x,y);
+            if(_position.canPromote(_from,_to)){
+              Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
+            } else {
+              _playerMoveCallback(_from,_to);
+              _from = null;
+              _to = null;
+            }
+          }
         }
-      } else {
-        var to:Point = new Point(x,y);
-        callback(from,to);
-        this.from = null;
       }
     }
 
+    private function _promotionHandler(e:CloseEvent):void{
+      _playerMoveCallback(_from,_to,e.detail == Alert.YES);
+      _from = null;
+      _to = null;
+    }
+
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if(this.from == null){
-        trace(e.target.coord_x.toString()+","+e.target.coord_y.toString());
-        this.from = new Point(e.target.coord_x,e.target.coord_y);
+      if(_game_started && _position.turn == _my_turn){
+        if(_from == null){
+          e.currentTarget.setStyle('backgroundColor','0x33CCCC');
+          _selected_square = Square(e.currentTarget);
+          _from = new Point(e.currentTarget.coord_x,e.currentTarget.coord_y);
+        } else {
+          if(_selected_square == e.currentTarget){
+            _selected_square.setStyle('backgroundColor',undefined);
+            _from = null;
+            _selected_square = null;
+          }
+        }
       }
     }
 

@@ -20,29 +20,20 @@ package  {
 		public static const KE:int = 5;
 		public static const KY:int = 6;
 		public static const FU:int = 7;
-		public static const NARI:int = 8;
+		public static const PROMOTE:int = 8;
 		
 		private var _ownerPlayer:int;
 		private var _type:int;
 		private var _x:int;
 		private var _y:int;
 		private var _images:Array;
-		private var _nari:int;
-		private var _id:int;
 	  
     //TODO replace x,y with Point
-		public function Koma(type:int = 0, x:int = 0, y:int = 0, ownerPlayer:int = 0,id:int=0) {
+		public function Koma(type:int = 0, x:int = 0, y:int = 0, ownerPlayer:int = 0) {
 			this._type = type;
 			this._x = x;
 			this._y = y;
 			this._ownerPlayer = ownerPlayer;
-			this._nari = 0;
-			this._id = id;
-			/*
-			this.width = KOMA_WIDTH;
-			this.height = KOMA_HEIGHT;
-			*/
-			//this.source = images[_ownerPlayer + _nari * 2];
 		}
 		
 		public function set ownerPlayer(v:int):void {
@@ -76,39 +67,21 @@ package  {
 		public function get y():int {
 			return this._y;
 		}
-		
-		public function set nari(v:int):void {
-			this._nari = v;
-		}
-		
-		public function get nari():int {
-			return this._nari;
-		}
-		
-		public function set id(v:int):void {
-			this._id = v;
-		}
-		
-		public function get id():int {
-			return this._id;
-		}
-
 
 		public function isPromoted():Boolean {
-		  if(this._nari == 1){
-		    return true;
-		  }
-		  return false;
-		}
+		  return this._type > PROMOTE;
+    }
 
 		public function promote():void {
-			this._nari = 1;
-			//updateImage();
+      if(this._type < PROMOTE){
+			  this._type += PROMOTE;
+      }
 		}
 			
 		public function depromote():void {
-			this._nari = 0;
-			//updateImage();
+      if(this._type > PROMOTE){
+			  this._type -= PROMOTE;
+      }
 		}
 	}
 	

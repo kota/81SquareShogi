@@ -10,6 +10,7 @@ package{
 		import mx.controls.Alert;
 
 		public static var CONNECTED:String = 'connected';
+		public static var GAME_STARTED:String = 'game_started';
 		public static var SERVER_MESSAGE:String = 'receive_message';
     
     public static var STATE_CONNECTED:int     = 0;
@@ -26,7 +27,7 @@ package{
 		private var _port:int = 2195;
 
     private var _current_state:int;
-    private var _is_sente:Boolean; //True if sente(White)
+    private var _my_turn:int;
 
 		public function CsaShogiClient(){
 		}
@@ -98,7 +99,7 @@ package{
         case STATE_GAME_WAITING:
           if (response.indexOf("BEGIN Game_Summary") >= 0) {
             trace("state change to agree_wating");
-            _is_sente = response.charAt(response.indexOf("Your_Turn:")+9+1) == '+';
+            _my_turn = response.charAt(response.indexOf("Your_Turn:")+9+1) == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
             _current_state = STATE_AGREE_WAITING;
             agree(); //agree automatically for now.
           }
@@ -106,6 +107,7 @@ package{
         case STATE_AGREE_WAITING:
           if (response.indexOf("START") >= 0){
             _current_state = STATE_GAME;
+			      dispatchEvent(new Event(CsaShogiClient.GAME_STARTED));
           }
           break;
         case STATE_START_WAITING:
@@ -126,8 +128,8 @@ package{
 			return _socket.connected;
 		}
 
-    public function get isSente():Boolean{
-      return _is_sente;
+    public function get myTurn():int{
+      return _my_turn;
     }
 
 	}
