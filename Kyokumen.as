@@ -57,7 +57,6 @@ package  {
 			_komadai[0] = new Komadai();
 			_komadai[1] = new Komadai();
 
-			//_makeInitialPosition();
       loadFromString(initialPositionStr());
 		}
 
@@ -68,14 +67,12 @@ package  {
         var line:String = lines[y].substr(2);
         for(var x:int=0;x<9;x++){
           var koma_str:String = line.slice(x*3,x*3+3)
-          trace("koma str:" + koma_str + ", " + koma_str.slice(1,3));
           if(koma_str != " * "){
             var owner:int = koma_str.charAt(0) == '+' ? SENTE : GOTE 
             var koma:Koma = new Koma(koma_names.indexOf(koma_str.slice(1,3)),x,y,owner);
             id++;
             _ban[x][y] = koma;
           } else {
-            trace("set to null");
             _ban[x][y] = null;
           }
         }

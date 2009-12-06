@@ -12,7 +12,10 @@ package{
 		public static var CONNECTED:String = 'connected';
 		public static var LOGIN:String = 'login';
 		public static var GAME_STARTED:String = 'game_started';
+		public static var GAME_END:String = 'game_end';
 		public static var SERVER_MESSAGE:String = 'receive_message';
+    public static var MOVE:String = 'move';
+    public static var CHAT:String = 'chat';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -37,18 +40,18 @@ package{
 
 		public function connect():void{
 		  _socket = new Socket();
-		  _socket.addEventListener(Event.CONNECT,handleConnect);
-		  _socket.addEventListener(Event.CLOSE,handleClose);
-		  _socket.addEventListener(ProgressEvent.SOCKET_DATA,handleSocketData);
-		  _socket.addEventListener(IOErrorEvent.IO_ERROR,handleIOError);
+		  _socket.addEventListener(Event.CONNECT,_handleConnect);
+		  _socket.addEventListener(Event.CLOSE,_handleClose);
+		  _socket.addEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
+		  _socket.addEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
 		  _socket.connect(_host,_port);
 		}
 
 		public function close():void{
 			_socket.close();
-			_socket.removeEventListener(Event.CONNECT,handleConnect);
-			_socket.removeEventListener(Event.CLOSE,handleClose);
-		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,handleSocketData);
+			_socket.removeEventListener(Event.CONNECT,_handleConnect);
+			_socket.removeEventListener(Event.CLOSE,_handleClose);
+		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
 			trace("socket closed");
 		}
 
@@ -84,27 +87,38 @@ package{
       send("%%WHO");
     }
 
-		private function handleConnect(e:Event):void{
+    public function chat(message:String):void{
+      send("%%CHAT " + message);
+    }
+
+		private function _handleConnect(e:Event):void{
 			trace("connected.");
 			dispatchEvent(new Event(CsaShogiClient.CONNECTED));
 		}
 
-		private function handleClose(e:Event):void{
+		private function _handleClose(e:Event):void{
 			trace("closed.");
-			_socket.removeEventListener(Event.CONNECT,handleConnect);
-			_socket.removeEventListener(Event.CLOSE,handleClose);
-		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,handleSocketData);
+			_socket.removeEventListener(Event.CONNECT,_handleConnect);
+			_socket.removeEventListener(Event.CLOSE,_handleClose);
+		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
 		}
 
-		private function handleSocketData(e:ProgressEvent):void{
+		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
       trace(response);
+      if(response.indexOf("CHAT") >= 0){
+        dispatchEvent(new ServerMessageEvent(CHAT,response));
+        return;
+      } else if(response.charAt(0) == '+' || response.charAt(0) == '-'){
+        dispatchEvent(new ServerMessageEvent(MOVE,response));
+        return;
+      }
       switch(_current_state)
       {
         case STATE_NOT_CONNECTED:
           if(response.indexOf("LOGIN") >= 0 && response.indexOf("OK") >= 0){
             _current_state = STATE_CONNECTED;
-			      dispatchEvent(new Event(CsaShogiClient.LOGIN));
+			      dispatchEvent(new Event(LOGIN));
           }
           break;
         case STATE_CONNECTED:
@@ -119,21 +133,26 @@ package{
           break;
         case STATE_AGREE_WAITING:
           if (response.indexOf("START") >= 0){
+            trace("state change to game");
             _current_state = STATE_GAME;
-			      dispatchEvent(new Event(CsaShogiClient.GAME_STARTED));
+			      dispatchEvent(new Event(GAME_STARTED));
           }
           break;
         case STATE_START_WAITING:
           break;
         case STATE_GAME:
+          if(response.indexOf("WIN") >= 0 || response.indexOf("LOSE") >= 0){
+            trace("state change to connected");
+            _current_state = STATE_CONNECTED
+			      dispatchEvent(new ServerMessageEvent(GAME_END,response));
+          }
           break;
         case STATE_FINISHED:
           break;
       }
-			dispatchEvent(new ServerMessageEvent(SERVER_MESSAGE,response));
     }
 
-		private function handleIOError(e:IOErrorEvent):void{
+		private function _handleIOError(e:IOErrorEvent):void{
 			Alert.show(e.toString());
 		}
 

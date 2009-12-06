@@ -4,27 +4,29 @@
 	<mx:Script>
 	  <![CDATA[
 		import flash.display.*;
+    import mx.events.FlexEvent;
 		import mx.controls.*;
 		import CsaShogiClient;
     import Board;
 
     private var _client:CsaShogiClient;
-    private var _currentPosition:Kyokumen;
 
 		private function initApp():void
 		{
 		  trace("application initialized..");
 		  _client = new CsaShogiClient();
-      _currentPosition = new Kyokumen();
-      board.setCallback(playerMove);
+      board.setCallback(_playerMove);
+      chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
 		}
 
-    private function connectAndLogin():void{
+    private function _connectAndLogin():void{
 		  trace("logging in");
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
-      _client.addEventListener(CsaShogiClient.CONNECTED,_handleLoggedIn);
-      _client.addEventListener(CsaShogiClient.SERVER_MESSAGE,_handleServerMessage);
-      _client.addEventListener(CsaShogiClient.SERVER_MESSAGE,_handleGameStarted);
+      _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
+      _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
+      _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
+      _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
+      _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.connect();
     } 
     
@@ -35,59 +37,67 @@
 
     private function _handleLoggedIn(e:Event):void{
       mainViewStack.selectedIndex = 1;
+      _writeUserMessage("Logged in successfully.");
     }
 
-    private function _handleServerMessage(e:ServerMessageEvent):void{
-      _writeUserMessage(e.message);
-      trace("handle server message");
-      if(e.message.charAt(0) == '+' || e.message.charAt(0) == '-'){
-        trace("move "+e.message);
-        var mv:Movement = _currentPosition.generateMovementFromString(e.message);
-        _currentPosition.move(mv);
-        board.setPosition(_currentPosition);
-      } else if(e.message.indexOf("START") >= 0){
-        if(_client.myTurn == Kyokumen.SENTE){
-          _writeUserMessage("You are Sente(White).");
-          _writeUserMessage("Your turn.");
-        } else {
-          _writeUserMessage("You are Gote(Black).");
-        }
-      }
+    private function _handleChat(e:ServerMessageEvent):void{
+			_writeUserMessage(e.message);
+    }
+
+    private function _handleMove(e:ServerMessageEvent):void{
+      trace("move "+e.message);
+      board.makeMove(e.message);
     }
 
     private function _handleGameStarted(e:Event):void{
+      if(_client.myTurn == Kyokumen.SENTE){
+        _writeUserMessage("You are Sente(White).");
+        _writeUserMessage("Your turn.");
+      } else {
+        _writeUserMessage("You are Gote(Black).");
+      }
       board.startGame(_client.myTurn);
+    }
+
+    private function _handleGameEnd(e:ServerMessageEvent):void{
+      if(e.message.indexOf("LOSE") >= 0){
+        _writeUserMessage("You lose.");
+      } else {
+        _writeUserMessage("You win.");
+      }
+      board.endGame();
     }
 
     private function _writeUserMessage(message:String):void{
       userMessage.text += message + "\n";
-      userMessage.callLater(scrollDown);
+      userMessage.callLater(_scrollDown);
     }
 
-    private function scrollDown():void{
+    private function _scrollDown():void{
       userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
     }
     
-    private function waitForGame():void{
+    private function _waitForGame():void{
       _writeUserMessage("Waiting for other player to join...");
       _client.waitForGame();
     }
 
-    private function agree():void{
-      _client.agree();
-    }
-
-    private function resign():void{
+    private function _resign():void{
       _client.resign();
     }
 
-    private function who():void{
+    private function _who():void{
       _client.who();
     }
 
-    private function playerMove(from:Point,to:Point,promote:Boolean=false):void{
-      var mv:Movement = _currentPosition.generateMovementFromCoordinates(from,to,promote);
+    private function _playerMove(from:Point,to:Point,promote:Boolean=false):void{
+      var mv:Movement = board.position.generateMovementFromCoordinates(from,to,promote);
       _client.move(mv.toCSA());
+    }
+
+    private function _handleSendChat(e:FlexEvent):void{
+      _client.chat(chatMessage.text);
+      chatMessage.text = "";
     }
 
 	  ]]>
@@ -102,7 +112,7 @@
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
 	      </mx:FormItem>
 	      <mx:FormItem>
-            <mx:Button id="loginButton" label="Login" y="400" click="connectAndLogin();"/>
+            <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
 	      </mx:FormItem>
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
@@ -111,11 +121,12 @@
     <mx:VBox>
       <eightyOneSquare:Board id="board" width="800" height="454"/> 
       <mx:HBox>
-      <mx:Button id="startButton" label="Start" y="400" click="waitForGame();"/>
-      <mx:Button id="resignButton" label="Resign" y="400" click="resign();"/>
-      <mx:Button id="whoButton" label="Who's online" y="400" click="who();"/>
+      <mx:Button id="startButton" label="Start" y="400" click="_waitForGame();"/>
+      <mx:Button id="resignButton" label="Resign" y="400" click="_resign();"/>
+      <mx:Button id="whoButton" label="Who's online" y="400" click="_who();"/>
       </mx:HBox>
       <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="500" height="200"/>
+      <mx:TextInput id="chatMessage" width="500"/>
     </mx:VBox>
   </mx:ViewStack>
 

@@ -101,11 +101,11 @@ package  {
 
     public var handBoxes:Array;
 
-		private var cells:Array;
-		private var board_back_image:Image = new Image();
-		private var board_masu_image:Image = new Image();
+		private var _cells:Array;
+		private var _board_back_image:Image = new Image();
+		private var _board_masu_image:Image = new Image();
 		
-		private var board_coordinate:Array = new Array();
+		private var _board_corrdinate:Array = new Array();
 
     private var _playerMoveCallback:Function;
 
@@ -120,9 +120,9 @@ package  {
 
 		public function Board() {
       super();
-			cells = new Array(9);
+			_cells = new Array(9);
 			for (var i:int; i < 9; i++ ) {
-				cells[i] = new Array(9);
+				_cells[i] = new Array(9);
 			}
 			
 			//_initializeBoardCoordinate();
@@ -130,17 +130,17 @@ package  {
 			this.width = BAN_WIDTH;
 			this.height = BAN_HEIGHT;
 			
-			board_back_image.width = BAN_WIDTH;
-			board_back_image.height = BAN_HEIGHT;
-			board_back_image.source = board_masu;
-			board_back_image.x = BAN_LEFT_MARGIN;
+			_board_back_image.width = BAN_WIDTH;
+			_board_back_image.height = BAN_HEIGHT;
+			_board_back_image.source = board_masu;
+			_board_back_image.x = BAN_LEFT_MARGIN;
 			
-			board_masu_image.source = board_masu;
-			board_masu_image.width = BAN_WIDTH;
-			board_masu_image.height = BAN_HEIGHT;
+			_board_masu_image.source = board_masu;
+			_board_masu_image.width = BAN_WIDTH;
+			_board_masu_image.height = BAN_HEIGHT;
 			
-			board_back_image.addChild(board_masu_image);
-			addChild(board_back_image);
+			_board_back_image.addChild(_board_masu_image);
+			addChild(_board_back_image);
 
       handBoxes = new Array(2);
       for(i=0;i<2;i++){
@@ -150,25 +150,38 @@ package  {
         hand.setStyle('borderStyle','solid');
         hand.setStyle('borderThickness',2);
         hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
+        hand.y = i == 0 ? BAN_HEIGHT - hand.height : 0;
         handBoxes[i] = hand;
         addChild(hand);
       }
+      
+		}
 
-			for (i = 0; i < 9; i++ ) {
+    public function reset():void{
+			for (var i:int = 0; i < 9; i++ ) {
 				for (var j:int = 0; j < 9;j++ ){
-          var square:Square = new Square(9-j,i+1);
-          square.addEventListener(MouseEvent.MOUSE_UP,_squareMouseUpHandler);
-          //square.source = sfu;
+          if(_cells[i][j] != null){
+            removeChild(_cells[i][j]);
+          }
+        }
+      }
+			for (i = 0; i < 9; i++ ) {
+				for (j = 0; j < 9;j++ ){
+          var square:Square;
+          if(_my_turn == Kyokumen.SENTE){
+            square = new Square(9-j,i+1);
+        		_cells[i][j] = square;
+          } else {
+            square = new Square(10-(9-j),10-(i+1));
+					  _cells[8-i][8-j] = square;
+          }
           square.x = BAN_LEFT_MARGIN + 10 + j * KOMA_WIDTH;
           square.y = 10 + i * KOMA_HEIGHT;
+          square.addEventListener(MouseEvent.MOUSE_UP,_squareMouseUpHandler);
           addChild(square);
-					cells[i][j] = square;
 				}
 			}
-
-      _position = new Kyokumen();
-      setPosition(_position);
-		}
+    }
 
     public function setPosition(pos:Kyokumen):void{
       _position = pos
@@ -176,11 +189,11 @@ package  {
         for(var x:int=0;x<9;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
-            var images:Array = koma.ownerPlayer == Kyokumen.SENTE ? koma_images_sente : koma_images_gote;
+            var images:Array = koma.ownerPlayer == _my_turn ? koma_images_sente : koma_images_gote;
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
-            cells[y][x].source = images[image_index];
+            _cells[y][x].source = images[image_index];
           } else {
-            cells[y][x].source = emptyImage;
+            _cells[y][x].source = emptyImage;
           }
         }
       }
@@ -192,13 +205,19 @@ package  {
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
               var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-              images = i == Kyokumen.SENTE ? koma_images_sente : koma_images_gote;
+              images = i == _my_turn ? koma_images_sente : koma_images_gote;
               handPiece.source = images[j];
-              handBoxes[i].addChild(handPiece);
+              handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
             }
           }
         }
       }
+    }
+
+    public function makeMove(move:String):void{
+      var mv:Movement = _position.generateMovementFromString(move);
+      _position.move(mv);
+      setPosition(_position);
     }
 
     public function setCallback(callback:Function):void{
@@ -206,12 +225,21 @@ package  {
     }
 
     public function startGame(my_turn:int):void{
-      this._my_turn = my_turn;
-      this._game_started = true;
+      trace("game started");
+      _my_turn = my_turn;
+      reset();
+      _position = new Kyokumen();
+      setPosition(_position);
+      _game_started = true;
     }
 
     public function endGame():void{
-      this._game_started = false;
+      trace("game end");
+      _game_started = false;
+    }
+
+    public function get position():Kyokumen{
+      return _position;
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
