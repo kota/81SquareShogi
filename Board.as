@@ -197,8 +197,9 @@ package  {
           }
         }
       }
+      handBoxes[0].removeAllChildren();
+      handBoxes[1].removeAllChildren();
       for(var i:int=0;i<2;i++){
-        handBoxes[i].removeAllChildren();
         var hand:Komadai = _position.getKomadai(i);
         for(var j:int=0;j<8;j++){
           if(hand.getNumOfKoma(j) > 0){
@@ -207,7 +208,10 @@ package  {
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? koma_images_sente : koma_images_gote;
               handPiece.source = images[j];
-              handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
+              var t:int = i == _my_turn ? 0 : 1;
+              trace(images[j].toString());
+              trace("client:"+_my_turn.toString()+"owner:"+i.toString()+"add to:"+t.toString()+",type:"+j.toString());
+              handBoxes[t].addChild(handPiece);
             }
           }
         }
