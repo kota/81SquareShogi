@@ -56,7 +56,7 @@
       } else {
         _writeUserMessage("You are Gote(Black).");
       }
-      board.startGame(_client.myTurn);
+      board.startGame(_client.myTurn,_client.playerNames);
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void{

@@ -13,6 +13,8 @@ package  {
   import mx.controls.Alert;
 	import mx.containers.Canvas;
   import mx.containers.Box;
+  import mx.containers.HBox;
+  import mx.controls.Label;
   import Square;
   import Kyokumen;
   import Koma;
@@ -94,12 +96,24 @@ package  {
 		private var gfu:Class
 		[Embed(source = "/images/Gto.png")]
 		private var gto:Class
+    
+		[Embed(source = "/images/white.png")]
+		private var white:Class
+		[Embed(source = "/images/white_r.png")]
+		private var white_r:Class
+		[Embed(source = "/images/black.png")]
+		private var black:Class
+		[Embed(source = "/images/black_r.png")]
+		private var black_r:Class
+
 
     private var koma_images_sente:Array = new Array(sou,shi,skaku,skin,sgin,skei,skyo,sfu,null,sryu,suma,null,sngin,snkei,snkyo,sto);
 
     private var koma_images_gote:Array = new Array(gou,ghi,gkaku,gkin,ggin,gkei,gkyo,gfu,null,gryu,guma,null,gngin,gnkei,gnkyo,gto);
 
     public var handBoxes:Array;
+    private var _name_labels:Array;
+    private var _turn_symbols:Array;
 
 		private var _cells:Array;
 		private var _board_back_image:Image = new Image();
@@ -125,8 +139,6 @@ package  {
 				_cells[i] = new Array(9);
 			}
 			
-			//_initializeBoardCoordinate();
-			
 			this.width = BAN_WIDTH;
 			this.height = BAN_HEIGHT;
 			
@@ -143,6 +155,8 @@ package  {
 			addChild(_board_back_image);
 
       handBoxes = new Array(2);
+      _name_labels = new Array(2);
+      _turn_symbols = new Array(2);
       for(i=0;i<2;i++){
         var hand:Box = new Box();
         hand.width = 150;
@@ -153,6 +167,17 @@ package  {
         hand.y = i == 0 ? BAN_HEIGHT - hand.height : 0;
         handBoxes[i] = hand;
         addChild(hand);
+
+        var name_label:Label = new Label();
+        _name_labels[i] = name_label;
+        var turn_symbol:Image = new Image();
+        _turn_symbols[i] = turn_symbol;
+        var h_box:HBox = new HBox();
+        h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
+        h_box.y = i == 0 ? BAN_HEIGHT - hand.height - 20 : 300 + 15 ;
+        h_box.addChild(turn_symbol);
+        h_box.addChild(name_label);
+        addChild(h_box);
       }
       
 		}
@@ -225,12 +250,16 @@ package  {
       _playerMoveCallback = callback;
     }
 
-    public function startGame(my_turn:int):void{
+    public function startGame(my_turn:int,player_names:Array):void{
       trace("game started");
       _my_turn = my_turn;
       reset();
       _position = new Kyokumen();
       setPosition(_position);
+      _name_labels[0].text = player_names[_my_turn]; 
+      _name_labels[1].text = player_names[1-_my_turn]; 
+      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
+      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _game_started = true;
     }
 

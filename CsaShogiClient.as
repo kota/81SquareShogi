@@ -33,9 +33,11 @@ package{
 
     private var _current_state:int;
     private var _my_turn:int;
+    private var _player_names:Array;
 
 		public function CsaShogiClient(){
       _current_state = STATE_NOT_CONNECTED;
+      _player_names = new Array(2);
 		}
 
 		public function connect():void{
@@ -127,6 +129,8 @@ package{
           if (response.indexOf("BEGIN Game_Summary") >= 0) {
             trace("state change to agree_wating");
             _my_turn = response.charAt(response.indexOf("Your_Turn:")+9+1) == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
+            _player_names[0] = response.match(/Name\+\:(.*)/)[1];
+            _player_names[1] = response.match(/Name\-\:(.*)/)[1];
             _current_state = STATE_AGREE_WAITING;
             agree(); //agree automatically for now.
           }
@@ -162,6 +166,10 @@ package{
 
     public function get myTurn():int{
       return _my_turn;
+    }
+
+    public function get playerNames():Array{
+      return _player_names;
     }
 
 	}
