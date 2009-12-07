@@ -208,10 +208,7 @@ package  {
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? koma_images_sente : koma_images_gote;
               handPiece.source = images[j];
-              var t:int = i == _my_turn ? 0 : 1;
-              trace(images[j].toString());
-              trace("client:"+_my_turn.toString()+"owner:"+i.toString()+"add to:"+t.toString()+",type:"+j.toString());
-              handBoxes[t].addChild(handPiece);
+              handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
             }
           }
         }
