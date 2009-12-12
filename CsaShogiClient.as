@@ -1,5 +1,5 @@
 package{
-	import com.adobe.serialization.json.JSON;
+//	import com.adobe.serialization.json.JSON;
 	import flash.events.EventDispatcher;
   import ServerMessageEvent;
 
@@ -29,8 +29,8 @@ package{
 		private var _socket:Socket;
 		
 		//private var host:String = '127.0.0.1';
-		//private var _host:String = '81square-shogi.homeip.net';
-		private var _host:String = '81squareuniverse.com';
+		private var _host:String = '81square-shogi.homeip.net';
+		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 2195;
 
     private var _current_state:int;
@@ -40,7 +40,7 @@ package{
 		public function CsaShogiClient(){
       _current_state = STATE_NOT_CONNECTED;
       _player_names = new Array(2);
-      Security.loadPolicyFile("xmlSocket://"+_host+":8430");
+     // Security.loadPolicyFile("xmlSocket://"+_host+":8430");
 		}
 
 		public function connect():void{

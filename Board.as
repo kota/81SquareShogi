@@ -5,13 +5,13 @@
 */
 
 package  {
-	import flash.events.Event;
+  import flash.events.Event;
   import flash.events.MouseEvent;
-	import flash.geom.Point;
-	import mx.events.CloseEvent;
-	import mx.controls.Image;
+  import flash.geom.Point;
+  import mx.events.CloseEvent;
+  import mx.controls.Image;
   import mx.controls.Alert;
-	import mx.containers.Canvas;
+  import mx.containers.Canvas;
   import mx.containers.Box;
   import mx.containers.HBox;
   import mx.controls.Label;
@@ -19,92 +19,101 @@ package  {
   import Kyokumen;
   import Koma;
 
-	public class Board extends Canvas {
-		
-		public static const BAN_WIDTH:int = 410;
-		public static const BAN_HEIGHT:int = 454;
-		public static const BAN_LEFT_MARGIN:int = 150;
+  public class Board extends Canvas {
+    
+    public static const BAN_WIDTH:int = 410;
+    public static const BAN_HEIGHT:int = 454;
+    public static const BAN_LEFT_MARGIN:int = 150;
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
 
-		
-		[Bindable]
-		[Embed(source = "/images/ban_kaya_a.png")]
-		private var board_back:Class
-		[Bindable]
-		[Embed(source = "/images/masu_dot.png")]
-		private var board_masu:Class
-		[Embed(source = "/images/empty.png")]
-		private var emptyImage:Class
-
-		[Bindable]
-		[Embed(source = "/images/Sou.png")]
-		private var sou:Class
-		[Embed(source = "/images/Shi.png")]
-		private var shi:Class
-		[Embed(source = "/images/Sryu.png")]
-		private var sryu:Class
-		[Embed(source = "/images/Skaku.png")]
-		private var skaku:Class
-		[Embed(source = "/images/Suma.png")]
-		private var suma:Class
-		[Embed(source = "/images/Skin.png")]
-		private var skin:Class
-		[Embed(source = "/images/Sgin.png")]
-		private var sgin:Class
-		[Embed(source = "/images/Sngin.png")]
-		private var sngin:Class
-		[Embed(source = "/images/Skei.png")]
-		private var skei:Class
-		[Embed(source = "/images/Snkei.png")]
-		private var snkei:Class
-		[Embed(source = "/images/Skyo.png")]
-		private var skyo:Class
-		[Embed(source = "/images/Snkyo.png")]
-		private var snkyo:Class
-		[Embed(source = "/images/Sfu.png")]
-		private var sfu:Class
-		[Embed(source = "/images/Sto.png")]
-		private var sto:Class
-		
-		[Embed(source = "/images/Gou.png")]
-		private var gou:Class
-		[Embed(source = "/images/Ghi.png")]
-		private var ghi:Class
-		[Embed(source = "/images/Gryu.png")]
-		private var gryu:Class
-		[Embed(source = "/images/Gkaku.png")]
-		private var gkaku:Class
-		[Embed(source = "/images/Guma.png")]
-		private var guma:Class
-		[Embed(source = "/images/Gkin.png")]
-		private var gkin:Class
-		[Embed(source = "/images/Ggin.png")]
-		private var ggin:Class
-		[Embed(source = "/images/Gngin.png")]
-		private var gngin:Class
-		[Embed(source = "/images/Gkei.png")]
-		private var gkei:Class
-		[Embed(source = "/images/Gnkei.png")]
-		private var gnkei:Class
-		[Embed(source = "/images/Gkyo.png")]
-		private var gkyo:Class
-		[Embed(source = "/images/Gnkyo.png")]
-		private var gnkyo:Class
-		[Embed(source = "/images/Gfu.png")]
-		private var gfu:Class
-		[Embed(source = "/images/Gto.png")]
-		private var gto:Class
     
-		[Embed(source = "/images/white.png")]
-		private var white:Class
-		[Embed(source = "/images/white_r.png")]
-		private var white_r:Class
-		[Embed(source = "/images/black.png")]
-		private var black:Class
-		[Embed(source = "/images/black_r.png")]
-		private var black_r:Class
+    [Bindable]
+    [Embed(source = "/images/ban_kaya_a.png")]
+    private var board_back:Class
+    [Bindable]
+    [Embed(source = "/images/masu_dot.png")]
+    private var board_masu:Class
+    [Embed(source = "/images/empty.png")]
+    private var emptyImage:Class
+    [Embed(source = "/images/Scoord_e.png")]
+    private var board_scoord_e:Class
+    [Embed(source = "/images/Gcoord_e.png")]
+    private var board_gcoord_e:Class
+    [Embed(source = "/images/Shand.png")]
+    private var board_shand:Class
+    [Embed(source = "/images/Ghand.png")]
+    private var board_ghand:Class
+
+
+    [Bindable]
+    [Embed(source = "/images/pieces_kinki/Sou.png")]
+    private var sou:Class
+    [Embed(source = "/images/pieces_kinki/Shi.png")]
+    private var shi:Class
+    [Embed(source = "/images/pieces_kinki/Sryu.png")]
+    private var sryu:Class
+    [Embed(source = "/images/pieces_kinki/Skaku.png")]
+    private var skaku:Class
+    [Embed(source = "/images/pieces_kinki/Suma.png")]
+    private var suma:Class
+    [Embed(source = "/images/pieces_kinki/Skin.png")]
+    private var skin:Class
+    [Embed(source = "/images/pieces_kinki/Sgin.png")]
+    private var sgin:Class
+    [Embed(source = "/images/pieces_kinki/Sngin.png")]
+    private var sngin:Class
+    [Embed(source = "/images/pieces_kinki/Skei.png")]
+    private var skei:Class
+    [Embed(source = "/images/pieces_kinki/Snkei.png")]
+    private var snkei:Class
+    [Embed(source = "/images/pieces_kinki/Skyo.png")]
+    private var skyo:Class
+    [Embed(source = "/images/pieces_kinki/Snkyo.png")]
+    private var snkyo:Class
+    [Embed(source = "/images/pieces_kinki/Sfu.png")]
+    private var sfu:Class
+    [Embed(source = "/images/pieces_kinki/Sto.png")]
+    private var sto:Class
+    
+    [Embed(source = "/images/pieces_kinki/Gou.png")]
+    private var gou:Class
+    [Embed(source = "/images/pieces_kinki/Ghi.png")]
+    private var ghi:Class
+    [Embed(source = "/images/pieces_kinki/Gryu.png")]
+    private var gryu:Class
+    [Embed(source = "/images/pieces_kinki/Gkaku.png")]
+    private var gkaku:Class
+    [Embed(source = "/images/pieces_kinki/Guma.png")]
+    private var guma:Class
+    [Embed(source = "/images/pieces_kinki/Gkin.png")]
+    private var gkin:Class
+    [Embed(source = "/images/pieces_kinki/Ggin.png")]
+    private var ggin:Class
+    [Embed(source = "/images/pieces_kinki/Gngin.png")]
+    private var gngin:Class
+    [Embed(source = "/images/pieces_kinki/Gkei.png")]
+    private var gkei:Class
+    [Embed(source = "/images/pieces_kinki/Gnkei.png")]
+    private var gnkei:Class
+    [Embed(source = "/images/pieces_kinki/Gkyo.png")]
+    private var gkyo:Class
+    [Embed(source = "/images/pieces_kinki/Gnkyo.png")]
+    private var gnkyo:Class
+    [Embed(source = "/images/pieces_kinki/Gfu.png")]
+    private var gfu:Class
+    [Embed(source = "/images/pieces_kinki/Gto.png")]
+    private var gto:Class
+    
+    [Embed(source = "/images/white.png")]
+    private var white:Class
+    [Embed(source = "/images/white_r.png")]
+    private var white_r:Class
+    [Embed(source = "/images/black.png")]
+    private var black:Class
+    [Embed(source = "/images/black_r.png")]
+    private var black_r:Class
 
 
     private var koma_images_sente:Array = new Array(sou,shi,skaku,skin,sgin,skei,skyo,sfu,null,sryu,suma,null,sngin,snkei,snkyo,sto);
@@ -115,11 +124,12 @@ package  {
     private var _name_labels:Array;
     private var _turn_symbols:Array;
 
-		private var _cells:Array;
-		private var _board_back_image:Image = new Image();
-		private var _board_masu_image:Image = new Image();
-		
-		private var _board_corrdinate:Array = new Array();
+    private var _cells:Array;
+    private var _board_back_image:Image = new Image();
+    private var _board_masu_image:Image = new Image();
+    private var _board_coord_image:Image = new Image();
+    
+    private var _board_corrdinate:Array = new Array();
 
     private var _playerMoveCallback:Function;
 
@@ -132,27 +142,31 @@ package  {
 
     private var _selected_square:Square;
 
-		public function Board() {
+    public function Board() {
       super();
-			_cells = new Array(9);
-			for (var i:int; i < 9; i++ ) {
-				_cells[i] = new Array(9);
-			}
-			
-			this.width = BAN_WIDTH;
-			this.height = BAN_HEIGHT;
-			
-			_board_back_image.width = BAN_WIDTH;
-			_board_back_image.height = BAN_HEIGHT;
-			_board_back_image.source = board_masu;
-			_board_back_image.x = BAN_LEFT_MARGIN;
-			
-			_board_masu_image.source = board_masu;
-			_board_masu_image.width = BAN_WIDTH;
-			_board_masu_image.height = BAN_HEIGHT;
-			
-			_board_back_image.addChild(_board_masu_image);
-			addChild(_board_back_image);
+      _cells = new Array(9);
+      for (var i:int; i < 9; i++ ) {
+        _cells[i] = new Array(9);
+      }
+      
+      this.width = BAN_WIDTH;
+      this.height = BAN_HEIGHT;
+      
+      _board_back_image.width = BAN_WIDTH;
+      _board_back_image.height = BAN_HEIGHT;
+      _board_back_image.source = board_masu;
+      _board_back_image.x = BAN_LEFT_MARGIN;
+      
+      _board_masu_image.source = board_masu;
+      _board_masu_image.width = BAN_WIDTH;
+      _board_masu_image.height = BAN_HEIGHT;
+
+      _board_coord_image.width = BAN_WIDTH;
+      _board_coord_image.height = BAN_HEIGHT;
+      
+      addChild(_board_back_image);
+      _board_back_image.addChild(_board_masu_image);
+      _board_back_image.addChild(_board_coord_image);
 
       handBoxes = new Array(2);
       _name_labels = new Array(2);
@@ -180,32 +194,38 @@ package  {
         addChild(h_box);
       }
       
-		}
+    }
 
     public function reset():void{
-			for (var i:int = 0; i < 9; i++ ) {
-				for (var j:int = 0; j < 9;j++ ){
+     if(_my_turn == Kyokumen.SENTE){
+        _board_coord_image.source = board_scoord_e
+      } else {
+        _board_coord_image.source = board_gcoord_e
+      }
+
+      for (var i:int = 0; i < 9; i++ ) {
+        for (var j:int = 0; j < 9;j++ ){
           if(_cells[i][j] != null){
             removeChild(_cells[i][j]);
           }
         }
       }
-			for (i = 0; i < 9; i++ ) {
-				for (j = 0; j < 9;j++ ){
+      for (i = 0; i < 9; i++ ) {
+        for (j = 0; j < 9;j++ ){
           var square:Square;
           if(_my_turn == Kyokumen.SENTE){
             square = new Square(9-j,i+1);
-        		_cells[i][j] = square;
+            _cells[i][j] = square;
           } else {
             square = new Square(10-(9-j),10-(i+1));
-					  _cells[8-i][8-j] = square;
+            _cells[8-i][8-j] = square;
           }
           square.x = BAN_LEFT_MARGIN + 10 + j * KOMA_WIDTH;
           square.y = 10 + i * KOMA_HEIGHT;
           square.addEventListener(MouseEvent.MOUSE_UP,_squareMouseUpHandler);
           addChild(square);
-				}
-			}
+        }
+      }
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -324,5 +344,5 @@ package  {
       }
     }
 
-	}
+  }
 }
