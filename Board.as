@@ -174,7 +174,7 @@ package  {
         _turn_symbols[i] = turn_symbol;
         var h_box:HBox = new HBox();
         h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
-        h_box.y = i == 0 ? BAN_HEIGHT - hand.height - 20 : 300 + 15 ;
+        h_box.y = i == 0 ? BAN_HEIGHT - hand.height - 25 : 300 + 5 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
         addChild(h_box);
