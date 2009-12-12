@@ -1,5 +1,5 @@
 package{
-	import com.adobe.serialization.json.JSON;
+//	import com.adobe.serialization.json.JSON;
 	import flash.events.EventDispatcher;
   import ServerMessageEvent;
 

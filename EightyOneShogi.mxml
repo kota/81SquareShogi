@@ -51,10 +51,10 @@
 
     private function _handleGameStarted(e:Event):void{
       if(_client.myTurn == Kyokumen.SENTE){
-        _writeUserMessage("You are Sente(White).");
+        _writeUserMessage("You are Sente(Black).");
         _writeUserMessage("Your turn.");
       } else {
-        _writeUserMessage("You are Gote(Black).");
+        _writeUserMessage("You are Gote(White).");
       }
       board.startGame(_client.myTurn);
     }

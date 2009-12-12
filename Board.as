@@ -5,17 +5,14 @@
 */
 
 package  {
-	import flash.events.Event;
-  import flash.events.MouseEvent;
+	import flash.events.MouseEvent;
 	import flash.geom.Point;
-	import mx.events.CloseEvent;
-	import mx.controls.Image;
-  import mx.controls.Alert;
+	
+	import mx.containers.Box;
 	import mx.containers.Canvas;
-  import mx.containers.Box;
-  import Square;
-  import Kyokumen;
-  import Koma;
+	import mx.controls.Alert;
+	import mx.controls.Image;
+	import mx.events.CloseEvent;
 
 	public class Board extends Canvas {
 		
@@ -35,64 +32,72 @@ package  {
 		private var board_masu:Class
 		[Embed(source = "/images/empty.png")]
 		private var emptyImage:Class
-
+		[Embed(source = "/images/Scoord_e.png")]
+		private var board_scoord_e:Class
+		[Embed(source = "/images/Gcoord_e.png")]
+		private var board_gcoord_e:Class
+		[Embed(source = "/images/Shand.png")]
+		private var board_shand:Class
+		[Embed(source = "/images/Ghand.png")]
+		private var board_ghand:Class
+				
 		[Bindable]
-		[Embed(source = "/images/Sou.png")]
+		[Embed(source = "/images/pieces_kinki/Sou.png")]
 		private var sou:Class
-		[Embed(source = "/images/Shi.png")]
+		[Embed(source = "/images/pieces_kinki/Shi.png")]
 		private var shi:Class
-		[Embed(source = "/images/Sryu.png")]
+		[Embed(source = "/images/pieces_kinki/Sryu.png")]
 		private var sryu:Class
-		[Embed(source = "/images/Skaku.png")]
+		[Embed(source = "/images/pieces_kinki/Skaku.png")]
 		private var skaku:Class
-		[Embed(source = "/images/Suma.png")]
+		[Embed(source = "/images/pieces_kinki/Suma.png")]
 		private var suma:Class
-		[Embed(source = "/images/Skin.png")]
+		[Embed(source = "/images/pieces_kinki/Skin.png")]
 		private var skin:Class
-		[Embed(source = "/images/Sgin.png")]
+		[Embed(source = "/images/pieces_kinki/Sgin.png")]
 		private var sgin:Class
-		[Embed(source = "/images/Sngin.png")]
+		[Embed(source = "/images/pieces_kinki/Sngin.png")]
 		private var sngin:Class
-		[Embed(source = "/images/Skei.png")]
+		[Embed(source = "/images/pieces_kinki/Skei.png")]
 		private var skei:Class
-		[Embed(source = "/images/Snkei.png")]
+		[Embed(source = "/images/pieces_kinki/Snkei.png")]
 		private var snkei:Class
-		[Embed(source = "/images/Skyo.png")]
+		[Embed(source = "/images/pieces_kinki/Skyo.png")]
 		private var skyo:Class
-		[Embed(source = "/images/Snkyo.png")]
+		[Embed(source = "/images/pieces_kinki/Snkyo.png")]
 		private var snkyo:Class
-		[Embed(source = "/images/Sfu.png")]
+		[Embed(source = "/images/pieces_kinki/Sfu.png")]
 		private var sfu:Class
-		[Embed(source = "/images/Sto.png")]
+		[Embed(source = "/images/pieces_kinki/Sto.png")]
 		private var sto:Class
 		
-		[Embed(source = "/images/Gou.png")]
+		[Embed(source = "/images/pieces_kinki/Gou.png")]
 		private var gou:Class
-		[Embed(source = "/images/Ghi.png")]
+		[Embed(source = "/images/pieces_kinki/Ghi.png")]
 		private var ghi:Class
-		[Embed(source = "/images/Gryu.png")]
+		[Embed(source = "/images/pieces_kinki/Gryu.png")]
 		private var gryu:Class
-		[Embed(source = "/images/Gkaku.png")]
+		[Embed(source = "/images/pieces_kinki/Gkaku.png")]
 		private var gkaku:Class
-		[Embed(source = "/images/Guma.png")]
+		[Embed(source = "/images/pieces_kinki/Guma.png")]
 		private var guma:Class
-		[Embed(source = "/images/Gkin.png")]
+		[Embed(source = "/images/pieces_kinki/Gkin.png")]
 		private var gkin:Class
-		[Embed(source = "/images/Ggin.png")]
+		[Embed(source = "/images/pieces_kinki/Ggin.png")]
 		private var ggin:Class
-		[Embed(source = "/images/Gngin.png")]
+		[Embed(source = "/images/pieces_kinki/Gngin.png")]
 		private var gngin:Class
-		[Embed(source = "/images/Gkei.png")]
+		[Embed(source = "/images/pieces_kinki/Gkei.png")]
 		private var gkei:Class
-		[Embed(source = "/images/Gnkei.png")]
+		[Embed(source = "/images/pieces_kinki/Gnkei.png")]
 		private var gnkei:Class
-		[Embed(source = "/images/Gkyo.png")]
+		[Embed(source = "/images/pieces_kinki/Gkyo.png")]
 		private var gkyo:Class
-		[Embed(source = "/images/Gnkyo.png")]
+		[Embed(source = "/images/pieces_kinki/Gnkyo.png")]
 		private var gnkyo:Class
-		[Embed(source = "/images/Gfu.png")]
+		[Embed(source = "/images/pieces_kinki/Gfu.png")]
 		private var gfu:Class
-		[Embed(source = "/images/Gto.png")]
+		[Embed(source = "/images/pieces_kinki/Gto.png")]
 		private var gto:Class
 
     private var koma_images_sente:Array = new Array(sou,shi,skaku,skin,sgin,skei,skyo,sfu,null,sryu,suma,null,sngin,snkei,snkyo,sto);
@@ -104,6 +109,7 @@ package  {
 		private var _cells:Array;
 		private var _board_back_image:Image = new Image();
 		private var _board_masu_image:Image = new Image();
+		private var _board_coord_image:Image = new Image();
 		
 		private var _board_corrdinate:Array = new Array();
 
@@ -132,15 +138,20 @@ package  {
 			
 			_board_back_image.width = BAN_WIDTH;
 			_board_back_image.height = BAN_HEIGHT;
-			_board_back_image.source = board_masu;
+			_board_back_image.source = board_back;
 			_board_back_image.x = BAN_LEFT_MARGIN;
 			
 			_board_masu_image.source = board_masu;
 			_board_masu_image.width = BAN_WIDTH;
 			_board_masu_image.height = BAN_HEIGHT;
 			
-			_board_back_image.addChild(_board_masu_image);
+//			_board_coord_image.source = board_scoord_e;
+			_board_coord_image.width = BAN_WIDTH;
+			_board_coord_image.height = BAN_HEIGHT;
+			
 			addChild(_board_back_image);
+			_board_back_image.addChild(_board_masu_image);
+			_board_back_image.addChild(_board_coord_image);
 
       handBoxes = new Array(2);
       for(i=0;i<2;i++){
@@ -158,6 +169,11 @@ package  {
 		}
 
     public function reset():void{
+    	if(_my_turn == Kyokumen.SENTE){
+    		_board_coord_image.source = board_scoord_e
+    	} else {
+    		_board_coord_image.source = board_gcoord_e
+    	}
 			for (var i:int = 0; i < 9; i++ ) {
 				for (var j:int = 0; j < 9;j++ ){
           if(_cells[i][j] != null){
