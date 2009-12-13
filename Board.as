@@ -7,8 +7,8 @@
 package  {
   import flash.events.MouseEvent;
   import flash.geom.Point;
+  import flash.media.Sound;
   
-  import mx.containers.Box;
   import mx.containers.Canvas;
   import mx.containers.HBox;
   import mx.controls.Alert;
@@ -115,6 +115,9 @@ package  {
     [Embed(source = "/images/black_r.png")]
     private var black_r:Class
 
+	[Embed(source = "/sound/piece.mp3")]
+	private var sound_piece:Class;
+	private var _sound_piece:Sound = new sound_piece();
 
     private var koma_images_sente:Array = new Array(sou,shi,skaku,skin,sgin,skei,skyo,sfu,null,sryu,suma,null,sngin,snkei,snkyo,sto);
 
@@ -281,6 +284,7 @@ package  {
       var mv:Movement = _position.generateMovementFromString(move);
       _position.move(mv);
       setPosition(_position);
+      _sound_piece.play();
     }
 
     public function setCallback(callback:Function):void{
