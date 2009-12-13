@@ -5,29 +5,28 @@
 */
 
 package  {
-  import flash.events.Event;
   import flash.events.MouseEvent;
   import flash.geom.Point;
-  import mx.events.CloseEvent;
-  import mx.controls.Image;
-  import mx.controls.Alert;
-  import mx.containers.Canvas;
+  
   import mx.containers.Box;
+  import mx.containers.Canvas;
   import mx.containers.HBox;
+  import mx.controls.Alert;
+  import mx.controls.Image;
   import mx.controls.Label;
-  import Square;
-  import Kyokumen;
-  import Koma;
+  import mx.events.CloseEvent;
 
   public class Board extends Canvas {
     
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
-    public static const BAN_LEFT_MARGIN:int = 150;
+    public static const BAN_LEFT_MARGIN:int = 190;
+	public static const BAN_TOP_MARGIN:int = 10
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
-
+    public static const KOMADAI_WIDTH:int = 170;
+    public static const KOMADAI_HEIGHT:int = 200;    
     
     [Bindable]
     [Embed(source = "/images/ban_kaya_a.png")]
@@ -45,7 +44,8 @@ package  {
     private var board_shand:Class
     [Embed(source = "/images/Ghand.png")]
     private var board_ghand:Class
-
+    [Embed(source = "/images/bg_tatami.png")]
+	private var board_bg:Class
 
     [Bindable]
     [Embed(source = "/images/pieces_kinki/Sou.png")]
@@ -125,9 +125,12 @@ package  {
     private var _turn_symbols:Array;
 
     private var _cells:Array;
+    private var _board_bg_image:Image = new Image();
     private var _board_back_image:Image = new Image();
     private var _board_masu_image:Image = new Image();
     private var _board_coord_image:Image = new Image();
+    private var _board_shand_image:Image = new Image();
+    private var _board_ghand_image:Image = new Image();
     
     private var _board_corrdinate:Array = new Array();
 
@@ -152,10 +155,13 @@ package  {
       this.width = BAN_WIDTH;
       this.height = BAN_HEIGHT;
       
+      _board_bg_image.source = board_bg;
+      
       _board_back_image.width = BAN_WIDTH;
       _board_back_image.height = BAN_HEIGHT;
-      _board_back_image.source = board_masu;
+      _board_back_image.source = board_back;
       _board_back_image.x = BAN_LEFT_MARGIN;
+      _board_back_image.y = BAN_TOP_MARGIN;
       
       _board_masu_image.source = board_masu;
       _board_masu_image.width = BAN_WIDTH;
@@ -164,21 +170,32 @@ package  {
       _board_coord_image.width = BAN_WIDTH;
       _board_coord_image.height = BAN_HEIGHT;
       
+      _board_shand_image.source = board_shand;
+      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 10
+      _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
+      _board_ghand_image.source = board_ghand;
+      _board_ghand_image.x = 10
+      _board_ghand_image.y = 10
+      
+      addChild(_board_bg_image);
       addChild(_board_back_image);
       _board_back_image.addChild(_board_masu_image);
       _board_back_image.addChild(_board_coord_image);
+      addChild(_board_shand_image);
+      addChild(_board_ghand_image);
 
       handBoxes = new Array(2);
       _name_labels = new Array(2);
       _turn_symbols = new Array(2);
       for(i=0;i<2;i++){
-        var hand:Box = new Box();
-        hand.width = 150;
-        hand.height = 300;
-        hand.setStyle('borderStyle','solid');
-        hand.setStyle('borderThickness',2);
-        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
-        hand.y = i == 0 ? BAN_HEIGHT - hand.height : 0;
+        var hand:Canvas = new Canvas();
+        
+        hand.width = KOMADAI_WIDTH;
+        hand.height = KOMADAI_HEIGHT;
+//        hand.setStyle('borderStyle','solid');
+//        hand.setStyle('borderThickness',2);
+        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
+        hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
         handBoxes[i] = hand;
         addChild(hand);
 
@@ -187,8 +204,8 @@ package  {
         var turn_symbol:Image = new Image();
         _turn_symbols[i] = turn_symbol;
         var h_box:HBox = new HBox();
-        h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 0;
-        h_box.y = i == 0 ? BAN_HEIGHT - hand.height - 25 : 300 + 5 ;
+        h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
+        h_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height - 25 : BAN_TOP_MARGIN + hand.height + 5 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
         addChild(h_box);
@@ -221,7 +238,7 @@ package  {
             _cells[8-i][8-j] = square;
           }
           square.x = BAN_LEFT_MARGIN + 10 + j * KOMA_WIDTH;
-          square.y = 10 + i * KOMA_HEIGHT;
+          square.y = BAN_TOP_MARGIN + 10 + i * KOMA_HEIGHT;
           square.addEventListener(MouseEvent.MOUSE_UP,_squareMouseUpHandler);
           addChild(square);
         }
@@ -250,9 +267,11 @@ package  {
           if(hand.getNumOfKoma(j) > 0){
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
               var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
-              handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
+              if (i==_my_turn) handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? koma_images_sente : koma_images_gote;
               handPiece.source = images[j];
+              handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
+              handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
               handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
             }
           }
