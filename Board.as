@@ -192,8 +192,6 @@ package  {
         
         hand.width = KOMADAI_WIDTH;
         hand.height = KOMADAI_HEIGHT;
-//        hand.setStyle('borderStyle','solid');
-//        hand.setStyle('borderThickness',2);
         hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
         hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
         handBoxes[i] = hand;
