@@ -10,6 +10,8 @@
     import Board;
 
     private var _client:CsaShogiClient;
+    [Bindable]
+    private var _user_list:Array;
 
 		private function initApp():void
 		{
@@ -17,6 +19,8 @@
 		  _client = new CsaShogiClient();
       board.setCallback(_playerMove);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
+      _user_list = new Array();
+      userListGrid.dataProvider = _user_list;
 		}
 
     private function _connectAndLogin():void{
@@ -27,6 +31,7 @@
       _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
       _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
+      _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.connect();
     } 
     
@@ -37,6 +42,7 @@
 
     private function _handleLoggedIn(e:Event):void{
       mainViewStack.selectedIndex = 1;
+      _client.who();
       _writeUserMessage("Logged in successfully.");
     }
 
@@ -66,6 +72,28 @@
         _writeUserMessage("You win.");
       }
       board.endGame();
+    }
+
+    private function _handleWho(e:ServerMessageEvent):void{
+      var users:Array = e.message.split("\n");
+      trace(users.length.toString());
+      var user_list:Array = new Array();
+      for each(var user_data:String in users){
+        trace(user_data);
+        if(user_data.match("##[WHO] +OK") != null){
+          break;
+        }
+        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+)/);
+        if(match != null && match[2] != "OK"){
+          var name:String = match[1];
+          trace(name);
+          var user:Object = new Object();
+          user.name = name;
+          user.rating = 1000;
+          user_list.push(user);
+        }
+      }
+      userListGrid.dataProvider = user_list;
     }
 
     private function _writeUserMessage(message:String):void{
@@ -117,6 +145,14 @@
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
       <mx:Label text="Message"/>
+    </mx:VBox>
+    <mx:VBox>
+      <mx:DataGrid id="userListGrid" >
+       <mx:columns>
+        <mx:DataGridColumn dataField="name"/>
+        <mx:DataGridColumn dataField="rating"/>
+       </mx:columns>
+      </mx:DataGrid>
     </mx:VBox>
     <mx:VBox>
       <eightyOneSquare:Board id="board" width="800" height="474"/> 

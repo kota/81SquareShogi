@@ -17,6 +17,7 @@ package{
 		public static var SERVER_MESSAGE:String = 'receive_message';
     public static var MOVE:String = 'move';
     public static var CHAT:String = 'chat';
+    public static var WHO:String = 'who';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -116,6 +117,9 @@ package{
         return;
       } else if(response.charAt(0) == '+' || response.charAt(0) == '-'){
         dispatchEvent(new ServerMessageEvent(MOVE,response));
+        return;
+      } else if(response.indexOf("##[WHO]") >= 0){
+        dispatchEvent(new ServerMessageEvent(WHO,response));
         return;
       }
       switch(_current_state)
