@@ -119,7 +119,7 @@
       <mx:Label text="Message"/>
     </mx:VBox>
     <mx:VBox>
-      <eightyOneSquare:Board id="board" width="800" height="454"/> 
+      <eightyOneSquare:Board id="board" width="800" height="474"/> 
       <mx:HBox>
       <mx:Button id="startButton" label="Start" y="400" click="_waitForGame();"/>
       <mx:Button id="resignButton" label="Resign" y="400" click="_resign();"/>
