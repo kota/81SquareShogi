@@ -147,6 +147,7 @@ package  {
     private var _game_started:Boolean;
 
     private var _selected_square:Square;
+    private var _last_square:Square;
 
     public function Board() {
       super();
@@ -283,7 +284,10 @@ package  {
     public function makeMove(move:String):void{
       var mv:Movement = _position.generateMovementFromString(move);
       _position.move(mv);
+      if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
       setPosition(_position);
+      _last_square = _cells[mv.to.y][mv.to.x]
+      _last_square.setStyle('backgroundColor','0xCC3333');      
       _sound_piece.play();
     }
 
