@@ -90,6 +90,7 @@
           var user:Object = new Object();
           user.name = name;
           user.rating = 1000;
+					user.status = "connected"
           user_list.push(user);
         }
       }
@@ -151,6 +152,7 @@
        <mx:columns>
         <mx:DataGridColumn dataField="name"/>
         <mx:DataGridColumn dataField="rating"/>
+        <mx:DataGridColumn dataField="status"/>
        </mx:columns>
       </mx:DataGrid>
     </mx:VBox>
