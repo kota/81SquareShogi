@@ -49,6 +49,7 @@ package{
 		  _socket.addEventListener(Event.CLOSE,_handleClose);
 		  _socket.addEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
 		  _socket.addEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
+		  _socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 		  _socket.connect(_host,_port);
 		}
 
@@ -160,6 +161,10 @@ package{
     }
 
 		private function _handleIOError(e:IOErrorEvent):void{
+			Alert.show(e.toString());
+		}
+
+		private function _handleSecurityError(e:SecurityErrorEvent):void{
 			Alert.show(e.toString());
 		}
 
