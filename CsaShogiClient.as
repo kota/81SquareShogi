@@ -17,6 +17,7 @@ package{
 		public static var SERVER_MESSAGE:String = 'receive_message';
     public static var MOVE:String = 'move';
     public static var CHAT:String = 'chat';
+    public static var WHO:String = 'who';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -36,11 +37,12 @@ package{
     private var _current_state:int;
     private var _my_turn:int;
     private var _player_names:Array;
+		private var _login_name:String;
 
 		public function CsaShogiClient(){
       _current_state = STATE_NOT_CONNECTED;
       _player_names = new Array(2);
-     // Security.loadPolicyFile("xmlSocket://"+_host+":8430");
+      //Security.loadPolicyFile("xmlSocket://"+_host+":8430");
 		}
 
 		public function connect():void{
@@ -67,16 +69,22 @@ package{
 		  trace ("message sent: " + message);
 		}
 
-    public function login(login_name:String,password:String):void{
+    public function login(login_name:String,password:String):void {
+			_login_name = login_name;
       send("LOGIN " + login_name + " " + password +" x1");//connect with extended mode.
     }
 
-    public function waitForGame():void{
+    public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME testgame-1500-0 *");
+      send("%%GAME " + _login_name + "-1500-0 *");
     }
 
-    public function agree():void{
+		public function challenge(user_name:String):void {
+      _current_state = STATE_GAME_WAITING;
+      send("%%GAME " + user_name + "-1500-0 *");
+    }
+
+    public function agree():void {
       trace("AGREE");
       send("AGREE");
     }
@@ -117,6 +125,9 @@ package{
         return;
       } else if(response.charAt(0) == '+' || response.charAt(0) == '-'){
         dispatchEvent(new ServerMessageEvent(MOVE,response));
+        return;
+      } else if(response.indexOf("##[WHO]") >= 0){
+        dispatchEvent(new ServerMessageEvent(WHO,response));
         return;
       }
       switch(_current_state)
