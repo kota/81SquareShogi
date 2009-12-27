@@ -12,6 +12,7 @@
     private var _client:CsaShogiClient;
     [Bindable]
     private var _user_list:Array;
+		private var _login_name:String;
 
 		private function initApp():void
 		{
@@ -36,14 +37,13 @@
     } 
     
     private function _handleConnected(e:Event):void{
-		  trace("connected. try login.");
       _client.login(loginname.text, "password");
+			_login_name = loginname.text;
     } 
 
     private function _handleLoggedIn(e:Event):void{
       mainViewStack.selectedIndex = 1;
       _client.who();
-      _writeUserMessage("Logged in successfully.");
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
@@ -51,46 +51,45 @@
     }
 
     private function _handleMove(e:ServerMessageEvent):void{
-      trace("move "+e.message);
       board.makeMove(e.message);
     }
 
     private function _handleGameStarted(e:Event):void{
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Sente(Black).");
-        _writeUserMessage("Your turn.");
       } else {
         _writeUserMessage("You are Gote(White).");
       }
       board.startGame(_client.myTurn,_client.playerNames);
+			closeButton.enabled = false;
+      mainViewStack.selectedIndex = 2;
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void{
       if(e.message.indexOf("LOSE") >= 0){
-        _writeUserMessage("You lose.");
+        _writeUserMessage("You Lose.");
       } else {
-        _writeUserMessage("You win.");
+        _writeUserMessage("You Win.");
       }
+			closeButton.enabled = true;
       board.endGame();
     }
 
     private function _handleWho(e:ServerMessageEvent):void{
       var users:Array = e.message.split("\n");
-      trace(users.length.toString());
       var user_list:Array = new Array();
       for each(var user_data:String in users){
         trace(user_data);
         if(user_data.match("##[WHO] +OK") != null){
           break;
         }
-        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+)/);
+        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+) x1 (\S*)/);
         if(match != null && match[2] != "OK"){
           var name:String = match[1];
-          trace(name);
           var user:Object = new Object();
           user.name = name;
           user.rating = 1000;
-					user.status = "connected"
+					user.status = match[3];
           user_list.push(user);
         }
       }
@@ -107,9 +106,21 @@
     }
     
     private function _waitForGame():void{
-      _writeUserMessage("Waiting for other player to join...");
+      //_writeUserMessage("Waiting for other player to join...");
       _client.waitForGame();
+			_refresh();
     }
+
+    private function _challenge():void{
+			var user:Object = userListGrid.selectedItem;
+			if(user != null){
+      	_client.challenge(user.name);
+			}
+    }
+
+		private function _refresh():void{
+			_client.who();	
+		}
 
     private function _resign():void{
       _client.resign();
@@ -118,6 +129,20 @@
     private function _who():void{
       _client.who();
     }
+
+		private function _closeGame():void{
+      mainViewStack.selectedIndex = 1;
+			_refresh();
+		}
+
+		private function _userSelected():void{
+			var user:Object = userListGrid.selectedItem;
+			if(user != null && user.name != _login_name){
+				challengeButton.enabled = true;
+			} else {
+				challengeButton.enabled = false;
+			}
+		}
 
     private function _playerMove(from:Point,to:Point,promote:Boolean=false):void{
       var mv:Movement = board.position.generateMovementFromCoordinates(from,to,promote);
@@ -148,7 +173,12 @@
       <mx:Label text="Message"/>
     </mx:VBox>
     <mx:VBox>
-      <mx:DataGrid id="userListGrid" >
+			<mx:HBox>
+        <mx:Button id="startButton" label="New Game" click="_waitForGame();"/>
+			  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
+			  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+			</mx:HBox>
+      <mx:DataGrid id="userListGrid" width="600" change="_userSelected();">
        <mx:columns>
         <mx:DataGridColumn dataField="name"/>
         <mx:DataGridColumn dataField="rating"/>
@@ -159,9 +189,8 @@
     <mx:VBox>
       <eightyOneSquare:Board id="board" width="800" height="474"/> 
       <mx:HBox>
-      <mx:Button id="startButton" label="Start" y="400" click="_waitForGame();"/>
       <mx:Button id="resignButton" label="Resign" y="400" click="_resign();"/>
-      <mx:Button id="whoButton" label="Who's online" y="400" click="_who();"/>
+      <mx:Button id="closeButton" label="Close" y="400" click="_closeGame();" enabled="false"/>
       </mx:HBox>
       <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="500" height="200"/>
       <mx:TextInput id="chatMessage" width="500"/>

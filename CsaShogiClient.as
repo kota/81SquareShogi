@@ -78,6 +78,11 @@ package{
       send("%%GAME " + _login_name + "-1500-0 *");
     }
 
+		public function challenge(user_name:String):void {
+      _current_state = STATE_GAME_WAITING;
+      send("%%GAME " + user_name + "-1500-0 *");
+    }
+
     public function agree():void {
       trace("AGREE");
       send("AGREE");
