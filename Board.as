@@ -150,6 +150,7 @@ package  {
     private var _game_started:Boolean;
 
     private var _selected_square:Square;
+    private var _last_square:Square;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -299,7 +300,10 @@ package  {
 			_timers[running_timer].accumulateTime(time);
 			_timers[1-running_timer].resume();
       _position.move(mv);
+      if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
       setPosition(_position);
+      _last_square = _cells[mv.to.y][mv.to.x]
+      _last_square.setStyle('backgroundColor','0xCC3333');      
       _sound_piece.play();
     }
 
