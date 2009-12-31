@@ -16,14 +16,16 @@ package  {
 		private var _koma:Koma;
 		private var _promote:Boolean;
 		private var _capture:Boolean;
+		private var _time:int;
 		
-		public function Movement(turn:int, from:Point, to:Point, koma:Koma, promote:Boolean, capture:Boolean ) {
+		public function Movement(turn:int, from:Point, to:Point, koma:Koma, promote:Boolean, capture:Boolean, time:int=0 ) {
 			_turn = turn;
 			_from = from;
 			_to = to;
 			_koma = koma;
 			_promote = promote;
 			_capture = capture;
+			_time = time;
 		}
 
     private function toHumanCoordinates(p:Point):Point{
@@ -62,6 +64,9 @@ package  {
 		}
 		public function get turn():int {
 			return this._turn;
+		}
+		public function get time():int {
+			return this._time;
 		}
 
 	}

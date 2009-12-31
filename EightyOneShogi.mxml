@@ -22,6 +22,7 @@
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
+
 		}
 
     private function _connectAndLogin():void{
@@ -60,7 +61,7 @@
       } else {
         _writeUserMessage("You are Gote(White).");
       }
-      board.startGame(_client.myTurn,_client.playerNames);
+      board.startGame(_client.myTurn,_client.playerNames,10,0);
 			closeButton.enabled = false;
       mainViewStack.selectedIndex = 2;
     }
@@ -153,6 +154,7 @@
       _client.chat(chatMessage.text);
       chatMessage.text = "";
     }
+
 
 	  ]]>
 	</mx:Script>

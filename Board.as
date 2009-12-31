@@ -5,6 +5,8 @@
 */
 
 package  {
+	import GameTimer;
+
   import flash.events.MouseEvent;
   import flash.geom.Point;
   import flash.media.Sound;
@@ -21,7 +23,7 @@ package  {
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
     public static const BAN_LEFT_MARGIN:int = 190;
-	public static const BAN_TOP_MARGIN:int = 10
+		public static const BAN_TOP_MARGIN:int = 10
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
@@ -126,6 +128,7 @@ package  {
     public var handBoxes:Array;
     private var _name_labels:Array;
     private var _turn_symbols:Array;
+		private var _timers:Array;
 
     private var _cells:Array;
     private var _board_bg_image:Image = new Image();
@@ -147,6 +150,9 @@ package  {
     private var _game_started:Boolean;
 
     private var _selected_square:Square;
+
+		private var _time_sente:int;
+		private var _time_gote:int;
 
     public function Board() {
       super();
@@ -190,6 +196,7 @@ package  {
       handBoxes = new Array(2);
       _name_labels = new Array(2);
       _turn_symbols = new Array(2);
+      _timers = new Array(2);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
         
@@ -204,14 +211,16 @@ package  {
         _name_labels[i] = name_label;
         var turn_symbol:Image = new Image();
         _turn_symbols[i] = turn_symbol;
+				var timer_label:GameTimer = new GameTimer();
+				_timers[i] = timer_label;
         var h_box:HBox = new HBox();
         h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
         h_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height - 25 : BAN_TOP_MARGIN + hand.height + 5 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
+				h_box.addChild(timer_label);
         addChild(h_box);
       }
-      
     }
 
     public function reset():void{
@@ -282,6 +291,13 @@ package  {
 
     public function makeMove(move:String):void{
       var mv:Movement = _position.generateMovementFromString(move);
+			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
+
+			var time:int = mv.time;
+
+			_timers[running_timer].suspend();
+			_timers[running_timer].accumulateTime(time);
+			_timers[1-running_timer].resume();
       _position.move(mv);
       setPosition(_position);
       _sound_piece.play();
@@ -291,7 +307,7 @@ package  {
       _playerMoveCallback = callback;
     }
 
-    public function startGame(my_turn:int,player_names:Array):void{
+    public function startGame(my_turn:int,player_names:Array,time_total:int,time_byoyomi:int):void{
       trace("game started");
       _my_turn = my_turn;
       reset();
@@ -301,11 +317,16 @@ package  {
       _name_labels[1].text = player_names[1-_my_turn]; 
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+			_timers[0].reset(time_total,time_byoyomi);
+			_timers[1].reset(time_total,time_byoyomi);
+			_timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
       _game_started = true;
     }
 
     public function endGame():void{
       trace("game end");
+			_timers[0].stop();
+			_timers[1].stop();
       _game_started = false;
     }
 

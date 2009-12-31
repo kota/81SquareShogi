@@ -187,7 +187,10 @@ package  {
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
       var koma:Koma = new Koma(koma_names.indexOf(moveStr.slice(5,7)),to.x,to.y,turn);
-      return new Movement(turn,from,to,koma,false,capture);
+			var match:Array = moveStr.match(/,T([0-9]*)/);
+			var time:int = parseInt(match[1]);
+
+      return new Movement(turn,from,to,koma,false,capture,time);
     }
 		
 		public function move(mv:Movement):void {
