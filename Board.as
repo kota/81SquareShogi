@@ -141,6 +141,7 @@ package  {
     private var _board_corrdinate:Array = new Array();
 
     private var _playerMoveCallback:Function;
+    private var _timeoutCallback:Function;
 
     private var _from:Point;
     private var _to:Point;
@@ -212,14 +213,15 @@ package  {
         _name_labels[i] = name_label;
         var turn_symbol:Image = new Image();
         _turn_symbols[i] = turn_symbol;
-				var timer_label:GameTimer = new GameTimer();
-				_timers[i] = timer_label;
+				var timer:GameTimer = new GameTimer();
+				timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
+				_timers[i] = timer;
         var h_box:HBox = new HBox();
         h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
         h_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height - 25 : BAN_TOP_MARGIN + hand.height + 5 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
-				h_box.addChild(timer_label);
+				h_box.addChild(timer);
         addChild(h_box);
       }
     }
@@ -307,8 +309,12 @@ package  {
       _sound_piece.play();
     }
 
-    public function setCallback(callback:Function):void{
+    public function setMoveCallback(callback:Function):void{
       _playerMoveCallback = callback;
+    }
+
+    public function setTimeoutCallback(callback:Function):void{
+      _timeoutCallback = callback;
     }
 
     public function startGame(my_turn:int,player_names:Array,time_total:int,time_byoyomi:int):void{
@@ -333,6 +339,11 @@ package  {
 			_timers[1].stop();
       _game_started = false;
     }
+	
+		public function timeout():void{
+			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
+			_timers[running_timer].timeout();
+		}
 
     public function get position():Kyokumen{
       return _position;
@@ -389,6 +400,10 @@ package  {
         }
       }
     }
+
+		private function _checkTimeout(e:Event):void{
+			_timeoutCallback();
+		}
 
   }
 }

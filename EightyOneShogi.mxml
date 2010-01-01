@@ -18,11 +18,11 @@
 		{
 		  trace("application initialized..");
 		  _client = new CsaShogiClient();
-      board.setCallback(_playerMove);
+      board.setMoveCallback(_playerMove);
+      board.setTimeoutCallback(_checkTimeout);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
-
 		}
 
     private function _connectAndLogin():void{
@@ -56,17 +56,22 @@
     }
 
     private function _handleGameStarted(e:Event):void{
+			userMessage.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Sente(Black).");
       } else {
         _writeUserMessage("You are Gote(White).");
       }
-      board.startGame(_client.myTurn,_client.playerNames,10,0);
+      board.startGame(_client.myTurn,_client.playerNames,10,10);
 			closeButton.enabled = false;
       mainViewStack.selectedIndex = 2;
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void{
+      if(e.message.indexOf("TIME_UP") >= 0){
+				board.timeout();
+        _writeUserMessage("Time out.");
+			}
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.");
       } else {
@@ -150,11 +155,14 @@
       _client.move(mv.toCSA());
     }
 
+		private function _checkTimeout():void{
+			_client.checkTimeout();
+		}
+
     private function _handleSendChat(e:FlexEvent):void{
       _client.chat(chatMessage.text);
       chatMessage.text = "";
     }
-
 
 	  ]]>
 	</mx:Script>

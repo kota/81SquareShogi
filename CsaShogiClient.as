@@ -76,12 +76,12 @@ package{
 
     public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-10-0 *");
+      send("%%GAME " + _login_name + "-10-10 *");
     }
 
 		public function challenge(user_name:String):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-10-0 *");
+      send("%%GAME " + user_name + "-10-10 *");
     }
 
     public function agree():void {
@@ -104,6 +104,10 @@ package{
     public function chat(message:String):void{
       send("%%CHAT " + message);
     }
+
+		public function checkTimeout():void{
+			send("%%%TIMEOUT");
+		}
 
 		private function _handleConnect(e:Event):void{
 			trace("connected.");

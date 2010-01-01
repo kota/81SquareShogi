@@ -1,19 +1,34 @@
 package {
+	import mx.containers.Canvas;
 	import mx.controls.Label;
 	import flash.utils.Timer;
+	import flash.events.Event;
 	import flash.events.TimerEvent;
 
-	public class GameTimer extends Label {
+	public class GameTimer extends Canvas{
+
+		public static var CHECK_TIMEOUT:String = 'check_timeout';
+
+		private var _label:Label;
+
 		private var _total:int;
 		private var _byoyomi:int;
 		private var _time_left:int;
 
 		private var _accumulated_time:int;
 		private var _byoyomi_flag:Boolean;
+		private var _timeout_flag:Boolean;
 
 		private var _timer:Timer;
 
 		public function GameTimer() {
+			this.width = 40;
+			this.setStyle('borderStyle','solid');
+			this.setStyle('borderColor',0x000000);
+			this.setStyle('textAlign','center');
+			_label = new Label();
+			_label.setStyle('textAlign','right');
+			addChild(_label);
 			_timer = new Timer(1000);
 			_timer.addEventListener(TimerEvent.TIMER,_tickHandler);
 		}
@@ -36,6 +51,7 @@ package {
 			_byoyomi_flag = _total <= 0;
 			_time_left = _byoyomi_flag ? _byoyomi : _total;
 			_accumulated_time = 0;
+			_timeout_flag = false;
 
 			_display();
 		}
@@ -66,14 +82,25 @@ package {
 			}
 		}
 
+		public function timeout():void{
+			_time_left = 0;
+			_display();
+		}
+
 		private function _tickHandler(e:TimerEvent):void{
+			if(_timeout_flag){
+				dispatchEvent(new Event(CHECK_TIMEOUT));
+			}
 			_time_left--;
 			if(_time_left <= 0){
-				if(!_byoyomi_flag){
+				_time_left = 0;
+				if(_byoyomi > 0 && !_byoyomi_flag){
 					_byoyomi_flag = true;
 					_time_left = _byoyomi;
 				} else {
-					_timer.stop();
+          //time's up
+					_timeout_flag = true;
+					//_timer.stop();
 				}
 			}
 			_display();
@@ -81,12 +108,14 @@ package {
 
 		private function _display():void{
 			var time:String = "";
-			if(_time_left > 60){
+			var sec:int = _time_left % 60;
+			time = int(_time_left / 60).toString() + ":" + (sec < 10 ? '0' : '') + sec.toString();
+			/*if(_time_left > 60){
 				time = int(_time_left / 60).toString() + ":" + (_time_left % 60).toString();
 			} else {
 				time = _time_left.toString();
-			}
-			this.text = time;
+			}*/
+			_label.text = time;
 		}
 
 	}
