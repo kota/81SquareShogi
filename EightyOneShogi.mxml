@@ -62,7 +62,7 @@
       } else {
         _writeUserMessage("You are Gote(White).");
       }
-      board.startGame(_client.myTurn,_client.playerNames,10,10);
+      board.startGame(_client.myTurn,_client.playerNames,60,30);
 			closeButton.enabled = false;
       mainViewStack.selectedIndex = 2;
     }

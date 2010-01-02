@@ -76,12 +76,12 @@ package{
 
     public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-10-10 *");
+      send("%%GAME " + _login_name + "-60-30 *");
     }
 
 		public function challenge(user_name:String):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-10-10 *");
+      send("%%GAME " + user_name + "-60-30 *");
     }
 
     public function agree():void {
