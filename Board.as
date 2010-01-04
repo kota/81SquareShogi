@@ -6,17 +6,15 @@
 
 package  {
 	import GameTimer;
-
-  import flash.events.MouseEvent;
-  import flash.geom.Point;
-  import flash.media.Sound;
-  
-  import mx.containers.Canvas;
-  import mx.containers.HBox;
-  import mx.controls.Alert;
-  import mx.controls.Image;
-  import mx.controls.Label;
-  import mx.events.CloseEvent;
+	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import flash.media.Sound;
+	
+	import mx.containers.Canvas;
+	import mx.controls.Alert;
+	import mx.controls.Image;
+	import mx.controls.Label;
+	import mx.events.CloseEvent;
 
   public class Board extends Canvas {
     
@@ -50,62 +48,62 @@ package  {
 	private var board_bg:Class
 
     [Bindable]
-    [Embed(source = "/images/pieces_kinki/Sou.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sou.png")]
     private var sou:Class
-    [Embed(source = "/images/pieces_kinki/Shi.png")]
+    [Embed(source = "/images/pieces_ryoko1/Shi.png")]
     private var shi:Class
-    [Embed(source = "/images/pieces_kinki/Sryu.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sryu.png")]
     private var sryu:Class
-    [Embed(source = "/images/pieces_kinki/Skaku.png")]
+    [Embed(source = "/images/pieces_ryoko1/Skaku.png")]
     private var skaku:Class
-    [Embed(source = "/images/pieces_kinki/Suma.png")]
+    [Embed(source = "/images/pieces_ryoko1/Suma.png")]
     private var suma:Class
-    [Embed(source = "/images/pieces_kinki/Skin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Skin.png")]
     private var skin:Class
-    [Embed(source = "/images/pieces_kinki/Sgin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sgin.png")]
     private var sgin:Class
-    [Embed(source = "/images/pieces_kinki/Sngin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sngin.png")]
     private var sngin:Class
-    [Embed(source = "/images/pieces_kinki/Skei.png")]
+    [Embed(source = "/images/pieces_ryoko1/Skei.png")]
     private var skei:Class
-    [Embed(source = "/images/pieces_kinki/Snkei.png")]
+    [Embed(source = "/images/pieces_ryoko1/Snkei.png")]
     private var snkei:Class
-    [Embed(source = "/images/pieces_kinki/Skyo.png")]
+    [Embed(source = "/images/pieces_ryoko1/Skyo.png")]
     private var skyo:Class
-    [Embed(source = "/images/pieces_kinki/Snkyo.png")]
+    [Embed(source = "/images/pieces_ryoko1/Snkyo.png")]
     private var snkyo:Class
-    [Embed(source = "/images/pieces_kinki/Sfu.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sfu.png")]
     private var sfu:Class
-    [Embed(source = "/images/pieces_kinki/Sto.png")]
+    [Embed(source = "/images/pieces_ryoko1/Sto.png")]
     private var sto:Class
     
-    [Embed(source = "/images/pieces_kinki/Gou.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gou.png")]
     private var gou:Class
-    [Embed(source = "/images/pieces_kinki/Ghi.png")]
+    [Embed(source = "/images/pieces_ryoko1/Ghi.png")]
     private var ghi:Class
-    [Embed(source = "/images/pieces_kinki/Gryu.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gryu.png")]
     private var gryu:Class
-    [Embed(source = "/images/pieces_kinki/Gkaku.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gkaku.png")]
     private var gkaku:Class
-    [Embed(source = "/images/pieces_kinki/Guma.png")]
+    [Embed(source = "/images/pieces_ryoko1/Guma.png")]
     private var guma:Class
-    [Embed(source = "/images/pieces_kinki/Gkin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gkin.png")]
     private var gkin:Class
-    [Embed(source = "/images/pieces_kinki/Ggin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Ggin.png")]
     private var ggin:Class
-    [Embed(source = "/images/pieces_kinki/Gngin.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gngin.png")]
     private var gngin:Class
-    [Embed(source = "/images/pieces_kinki/Gkei.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gkei.png")]
     private var gkei:Class
-    [Embed(source = "/images/pieces_kinki/Gnkei.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gnkei.png")]
     private var gnkei:Class
-    [Embed(source = "/images/pieces_kinki/Gkyo.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gkyo.png")]
     private var gkyo:Class
-    [Embed(source = "/images/pieces_kinki/Gnkyo.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gnkyo.png")]
     private var gnkyo:Class
-    [Embed(source = "/images/pieces_kinki/Gfu.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gfu.png")]
     private var gfu:Class
-    [Embed(source = "/images/pieces_kinki/Gto.png")]
+    [Embed(source = "/images/pieces_ryoko1/Gto.png")]
     private var gto:Class
     
     [Embed(source = "/images/white.png")]
@@ -127,6 +125,7 @@ package  {
 
     public var handBoxes:Array;
     private var _name_labels:Array;
+    private var _info_labels:Array;
     private var _turn_symbols:Array;
 		private var _timers:Array;
 
@@ -197,6 +196,7 @@ package  {
 
       handBoxes = new Array(2);
       _name_labels = new Array(2);
+      _info_labels = new Array(2);
       _turn_symbols = new Array(2);
       _timers = new Array(2);
       for(i=0;i<2;i++){
@@ -208,20 +208,40 @@ package  {
         hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
         handBoxes[i] = hand;
         addChild(hand);
+        
+ 		var timer:GameTimer = new GameTimer();
+		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
+		timer.x = hand.x + KOMADAI_WIDTH/2 - 40
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
+		_timers[i] = timer;
+		addChild(timer)
 
-        var name_label:Label = new Label();
-        _name_labels[i] = name_label;
         var turn_symbol:Image = new Image();
+        turn_symbol.x = 2
+        turn_symbol.y = i == 0 ? 122 : 2
         _turn_symbols[i] = turn_symbol;
-				var timer:GameTimer = new GameTimer();
-				timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
-				_timers[i] = timer;
-        var h_box:HBox = new HBox();
-        h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
-        h_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height - 25 : BAN_TOP_MARGIN + hand.height + 5 ;
+        var name_label:Label = new Label();
+        name_label.setStyle('fontSize',12)
+        name_label.setStyle('fontWeight','bold')
+        name_label.x = turn_symbol.x + 20
+        name_label.y = turn_symbol.y + 5
+        _name_labels[i] = name_label;
+        var info_label:Label = new Label();
+        info_label.setStyle('fontSize',11)
+        info_label.x = name_label.x
+        info_label.y = name_label.y + 20
+        _info_labels[i] = info_label;       
+
+        var h_box:Canvas = new Canvas();
+        h_box.setStyle('backgroundColor',0xddee88);
+        h_box.setStyle('borderStyle','solid');
+        h_box.width = KOMADAI_WIDTH - 10
+        h_box.height = KOMADAI_HEIGHT - 30
+        h_box.x = hand.x + 5
+        h_box.y = i == 0 ? BAN_TOP_MARGIN + 28 : BAN_TOP_MARGIN + hand.height + 55 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
-				h_box.addChild(timer);
+        h_box.addChild(info_label);
         addChild(h_box);
       }
     }
@@ -324,7 +344,9 @@ package  {
       _position = new Kyokumen();
       setPosition(_position);
       _name_labels[0].text = player_names[_my_turn]; 
-      _name_labels[1].text = player_names[1-_my_turn]; 
+      _name_labels[1].text = player_names[1-_my_turn];
+      _info_labels[0].text = "R:1000, (Country)"
+      _info_labels[1].text = "R:1000, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);

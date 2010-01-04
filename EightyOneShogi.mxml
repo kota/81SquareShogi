@@ -5,6 +5,7 @@
 	  <![CDATA[
 		import flash.display.*;
     import mx.events.FlexEvent;
+      import flash.media.Sound;
 		import mx.controls.*;
 		import CsaShogiClient;
     import Board;
@@ -13,7 +14,13 @@
     [Bindable]
     private var _user_list:Array;
 		private var _login_name:String;
-
+		[Embed(source = "/sound/win.mp3")]
+		private var sound_win:Class;
+		private var _sound_win:Sound = new sound_win();
+		[Embed(source = "/sound/lose.mp3")]
+		private var sound_lose:Class;
+		private var _sound_lose:Sound = new sound_lose();
+		
 		private function initApp():void
 		{
 		  trace("application initialized..");
@@ -74,8 +81,10 @@
 			}
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.");
+        _sound_lose.play();
       } else {
         _writeUserMessage("You Win.");
+        _sound_win.play();
       }
 			closeButton.enabled = true;
       board.endGame();
@@ -199,11 +208,11 @@
     <mx:VBox>
       <eightyOneSquare:Board id="board" width="800" height="474"/> 
       <mx:HBox>
+      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="400" height="130"/>
       <mx:Button id="resignButton" label="Resign" y="400" click="_resign();"/>
       <mx:Button id="closeButton" label="Close" y="400" click="_closeGame();" enabled="false"/>
       </mx:HBox>
-      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="500" height="200"/>
-      <mx:TextInput id="chatMessage" width="500"/>
+      <mx:TextInput id="chatMessage" width="400"/>
     </mx:VBox>
   </mx:ViewStack>
 

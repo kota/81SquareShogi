@@ -60,6 +60,8 @@ package{
 			_socket.removeEventListener(Event.CONNECT,_handleConnect);
 			_socket.removeEventListener(Event.CLOSE,_handleClose);
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
+		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
+		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 			trace("socket closed");
 		}
 
@@ -119,6 +121,8 @@ package{
 			_socket.removeEventListener(Event.CONNECT,_handleConnect);
 			_socket.removeEventListener(Event.CLOSE,_handleClose);
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
+		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
+		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 		}
 
 		private function _handleSocketData(e:ProgressEvent):void{

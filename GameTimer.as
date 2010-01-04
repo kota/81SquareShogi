@@ -4,6 +4,7 @@ package {
 	import flash.utils.Timer;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
+	import flash.media.Sound;
 
 	public class GameTimer extends Canvas{
 
@@ -20,14 +21,22 @@ package {
 		private var _timeout_flag:Boolean;
 
 		private var _timer:Timer;
+		
+		[Embed(source = "/sound/timer.mp3")]
+		private var sound_timer:Class;
+		private var _sound_timer:Sound = new sound_timer();
 
 		public function GameTimer() {
-			this.width = 40;
+			this.width = 75;
 			this.setStyle('borderStyle','solid');
 			this.setStyle('borderColor',0x000000);
 			this.setStyle('textAlign','center');
+			this.setStyle('backgroundColor',0xffffff);
 			_label = new Label();
 			_label.setStyle('textAlign','right');
+			_label.setStyle('fontSize',18);
+			_label.setStyle('fontWeight','bold');
+			_label.x = 10
 			addChild(_label);
 			_timer = new Timer(1000);
 			_timer.addEventListener(TimerEvent.TIMER,_tickHandler);
@@ -52,23 +61,26 @@ package {
 			_time_left = _byoyomi_flag ? _byoyomi : _total;
 			_accumulated_time = 0;
 			_timeout_flag = false;
-
+			this.setStyle('backgroundColor',0xFFFFFF);
 			_display();
 		}
 
 		public function suspend():void{
 			if(_timer.running){
 				_timer.stop();
+				if (_byoyomi_flag){
+					this.setStyle('backgroundColor',0xFFFF00);
+					_time_left = _byoyomi;
+				}
 			}
+			_display();
 		}
 
 		public function resume():void{
 			if(!_timer.running){
 				_timer.start();
 			}
-			if(_byoyomi_flag){
-				_time_left = _byoyomi;
-			}
+			_display();
 		}
 
 		public function accumulateTime(time:int):void{
@@ -96,12 +108,21 @@ package {
 				_time_left = 0;
 				if(_byoyomi > 0 && !_byoyomi_flag){
 					_byoyomi_flag = true;
+					this.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
+					_sound_timer.play();
 				} else {
           //time's up
 					_timeout_flag = true;
 					//_timer.stop();
 				}
+			}
+			if(_byoyomi_flag && _time_left == 10){
+				this.setStyle('backgroundColor',0xFF0000);
+				_sound_timer.play();
+			}
+			if(_byoyomi_flag && _time_left <= 5 && _time_left >= 1){
+				_sound_timer.play();
 			}
 			_display();
 		}
