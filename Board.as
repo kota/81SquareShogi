@@ -383,13 +383,18 @@ package  {
             _from = new Point(x,y);
           }
         } else {
+          koma = _position.getKomaAt(_position.translateHumanCoordinates(new Point(x,y)));
           _selected_square.setStyle('backgroundColor',undefined);
-          if(_selected_square == e.currentTarget){
-            _from = null;
-            _selected_square = null;
+          if( koma != null && koma.ownerPlayer == _my_turn){
+          	_from = null;
+          	_selected_square = null;
           } else {
             _to = new Point(x,y);
-            if(_position.canPromote(_from,_to)){
+            if(_position.cantMove(_from,_to)){
+            	_from = null;
+            	_to = null;
+            	_selected_square = null;
+            } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
               _playerMoveCallback(_from,_to);

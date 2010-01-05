@@ -189,7 +189,7 @@
 	      </mx:FormItem>
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
-      <mx:Label text="Message"/>
+      <mx:Label text="ver.2010/01/05"/>
     </mx:VBox>
     <mx:VBox>
 			<mx:HBox>
@@ -199,9 +199,12 @@
 			</mx:HBox>
       <mx:DataGrid id="userListGrid" width="600" change="_userSelected();">
        <mx:columns>
+        <mx:DataGridColumn dataField="rank"/>
         <mx:DataGridColumn dataField="name"/>
+        <mx:DataGridColumn dataField="country"/>
         <mx:DataGridColumn dataField="rating"/>
         <mx:DataGridColumn dataField="status"/>
+        <mx:DataGridColumn dataField="opponent"/>
        </mx:columns>
       </mx:DataGrid>
     </mx:VBox>
