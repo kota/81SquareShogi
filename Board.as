@@ -20,7 +20,7 @@ package  {
     
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
-    public static const BAN_LEFT_MARGIN:int = 190;
+    public static const BAN_LEFT_MARGIN:int = 185;
 		public static const BAN_TOP_MARGIN:int = 10
 
     public static const KOMA_WIDTH:int = 43;
@@ -166,6 +166,8 @@ package  {
       this.height = BAN_HEIGHT;
       
       _board_bg_image.source = board_bg;
+      _board_bg_image.setStyle('borderStyle','solid');
+      _board_bg_image.setStyle('borderColor',0x888888);
       
       _board_back_image.width = BAN_WIDTH;
       _board_back_image.height = BAN_HEIGHT;
@@ -181,7 +183,7 @@ package  {
       _board_coord_image.height = BAN_HEIGHT;
       
       _board_shand_image.source = board_shand;
-      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 10
+      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
       _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
       _board_ghand_image.source = board_ghand;
       _board_ghand_image.x = 10
@@ -204,7 +206,7 @@ package  {
         
         hand.width = KOMADAI_WIDTH;
         hand.height = KOMADAI_HEIGHT;
-        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
+        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 5 : 10;
         hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
         handBoxes[i] = hand;
         addChild(hand);
@@ -237,7 +239,7 @@ package  {
         h_box.setStyle('borderStyle','solid');
         h_box.width = KOMADAI_WIDTH - 10
         h_box.height = KOMADAI_HEIGHT - 30
-        h_box.x = hand.x + 5
+        h_box.x = i == 0 ? hand.x + 10 : hand.x
         h_box.y = i == 0 ? BAN_TOP_MARGIN + 28 : BAN_TOP_MARGIN + hand.height + 55 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
