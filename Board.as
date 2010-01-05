@@ -5,24 +5,22 @@
 */
 
 package  {
+	import flash.events.MouseEvent;
+	import flash.geom.Point;
+	import flash.media.Sound;
+	
+	import mx.containers.Canvas;
+	import mx.controls.Alert;
+	import mx.controls.Image;
+	import mx.controls.Label;
+	import mx.events.CloseEvent;
 	import GameTimer;
-
-  import flash.events.MouseEvent;
-  import flash.geom.Point;
-  import flash.media.Sound;
-  
-  import mx.containers.Canvas;
-  import mx.containers.HBox;
-  import mx.controls.Alert;
-  import mx.controls.Image;
-  import mx.controls.Label;
-  import mx.events.CloseEvent;
 
   public class Board extends Canvas {
     
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
-    public static const BAN_LEFT_MARGIN:int = 190;
+    public static const BAN_LEFT_MARGIN:int = 185;
 		public static const BAN_TOP_MARGIN:int = 10
 
     public static const KOMA_WIDTH:int = 43;
@@ -48,65 +46,6 @@ package  {
     private var board_ghand:Class
     [Embed(source = "/images/bg_tatami.png")]
 	private var board_bg:Class
-
-    [Bindable]
-    [Embed(source = "/images/pieces_kinki/Sou.png")]
-    private var sou:Class
-    [Embed(source = "/images/pieces_kinki/Shi.png")]
-    private var shi:Class
-    [Embed(source = "/images/pieces_kinki/Sryu.png")]
-    private var sryu:Class
-    [Embed(source = "/images/pieces_kinki/Skaku.png")]
-    private var skaku:Class
-    [Embed(source = "/images/pieces_kinki/Suma.png")]
-    private var suma:Class
-    [Embed(source = "/images/pieces_kinki/Skin.png")]
-    private var skin:Class
-    [Embed(source = "/images/pieces_kinki/Sgin.png")]
-    private var sgin:Class
-    [Embed(source = "/images/pieces_kinki/Sngin.png")]
-    private var sngin:Class
-    [Embed(source = "/images/pieces_kinki/Skei.png")]
-    private var skei:Class
-    [Embed(source = "/images/pieces_kinki/Snkei.png")]
-    private var snkei:Class
-    [Embed(source = "/images/pieces_kinki/Skyo.png")]
-    private var skyo:Class
-    [Embed(source = "/images/pieces_kinki/Snkyo.png")]
-    private var snkyo:Class
-    [Embed(source = "/images/pieces_kinki/Sfu.png")]
-    private var sfu:Class
-    [Embed(source = "/images/pieces_kinki/Sto.png")]
-    private var sto:Class
-    
-    [Embed(source = "/images/pieces_kinki/Gou.png")]
-    private var gou:Class
-    [Embed(source = "/images/pieces_kinki/Ghi.png")]
-    private var ghi:Class
-    [Embed(source = "/images/pieces_kinki/Gryu.png")]
-    private var gryu:Class
-    [Embed(source = "/images/pieces_kinki/Gkaku.png")]
-    private var gkaku:Class
-    [Embed(source = "/images/pieces_kinki/Guma.png")]
-    private var guma:Class
-    [Embed(source = "/images/pieces_kinki/Gkin.png")]
-    private var gkin:Class
-    [Embed(source = "/images/pieces_kinki/Ggin.png")]
-    private var ggin:Class
-    [Embed(source = "/images/pieces_kinki/Gngin.png")]
-    private var gngin:Class
-    [Embed(source = "/images/pieces_kinki/Gkei.png")]
-    private var gkei:Class
-    [Embed(source = "/images/pieces_kinki/Gnkei.png")]
-    private var gnkei:Class
-    [Embed(source = "/images/pieces_kinki/Gkyo.png")]
-    private var gkyo:Class
-    [Embed(source = "/images/pieces_kinki/Gnkyo.png")]
-    private var gnkyo:Class
-    [Embed(source = "/images/pieces_kinki/Gfu.png")]
-    private var gfu:Class
-    [Embed(source = "/images/pieces_kinki/Gto.png")]
-    private var gto:Class
     
     [Embed(source = "/images/white.png")]
     private var white:Class
@@ -117,16 +56,15 @@ package  {
     [Embed(source = "/images/black_r.png")]
     private var black_r:Class
 
+	private var pSrc:PieceSource = new PieceSource();
+
 	[Embed(source = "/sound/piece.mp3")]
 	private var sound_piece:Class;
 	private var _sound_piece:Sound = new sound_piece();
 
-    private var koma_images_sente:Array = new Array(sou,shi,skaku,skin,sgin,skei,skyo,sfu,null,sryu,suma,null,sngin,snkei,snkyo,sto);
-
-    private var koma_images_gote:Array = new Array(gou,ghi,gkaku,gkin,ggin,gkei,gkyo,gfu,null,gryu,guma,null,gngin,gnkei,gnkyo,gto);
-
     public var handBoxes:Array;
     private var _name_labels:Array;
+    private var _info_labels:Array;
     private var _turn_symbols:Array;
 		private var _timers:Array;
 
@@ -152,6 +90,7 @@ package  {
 
     private var _selected_square:Square;
     private var _last_square:Square;
+    private var _piece_type:int = 0;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -167,6 +106,8 @@ package  {
       this.height = BAN_HEIGHT;
       
       _board_bg_image.source = board_bg;
+      _board_bg_image.setStyle('borderStyle','solid');
+      _board_bg_image.setStyle('borderColor',0x888888);
       
       _board_back_image.width = BAN_WIDTH;
       _board_back_image.height = BAN_HEIGHT;
@@ -182,7 +123,7 @@ package  {
       _board_coord_image.height = BAN_HEIGHT;
       
       _board_shand_image.source = board_shand;
-      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 10
+      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
       _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
       _board_ghand_image.source = board_ghand;
       _board_ghand_image.x = 10
@@ -197,6 +138,7 @@ package  {
 
       handBoxes = new Array(2);
       _name_labels = new Array(2);
+      _info_labels = new Array(2);
       _turn_symbols = new Array(2);
       _timers = new Array(2);
       for(i=0;i<2;i++){
@@ -204,24 +146,44 @@ package  {
         
         hand.width = KOMADAI_WIDTH;
         hand.height = KOMADAI_HEIGHT;
-        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
+        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 5 : 10;
         hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
         handBoxes[i] = hand;
         addChild(hand);
+        
+ 		var timer:GameTimer = new GameTimer();
+		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
+		timer.x = hand.x + KOMADAI_WIDTH/2 - 40
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
+		_timers[i] = timer;
+		addChild(timer)
 
-        var name_label:Label = new Label();
-        _name_labels[i] = name_label;
         var turn_symbol:Image = new Image();
+        turn_symbol.x = 2
+        turn_symbol.y = i == 0 ? 122 : 2
         _turn_symbols[i] = turn_symbol;
-				var timer:GameTimer = new GameTimer();
-				timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
-				_timers[i] = timer;
-        var h_box:HBox = new HBox();
-        h_box.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 10 : 10;
-        h_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height - 25 : BAN_TOP_MARGIN + hand.height + 5 ;
+        var name_label:Label = new Label();
+        name_label.setStyle('fontSize',12)
+        name_label.setStyle('fontWeight','bold')
+        name_label.x = turn_symbol.x + 20
+        name_label.y = turn_symbol.y + 5
+        _name_labels[i] = name_label;
+        var info_label:Label = new Label();
+        info_label.setStyle('fontSize',11)
+        info_label.x = name_label.x
+        info_label.y = name_label.y + 20
+        _info_labels[i] = info_label;       
+
+        var h_box:Canvas = new Canvas();
+        h_box.setStyle('backgroundColor',0xddee88);
+        h_box.setStyle('borderStyle','solid');
+        h_box.width = KOMADAI_WIDTH - 10
+        h_box.height = KOMADAI_HEIGHT - 30
+        h_box.x = i == 0 ? hand.x + 10 : hand.x
+        h_box.y = i == 0 ? BAN_TOP_MARGIN + 28 : BAN_TOP_MARGIN + hand.height + 55 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
-				h_box.addChild(timer);
+        h_box.addChild(info_label);
         addChild(h_box);
       }
     }
@@ -264,7 +226,7 @@ package  {
         for(var x:int=0;x<9;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
-            var images:Array = koma.ownerPlayer == _my_turn ? koma_images_sente : koma_images_gote;
+            var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[_piece_type] : pSrc.koma_images_gote[_piece_type];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
             _cells[y][x].source = images[image_index];
           } else {
@@ -281,7 +243,7 @@ package  {
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
               var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
               if (i==_my_turn) handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-              images = i == _my_turn ? koma_images_sente : koma_images_gote;
+              images = i == _my_turn ? pSrc.koma_images_sente[_piece_type] : pSrc.koma_images_gote[_piece_type];
               handPiece.source = images[j];
               handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
               handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
@@ -324,7 +286,9 @@ package  {
       _position = new Kyokumen();
       setPosition(_position);
       _name_labels[0].text = player_names[_my_turn]; 
-      _name_labels[1].text = player_names[1-_my_turn]; 
+      _name_labels[1].text = player_names[1-_my_turn];
+      _info_labels[0].text = "R:1000, (Country)"
+      _info_labels[1].text = "R:1000, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);
@@ -348,6 +312,10 @@ package  {
     public function get position():Kyokumen{
       return _position;
     }
+    public function setPieceType(i:int):void{
+    	_piece_type = i;
+    	setPosition(_position);
+    }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
       if(_game_started && _position.turn == _my_turn){
@@ -361,13 +329,18 @@ package  {
             _from = new Point(x,y);
           }
         } else {
+          koma = _position.getKomaAt(_position.translateHumanCoordinates(new Point(x,y)));
           _selected_square.setStyle('backgroundColor',undefined);
-          if(_selected_square == e.currentTarget){
-            _from = null;
-            _selected_square = null;
+          if( koma != null && koma.ownerPlayer == _my_turn){
+          	_from = null;
+          	_selected_square = null;
           } else {
             _to = new Point(x,y);
-            if(_position.canPromote(_from,_to)){
+            if(_position.cantMove(_from,_to)){
+            	_from = null;
+            	_to = null;
+            	_selected_square = null;
+            } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
               _playerMoveCallback(_from,_to);

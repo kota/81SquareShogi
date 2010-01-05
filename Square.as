@@ -14,7 +14,7 @@ package {
       super();
       this.width = KOMA_WIDTH;
       this.height = KOMA_HEIGHT;
-      this.setStyle('backgroundAlpha',0.5);
+      this.setStyle('backgroundAlpha',0.3);
       _img = new Image();
       _img.width = KOMA_WIDTH;
       _img.height = KOMA_HEIGHT;

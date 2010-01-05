@@ -5,6 +5,7 @@
 	  <![CDATA[
 		import flash.display.*;
     import mx.events.FlexEvent;
+      import flash.media.Sound;
 		import mx.controls.*;
 		import CsaShogiClient;
     import Board;
@@ -13,7 +14,13 @@
     [Bindable]
     private var _user_list:Array;
 		private var _login_name:String;
-
+		[Embed(source = "/sound/win.mp3")]
+		private var sound_win:Class;
+		private var _sound_win:Sound = new sound_win();
+		[Embed(source = "/sound/lose.mp3")]
+		private var sound_lose:Class;
+		private var _sound_lose:Sound = new sound_lose();
+		
 		private function initApp():void
 		{
 		  trace("application initialized..");
@@ -74,8 +81,10 @@
 			}
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.");
+        _sound_lose.play();
       } else {
         _writeUserMessage("You Win.");
+        _sound_win.play();
       }
 			closeButton.enabled = true;
       board.endGame();
@@ -180,31 +189,79 @@
 	      </mx:FormItem>
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
-      <mx:Label text="Message"/>
+      <mx:Label text="ver.2010/01/05"/>
     </mx:VBox>
     <mx:VBox>
+    	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
-        <mx:Button id="startButton" label="New Game" click="_waitForGame();"/>
-			  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
-			  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
+				  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
+				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
 			</mx:HBox>
-      <mx:DataGrid id="userListGrid" width="600" change="_userSelected();">
-       <mx:columns>
-        <mx:DataGridColumn dataField="name"/>
-        <mx:DataGridColumn dataField="rating"/>
-        <mx:DataGridColumn dataField="status"/>
-       </mx:columns>
-      </mx:DataGrid>
+	      <mx:DataGrid id="userListGrid" width="580" height="400" change="_userSelected();">
+	       <mx:columns>
+	        <mx:DataGridColumn dataField="rank" width="50"/>
+	        <mx:DataGridColumn dataField="name" width="120"/>
+	        <mx:DataGridColumn dataField="country" width="110"/>
+	        <mx:DataGridColumn dataField="rating" width="60"/>
+	        <mx:DataGridColumn dataField="status" width="120"/>
+	        <mx:DataGridColumn dataField="opponent" width="120"/>
+	       </mx:columns>
+	      </mx:DataGrid>
+      </mx:Panel>
     </mx:VBox>
-    <mx:VBox>
-      <eightyOneSquare:Board id="board" width="800" height="474"/> 
+    
+    <mx:HBox>
+      <mx:VBox>
+      <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-      <mx:Button id="resignButton" label="Resign" y="400" click="_resign();"/>
-      <mx:Button id="closeButton" label="Close" y="400" click="_closeGame();" enabled="false"/>
+      	<mx:Panel id="messagePanel" title="Message Panel" width="405" height="155">
+	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="385" height="115"/>      		
+      	</mx:Panel>
+      	<mx:Panel id="controlPanel" title="Control Panel" width="370" height="155" verticalAlign="middle" paddingLeft="8">
+      	  <mx:HBox>
+       	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
+       	  	<mx:Button id="optionButton" label="Options" enabled="false"/>
+          	<mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>     	  	
+      	  </mx:HBox>
+      	  <mx:HBox>
+      	  	<mx:Label text="Piece Type"/>
+				<mx:RadioButtonGroup id="RadioGroup1" change="board.setPieceType(int(RadioGroup1.selectedValue));"/>
+				<mx:RadioButton label="Ryouko" groupName="RadioGroup1" value="0" selected="true"/>
+				<mx:RadioButton label="Kinki" groupName="RadioGroup1" value="1"/>
+				<mx:RadioButton label="Hidetchi" groupName="RadioGroup1" value="2"/>
+      	  </mx:HBox>
+      	  <mx:HBox>
+       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false"/>
+          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false"/>  	
+       	  	<mx:Button id="forwardOneButton" label=">" enabled="false"/>
+          	<mx:Button id="forwardAllButton" label=">|" enabled="false"/> 
+      	  </mx:HBox>
+      	  <mx:HBox>
+	       	  <mx:Label text="Chat"/>
+		      <mx:TextInput id="chatMessage" width="290"/>     	  	
+      	  </mx:HBox>
+      	</mx:Panel>
       </mx:HBox>
-      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="500" height="200"/>
-      <mx:TextInput id="chatMessage" width="500"/>
-    </mx:VBox>
+      </mx:VBox>
+        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="635">
+          <mx:Label text="Watchers" fontWeight="bold"/>
+	      <mx:DataGrid id="watcherListGrid" width="160" height="220">
+	       <mx:columns>
+	        <mx:DataGridColumn dataField="name" width="57"/>
+	        <mx:DataGridColumn dataField="country" width="56"/>
+	        <mx:DataGridColumn dataField="rating"/>
+	       </mx:columns>
+	      </mx:DataGrid>
+	      <mx:Label text="Kifu" fontWeight="bold"/>
+	      <mx:DataGrid id="kifuDataGrid" width="160" height="300">
+	       <mx:columns>
+	        <mx:DataGridColumn dataField="No." width="45"/>
+	        <mx:DataGridColumn dataField="move"/>
+	       </mx:columns>
+	      </mx:DataGrid>
+      	</mx:Panel>
+    </mx:HBox>
   </mx:ViewStack>
 
 </mx:Application>

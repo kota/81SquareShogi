@@ -6,7 +6,7 @@
 
 package  {
 	import flash.display.PixelSnapping;
-	import flash.geom.Point;
+ 	import flash.geom.Point;
 	import flash.utils.ByteArray;
 	import mx.controls.Alert;
 	import Board;
@@ -151,6 +151,54 @@ package  {
 				}
 			}
 			return false;
+		}
+		
+		public function cantMove(from:Point,to:Point):Boolean {
+			if(from.x > HAND) return false;
+			from = translateHumanCoordinates(from);
+			to = translateHumanCoordinates(to);
+			var koma:Koma; 
+	        koma = getKomaAt(from);
+	        var dx:Number = to.x - from.x;
+	        var dy:Number = koma.ownerPlayer == SENTE ? to.y - from.y : from.y - to.y;
+	        switch (koma.type){
+	        	case Koma.OU:
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        		break;
+	        	case Koma.KI:
+	        	case Koma.GI+Koma.PROMOTE:
+	        	case Koma.KE+Koma.PROMOTE:
+	        	case Koma.KY+Koma.PROMOTE:
+	        	case Koma.FU+Koma.PROMOTE:
+	        		if (Math.abs(dx) == 1 && dy == 1) return true;
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        		break;
+	        	case Koma.GI:
+	        		if (Math.abs(dx) == 1 && dy == 0) return true;
+	        		if (dx == 0 && dy == 1) return true;
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+					break;
+				case Koma.HI+Koma.PROMOTE:
+					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        	case Koma.HI:
+	        		if (dx == 0 || dy == 0) return false;
+	        		break;
+				case Koma.KA + Koma.PROMOTE:
+					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        	case Koma.KA:
+	        		if (Math.abs(dx) == Math.abs(dy)) return false;
+	        		break;
+	        	case Koma.FU:
+	        		if (dx == 0 && dy == -1) return false;
+	        		break;
+	        	case Koma.KY:
+	        		if (dx == 0 && dy < 0) return false;
+	        		break;
+	        	case Koma.KE:
+	        		if (Math.abs(dx) == 1 && dy == -2) return false;
+				default:
+	        }
+	        return true;
 		}
 
     public function translateHumanCoordinates(p:Point):Point{

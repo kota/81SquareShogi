@@ -32,8 +32,7 @@ package{
 		//private var _host:String = '127.0.0.1';
 		private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
-		private var _port:int = 2195;
-		//private var _port:int = 4000;
+		private var _port:int = 4081;
 
     private var _current_state:int;
     private var _my_turn:int;
@@ -61,6 +60,8 @@ package{
 			_socket.removeEventListener(Event.CONNECT,_handleConnect);
 			_socket.removeEventListener(Event.CLOSE,_handleClose);
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
+		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
+		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 			trace("socket closed");
 		}
 
@@ -120,6 +121,8 @@ package{
 			_socket.removeEventListener(Event.CONNECT,_handleConnect);
 			_socket.removeEventListener(Event.CLOSE,_handleClose);
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
+		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
+		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 		}
 
 		private function _handleSocketData(e:ProgressEvent):void{
