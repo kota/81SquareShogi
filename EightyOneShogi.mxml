@@ -215,14 +215,21 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-      	<mx:Panel id="messagePanel" title="Message Panel" width="415" height="155">
-	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="395" height="115"/>      		
+      	<mx:Panel id="messagePanel" title="Message Panel" width="405" height="155">
+	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="385" height="115"/>      		
       	</mx:Panel>
-      	<mx:Panel id="controlPanel" title="Control Panel" width="360" height="155" verticalAlign="middle" paddingLeft="8">
+      	<mx:Panel id="controlPanel" title="Control Panel" width="370" height="155" verticalAlign="middle" paddingLeft="8">
       	  <mx:HBox>
        	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
        	  	<mx:Button id="optionButton" label="Options" enabled="false"/>
           	<mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>     	  	
+      	  </mx:HBox>
+      	  <mx:HBox>
+      	  	<mx:Label text="Piece Type"/>
+				<mx:RadioButtonGroup id="RadioGroup1" change="board.setPieceType(int(RadioGroup1.selectedValue));"/>
+				<mx:RadioButton label="Ryouko" groupName="RadioGroup1" value="0" selected="true"/>
+				<mx:RadioButton label="Kinki" groupName="RadioGroup1" value="1"/>
+				<mx:RadioButton label="Hidetchi" groupName="RadioGroup1" value="2"/>
       	  </mx:HBox>
       	  <mx:HBox>
        	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false"/>
@@ -230,8 +237,10 @@
        	  	<mx:Button id="forwardOneButton" label=">" enabled="false"/>
           	<mx:Button id="forwardAllButton" label=">|" enabled="false"/> 
       	  </mx:HBox>
-      	  <mx:Label text="Chat"/>
-	      <mx:TextInput id="chatMessage" width="320"/>
+      	  <mx:HBox>
+	       	  <mx:Label text="Chat"/>
+		      <mx:TextInput id="chatMessage" width="290"/>     	  	
+      	  </mx:HBox>
       	</mx:Panel>
       </mx:HBox>
       </mx:VBox>
