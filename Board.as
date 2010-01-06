@@ -14,7 +14,6 @@ package  {
 	import mx.controls.Image;
 	import mx.controls.Label;
 	import mx.events.CloseEvent;
-	import GameTimer;
 
   public class Board extends Canvas {
     
@@ -81,6 +80,9 @@ package  {
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
 
+    [Bindable]
+    public var kifu_list:Array;
+
     private var _from:Point;
     private var _to:Point;
     private var _position:Kyokumen;
@@ -135,7 +137,8 @@ package  {
       _board_back_image.addChild(_board_coord_image);
       addChild(_board_shand_image);
       addChild(_board_ghand_image);
-
+	
+		kifu_list = new Array();
       handBoxes = new Array(2);
       _name_labels = new Array(2);
       _info_labels = new Array(2);
@@ -218,6 +221,10 @@ package  {
           addChild(square);
         }
       }
+      var kifuMove:Object = new Object();
+      kifuMove.num = "0";
+      kifuMove.move = "Start";
+	  kifu_list.push(kifuMove);
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -269,6 +276,11 @@ package  {
       _last_square = _cells[mv.to.y][mv.to.x]
       _last_square.setStyle('backgroundColor','0xCC3333');      
       _sound_piece.play();
+            
+      var kifuMove:Object = new Object();
+      kifuMove.num = kifu_list.length;
+      kifuMove.move = move;
+	  kifu_list.push(kifuMove);
     }
 
     public function setMoveCallback(callback:Function):void{
