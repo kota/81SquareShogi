@@ -5,7 +5,7 @@
 	  <![CDATA[
 		import flash.display.*;
     import mx.events.FlexEvent;
-      import flash.media.Sound;
+    import flash.media.Sound;
 		import mx.controls.*;
 		import CsaShogiClient;
     import Board;
@@ -28,6 +28,8 @@
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
+      loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
+      password.addEventListener(FlexEvent.ENTER,_handleLogin);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
 		}
@@ -43,6 +45,10 @@
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.connect();
     } 
+
+    private function _handleLogin(e:Event):void{
+      _connectAndLogin();
+    }
     
     private function _handleConnected(e:Event):void{
       _client.login(loginname.text, password.text);
