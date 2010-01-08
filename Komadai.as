@@ -12,9 +12,7 @@ package  {
 		private var koma_list:Array = new Array(8);
 		
 		public function Komadai() {
-			for (var i:int = 0; i < 8; i++ ) {
-				koma_list[i] = 0; 
-			}
+			clearKoma();
 		}
 		
 		public function addKoma(koma:Koma):void {
@@ -27,6 +25,12 @@ package  {
 		
 		public function getNumOfKoma(koma_type:int):int {
 			return koma_list[koma_type];
+		}
+		
+		public function clearKoma():void{
+			for (var i:int = 0; i < 8; i++ ) {
+				koma_list[i]=0;
+			}
 		}
 	}
 }

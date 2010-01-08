@@ -397,6 +397,9 @@ package  {
 		  	_last_square.setStyle('backgroundColor',undefined);
 		  	_last_square = null;
 		  }
+		  _position.turn = Kyokumen.SENTE;
+		  _position.getKomadai(0).clearKoma();
+		  _position.getKomadai(1).clearKoma();
 		  _position.loadFromString(_position.initialPositionStr());
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {

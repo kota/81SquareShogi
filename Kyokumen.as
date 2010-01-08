@@ -83,6 +83,10 @@ package  {
 		public function get turn():int {
 			return this._turn;
 		}
+		
+		public function set turn(v:int):void {
+			this._turn = v;
+		}
 
 		public function getKomadai(sengo:int):Komadai{
 			if(sengo > 1){
