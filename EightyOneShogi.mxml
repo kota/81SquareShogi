@@ -78,7 +78,12 @@
         _writeUserMessage("You are Gote(White).");
       }
       board.startGame(_client.myTurn,_client.playerNames,60,30);
-			closeButton.enabled = false;
+	  closeButton.enabled = false;
+	  rewindAllButton.enabled = false;
+	  rewindOneButton.enabled = false;
+	  forwardOneButton.enabled = false;
+	  forwardAllButton.enabled = false;
+	  kifuDataGrid.selectable = false;
 	  kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
     }
@@ -95,7 +100,13 @@
         _writeUserMessage("You Win.");
         _sound_win.play();
       }
-			closeButton.enabled = true;
+	  closeButton.enabled = true;
+	  rewindAllButton.enabled = true;
+	  rewindOneButton.enabled = true;
+	  forwardOneButton.enabled = true;
+	  forwardAllButton.enabled = true;
+	  kifuDataGrid.selectable = true;
+	  kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
     }
 
@@ -168,7 +179,7 @@
 			}
 		}
 
-    private function _playerMove(from:Point,to:Point,promote:Boolean=false):void{
+    private function _playerMove(from:Point,to:Point,promote:Boolean):void{
       var mv:Movement = board.position.generateMovementFromCoordinates(from,to,promote);
       _client.move(mv.toCSA());
     }
@@ -180,6 +191,31 @@
     private function _handleSendChat(e:FlexEvent):void{
       _client.chat(chatMessage.text);
       chatMessage.text = "";
+    }
+    
+    private function replay():void{
+    	board.replayMoves(int(kifuDataGrid.selectedIndex));
+    }
+    
+    private function replayByButton(i:int):void{
+    	switch (i) {
+    		case -2:
+    			kifuDataGrid.selectedIndex = 0; replay();
+    			break;
+    		case -1:
+    			if (kifuDataGrid.selectedIndex > 0) {
+	    			kifuDataGrid.selectedIndex--; replay();
+	    		}
+	    		break;
+	    	case 1:
+	    		if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
+	    			kifuDataGrid.selectedIndex++; replay();
+	    		}
+	    		break;
+	    	case 2:
+	    		kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
+    	}
+    	
     }
 
 	  ]]>
@@ -241,10 +277,10 @@
 				<mx:RadioButton label="Hidetchi" groupName="RadioGroup1" value="2"/>
       	  </mx:HBox>
       	  <mx:HBox>
-       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false"/>
-          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false"/>  	
-       	  	<mx:Button id="forwardOneButton" label=">" enabled="false"/>
-          	<mx:Button id="forwardAllButton" label=">|" enabled="false"/> 
+       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
+          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>  	
+       	  	<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
+          	<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
       	  </mx:HBox>
       	  <mx:HBox>
 	       	  <mx:Label text="Chat"/>
@@ -263,7 +299,7 @@
 	       </mx:columns>
 	      </mx:DataGrid>
 	      <mx:Label text="Kifu" fontWeight="bold"/>
-	      <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287">
+	      <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287" change="replay();" selectable="false">
 	       <mx:columns>
 	        <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
 	        <mx:DataGridColumn dataField="move"/>

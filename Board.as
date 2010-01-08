@@ -138,7 +138,6 @@ package  {
       addChild(_board_shand_image);
       addChild(_board_ghand_image);
 	
-		kifu_list = new Array();
       handBoxes = new Array(2);
       _name_labels = new Array(2);
       _info_labels = new Array(2);
@@ -221,6 +220,7 @@ package  {
           addChild(square);
         }
       }
+      kifu_list = new Array();
       var kifuMove:Object = new Object();
       kifuMove.num = "0";
       kifuMove.move = "Start";
@@ -270,18 +270,20 @@ package  {
 			_timers[running_timer].suspend();
 			_timers[running_timer].accumulateTime(time);
 			_timers[1-running_timer].resume();
+
       _position.move(mv);
       if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
       setPosition(_position);
       _last_square = _cells[mv.to.y][mv.to.x]
       _last_square.setStyle('backgroundColor','0xCC3333');      
       _sound_piece.play();
-            
+      
       var kifuMove:Object = new Object();
       kifuMove.num = kifu_list.length;
-      kifuMove.move = move;
+      kifuMove.move = _position.generateWesternNotationFromMovement(mv);
+      kifuMove.moveStr = move;
 	  kifu_list.push(kifuMove);
-    }
+	    }
 
     public function setMoveCallback(callback:Function):void{
       _playerMoveCallback = callback;
@@ -355,7 +357,7 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-              _playerMoveCallback(_from,_to);
+              _playerMoveCallback(_from,_to,false);
               _from = null;
               _to = null;
             }
@@ -389,6 +391,23 @@ package  {
 		private function _checkTimeout(e:Event):void{
 			_timeoutCallback();
 		}
+		
+	public function replayMoves(n:int):void{
+		  if (_last_square != null){
+		  	_last_square.setStyle('backgroundColor',undefined);
+		  	_last_square = null;
+		  }
+		  _position.loadFromString(_position.initialPositionStr());
+		  if (n >= 1){
+			  for (var i:int = 1; i <= n; i++ ) {
+			      var mv:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
+			      _position.move(mv);		  	
+			  }
+		      _last_square = _cells[mv.to.y][mv.to.x]
+		      _last_square.setStyle('backgroundColor','0xCC3333');
+		  }
+      	  setPosition(_position);
+	}
 
   }
 }

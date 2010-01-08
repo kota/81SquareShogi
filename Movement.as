@@ -6,7 +6,6 @@
 
 package  {
 	import flash.geom.Point;
-	import Koma;
 		
 	public class Movement {
 		
@@ -42,7 +41,11 @@ package  {
       var to:Point = toHumanCoordinates(_to);
       var buff:String = _turn == 0 ? "+" : "-"
       buff += from.x.toString() + from.y.toString() + to.x.toString() + to.y.toString();
-      buff += Kyokumen.koma_names[_koma.type];
+      if (_promote) {
+      	buff += Kyokumen.koma_names[_koma.type + Koma.PROMOTE];
+      } else {
+      	buff += Kyokumen.koma_names[_koma.type];
+      }
       return buff;
     }
 		
@@ -58,6 +61,9 @@ package  {
 		}
 		public function get promote():Boolean {
 			return this._promote;
+		}
+		public function get capture():Boolean{
+			return this._capture;
 		}
 		public function set promote(v:Boolean):void {
 			this._promote = v;
