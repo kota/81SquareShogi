@@ -20,7 +20,7 @@ package  {
     private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
     private static const koma_japanese_names:Array = new Array('玉','飛','角','金','銀','桂','香','歩','','龍','馬','','成銀','成桂','成香','と');
     private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
-    private static const rank_japanese_names:Array = new Array('一','ニ','三','四','五','六','七','八','九');
+    private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
     private static const file_japanese_names:Array = new Array('１','２','３','４','５','６','７','８','９');
 
     public function initialPositionStr():String{
