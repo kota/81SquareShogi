@@ -26,6 +26,9 @@
 		[Embed(source = "/sound/chat.mp3")]
 		private var sound_chat:Class;
 		private var _sound_chat:Sound = new sound_chat();
+		private var optionWindow:OptionDialog;
+		private var _end_sound_play:Boolean = true;
+		private var _chat_sound_play:Boolean = true;
 		
 		private function initApp():void
 		{
@@ -69,7 +72,7 @@
 
     private function _handleChat(e:ServerMessageEvent):void{
 			_writeUserMessage(e.message.substr(8));
-			_sound_chat.play();
+			if (_chat_sound_play) _sound_chat.play();
     }
 
     private function _handleMove(e:ServerMessageEvent):void{
@@ -108,10 +111,10 @@
 	  }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
-        _sound_lose.play();
+        if (_end_sound_play) _sound_lose.play();
       } else {
         _writeUserMessage("You Win.\n");
-        _sound_win.play();
+        if (_end_sound_play) _sound_win.play();
       }
 	  closeButton.enabled = true;
 	  resignButton.enabled = false;
@@ -162,6 +165,24 @@
       //_writeUserMessage("Waiting for other player to join...");
       _client.waitForGame();
 			_refresh();
+    }
+    
+    private function _showOptions():void{
+    	optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
+    	PopUpManager.centerPopUp(optionWindow);
+    	optionWindow.title = "Options";
+    	optionWindow.RadioGroup1.selectedValue = board._piece_type;
+      	optionWindow.pieceSoundCheckBox.selected = board._piece_sound_play;
+    	optionWindow.gameEndSoundCheckBox.selected = _end_sound_play;
+    	optionWindow.chatSoundCheckBox.selected = _chat_sound_play;
+    	optionWindow.OkButton.addEventListener("click",_handleOption);
+    }
+    
+    private function _handleOption(e:Event):void{
+    	board.setPieceType(int(optionWindow.RadioGroup1.selectedValue));
+    	board._piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
+    	_end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
+    	_chat_sound_play = optionWindow.chatSoundCheckBox.selected;
     }
     
     private function _challengeForm():void{
@@ -269,8 +290,8 @@
 	      </mx:FormItem>
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
-      <mx:Label text="Chief Programmer: Kota"/>
-      <mx:Label text="ver.2010/01/08"/>
+      <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
+      <mx:Label text="ver.2010/01/09"/>
     </mx:VBox>
     
     <mx:VBox>
@@ -279,6 +300,7 @@
 	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
 				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+				  <mx:Button id="optionButton1" label="Options" click="_showOptions();"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
 	       <mx:columns>
@@ -290,7 +312,8 @@
 	        <mx:DataGridColumn dataField="opponent" width="120"/>
 	       </mx:columns>
 	      </mx:DataGrid>
-	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"/>   
+	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"
+	      	      	 text="Note: All chat message (even in a game room) will be seen from all users."/>   
 	      		  <mx:TextInput id="chatMessage2" width="290"/>    
       </mx:Panel>
     </mx:VBox>
@@ -305,15 +328,8 @@
       	<mx:Panel id="controlPanel" title="Control Panel" width="370" height="155" verticalAlign="middle" paddingLeft="8">
       	  <mx:HBox>
        	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
-       	  	<mx:Button id="optionButton" label="Options" enabled="false"/>
+       	  	<mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
           	<mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>     	  	
-      	  </mx:HBox>
-      	  <mx:HBox>
-      	  	<mx:Label text="Piece Type"/>
-				<mx:RadioButtonGroup id="RadioGroup1" change="board.setPieceType(int(RadioGroup1.selectedValue));"/>
-				<mx:RadioButton label="Ryouko" groupName="RadioGroup1" value="0" selected="true"/>
-				<mx:RadioButton label="Kinki" groupName="RadioGroup1" value="1"/>
-				<mx:RadioButton label="Hidetchi" groupName="RadioGroup1" value="2"/>
       	  </mx:HBox>
       	  <mx:HBox>
        	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>

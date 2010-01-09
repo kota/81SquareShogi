@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="370" height="360">
+	<mx:Script>
+        <![CDATA[
+        	import mx.controls.*;
+            import mx.managers.PopUpManager;
+            
+            private function clickOK():void {
+                PopUpManager.removePopUp(this);
+            }
+        ]]>
+    </mx:Script>
+    <mx:Label text="Sound" fontWeight="bold"/>
+    <mx:VBox paddingLeft="30">
+		<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
+		<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
+		<mx:CheckBox label="incoming chat sound" id="chatSoundCheckBox"/>
+    </mx:VBox>
+    <mx:Label text="Piece Type" fontWeight="bold"/>
+	<mx:RadioButtonGroup id="RadioGroup1"/>
+	<mx:HBox paddingLeft="30">
+		<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup1" value="0"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/sou.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/suma.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/sfu.png')" width="31" height="36"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="30">
+		<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup1"  value="1"/>
+		<mx:Image source="@Embed('images/pieces_kinki/sou.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_kinki/suma.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_kinki/sfu.png')" width="31" height="36"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="30">
+		<mx:RadioButton label="Hidetchi's internationalized" groupName="RadioGroup1"  value="2"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/sou.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/suma.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/sfu.png')" width="34" height="40"/>
+	</mx:HBox>
+    <mx:HBox paddingTop="20"> 
+        <mx:Button id="OkButton" click="clickOK();" label="OK"/> 
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+    </mx:HBox> 
+</mx:TitleWindow>

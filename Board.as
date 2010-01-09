@@ -93,7 +93,8 @@ package  {
 
     private var _selected_square:Square;
     private var _last_square:Square;
-    private var _piece_type:int = 0;
+    public var _piece_type:int = 0;
+    public var _piece_sound_play:Boolean = true;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -277,7 +278,7 @@ package  {
       setPosition(_position);
       _last_square = _cells[mv.to.y][mv.to.x]
       _last_square.setStyle('backgroundColor','0xCC3333');      
-      _sound_piece.play();
+      if (_piece_sound_play) _sound_piece.play();
       
       var kifuMove:Object = new Object();
       kifuMove.num = kifu_list.length;
