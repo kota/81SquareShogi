@@ -27,7 +27,7 @@ package {
 		private var _sound_timer:Sound = new sound_timer();
 
 		public function GameTimer() {
-			this.width = 75;
+			this.width = 85;
 			this.setStyle('borderStyle','solid');
 			this.setStyle('borderColor',0x000000);
 			this.setStyle('textAlign','center');

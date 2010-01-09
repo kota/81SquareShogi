@@ -41,6 +41,9 @@
       _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
+      _client.addEventListener(CsaShogiClient.START_WATCH,_handleStartWatch);
+      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
+      _client.addEventListener(CsaShogiClient.LIST,_handleList);
       _client.connect();
     } 
     
@@ -69,7 +72,7 @@
       } else {
         _writeUserMessage("You are Gote(White).");
       }
-      board.startGame(_client.myTurn,_client.playerNames,60,30);
+      board.startGame(_client.myTurn,_client.playerNames,1500,30);
 			closeButton.enabled = false;
       mainViewStack.selectedIndex = 2;
     }
@@ -109,6 +112,14 @@
         }
       }
       userListGrid.dataProvider = user_list;
+    }
+
+    private function _handleStartWatch(e:ServerMessageEvent):void{
+      board.startWatch(e.message);
+    }
+
+    private function _handleMonitor(e:ServerMessageEvent):void{
+      board.monitor(e.message);
     }
 
     private function _writeUserMessage(message:String):void{
@@ -168,6 +179,20 @@
 			_client.checkTimeout();
 		}
 
+    private function _handleList(e:ServerMessageEvent):void{
+      var first_line:String = e.message.split("\n")[0];
+      var match:Array = first_line.match(/##\[LIST\] (.*)/);
+      var game_name:String = match[1];
+      trace("FIRST GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
+      _client.monitorOn(game_name);
+    }
+
+    private function _watch():void{
+      _client.list();
+      //board.startWatch();
+      mainViewStack.selectedIndex = 2;
+    }
+
     private function _handleSendChat(e:FlexEvent):void{
       _client.chat(chatMessage.text);
       chatMessage.text = "";
@@ -197,6 +222,7 @@
 	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
 				  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+				  <mx:Button id="monitorButton" label="Watch" click="_watch();"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="400" change="_userSelected();">
 	       <mx:columns>

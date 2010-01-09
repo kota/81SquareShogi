@@ -61,8 +61,8 @@ package  {
 		}
 
     public function loadFromString(position_str:String):void{
+      trace("POSITION TO BE LOADED:\n" + position_str);
       var lines:Array = position_str.split("\n");
-      var id:int = 0;
       for(var y:int=0;y<9;y++){
         var line:String = lines[y].substr(2);
         for(var x:int=0;x<9;x++){
@@ -70,7 +70,6 @@ package  {
           if(koma_str != " * "){
             var owner:int = koma_str.charAt(0) == '+' ? SENTE : GOTE 
             var koma:Koma = new Koma(koma_names.indexOf(koma_str.slice(1,3)),x,y,owner);
-            id++;
             _ban[x][y] = koma;
           } else {
             _ban[x][y] = null;

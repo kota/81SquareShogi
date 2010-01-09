@@ -94,7 +94,8 @@ package  {
 
 		private var _time_sente:int;
 		private var _time_gote:int;
-
+    
+    //TODO Define the view with mxml.
     public function Board() {
       super();
       _cells = new Array(9);
@@ -297,6 +298,35 @@ package  {
       _game_started = true;
     }
 
+    public function startWatch(game_info:String):void{
+      trace("GAME INFO: " + game_info);
+      _my_turn = Kyokumen.SENTE;
+      reset();
+      _position = new Kyokumen();
+      var kyokumen_str:String = _parsePosition(game_info);
+      _position.loadFromString(kyokumen_str);
+      setPosition(_position);
+      var match:Array = game_info.match(/^##\[MONITOR\]\[.*\] (.*)$/);
+      trace("MATCH 0:"+ match.toString());
+      /*
+      _name_labels[0] = game_info.match(/^##\[MONITOR\]\[.*\] Name\+\:(.*)$/)[1];
+      _name_labels[1] = game_info.match(/^##\[MONITOR\]\[.*\] Name\-\:(.*)$/)[1];
+      */
+      _info_labels[0].text = "R:1000, (Country)"
+      _info_labels[1].text = "R:1000, (Country)"
+      _turn_symbols[0].source = black;
+      _turn_symbols[1].source = white_r;
+      /*
+      var total_time:String = game_info.match(/Remaining_Time\+\:(.*)/)[1];
+      var byoyomi:String = game_info.match(/Byoyomi\+\:(.*)/)[1];
+      _timers[0].reset(parseInt(total_time),parseInt(byoyomi));
+      total_time = game_info.match(/Remaining_Time\-\:(.*)/)[1];
+      _timers[1].reset(parseInt(total_time),parseInt(byoyomi));
+      var to_move:String = game_info.match(/To_Move\+\:(.*)/)[1];
+      _timers[to_move == '+' ? 0 : 1].start();
+      */
+    }
+
     public function endGame():void{
       trace("game end");
 			_timers[0].stop();
@@ -315,6 +345,26 @@ package  {
     public function setPieceType(i:int):void{
     	_piece_type = i;
     	setPosition(_position);
+    }
+
+    public function monitor(str:String):void{
+      var kyokumen_str:String = _parsePosition(str);
+      if(kyokumen_str != ""){
+        _position.loadFromString(kyokumen_str);
+        setPosition(_position);
+      }
+    }
+
+    private function _parsePosition(game_info:String):String{
+      var lines:Array = game_info.split("\n");
+      var kyokumen_str:String = "";
+      for each (var line:String in lines ){
+        var match:Array = line.match(/##\[MONITOR\]\[.*\] (P[0-9+-].*)/);
+        if(match != null){
+          kyokumen_str += match[1] + "\n";
+        }
+      }
+      return kyokumen_str;
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {

@@ -18,6 +18,9 @@ package{
     public static var MOVE:String = 'move';
     public static var CHAT:String = 'chat';
     public static var WHO:String = 'who';
+    public static var MONITOR:String = 'monitor';
+    public static var START_WATCH:String = 'start_watch';
+    public static var LIST:String = 'list';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -27,12 +30,15 @@ package{
     public static var STATE_FINISHED:int      = 5;
     public static var STATE_NOT_CONNECTED:int = 6;
 
+    public static var STATE_WATCH:int         = 7;
+
 		private var _socket:Socket;
 		
-		//private var _host:String = '127.0.0.1';
-		private var _host:String = '81square-shogi.homeip.net';
+		private var _host:String = '127.0.0.1';
+		//private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
-		private var _port:int = 4081;
+		//private var _port:int = 4081;
+		private var _port:int = 4000;
 
     private var _current_state:int;
     private var _my_turn:int;
@@ -78,12 +84,12 @@ package{
 
     public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-60-30 *");
+      send("%%GAME " + _login_name + "-1500-30 *");
     }
 
 		public function challenge(user_name:String):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-60-30 *");
+      send("%%GAME " + user_name + "-1500-30 *");
     }
 
     public function agree():void {
@@ -111,6 +117,14 @@ package{
 			send("%%%TIMEOUT");
 		}
 
+    public function monitorOn(game_name:String):void{
+      send("%%MONITORON " + game_name);
+    }
+
+    public function list():void{
+      send("%%LIST");
+    }
+
 		private function _handleConnect(e:Event):void{
 			trace("connected.");
 			dispatchEvent(new Event(CsaShogiClient.CONNECTED));
@@ -125,6 +139,7 @@ package{
 		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 		}
 
+    //TODO Buffer the response; Dispatch Event only when the whole message is loaded.
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
       trace(response);
@@ -137,7 +152,10 @@ package{
       } else if(response.indexOf("##[WHO]") >= 0){
         dispatchEvent(new ServerMessageEvent(WHO,response));
         return;
-      }
+      } else if(response.indexOf("##[LIST]") >= 0){
+        dispatchEvent(new ServerMessageEvent(LIST,response));
+        return;
+      } 
       switch(_current_state)
       {
         case STATE_NOT_CONNECTED:
@@ -147,6 +165,10 @@ package{
           }
           break;
         case STATE_CONNECTED:
+          if(response.indexOf("##[MONITOR]") >= 0){
+            _current_state = STATE_WATCH;
+			      dispatchEvent(new ServerMessageEvent(START_WATCH,response));
+          }
           break;
         case STATE_GAME_WAITING:
           if (response.indexOf("BEGIN Game_Summary") >= 0) {
@@ -175,6 +197,11 @@ package{
           }
           break;
         case STATE_FINISHED:
+          break;
+        case STATE_WATCH:
+          if(response.indexOf("##[MONITOR]") >= 0){
+			      dispatchEvent(new ServerMessageEvent(MONITOR,response));
+          }
           break;
       }
     }
