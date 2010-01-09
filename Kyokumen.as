@@ -17,8 +17,11 @@ package  {
 		private var _komadai:Array;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
-    public static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
-    public static const rank_names:Array = new Array('a','b','c','d','e','f','g','h','i');
+    private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
+    private static const koma_japanese_names:Array = new Array('玉','飛','角','金','銀','桂','香','歩','','龍','馬','','成銀','成桂','成香','と');
+    private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
+    private static const rank_japanese_names:Array = new Array('一','ニ','三','四','五','六','七','八','九');
+    private static const file_japanese_names:Array = new Array('１','２','３','４','５','６','７','８','９');
 
     public function initialPositionStr():String{
       var tmp:String = "";
@@ -294,7 +297,7 @@ package  {
 	  	notationStr += "-";
 	  }
 	  notationStr += 9 - mv.to.x
-	  notationStr += rank_names[mv.to.y];
+	  notationStr += rank_western_names[mv.to.y];
 	  if (mv.promote) {
 	  	notationStr += "+";
 	  } else if (mv.from.x != HAND && !mv.koma.isPromoted()){
@@ -302,6 +305,22 @@ package  {
 	  } 
 	  notationStr += " (" + mv.time + ")";
 	  return notationStr;	
+	}
+	
+	public function generateKIFTextFromMovement(mv:Movement):String{
+	  var KIFStr:String = file_japanese_names[8 - mv.to.x];
+	  KIFStr += rank_japanese_names[mv.to.y];
+	  
+	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
+	  KIFStr += koma_japanese_names[originalType];
+	  if (mv.from.x == HAND) {
+	  	KIFStr += "打";
+	  } else {
+	  	if (mv.promote) KIFStr += "成";
+	  	KIFStr += "(" + String(9 - mv.from.x) + String(mv.from.y + 1) + ")";
+	  }
+	  KIFStr += "   ( " + int(mv.time/60) + ":" + mv.time % 60 + ")";
+	  return KIFStr;	
 	}
 
 	}

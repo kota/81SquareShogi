@@ -88,6 +88,7 @@
       board.startGame(_client.myTurn,_client.playerNames,60,30);
 	  closeButton.enabled = false;
 	  resignButton.enabled = true;
+	  kifuCopyButton.enabled = false;
 	  rewindAllButton.enabled = false;
 	  rewindOneButton.enabled = false;
 	  forwardOneButton.enabled = false;
@@ -114,6 +115,7 @@
       }
 	  closeButton.enabled = true;
 	  resignButton.enabled = false;
+	  kifuCopyButton.enabled = true;
 	  rewindAllButton.enabled = true;
 	  rewindOneButton.enabled = true;
 	  forwardOneButton.enabled = true;
@@ -153,6 +155,7 @@
 
     private function _scrollDown():void{
       userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
+      userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
     }
     
     private function _waitForGame():void{
@@ -342,7 +345,7 @@
 	       </mx:columns>
 	      </mx:DataGrid>
 	      <mx:HBox>
-       	  	<mx:Button id="kifuCopyButton" label="Copy" enabled="false"/>
+       	  	<mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard();" enabled="false"/>
        	  	<mx:Button id="kifuSaveButton" label="Save" enabled="false"/>	      	
 	      </mx:HBox>
       	</mx:Panel>
