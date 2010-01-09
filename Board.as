@@ -315,6 +315,11 @@ package  {
       trace("game end");
 			_timers[0].stop();
 			_timers[1].stop();
+	  if(_selected_square != null){
+            _selected_square.setStyle('backgroundColor',undefined);
+            _from = null;
+            _selected_square = null;
+          }
       _game_started = false;
     }
 	
@@ -323,6 +328,9 @@ package  {
 			_timers[running_timer].timeout();
 		}
 
+	public function get my_turn():int{
+		return _my_turn;
+	}
     public function get position():Kyokumen{
       return _position;
     }

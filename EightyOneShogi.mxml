@@ -7,8 +7,11 @@
     import mx.events.FlexEvent;
     import flash.media.Sound;
 		import mx.controls.*;
+		  import mx.managers.PopUpManager;
+          import mx.core.IFlexDisplayObject;
 		import CsaShogiClient;
     import Board;
+    import ChallengeForm;
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -20,6 +23,9 @@
 		[Embed(source = "/sound/lose.mp3")]
 		private var sound_lose:Class;
 		private var _sound_lose:Sound = new sound_lose();
+		[Embed(source = "/sound/chat.mp3")]
+		private var sound_chat:Class;
+		private var _sound_chat:Sound = new sound_chat();
 		
 		private function initApp():void
 		{
@@ -63,6 +69,7 @@
 
     private function _handleChat(e:ServerMessageEvent):void{
 			_writeUserMessage(e.message.substr(8));
+			_sound_chat.play();
     }
 
     private function _handleMove(e:ServerMessageEvent):void{
@@ -80,6 +87,7 @@
       }
       board.startGame(_client.myTurn,_client.playerNames,60,30);
 	  closeButton.enabled = false;
+	  resignButton.enabled = true;
 	  rewindAllButton.enabled = false;
 	  rewindOneButton.enabled = false;
 	  forwardOneButton.enabled = false;
@@ -92,16 +100,20 @@
     private function _handleGameEnd(e:ServerMessageEvent):void{
       if(e.message.indexOf("TIME_UP") >= 0){
 				board.timeout();
-        _writeUserMessage("Time out.");
+        _writeUserMessage("Time out.\n");
 			}
+	  if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
+	  	_writeUserMessage("Illegal Move.\n");
+	  }
       if(e.message.indexOf("LOSE") >= 0){
-        _writeUserMessage("You Lose.");
+        _writeUserMessage("You Lose.\n");
         _sound_lose.play();
       } else {
-        _writeUserMessage("You Win.");
+        _writeUserMessage("You Win.\n");
         _sound_win.play();
       }
 	  closeButton.enabled = true;
+	  resignButton.enabled = false;
 	  rewindAllButton.enabled = true;
 	  rewindOneButton.enabled = true;
 	  forwardOneButton.enabled = true;
@@ -148,12 +160,20 @@
       _client.waitForGame();
 			_refresh();
     }
-
-    private function _challenge():void{
-			var user:Object = userListGrid.selectedItem;
+    
+    private function _challengeForm():void{
+  			var user:Object = userListGrid.selectedItem;
 			if(user != null){
-      	_client.challenge(user.name);
-			}
+				var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
+				PopUpManager.centerPopUp(challengeWindow);
+	            challengeWindow.title = "Challenge to " + user.name;
+	            challengeWindow.challengeButton.addEventListener("click",_challenge);
+			}  	
+    }
+
+    private function _challenge(e:Event):void{
+    	var user:Object = userListGrid.selectedItem;
+    	_client.challenge(user.name);
     }
 
 		private function _refresh():void{
@@ -161,8 +181,10 @@
 		}
 
     private function _resign():void{
-      _client.chat("(auto-chat) I resign.");
-      _client.resign();
+      if (board.my_turn == board.position.turn) {
+      	_client.chat("(auto-chat) I resign.\n");
+      	_client.resign();
+      }
     }
 
     private function _who():void{
@@ -252,7 +274,7 @@
     	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
 	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
-				  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
+				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
