@@ -325,6 +325,7 @@
             <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
 	      </mx:FormItem>
 	    </mx:Form>
+      <mx:LinkButton label="Singup" fontSize="13" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
     <mx:Label id="errorMessage"/>
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
       <mx:Label text="ver.2010/01/12"/>
