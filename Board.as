@@ -8,6 +8,7 @@ package  {
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.media.Sound;
+	import flash.system.System;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Alert;
@@ -92,7 +93,8 @@ package  {
 
     private var _selected_square:Square;
     private var _last_square:Square;
-    private var _piece_type:int = 0;
+    public var _piece_type:int = 0;
+    public var _piece_sound_play:Boolean = true;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -277,12 +279,13 @@ package  {
       setPosition(_position);
       _last_square = _cells[mv.to.y][mv.to.x]
       _last_square.setStyle('backgroundColor','0xCC3333');      
-      _sound_piece.play();
+      if (_piece_sound_play) _sound_piece.play();
       
       var kifuMove:Object = new Object();
       kifuMove.num = kifu_list.length;
       kifuMove.move = _position.generateWesternNotationFromMovement(mv);
       kifuMove.moveStr = move;
+      kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);
 	    kifu_list.push(kifuMove);
 	  }
 
@@ -487,6 +490,21 @@ package  {
 		      _last_square.setStyle('backgroundColor','0xCC3333');
 		  }
       	  setPosition(_position);
+	}
+	
+	public function copyKIFtoClipboard():void{
+		var KIFDataText:String = "";
+		KIFDataText += "開始日時:\n";
+		KIFDataText += "棋戦:the 81-square Universe\n";
+		KIFDataText += "手合割:平手\n";
+		KIFDataText += "先手:" + _name_labels[0].text + "\n";
+		KIFDataText += "後手:" + _name_labels[1].text + "\n";
+		KIFDataText += "手数----指手---------消費時間--\n";
+		for (var i:int = 1; i < kifu_list.length ; i++){
+			KIFDataText += "   " + String(i) + " ";
+			KIFDataText += kifu_list[i].moveKIF + "\n";
+		}
+		System.setClipboard(KIFDataText);
 	}
 
   }

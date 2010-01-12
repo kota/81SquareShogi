@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="250" height="250" paddingLeft="10">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="250" height="265" paddingLeft="10">
 	    <mx:Script>
         <![CDATA[
         	import mx.controls.*;
@@ -10,11 +10,33 @@
             }
         ]]>
     </mx:Script>
-
+	<mx:RadioButtonGroup id="RadioGroup2"/>
 	<mx:RadioButton label="Rated, 1min  - 30sec" selected="true"/>
 	<mx:RadioButton label="Rated, 15min - 60sec"/>
 	<mx:RadioButton label="Rated, 30min - 60sec"/>
-	<mx:RadioButton label="Non-rated, 15min - 60sec"/>
+	<mx:RadioButton label="Non-rated"/>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox selectedIndex="2">
+			<mx:dataProvider>
+				<mx:Array>
+					<mx:String>60min</mx:String>
+					<mx:String>30min</mx:String>
+					<mx:String>15min</mx:String>
+					<mx:String> 1min</mx:String>
+					<mx:String> 0min</mx:String>
+				</mx:Array>
+			</mx:dataProvider>
+		</mx:ComboBox>
+		<mx:ComboBox selectedIndex="0">
+			<mx:dataProvider>
+				<mx:Array>
+					<mx:String>60sec</mx:String>
+					<mx:String>30sec</mx:String>
+					<mx:String>10sec</mx:String>
+				</mx:Array>
+			</mx:dataProvider>
+		</mx:ComboBox>
+	</mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox>
 			<mx:dataProvider>
