@@ -131,11 +131,6 @@ package {
 			var time:String = "";
 			var sec:int = _time_left % 60;
 			time = int(_time_left / 60).toString() + ":" + (sec < 10 ? '0' : '') + sec.toString();
-			/*if(_time_left > 60){
-				time = int(_time_left / 60).toString() + ":" + (_time_left % 60).toString();
-			} else {
-				time = _time_left.toString();
-			}*/
 			_label.text = time;
 		}
 

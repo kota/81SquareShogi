@@ -5,12 +5,7 @@
 */
 
 package  {
-	import flash.display.PixelSnapping;
- 	import flash.geom.Point;
-	import flash.utils.ByteArray;
-	import mx.controls.Alert;
-	import Board;
-	import Komadai;
+	import flash.geom.Point;
 	
 	public class Kyokumen {
 		
@@ -22,6 +17,8 @@ package  {
 		private var _komadai:Array;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
+    public static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
+    public static const rank_names:Array = new Array('a','b','c','d','e','f','g','h','i');
 
     public function initialPositionStr():String{
       var tmp:String = "";
@@ -61,7 +58,6 @@ package  {
 		}
 
     public function loadFromString(position_str:String):void{
-      trace("POSITION TO BE LOADED:\n" + position_str);
       var lines:Array = position_str.split("\n");
       for(var y:int=0;y<9;y++){
         var line:String = lines[y].substr(2);
@@ -76,6 +72,20 @@ package  {
           }
         }
       }
+      if(lines.length > 9){
+        for(var i:int = 9; i< lines.length; i++){
+          var match:Array = lines[i].match(/P([+-])00(.*)/);
+          if(match != null){
+            owner = match[1] == "+" ? SENTE : GOTE
+            var komas:Array = lines[i].split("00");
+            komas.shift();//P[+-]
+            for each(var koma_name:String in komas){
+              koma = new Koma(koma_names.indexOf(koma_name),0,0,owner);
+              _komadai[owner].addKoma(koma);
+            }
+          }
+        }
+      }
     }
 		
 		public function get ban():Array{
@@ -84,6 +94,10 @@ package  {
 
 		public function get turn():int {
 			return this._turn;
+		}
+		
+		public function set turn(v:int):void {
+			this._turn = v;
 		}
 
 		public function getKomadai(sengo:int):Komadai{
@@ -200,11 +214,11 @@ package  {
 	        return true;
 		}
 
-    public function translateHumanCoordinates(p:Point):Point{
+    public static function translateHumanCoordinates(p:Point):Point{
       return new Point(9-p.x,p.y-1);
     }
 
-    public function generateMovementFromCoordinates(from:Point,to:Point,promote:Boolean=false):Movement{
+    public function generateMovementFromCoordinates(from:Point,to:Point,promote:Boolean):Movement{
       var koma:Koma;
       if(from.x > HAND){
         koma = new Koma(from.x-HAND,from.x,from.y,_turn);
@@ -212,13 +226,13 @@ package  {
         from = translateHumanCoordinates(from);
         koma = getKomaAt(from);
       }
-      if(promote){
-        koma.promote();
-      }
+//      if(promote){
+//        koma.promote();
+//      }
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
 
-      return new Movement(_turn,from,to,koma,false,capture);
+      return new Movement(_turn,from,to,koma,promote,capture);
     }
 
     public function generateMovementFromString(moveStr:String):Movement{
@@ -236,8 +250,11 @@ package  {
       var koma:Koma = new Koma(koma_names.indexOf(moveStr.slice(5,7)),to.x,to.y,turn);
 			var match:Array = moveStr.match(/,T([0-9]*)/);
 			var time:int = parseInt(match[1]);
+	  if (from.x != HAND){
+	  	var promote:Boolean = getKomaAt(from).type != koma_names.indexOf(moveStr.slice(5,7));
+	  }
 
-      return new Movement(turn,from,to,koma,false,capture,time);
+      return new Movement(turn,from,to,koma,promote,capture,time);
     }
 		
 		public function move(mv:Movement):void {
@@ -276,5 +293,29 @@ package  {
 			}
 			_komadai[turn].addKoma(koma);
 		}
+		
+	public function generateWesternNotationFromMovement(mv:Movement):String{
+	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
+	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
+	  notationStr += koma_western_names[originalType];
+	  if (mv.from.x == HAND) {
+	  	notationStr += "*";
+	  } else if (mv.capture) {
+	  	notationStr += "x";
+	  } else {
+	  	notationStr += "-";
+	  }
+	  notationStr += 9 - mv.to.x
+	  notationStr += rank_names[mv.to.y];
+	  if (mv.promote) {
+	  	notationStr += "+";
+	  } else if (mv.from.x != HAND && !mv.koma.isPromoted()){
+	  	if ( (1-mv.turn)*mv.from.y + mv.turn*(8-mv.from.y) <= 2 || (1-mv.turn)*mv.to.y + mv.turn*(8-mv.to.y) <=2 ) notationStr += "=";
+	  } 
+	  notationStr += " (" + mv.time + ")";
+	  return notationStr;	
 	}
+
+	}
+	
 }

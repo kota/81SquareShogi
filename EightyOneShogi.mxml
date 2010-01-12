@@ -3,23 +3,30 @@
 
 	<mx:Script>
 	  <![CDATA[
-		import flash.display.*;
+    import flash.display.*;
     import mx.events.FlexEvent;
-      import flash.media.Sound;
-		import mx.controls.*;
-		import CsaShogiClient;
+    import flash.media.Sound;
+    import mx.controls.*;
+    import mx.managers.PopUpManager;
+    import mx.core.IFlexDisplayObject;
+    import CsaShogiClient;
     import Board;
+    import ChallengeForm;
 
     private var _client:CsaShogiClient;
     [Bindable]
     private var _user_list:Array;
 		private var _login_name:String;
+    private var _watch_user:Object;
 		[Embed(source = "/sound/win.mp3")]
 		private var sound_win:Class;
 		private var _sound_win:Sound = new sound_win();
 		[Embed(source = "/sound/lose.mp3")]
 		private var sound_lose:Class;
 		private var _sound_lose:Sound = new sound_lose();
+		[Embed(source = "/sound/chat.mp3")]
+		private var sound_chat:Class;
+		private var _sound_chat:Sound = new sound_chat();
 		
 		private function initApp():void
 		{
@@ -28,6 +35,9 @@
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
+      chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
+      loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
+      password.addEventListener(FlexEvent.ENTER,_handleLogin);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
 		}
@@ -41,11 +51,14 @@
       _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
-      _client.addEventListener(CsaShogiClient.START_WATCH,_handleStartWatch);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
       _client.addEventListener(CsaShogiClient.LIST,_handleList);
       _client.connect();
     } 
+
+    private function _handleLogin(e:Event):void{
+      _connectAndLogin();
+    }
     
     private function _handleConnected(e:Event):void{
       _client.login(loginname.text, password.text);
@@ -58,38 +71,58 @@
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
-			_writeUserMessage(e.message);
+			_writeUserMessage(e.message.substr(8));
+			_sound_chat.play();
     }
 
     private function _handleMove(e:ServerMessageEvent):void{
       board.makeMove(e.message);
+      kifuDataGrid.dataProvider = board.kifu_list;
+      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
 
     private function _handleGameStarted(e:Event):void{
 			userMessage.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
-        _writeUserMessage("You are Sente(Black).");
+        _writeUserMessage("You are Sente(Black).\n");
       } else {
-        _writeUserMessage("You are Gote(White).");
+        _writeUserMessage("You are Gote(White).\n");
       }
-      board.startGame(_client.myTurn,_client.playerNames,1500,30);
+      board.startGame(_client.myTurn,_client.playerNames,60,30);
 			closeButton.enabled = false;
+	    resignButton.enabled = true;
+	    rewindAllButton.enabled = false;
+	    rewindOneButton.enabled = false;
+	    forwardOneButton.enabled = false;
+	    forwardAllButton.enabled = false;
+	    kifuDataGrid.selectable = false;
+	    kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void{
       if(e.message.indexOf("TIME_UP") >= 0){
 				board.timeout();
-        _writeUserMessage("Time out.");
+        _writeUserMessage("Time out.\n");
 			}
+	  if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
+	  	_writeUserMessage("Illegal Move.\n");
+	  }
       if(e.message.indexOf("LOSE") >= 0){
-        _writeUserMessage("You Lose.");
+        _writeUserMessage("You Lose.\n");
         _sound_lose.play();
       } else {
-        _writeUserMessage("You Win.");
+        _writeUserMessage("You Win.\n");
         _sound_win.play();
       }
-			closeButton.enabled = true;
+	  closeButton.enabled = true;
+	  resignButton.enabled = false;
+	  rewindAllButton.enabled = true;
+	  rewindOneButton.enabled = true;
+	  forwardOneButton.enabled = true;
+	  forwardAllButton.enabled = true;
+	  kifuDataGrid.selectable = true;
+	  kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
     }
 
@@ -114,17 +147,12 @@
       userListGrid.dataProvider = user_list;
     }
 
-    private function _handleStartWatch(e:ServerMessageEvent):void{
-      board.startWatch(e.message);
-    }
-
-    private function _handleMonitor(e:ServerMessageEvent):void{
-      board.monitor(e.message);
-    }
 
     private function _writeUserMessage(message:String):void{
-      userMessage.text += message + "\n";
+      userMessage.text += message; // + "\n";
       userMessage.callLater(_scrollDown);
+      userMessage2.text += message; // + "\n";
+      userMessage2.callLater(_scrollDown);
     }
 
     private function _scrollDown():void{
@@ -132,16 +160,23 @@
     }
     
     private function _waitForGame():void{
-      //_writeUserMessage("Waiting for other player to join...");
       _client.waitForGame();
 			_refresh();
     }
-
-    private function _challenge():void{
-			var user:Object = userListGrid.selectedItem;
+    
+    private function _challengeForm():void{
+  			var user:Object = userListGrid.selectedItem;
 			if(user != null){
-      	_client.challenge(user.name);
-			}
+				var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
+				PopUpManager.centerPopUp(challengeWindow);
+	            challengeWindow.title = "Challenge to " + user.name;
+	            challengeWindow.challengeButton.addEventListener("click",_challenge);
+			}  	
+    }
+
+    private function _challenge(e:Event):void{
+    	var user:Object = userListGrid.selectedItem;
+    	_client.challenge(user.name);
     }
 
 		private function _refresh():void{
@@ -149,7 +184,10 @@
 		}
 
     private function _resign():void{
-      _client.resign();
+      if (board.my_turn == board.position.turn) {
+      	_client.chat("(auto-chat) I resign.\n");
+      	_client.resign();
+      }
     }
 
     private function _who():void{
@@ -165,12 +203,14 @@
 			var user:Object = userListGrid.selectedItem;
 			if(user != null && user.name != _login_name){
 				challengeButton.enabled = true;
+				watchButton.enabled = true;
 			} else {
 				challengeButton.enabled = false;
+				watchButton.enabled = true;
 			}
 		}
 
-    private function _playerMove(from:Point,to:Point,promote:Boolean=false):void{
+    private function _playerMove(from:Point,to:Point,promote:Boolean):void{
       var mv:Movement = board.position.generateMovementFromCoordinates(from,to,promote);
       _client.move(mv.toCSA());
     }
@@ -180,28 +220,77 @@
 		}
 
     private function _handleList(e:ServerMessageEvent):void{
-      var first_line:String = e.message.split("\n")[0];
-      var match:Array = first_line.match(/##\[LIST\] (.*)/);
-      var game_name:String = match[1];
-      trace("FIRST GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
-      _client.monitorOn(game_name);
+      trace("list original message:"+e.message);
+      if(_watch_user != null){
+        var lines:Array = e.message.split("\n");
+        for each(var line:String in lines){
+          var tokens:Array = line.split("+");
+          if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
+            var match:Array = line.match(/##\[LIST\] (.*)/);
+            if(match != null){
+              var game_name:String = match[1];
+              trace("WATCH GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
+              _client.monitorOn(game_name);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    private function _handleMonitor(e:ServerMessageEvent):void{
+      if(_watch_user != null){
+        board.monitor(e.message,_watch_user);
+      }
     }
 
     private function _watch():void{
       _client.list();
-      //board.startWatch();
+      _watch_user = userListGrid.selectedItem;
       mainViewStack.selectedIndex = 2;
+      closeButton.enabled = true;
+      resignButton.enabled = false;
     }
 
     private function _handleSendChat(e:FlexEvent):void{
       _client.chat(chatMessage.text);
       chatMessage.text = "";
     }
+    
+    private function _handleSendChat2(e:FlexEvent):void{
+      _client.chat(chatMessage2.text);
+      chatMessage2.text = "";
+    }
+    
+    private function replay():void{
+    	board.replayMoves(int(kifuDataGrid.selectedIndex));
+    }
+    
+    private function replayByButton(i:int):void{
+    	switch (i) {
+    		case -2:
+    			kifuDataGrid.selectedIndex = 0; replay();
+    			break;
+    		case -1:
+    			if (kifuDataGrid.selectedIndex > 0) {
+	    			kifuDataGrid.selectedIndex--; replay();
+	    		}
+	    		break;
+	    	case 1:
+	    		if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
+	    			kifuDataGrid.selectedIndex++; replay();
+	    		}
+	    		break;
+	    	case 2:
+	    		kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
+    	}
+    }
 
 	  ]]>
 	</mx:Script>
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+      <mx:Label text="the 81-square Universe Shogi Dojo (powered by ShogiServer)" fontSize="12"/>
       <mx:Form>
         <mx:FormItem label="loginname">
             <mx:TextInput id="loginname" width="200"/>
@@ -214,17 +303,19 @@
 	      </mx:FormItem>
 	    </mx:Form>
     <mx:Label id="errorMessage"/>
-      <mx:Label text="ver.2010/01/05"/>
+      <mx:Label text="Chief Programmer: Kota"/>
+      <mx:Label text="ver.2010/01/08"/>
     </mx:VBox>
+    
     <mx:VBox>
     	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
 	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
-				  <mx:Button id="challengeButton" label="Challenge" click="_challenge();" enabled="false"/>
+				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
-				  <mx:Button id="monitorButton" label="Watch" click="_watch();"/>
+				  <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
 			</mx:HBox>
-	      <mx:DataGrid id="userListGrid" width="580" height="400" change="_userSelected();">
+	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
 	       <mx:columns>
 	        <mx:DataGridColumn dataField="rank" width="50"/>
 	        <mx:DataGridColumn dataField="name" width="120"/>
@@ -234,6 +325,8 @@
 	        <mx:DataGridColumn dataField="opponent" width="120"/>
 	       </mx:columns>
 	      </mx:DataGrid>
+	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"/>   
+	      		  <mx:TextInput id="chatMessage2" width="290"/>    
       </mx:Panel>
     </mx:VBox>
     
@@ -258,10 +351,10 @@
 				<mx:RadioButton label="Hidetchi" groupName="RadioGroup1" value="2"/>
       	  </mx:HBox>
       	  <mx:HBox>
-       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false"/>
-          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false"/>  	
-       	  	<mx:Button id="forwardOneButton" label=">" enabled="false"/>
-          	<mx:Button id="forwardAllButton" label=">|" enabled="false"/> 
+       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
+          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>  	
+       	  	<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
+          	<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
       	  </mx:HBox>
       	  <mx:HBox>
 	       	  <mx:Label text="Chat"/>
@@ -280,12 +373,16 @@
 	       </mx:columns>
 	      </mx:DataGrid>
 	      <mx:Label text="Kifu" fontWeight="bold"/>
-	      <mx:DataGrid id="kifuDataGrid" width="160" height="300">
+	      <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287" change="replay();" selectable="false">
 	       <mx:columns>
-	        <mx:DataGridColumn dataField="No." width="45"/>
+	        <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
 	        <mx:DataGridColumn dataField="move"/>
 	       </mx:columns>
 	      </mx:DataGrid>
+	      <mx:HBox>
+       	  	<mx:Button id="kifuCopyButton" label="Copy" enabled="false"/>
+       	  	<mx:Button id="kifuSaveButton" label="Save" enabled="false"/>	      	
+	      </mx:HBox>
       	</mx:Panel>
     </mx:HBox>
   </mx:ViewStack>

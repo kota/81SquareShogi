@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="250" height="250" paddingLeft="10">
+	    <mx:Script>
+        <![CDATA[
+        	import mx.controls.*;
+            import mx.managers.PopUpManager;
+            
+            private function clickChallenge():void {
+                PopUpManager.removePopUp(this);
+            }
+        ]]>
+    </mx:Script>
+
+	<mx:RadioButton label="Rated, 1min  - 30sec" selected="true"/>
+	<mx:RadioButton label="Rated, 15min - 60sec"/>
+	<mx:RadioButton label="Rated, 30min - 60sec"/>
+	<mx:RadioButton label="Non-rated, 15min - 60sec"/>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox>
+			<mx:dataProvider>
+				<mx:Array>
+					<mx:String>Even Game</mx:String>
+					<mx:String>Lance Down</mx:String>
+					<mx:String>Bishop Down</mx:String>
+					<mx:String>Rook Down</mx:String>
+					<mx:String>Rook-Lance Down</mx:String>
+					<mx:String>2-piece Down</mx:String>
+					<mx:String>4-piece Down</mx:String>
+					<mx:String>6-piece Down</mx:String>
+					<mx:String>8-piece Down</mx:String>
+					<mx:String>Dragonfly</mx:String>
+					<mx:String>10-piece Down</mx:String>
+					<mx:String>3-pawns</mx:String>
+					<mx:String>Naked King</mx:String>
+				</mx:Array>
+			</mx:dataProvider>
+		</mx:ComboBox>
+	</mx:HBox>
+    <mx:HBox paddingTop="20"> 
+        <mx:Button id="challengeButton" click="clickChallenge();" label="Challenge"/> 
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+    </mx:HBox> 
+
+</mx:TitleWindow>

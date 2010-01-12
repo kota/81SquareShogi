@@ -14,7 +14,6 @@ package  {
 	import mx.controls.Image;
 	import mx.controls.Label;
 	import mx.events.CloseEvent;
-	import GameTimer;
 
   public class Board extends Canvas {
     
@@ -81,6 +80,9 @@ package  {
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
 
+    [Bindable]
+    public var kifu_list:Array;
+
     private var _from:Point;
     private var _to:Point;
     private var _position:Kyokumen;
@@ -95,7 +97,7 @@ package  {
 		private var _time_sente:int;
 		private var _time_gote:int;
     
-    //TODO Define the view with mxml.
+    //TODO Define the layout with mxml.
     public function Board() {
       super();
       _cells = new Array(9);
@@ -136,7 +138,7 @@ package  {
       _board_back_image.addChild(_board_coord_image);
       addChild(_board_shand_image);
       addChild(_board_ghand_image);
-
+	
       handBoxes = new Array(2);
       _name_labels = new Array(2);
       _info_labels = new Array(2);
@@ -219,6 +221,11 @@ package  {
           addChild(square);
         }
       }
+      kifu_list = new Array();
+      var kifuMove:Object = new Object();
+      kifuMove.num = "0";
+      kifuMove.move = "Start";
+	  kifu_list.push(kifuMove);
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -264,13 +271,20 @@ package  {
 			_timers[running_timer].suspend();
 			_timers[running_timer].accumulateTime(time);
 			_timers[1-running_timer].resume();
+
       _position.move(mv);
       if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
       setPosition(_position);
       _last_square = _cells[mv.to.y][mv.to.x]
       _last_square.setStyle('backgroundColor','0xCC3333');      
       _sound_piece.play();
-    }
+      
+      var kifuMove:Object = new Object();
+      kifuMove.num = kifu_list.length;
+      kifuMove.move = _position.generateWesternNotationFromMovement(mv);
+      kifuMove.moveStr = move;
+	    kifu_list.push(kifuMove);
+	  }
 
     public function setMoveCallback(callback:Function):void{
       _playerMoveCallback = callback;
@@ -298,39 +312,15 @@ package  {
       _game_started = true;
     }
 
-    public function startWatch(game_info:String):void{
-      trace("GAME INFO: " + game_info);
-      _my_turn = Kyokumen.SENTE;
-      reset();
-      _position = new Kyokumen();
-      var kyokumen_str:String = _parsePosition(game_info);
-      _position.loadFromString(kyokumen_str);
-      setPosition(_position);
-      var match:Array = game_info.match(/^##\[MONITOR\]\[.*\] (.*)$/);
-      trace("MATCH 0:"+ match.toString());
-      /*
-      _name_labels[0] = game_info.match(/^##\[MONITOR\]\[.*\] Name\+\:(.*)$/)[1];
-      _name_labels[1] = game_info.match(/^##\[MONITOR\]\[.*\] Name\-\:(.*)$/)[1];
-      */
-      _info_labels[0].text = "R:1000, (Country)"
-      _info_labels[1].text = "R:1000, (Country)"
-      _turn_symbols[0].source = black;
-      _turn_symbols[1].source = white_r;
-      /*
-      var total_time:String = game_info.match(/Remaining_Time\+\:(.*)/)[1];
-      var byoyomi:String = game_info.match(/Byoyomi\+\:(.*)/)[1];
-      _timers[0].reset(parseInt(total_time),parseInt(byoyomi));
-      total_time = game_info.match(/Remaining_Time\-\:(.*)/)[1];
-      _timers[1].reset(parseInt(total_time),parseInt(byoyomi));
-      var to_move:String = game_info.match(/To_Move\+\:(.*)/)[1];
-      _timers[to_move == '+' ? 0 : 1].start();
-      */
-    }
-
     public function endGame():void{
       trace("game end");
 			_timers[0].stop();
 			_timers[1].stop();
+	    if(_selected_square != null){
+        _selected_square.setStyle('backgroundColor',undefined);
+        _from = null;
+        _selected_square = null;
+      }
       _game_started = false;
     }
 	
@@ -339,6 +329,9 @@ package  {
 			_timers[running_timer].timeout();
 		}
 
+	public function get my_turn():int{
+		return _my_turn;
+	}
     public function get position():Kyokumen{
       return _position;
     }
@@ -347,12 +340,60 @@ package  {
     	setPosition(_position);
     }
 
-    public function monitor(str:String):void{
-      var kyokumen_str:String = _parsePosition(str);
-      if(kyokumen_str != ""){
-        _position.loadFromString(kyokumen_str);
-        setPosition(_position);
+    public function monitor(game_info:String,watch_user:Object):void{
+      trace("MONITOR");
+      if(game_info.split("\n")[0].indexOf("Game_Summary") <= 0){
+        return;
       }
+      var names:Array = new Array(2);
+      var remaining_times:Array = new Array(2);
+      var byoyomi:int;
+      var current_turn:int;
+      var last_move:Point;
+      for each(var line:String in game_info.split("\n")){
+        var match:Array = line.match(/^##\[MONITOR\]\[.*\] (.*)$/);
+        if(match != null){
+          if(match[1].indexOf("Name+") == 0){
+            var name:String = match[1].match(/Name\+:(.*)/)[1]
+            names[0] = name;
+            _my_turn = name == watch_user.name ? Kyokumen.SENTE : Kyokumen.GOTE;
+          } else if (match[1].indexOf("Name-") == 0){
+            names[1] = match[1].match(/Name\-:(.*)/)[1];
+          } else if (match[1].indexOf("Remaining_Time+") == 0){
+            remaining_times[0] = parseInt(match[1].match(/Remaining_Time\+:(.*)/)[1]);
+          } else if (match[1].indexOf("Remaining_Time-") == 0){
+            remaining_times[1] = parseInt(match[1].match(/Remaining_Time\-:(.*)/)[1]);
+          } else if (match[1].indexOf("Byoyomi") == 0){
+            byoyomi = parseInt(match[1].match(/Byoyomi:(.*)/)[1]);
+          } else if (match[1].indexOf("Current_Turn") == 0){
+            current_turn = match[1].match(/Current_Turn:(.*)/)[1]
+          } else if (match[1].indexOf("Last_Move") == 0){
+            var x:int = parseInt(match[1].substr(13,1));
+            var y:int = parseInt(match[1].substr(14,1));
+            last_move = Kyokumen.translateHumanCoordinates(new Point(x,y));
+          }
+        }
+      }
+      reset();
+      _position = new Kyokumen();
+      _position.loadFromString(_parsePosition(game_info));
+      setPosition(_position);
+
+      _name_labels[0].text = names[_my_turn];
+      _name_labels[1].text = names[1 - _my_turn];
+      _info_labels[0].text = "R:1000, (Country)"
+      _info_labels[1].text = "R:1000, (Country)"
+      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
+      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+      _timers[0].reset(remaining_times[_my_turn],byoyomi);
+      _timers[1].reset(remaining_times[_my_turn],byoyomi);
+
+			var turn:int = current_turn % 2 == 0 ? Kyokumen.SENTE : Kyokumen.GOTE;
+      _timers[turn].start();
+      _timers[1-turn].stop();
+
+      var _last_square:Square = _cells[last_move.y][last_move.x];
+      _last_square.setStyle('backgroundColor','0xCC3333');      
     }
 
     private function _parsePosition(game_info:String):String{
@@ -372,14 +413,14 @@ package  {
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
-          var koma:Koma = _position.getKomaAt(_position.translateHumanCoordinates(new Point(x,y)));
+          var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           if( koma != null && koma.ownerPlayer == _my_turn){
             e.currentTarget.setStyle('backgroundColor','0x33CCCC');
             _selected_square = Square(e.currentTarget);
             _from = new Point(x,y);
           }
         } else {
-          koma = _position.getKomaAt(_position.translateHumanCoordinates(new Point(x,y)));
+          koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           _selected_square.setStyle('backgroundColor',undefined);
           if( koma != null && koma.ownerPlayer == _my_turn){
           	_from = null;
@@ -393,7 +434,7 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-              _playerMoveCallback(_from,_to);
+              _playerMoveCallback(_from,_to,false);
               _from = null;
               _to = null;
             }
@@ -427,6 +468,26 @@ package  {
 		private function _checkTimeout(e:Event):void{
 			_timeoutCallback();
 		}
+		
+	public function replayMoves(n:int):void{
+		  if (_last_square != null){
+		  	_last_square.setStyle('backgroundColor',undefined);
+		  	_last_square = null;
+		  }
+		  _position.turn = Kyokumen.SENTE;
+		  _position.getKomadai(0).clearKoma();
+		  _position.getKomadai(1).clearKoma();
+		  _position.loadFromString(_position.initialPositionStr());
+		  if (n >= 1){
+			  for (var i:int = 1; i <= n; i++ ) {
+			      var mv:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
+			      _position.move(mv);		  	
+			  }
+		      _last_square = _cells[mv.to.y][mv.to.x]
+		      _last_square.setStyle('backgroundColor','0xCC3333');
+		  }
+      	  setPosition(_position);
+	}
 
   }
 }

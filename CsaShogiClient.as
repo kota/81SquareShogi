@@ -1,5 +1,4 @@
 package{
-//	import com.adobe.serialization.json.JSON;
 	import flash.events.EventDispatcher;
   import ServerMessageEvent;
 
@@ -30,24 +29,25 @@ package{
     public static var STATE_FINISHED:int      = 5;
     public static var STATE_NOT_CONNECTED:int = 6;
 
-    public static var STATE_WATCH:int         = 7;
-
 		private var _socket:Socket;
-		
-		private var _host:String = '127.0.0.1';
-		//private var _host:String = '81square-shogi.homeip.net';
+
+		//private var _host:String = '127.0.0.1';
+		private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
-		//private var _port:int = 4081;
-		private var _port:int = 4000;
+		private var _port:int = 4081;
+		//private var _port:int = 4000;
 
     private var _current_state:int;
     private var _my_turn:int;
     private var _player_names:Array;
 		private var _login_name:String;
 
+    private var _buffer:String;
+
 		public function CsaShogiClient(){
       _current_state = STATE_NOT_CONNECTED;
       _player_names = new Array(2);
+      _buffer = "";
       //Security.loadPolicyFile("xmlSocket://"+_host+":8430");
 		}
 
@@ -84,12 +84,12 @@ package{
 
     public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-1500-30 *");
+      send("%%GAME " + _login_name + "-60-30 *");
     }
 
 		public function challenge(user_name:String):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-1500-30 *");
+      send("%%GAME " + user_name + "-60-30 *");
     }
 
     public function agree():void {
@@ -166,8 +166,11 @@ package{
           break;
         case STATE_CONNECTED:
           if(response.indexOf("##[MONITOR]") >= 0){
-            _current_state = STATE_WATCH;
-			      dispatchEvent(new ServerMessageEvent(START_WATCH,response));
+            _buffer += response;
+            if(response.match(/##\[MONITOR\]\[.*\] \+OK/) != null){
+			        dispatchEvent(new ServerMessageEvent(MONITOR,_buffer));
+              _buffer = "";
+            }
           }
           break;
         case STATE_GAME_WAITING:
@@ -197,11 +200,6 @@ package{
           }
           break;
         case STATE_FINISHED:
-          break;
-        case STATE_WATCH:
-          if(response.indexOf("##[MONITOR]") >= 0){
-			      dispatchEvent(new ServerMessageEvent(MONITOR,response));
-          }
           break;
       }
     }
