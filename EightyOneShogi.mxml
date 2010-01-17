@@ -334,7 +334,7 @@
     <mx:VBox>
     	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
-	        	  <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
+	        <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
 				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
 				  <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
@@ -351,7 +351,7 @@
 	       </mx:columns>
 	      </mx:DataGrid>
 	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"
-	      	      	 text="Note: All chat message (even in a game room) will be seen from all users."/>   
+	      	      	 text="Note: All chat messages (even in a game room) will be seen by all users."/>   
 	      		  <mx:TextInput id="chatMessage2" width="290"/>    
       </mx:Panel>
     </mx:VBox>
