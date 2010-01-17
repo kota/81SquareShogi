@@ -43,11 +43,17 @@ package{
 		private var _login_name:String;
 
     private var _buffer:String;
+    private var _buffers:Object;
+    private var _reading_game_summary_flag:Boolean;
 
 		public function CsaShogiClient(){
       _current_state = STATE_NOT_CONNECTED;
       _player_names = new Array(2);
       _buffer = "";
+      _buffers = new Object();
+      for each(var key:String in [WHO,LIST,MONITOR,GAME_END]){
+        _buffers[key] = "";
+      }
       //Security.loadPolicyFile("xmlSocket://"+_host+":8430");
 		}
 
@@ -142,66 +148,93 @@ package{
     //TODO Buffer the response; Dispatch Event only when the whole message is loaded.
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
+      var lines:Array = response.split("\n");
       trace(response);
-      if(response.indexOf("CHAT") >= 0){
-        dispatchEvent(new ServerMessageEvent(CHAT,response));
-        return;
-      } else if(response.charAt(0) == '+' || response.charAt(0) == '-'){
-        dispatchEvent(new ServerMessageEvent(MOVE,response));
-        return;
-      } else if(response.indexOf("##[WHO]") >= 0){
-        dispatchEvent(new ServerMessageEvent(WHO,response));
-        return;
-      } else if(response.indexOf("##[LIST]") >= 0){
-        dispatchEvent(new ServerMessageEvent(LIST,response));
-        return;
-      } 
-      switch(_current_state)
-      {
-        case STATE_NOT_CONNECTED:
-          if(response.indexOf("LOGIN") >= 0 && response.indexOf("OK") >= 0){
-            _current_state = STATE_CONNECTED;
-			      dispatchEvent(new Event(LOGIN));
-          }
-          break;
-        case STATE_CONNECTED:
-          if(response.indexOf("##[MONITOR]") >= 0){
-            _buffer += response;
-            if(response.match(/##\[MONITOR\]\[.*\] \+OK/) != null){
-			        dispatchEvent(new ServerMessageEvent(MONITOR,_buffer));
-              _buffer = "";
-            }
-          }
-          break;
-        case STATE_GAME_WAITING:
-          if (response.indexOf("BEGIN Game_Summary") >= 0) {
+      var match:Array;
+      for each(var line:String in lines){
+        if(_reading_game_summary_flag){
+          if(match = line.match(/^Your_Turn\:([+-])/)) {
+            _my_turn = match[1] == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
+          } else if(match = line.match(/^Name\+\:(.*)/)){
+            _player_names[0] = match[1];
+          } else if(match = line.match(/^Name\-\:(.*)/)){
+            _player_names[1] = match[1];
+          } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
-            _my_turn = response.charAt(response.indexOf("Your_Turn:")+9+1) == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
-            _player_names[0] = response.match(/Name\+\:(.*)/)[1];
-            _player_names[1] = response.match(/Name\-\:(.*)/)[1];
             _current_state = STATE_AGREE_WAITING;
+            _reading_game_summary_flag = false;
             agree(); //agree automatically for now.
           }
-          break;
-        case STATE_AGREE_WAITING:
-          if (response.indexOf("START") >= 0){
-            trace("state change to game");
-            _current_state = STATE_GAME;
-			      dispatchEvent(new Event(GAME_STARTED));
+        }
+        if(line.match(/^##\[CHAT\]/)){
+          dispatchEvent(new ServerMessageEvent(CHAT,line+"\n"));
+        } else if(line.match(/^[-+][0-9]{4}/)){
+          dispatchEvent(new ServerMessageEvent(MOVE,line));
+        } else if(line.match(/^##\[WHO\]/) != null){
+          _buffer_response(WHO,line);
+          if(line.match(/^##\[WHO\] \+OK$/)){
+			      _dispatchServerMessageEvent(WHO);
           }
-          break;
-        case STATE_START_WAITING:
-          break;
-        case STATE_GAME:
-          if(response.indexOf("WIN") >= 0 || response.indexOf("LOSE") >= 0){
-            trace("state change to connected");
-            _current_state = STATE_CONNECTED
-			      dispatchEvent(new ServerMessageEvent(GAME_END,response));
+        } else if(line.match(/^##\[LIST\]/) != null){
+          _buffer_response(LIST,line);
+          if(line == "##[LIST] +OK"){
+			      _dispatchServerMessageEvent(LIST);
           }
-          break;
-        case STATE_FINISHED:
-          break;
+        } else {
+          switch(_current_state) {
+            case STATE_NOT_CONNECTED:
+              if(line.match(/LOGIN:.* OK/)){
+                _current_state = STATE_CONNECTED;
+			          dispatchEvent(new Event(LOGIN));
+              }
+              break;
+            case STATE_CONNECTED:
+              if(line.match(/^##\[MONITOR\]/)){
+                _buffer_response(MONITOR,line);
+                if(line.match(/##\[MONITOR\]\[.*\] \+OK/)){
+			            _dispatchServerMessageEvent(MONITOR);
+                }
+              }
+              break;
+            case STATE_GAME_WAITING:
+              if (line == "BEGIN Game_Summary") {
+                _reading_game_summary_flag = true;
+              }
+              break;
+            case STATE_AGREE_WAITING:
+              if (line.match(/^START\:/) != null){
+                trace("state change to game");
+                _current_state = STATE_GAME;
+			          dispatchEvent(new Event(GAME_STARTED));
+              }
+              break;
+            case STATE_START_WAITING:
+              break;
+            case STATE_GAME:
+              if(match = line.match(/^#(WIN|LOSE|TIMEUP|ILLEGAL_MOVE)/)){
+                _buffer_response(GAME_END,line);
+                if(match[1] == "WIN" || match[1] == "LOSE"){
+                  trace("state change to connected");
+                  _current_state = STATE_CONNECTED
+			            _dispatchServerMessageEvent(GAME_END);
+                }
+              }
+              break;
+            case STATE_FINISHED:
+              break;
+          }
+        }
       }
+    }
+
+    private function _dispatchServerMessageEvent(event_name:String):void{
+      trace("dispatch " + event_name + ":" + _buffers[event_name]);
+			dispatchEvent(new ServerMessageEvent(event_name,_buffers[event_name]));
+      _buffers[event_name] = "";
+    }
+
+    private function _buffer_response(event_name:String, response:String):void{
+      _buffers[event_name] += response+"\n";
     }
 
 		private function _handleIOError(e:IOErrorEvent):void{
