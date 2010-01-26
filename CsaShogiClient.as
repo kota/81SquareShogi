@@ -35,7 +35,7 @@ package{
 		private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
-		//private var _port:int = 4000;
+		//private var _port:int = 2195;
 
     private var _current_state:int;
     private var _my_turn:int;
@@ -90,12 +90,12 @@ package{
 
     public function waitForGame():void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-60-30 *");
+      send("%%GAME " + _login_name + "-1500-30 *");
     }
 
 		public function challenge(user_name:String):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-60-30 *");
+      send("%%GAME " + user_name + "-1500-30 *");
     }
 
     public function agree():void {
@@ -125,6 +125,10 @@ package{
 
     public function monitorOn(game_name:String):void{
       send("%%MONITORON " + game_name);
+    }
+
+    public function monitorOff(game_name:String):void{
+      send("%%MONITOROFF " + game_name);
     }
 
     public function list():void{

@@ -89,6 +89,7 @@ package  {
     private var _position:Kyokumen;
 
     private var _my_turn:int;
+
     private var _game_started:Boolean;
 
     private var _selected_square:Square;
@@ -383,20 +384,22 @@ package  {
       setPosition(_position);
 
       _name_labels[0].text = names[_my_turn];
-      _name_labels[1].text = names[1 - _my_turn];
+      _name_labels[1].text = names[1-_my_turn];
       _info_labels[0].text = "R:1000, (Country)"
       _info_labels[1].text = "R:1000, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _timers[0].reset(remaining_times[_my_turn],byoyomi);
-      _timers[1].reset(remaining_times[_my_turn],byoyomi);
+      _timers[1].reset(remaining_times[1-_my_turn],byoyomi);
 
 			var turn:int = current_turn % 2 == 0 ? Kyokumen.SENTE : Kyokumen.GOTE;
-      _timers[turn].start();
-      _timers[1-turn].stop();
-
-      var _last_square:Square = _cells[last_move.y][last_move.x];
-      _last_square.setStyle('backgroundColor','0xCC3333');      
+      var running_timer:int = turn == _my_turn ? 0 : 1;
+      _timers[running_timer].start();
+      _timers[1-running_timer].stop();
+      if(last_move){
+        var _last_square:Square = _cells[last_move.y][last_move.x];
+        _last_square.setStyle('backgroundColor','0xCC3333');      
+      }
     }
 
     private function _parsePosition(game_info:String):String{

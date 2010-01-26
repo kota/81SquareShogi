@@ -15,9 +15,12 @@
 
     private var _client:CsaShogiClient;
     [Bindable]
+    private var _game_name:String;
     private var _user_list:Array;
 		private var _login_name:String;
     private var _watch_user:Object;
+    private var _monitoring:Boolean;
+
 		[Embed(source = "/sound/win.mp3")]
 		private var sound_win:Class;
 		private var _sound_win:Sound = new sound_win();
@@ -91,7 +94,7 @@
       } else {
         _writeUserMessage("You are Gote(White).\n");
       }
-      board.startGame(_client.myTurn,_client.playerNames,60,30);
+      board.startGame(_client.myTurn,_client.playerNames,1500,30);
       closeButton.enabled = false;
       resignButton.enabled = true;
       rewindAllButton.enabled = false;
@@ -218,6 +221,11 @@
     }
 
 		private function _closeGame():void{
+      if(_game_name && _monitoring){
+        _client.monitorOff(_game_name);
+        _game_name = null;
+        _monitoring = false;
+      }
       mainViewStack.selectedIndex = 1;
 			_refresh();
 		}
@@ -253,6 +261,8 @@
             if(match != null){
               var game_name:String = match[1];
               trace("WATCH GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
+              _game_name = game_name;
+              _monitoring = true;
               _client.monitorOn(game_name);
               break;
             }
