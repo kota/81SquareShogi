@@ -159,10 +159,23 @@
           var name:String = match[1];
           var user:Object = new Object();
           user.name = name;
-          user.rating = 1000;
-					user.status = match[3].split(" ")[0];
+		  user.country = "81SU";
+          user.rating = 1500;
+		  user.rank = makeRankFromRating(user.rating);
+		  user.status = match[3].split(" ")[0];
           if(user.status.indexOf("game_waiting") == 0){
             user.game_name = match[3].split(" ")[1];
+			user.status2 = "W";
+			match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+			var total:int = parseInt(match[2]) / 60 ;
+			user.rule = total + "-" + match[3];
+          } else if(user.status.indexOf("game") == 0){
+            user.game_name = match[3].split(" ")[1];
+			user.status2 = "G(" + match[3].split(" ")[2] + ")";
+			match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+			total = parseInt(match[2]) / 60 ;
+			user.rule = total + "-" + match[3];
+			if (user.name != match[1]) user.opponent = match[1];  //Temporary Feature(Opponent is shown only for one side^^)
           }
           user_list.push(user);
         }
@@ -217,7 +230,7 @@
         Alert.noLabel = "Offer your setting";
         Alert.buttonWidth = 140;
         //Only YES works now.
-        Alert.show("Time:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES,this,_handleChallengeAlert);
+        Alert.show("Opponent:" + match[1] + "\nTime:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES,this,_handleChallengeAlert);
         //set properties back to default.
         Alert.yesLabel = "Yes";
         Alert.noLabel = "No";
@@ -282,7 +295,7 @@
 
 		private function _userSelected():void{
 			var user:Object = userListGrid.selectedItem;
-			if(user != null && user.name != _login_name){
+			if(user != null && user.name != _login_name && user.status.indexOf("game_waiting") == 0){
 				challengeButton.enabled = true;
 				watchButton.enabled = true;
 			} else {
@@ -368,6 +381,16 @@
 	    		kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
     	}
     }
+	
+	//TO DO: Move to another class maybe?
+	private function makeRankFromRating(i:int):String{
+		var rank_borders:Array = new Array(50, 150, 250, 350, 450, 550, 650, 750, 850, 950, 1050, 1150, 1250, 1350, 1450, 1550, 1700, 1900, 2100, 2300, 2450,10000);
+		var rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
+		for (var j:int = 0; j < 22; j++) {
+			if (i < rank_borders[j]) return rank_names[j];
+		}
+		return "";
+	}
 
 	  ]]>
 	</mx:Script>
@@ -399,16 +422,18 @@
 				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
 				  <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-				  <mx:Button id="optionButton1" label="Options" click="_showOptions();"/>
+				  <mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="false"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
 	       <mx:columns>
-	        <mx:DataGridColumn dataField="rank" width="50"/>
+	        <mx:DataGridColumn dataField="rank" width="65"/>
 	        <mx:DataGridColumn dataField="name" width="120"/>
 	        <mx:DataGridColumn dataField="country" width="110"/>
 	        <mx:DataGridColumn dataField="rating" width="60"/>
-	        <mx:DataGridColumn dataField="status" width="120"/>
+			<mx:DataGridColumn dataField="status2" headerText="status" width="60"/>
+			<mx:DataGridColumn dataField="rule" width="60"/>
 	        <mx:DataGridColumn dataField="opponent" width="120"/>
+	        <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
 	       </mx:columns>
 	      </mx:DataGrid>
 	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"
