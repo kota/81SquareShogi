@@ -11,6 +11,7 @@ package{
 
 		public static var CONNECTED:String = 'connected';
 		public static var LOGIN:String = 'login';
+		public static var LOGIN_FAILED:String = 'login_failed';
 		public static var GAME_STARTED:String = 'game_started';
 		public static var GAME_END:String = 'game_end';
 		public static var SERVER_MESSAGE:String = 'receive_message';
@@ -88,14 +89,16 @@ package{
       send("LOGIN " + login_name + " " + password +" x1");//connect with extended mode.
     }
 
-    public function waitForGame():void {
+    public function waitForGame(total:int=1500,byoyomi:int=30):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-1500-30 *");
+      send("%%GAME " + _login_name + "-"+total.toString()+"-"+byoyomi.toString()+" *");
     }
 
-		public function challenge(user_name:String):void {
-      _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + user_name + "-1500-30 *");
+		public function challenge(user:Object):void {
+      if(user.game_name){
+        _current_state = STATE_GAME_WAITING;
+        send("%%GAME " + user.game_name+ " *");
+      }
     }
 
     public function agree():void {
@@ -149,7 +152,6 @@ package{
 		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
 		}
 
-    //TODO Buffer the response; Dispatch Event only when the whole message is loaded.
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
       var lines:Array = response.split("\n");
@@ -190,6 +192,10 @@ package{
               if(line.match(/LOGIN:.* OK/)){
                 _current_state = STATE_CONNECTED;
 			          dispatchEvent(new Event(LOGIN));
+              } else if (line.match(/LOGIN:incorrect login/)){
+                dispatchEvent(new ServerMessageEvent(LOGIN_FAILED,"Loginname not Found."));
+              } else if (line.match(/LOGIN:incorrect password/)){
+                dispatchEvent(new ServerMessageEvent(LOGIN_FAILED,"Incorrect Password."));
               }
               break;
             case STATE_CONNECTED:
@@ -209,7 +215,8 @@ package{
               if (line.match(/^START\:/) != null){
                 trace("state change to game");
                 _current_state = STATE_GAME;
-			          dispatchEvent(new Event(GAME_STARTED));
+			          //dispatchEvent(new Event(GAME_STARTED));
+			          dispatchEvent(new ServerMessageEvent(GAME_STARTED,line));
               }
               break;
             case STATE_START_WAITING:

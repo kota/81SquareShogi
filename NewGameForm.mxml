@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="250" height="265" paddingLeft="10">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+          import mx.collections.ArrayCollection;
+          
+          [Bindable]
+          public var totals:ArrayCollection = new ArrayCollection(
+            [{label:"60min", data:3600},
+             {label:"30min", data:1800},
+             {label:"15min", data:900},
+             {label:"1min", data:60},
+             {label:"0min", data:0}]
+          );
+
+          [Bindable]
+          public var byoyomis:ArrayCollection = new ArrayCollection(
+            [{label:"60sec", data:60},
+             {label:"30sec", data:30},
+             {label:"10sec", data:10}]
+          );
+            
+          private function submit():void {
+            var total:int;
+            var byoyomi:int;
+            trace("Challenge Clicked");
+            switch(timeSetting.selectedValue){
+              case 0:
+                total = 60;
+                byoyomi = 30;
+                break;
+              case 1:
+                total = 900;
+                byoyomi = 60;
+                break;
+              case 2:
+                total = 1800;
+                byoyomi = 60;
+                break;
+              case 3:
+                total = nonrated_total.selectedItem.data;
+                byoyomi = nonrated_byoyomi.selectedItem.data;
+              default:
+                break;
+            }
+            if(total && byoyomi){
+              var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,0);
+              dispatchEvent(gameRuleEvent);
+            }
+            PopUpManager.removePopUp(this);
+          }
+        ]]>
+    </mx:Script>
+	<mx:RadioButtonGroup id="timeSetting"/>
+	<mx:RadioButton groupName="timeSetting" label="Rated, 1min  - 30sec" value="0" selected="true"/>
+	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="1" />
+	<mx:RadioButton groupName="timeSetting" label="Rated, 30min - 60sec" value="2"/>
+	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3"/>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox id="nonrated_total" selectedIndex="2" dataProvider="{totals}"/>
+		<mx:ComboBox id="nonrated_byoyomi" selectedIndex="0" dataProvider="{byoyomis}"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox>
+			<mx:dataProvider>
+				<mx:Array>
+					<mx:String>Even Game</mx:String>
+					<mx:String>Lance Down</mx:String>
+					<mx:String>Bishop Down</mx:String>
+					<mx:String>Rook Down</mx:String>
+					<mx:String>Rook-Lance Down</mx:String>
+					<mx:String>2-piece Down</mx:String>
+					<mx:String>4-piece Down</mx:String>
+					<mx:String>6-piece Down</mx:String>
+					<mx:String>8-piece Down</mx:String>
+					<mx:String>Dragonfly</mx:String>
+					<mx:String>10-piece Down</mx:String>
+					<mx:String>3-pawns</mx:String>
+					<mx:String>Naked King</mx:String>
+				</mx:Array>
+			</mx:dataProvider>
+		</mx:ComboBox>
+	</mx:HBox>
+    <mx:HBox paddingTop="20"> 
+        <mx:Button id="Submit" click="submit();" label="Create Game"/> 
+        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+    </mx:HBox> 
+
+</mx:TitleWindow>

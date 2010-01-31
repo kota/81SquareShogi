@@ -11,10 +11,10 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="RadioGroup2"/>
-	<mx:RadioButton label="Rated, 1min  - 30sec" selected="true"/>
-	<mx:RadioButton label="Rated, 15min - 60sec"/>
-	<mx:RadioButton label="Rated, 30min - 60sec"/>
-	<mx:RadioButton label="Non-rated"/>
+	<mx:RadioButton label="Rated, 1min  - 30sec" value="0" selected="true"/>
+	<mx:RadioButton label="Rated, 15min - 60sec" value="1" />
+	<mx:RadioButton label="Rated, 30min - 60sec" value="2"/>
+	<mx:RadioButton label="Non-rated" value="3"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox selectedIndex="2">
 			<mx:dataProvider>

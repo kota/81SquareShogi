@@ -5,6 +5,7 @@
 	  <![CDATA[
     import flash.display.*;
     import mx.events.FlexEvent;
+    import mx.events.CloseEvent;
     import flash.media.Sound;
     import mx.controls.*;
     import mx.managers.PopUpManager;
@@ -12,6 +13,7 @@
     import CsaShogiClient;
     import Board;
     import ChallengeForm;
+    import GameRuleEvent;
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -33,6 +35,7 @@
 		private var optionWindow:OptionDialog;
 		private var _end_sound_play:Boolean = true;
 		private var _chat_sound_play:Boolean = true;
+
 		
 		private function initApp():void
 		{
@@ -52,6 +55,7 @@
 		  trace("connecting.");
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
       _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
+      _client.addEventListener(CsaShogiClient.LOGIN_FAILED,_handleLoginFailed);
       _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
       _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
       _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
@@ -59,6 +63,8 @@
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
       _client.addEventListener(CsaShogiClient.LIST,_handleList);
+      loginMessage.text = "Connection...";
+      errorMessage.text = "";
       _client.connect();
     } 
 
@@ -67,13 +73,20 @@
     }
     
     private function _handleConnected(e:Event):void{
+      loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
 			_login_name = loginname.text;
     } 
 
     private function _handleLoggedIn(e:Event):void{
+      loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
       _client.who();
+    }
+
+    private function _handleLoginFailed(e:ServerMessageEvent):void{
+      loginMessage.text = "";
+      errorMessage.text = e.message;
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
@@ -87,14 +100,15 @@
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
 
-    private function _handleGameStarted(e:Event):void{
+    private function _handleGameStarted(e:ServerMessageEvent):void{
 			userMessage.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Sente(Black).\n");
       } else {
         _writeUserMessage("You are Gote(White).\n");
       }
-      board.startGame(_client.myTurn,_client.playerNames,1500,30);
+      var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
+      board.startGame(_client.myTurn,_client.playerNames,match[3],match[4]);
       closeButton.enabled = false;
       resignButton.enabled = true;
       rewindAllButton.enabled = false;
@@ -121,15 +135,15 @@
         _writeUserMessage("You Win.\n");
         if (_end_sound_play) _sound_win.play();
       }
-	  closeButton.enabled = true;
-	  resignButton.enabled = false;
-	  kifuCopyButton.enabled = true;
-	  rewindAllButton.enabled = true;
-	  rewindOneButton.enabled = true;
-	  forwardOneButton.enabled = true;
-	  forwardAllButton.enabled = true;
-	  kifuDataGrid.selectable = true;
-	  kifuDataGrid.selectedIndex = board.kifu_list.length;
+      closeButton.enabled = true;
+      resignButton.enabled = false;
+      kifuCopyButton.enabled = true;
+      rewindAllButton.enabled = true;
+      rewindOneButton.enabled = true;
+      forwardOneButton.enabled = true;
+      forwardAllButton.enabled = true;
+      kifuDataGrid.selectable = true;
+      kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
     }
 
@@ -137,17 +151,19 @@
       var users:Array = e.message.split("\n");
       var user_list:Array = new Array();
       for each(var user_data:String in users){
-        trace("USER_DATA:"+user_data);
         if(user_data.match("##[WHO] +OK") != null){
           break;
         }
-        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+) x1 (\S*)/);
+        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+) x1 (.*)/);
         if(match != null && match[2] != "OK"){
           var name:String = match[1];
           var user:Object = new Object();
           user.name = name;
           user.rating = 1000;
-					user.status = match[3];
+					user.status = match[3].split(" ")[0];
+          if(user.status.indexOf("game_waiting") == 0){
+            user.game_name = match[3].split(" ")[1];
+          }
           user_list.push(user);
         }
       }
@@ -167,8 +183,8 @@
       userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
     }
     
-    private function _waitForGame():void{
-      _client.waitForGame();
+    private function _waitForGame(total:int=1500,byoyomi:int=30):void{
+      _client.waitForGame(total,byoyomi);
 			_refresh();
     }
     
@@ -189,20 +205,54 @@
     	_end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
     	_chat_sound_play = optionWindow.chatSoundCheckBox.selected;
     }
-    
+
     private function _challengeForm():void{
-  			var user:Object = userListGrid.selectedItem;
+  		var user:Object = userListGrid.selectedItem;
 			if(user != null){
-				var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
-				PopUpManager.centerPopUp(challengeWindow);
-	            challengeWindow.title = "Challenge to " + user.name;
-	            challengeWindow.challengeButton.addEventListener("click",_challenge);
+        trace("gamename:"+user.game_name);
+        var match:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+        var total:int = parseInt(match[2]) / 60 ;
+        var rule:String = total + "min -" + match[3] + "sec";
+        Alert.yesLabel = "Challenge";
+        Alert.noLabel = "Offer your setting";
+        Alert.buttonWidth = 140;
+        //Only YES works now.
+        Alert.show("Time:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES,this,_handleChallengeAlert);
+        //set properties back to default.
+        Alert.yesLabel = "Yes";
+        Alert.noLabel = "No";
+        Alert.buttonWidth = 60;
 			}  	
+    }
+
+    private function _handleChallengeAlert(e:CloseEvent):void{
+  		var user:Object = userListGrid.selectedItem;
+      if(e.detail == Alert.YES){
+        _client.challenge(user);
+      } else {
+        var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
+				PopUpManager.centerPopUp(challengeWindow);
+	      challengeWindow.title = "Challenge to " + user.name;
+	      challengeWindow.challengeButton.addEventListener("click",_challenge);
+      }
+    }
+
+    private function _newGameForm():void{
+			var newGameWindow:NewGameForm = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
+			PopUpManager.centerPopUp(newGameWindow);
+	    newGameWindow.title = "Create new game";
+	    newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+    }
+
+    private function _handleRuleSelected(e:GameRuleEvent):void{
+      _waitForGame(e.total,e.byoyomi);
     }
 
     private function _challenge(e:Event):void{
     	var user:Object = userListGrid.selectedItem;
-    	_client.challenge(user.name);
+      if(user != null){
+    	  _client.challenge(user);
+      }
     }
 
 		private function _refresh():void{
@@ -335,16 +385,17 @@
             <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
 	      </mx:FormItem>
 	    </mx:Form>
+      <mx:Label id="loginMessage"/>
+      <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="13" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
-    <mx:Label id="errorMessage"/>
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/01/26"/>
+      <mx:Label text="ver.2010/01/31"/>
     </mx:VBox>
     
     <mx:VBox>
     	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
-	        <mx:Button id="startButton" label="Wait for Game" click="_waitForGame();"/>
+	        <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
 				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
 				  <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
