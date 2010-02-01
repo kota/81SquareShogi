@@ -108,7 +108,8 @@
         _writeUserMessage("You are Gote(White).\n");
       }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
-      board.startGame(_client.myTurn,_client.playerNames,match[3],match[4]);
+      board.startGame(_client.myTurn, _client.playerNames, match[3], match[4]);
+	  stopButton.enabled = false;
       closeButton.enabled = false;
       resignButton.enabled = true;
       rewindAllButton.enabled = false;
@@ -199,6 +200,7 @@
     private function _waitForGame(total:int=1500,byoyomi:int=30):void{
       _client.waitForGame(total,byoyomi);
 			_refresh();
+			stopButton.enabled = true;
     }
     
     private function _showOptions():void{
@@ -256,6 +258,12 @@
 	    newGameWindow.title = "Create new game";
 	    newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
     }
+	
+	private function _stopWaiting():void {
+		_client.stopWaiting();
+		_refresh();
+		stopButton.enabled = false;
+	}
 
     private function _handleRuleSelected(e:GameRuleEvent):void{
       _waitForGame(e.total,e.byoyomi);
@@ -418,11 +426,12 @@
     <mx:VBox>
     	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
 			<mx:HBox>
-	        <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
-				  <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-				  <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
-				  <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-				  <mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="false"/>
+				<mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+				<mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
+				<mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
+				<mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
+				<mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
+				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="false"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
 	       <mx:columns>

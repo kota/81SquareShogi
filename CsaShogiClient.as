@@ -93,6 +93,13 @@ package{
       _current_state = STATE_GAME_WAITING;
       send("%%GAME " + _login_name + "-"+total.toString()+"-"+byoyomi.toString()+" *");
     }
+	
+	public function stopWaiting():void {
+		if (_current_state == STATE_GAME_WAITING){
+			_current_state = STATE_CONNECTED;
+			send("%%GAME");
+		}
+	}
 
 		public function challenge(user:Object):void {
       if(user.game_name){
