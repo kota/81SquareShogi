@@ -419,7 +419,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="13" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/01/31"/>
+      <mx:Label text="ver.2010/02/11"/>
     </mx:VBox>
     
     <mx:VBox>
