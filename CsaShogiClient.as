@@ -134,11 +134,11 @@ package{
 		}
 
     public function monitorOn(game_name:String):void{
-      send("%%MONITORON " + game_name);
+      send("%%MONITOR2ON " + game_name);
     }
 
     public function monitorOff(game_name:String):void{
-      send("%%MONITOROFF " + game_name);
+      send("%%MONITOR2OFF " + game_name);
     }
 
     public function list():void{
@@ -206,9 +206,9 @@ package{
               }
               break;
             case STATE_CONNECTED:
-              if(line.match(/^##\[MONITOR\]/)){
+              if(line.match(/^##\[MONITOR2\]/)){
                 _buffer_response(MONITOR,line);
-                if(line.match(/##\[MONITOR\]\[.*\] \+OK/)){
+                if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
 			            _dispatchServerMessageEvent(MONITOR);
                 }
               }

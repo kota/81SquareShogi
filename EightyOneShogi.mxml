@@ -160,23 +160,23 @@
           var name:String = match[1];
           var user:Object = new Object();
           user.name = name;
-		  user.country = "81SU";
+          user.country = "81SU";
           user.rating = 1500;
-		  user.rank = makeRankFromRating(user.rating);
-		  user.status = match[3].split(" ")[0];
+          user.rank = makeRankFromRating(user.rating);
+          user.status = match[3].split(" ")[0];
           if(user.status.indexOf("game_waiting") == 0){
             user.game_name = match[3].split(" ")[1];
-			user.status2 = "W";
-			match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-			var total:int = parseInt(match[2]) / 60 ;
-			user.rule = total + "-" + match[3];
+	          user.status2 = "W";
+	          match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+	          var total:int = parseInt(match[2]) / 60 ;
+	          user.rule = total + "-" + match[3];
           } else if(user.status.indexOf("game") == 0){
             user.game_name = match[3].split(" ")[1];
-			user.status2 = "G(" + match[3].split(" ")[2] + ")";
-			match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-			total = parseInt(match[2]) / 60 ;
-			user.rule = total + "-" + match[3];
-			if (user.name != match[1]) user.opponent = match[1];  //Temporary Feature(Opponent is shown only for one side^^)
+            user.status2 = "G(" + match[3].split(" ")[2] + ")";
+            match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+            total = parseInt(match[2]) / 60 ;
+            user.rule = total + "-" + match[3];
+            if (user.name != match[1]) user.opponent = match[1];  //Temporary Feature(Opponent is shown only for one side^^)
           }
           user_list.push(user);
         }
@@ -184,11 +184,10 @@
       userListGrid.dataProvider = user_list;
     }
 
-
     private function _writeUserMessage(message:String):void{
-      userMessage.text += message; // + "\n";
+      userMessage.text += message;
       userMessage.callLater(_scrollDown);
-      userMessage2.text += message; // + "\n";
+      userMessage2.text += message;
       userMessage2.callLater(_scrollDown);
     }
 
