@@ -63,7 +63,7 @@
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
       _client.addEventListener(CsaShogiClient.LIST,_handleList);
-      loginMessage.text = "Connection...";
+      loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
     } 
