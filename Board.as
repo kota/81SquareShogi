@@ -333,9 +333,10 @@ package  {
 			_timers[running_timer].timeout();
 		}
 
-	public function get my_turn():int{
-		return _my_turn;
-	}
+  	public function get my_turn():int{
+  		return _my_turn;
+  	}
+
     public function get position():Kyokumen{
       return _position;
     }
@@ -498,7 +499,7 @@ package  {
 			_timeoutCallback();
 		}
 		
-	public function replayMoves(n:int):void{
+	  public function replayMoves(n:int):void{
 		  if (_last_square != null){
 		  	_last_square.setStyle('backgroundColor',undefined);
 		  	_last_square = null;
@@ -515,8 +516,8 @@ package  {
 		      _last_square = _cells[mv.to.y][mv.to.x]
 		      _last_square.setStyle('backgroundColor','0xCC3333');
 		  }
-      	  setPosition(_position);
-	}
+      setPosition(_position);
+	  }
 	
 	public function copyKIFtoClipboard():void{
 		var KIFDataText:String = "";

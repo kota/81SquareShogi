@@ -21,7 +21,7 @@
              {label:"30sec", data:30},
              {label:"10sec", data:10}]
           );
-            
+
           private function submit():void {
             var total:int;
             var byoyomi:int;
@@ -51,16 +51,22 @@
             }
             PopUpManager.removePopUp(this);
           }
+
+          private function _toggleTimeSelection(e:Event):void{
+            nonrated_total.enabled = timeSetting.selectedValue == 3;
+            nonrated_byoyomi.enabled = timeSetting.selectedValue == 3;
+          }
+
         ]]>
     </mx:Script>
-	<mx:RadioButtonGroup id="timeSetting"/>
+	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
 	<mx:RadioButton groupName="timeSetting" label="Rated, 1min  - 30sec" value="0" selected="true"/>
 	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="1" />
 	<mx:RadioButton groupName="timeSetting" label="Rated, 30min - 60sec" value="2"/>
 	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3"/>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_total" selectedIndex="2" dataProvider="{totals}"/>
-		<mx:ComboBox id="nonrated_byoyomi" selectedIndex="0" dataProvider="{byoyomis}"/>
+		<mx:ComboBox id="nonrated_total" selectedIndex="2" dataProvider="{totals}" enabled="false"/>
+		<mx:ComboBox id="nonrated_byoyomi" selectedIndex="0" dataProvider="{byoyomis}" enabled="false"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox>
@@ -82,10 +88,9 @@
 				</mx:Array>
 			</mx:dataProvider>
 		</mx:ComboBox>
-	</mx:HBox>
-    <mx:HBox paddingTop="20"> 
-        <mx:Button id="Submit" click="submit();" label="Create Game"/> 
-        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
-    </mx:HBox> 
-
+  </mx:HBox>
+  <mx:HBox paddingTop="20"> 
+      <mx:Button id="Submit" click="submit();" label="Create Game"/> 
+      <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+  </mx:HBox> 
 </mx:TitleWindow>
