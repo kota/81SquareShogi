@@ -206,8 +206,8 @@
     	optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
     	PopUpManager.centerPopUp(optionWindow);
     	optionWindow.title = "Options";
-    	optionWindow.RadioGroup1.selectedValue = board._piece_type;
-      	optionWindow.pieceSoundCheckBox.selected = board._piece_sound_play;
+    	optionWindow.RadioGroup1.selectedValue = board.piece_type;
+      	optionWindow.pieceSoundCheckBox.selected = board.piece_sound_play;
     	optionWindow.gameEndSoundCheckBox.selected = _end_sound_play;
     	optionWindow.chatSoundCheckBox.selected = _chat_sound_play;
     	optionWindow.OkButton.addEventListener("click",_handleOption);
@@ -215,7 +215,7 @@
     
     private function _handleOption(e:Event):void{
     	board.setPieceType(int(optionWindow.RadioGroup1.selectedValue));
-    	board._piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
+    	board.piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
     	_end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
     	_chat_sound_play = optionWindow.chatSoundCheckBox.selected;
     }
@@ -297,17 +297,22 @@
         _monitoring = false;
       }
       mainViewStack.selectedIndex = 1;
+		challengeButton.enabled = false;
+		watchButton.enabled = false;
 			_refresh();
 		}
 
 		private function _userSelected():void{
 			var user:Object = userListGrid.selectedItem;
-			if(user != null && user.name != _login_name && user.status.indexOf("game_waiting") == 0){
+			if(user != null && user.name != _login_name && user.status == "game_waiting"){
 				challengeButton.enabled = true;
+				watchButton.enabled = false;
+			} else if (user != null && user.status == "game") {
+				challengeButton.enabled = false;
 				watchButton.enabled = true;
 			} else {
 				challengeButton.enabled = false;
-				watchButton.enabled = true;
+				watchButton.enabled = false;
 			}
 		}
 
@@ -345,6 +350,17 @@
       if(_watch_user != null){
         board.monitor(e.message,_watch_user);
       }
+      kifuDataGrid.dataProvider = board.kifu_list;
+      kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
+	  if (board.watch_game_end) {
+		  kifuCopyButton.enabled = true;
+		  rewindAllButton.enabled = true;
+		  rewindOneButton.enabled = true;
+		  forwardOneButton.enabled = true;
+		  forwardAllButton.enabled = true;
+		  kifuDataGrid.selectable = true;
+		  kifuDataGrid.selectedIndex = board.kifu_list.length;
+	  }
     }
 
     private function _watch():void{
@@ -353,6 +369,12 @@
       mainViewStack.selectedIndex = 2;
       closeButton.enabled = true;
       resignButton.enabled = false;
+      rewindAllButton.enabled = false;
+      rewindOneButton.enabled = false;
+      forwardOneButton.enabled = false;
+      forwardAllButton.enabled = false;
+      kifuDataGrid.selectable = false;
+      kifuDataGrid.dataProvider = board.kifu_list;
     }
 
     private function _handleSendChat(e:FlexEvent):void{
@@ -403,7 +425,8 @@
 	</mx:Script>
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-      <mx:Label text="the 81-square Universe Shogi Dojo (powered by ShogiServer)" fontSize="12"/>
+      <mx:Label text="81-Dojo" fontSize="17"/>
+      <mx:Label text="(powered by ShogiServer and 81SU)" fontSize="11"/>
       <mx:Form>
         <mx:FormItem label="loginname">
             <mx:TextInput id="loginname" width="200"/>
@@ -417,9 +440,9 @@
 	    </mx:Form>
       <mx:Label id="loginMessage"/>
       <mx:Label id="errorMessage" color="#ff6666" />
-      <mx:LinkButton label="Sign Up" fontSize="13" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
+      <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/02/11"/>
+      <mx:Label text="ver.2010/02/14"/>
     </mx:VBox>
     
     <mx:VBox>
@@ -444,9 +467,9 @@
 	        <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
 	       </mx:columns>
 	      </mx:DataGrid>
-	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="385" height="115"
+	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115"
 	      	      	 text="Note: All chat messages (even in a game room) will be seen by all users."/>   
-	      		  <mx:TextInput id="chatMessage2" width="290"/>    
+	      		  <mx:TextInput id="chatMessage2" width="430"/>    
       </mx:Panel>
     </mx:VBox>
     
@@ -454,10 +477,10 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-      	<mx:Panel id="messagePanel" title="Message Panel" width="405" height="155">
-	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="385" height="115"/>      		
+      	<mx:Panel id="messagePanel" title="Message Panel" width="435" height="155">
+	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115"/>      		
       	</mx:Panel>
-      	<mx:Panel id="controlPanel" title="Control Panel" width="370" height="155" verticalAlign="middle" paddingLeft="8">
+      	<mx:Panel id="controlPanel" title="Control Panel" width="340" height="155" verticalAlign="middle" paddingLeft="8">
       	  <mx:HBox>
        	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
        	  	<mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
@@ -469,10 +492,8 @@
        	  	<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
           	<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
       	  </mx:HBox>
-      	  <mx:HBox>
-	       	  <mx:Label text="Chat"/>
-		      <mx:TextInput id="chatMessage" width="290"/>     	  	
-      	  </mx:HBox>
+	       <mx:Label text="Chat"/>
+		   <mx:TextInput id="chatMessage" width="300"/>     	  	
       	</mx:Panel>
       </mx:HBox>
       </mx:VBox>

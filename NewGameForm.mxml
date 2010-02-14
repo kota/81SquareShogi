@@ -55,6 +55,7 @@
           private function _toggleTimeSelection(e:Event):void{
             nonrated_total.enabled = timeSetting.selectedValue == 3;
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 3;
+            nonrated_handicap.enabled = timeSetting.selectedValue == 3;
           }
 
         ]]>
@@ -69,7 +70,7 @@
 		<mx:ComboBox id="nonrated_byoyomi" selectedIndex="0" dataProvider="{byoyomis}" enabled="false"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox>
+		<mx:ComboBox id="nonrated_handicap" enabled="false">
 			<mx:dataProvider>
 				<mx:Array>
 					<mx:String>Even Game</mx:String>
