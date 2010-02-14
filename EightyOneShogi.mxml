@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
 
 	<mx:Script>
@@ -172,7 +172,7 @@
 	          user.rule = total + "-" + match[3];
           } else if(user.status.indexOf("game") == 0){
             user.game_name = match[3].split(" ")[1];
-            user.status2 = "G(" + match[3].split(" ")[2] + ")";
+            user.status2 = "G(" + (match[3].split(" ")[2] == "+" ? "▲" : "△") + ")";
             match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
             total = parseInt(match[2]) / 60 ;
             user.rule = total + "-" + match[3];

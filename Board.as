@@ -1,4 +1,4 @@
-/**
+﻿/**
 * ...
 * @author Default
 * @version 0.1
@@ -531,12 +531,12 @@ package  {
 	
 	public function copyKIFtoClipboard():void{
 		var KIFDataText:String = "";
-		KIFDataText += "開始日晁E\n";
+		KIFDataText += "開始日時:\n";
 		KIFDataText += "棋戦:the 81-square Universe\n";
 		KIFDataText += "手合割:平手\n";
 		KIFDataText += "先手:" + _name_labels[0].text + "\n";
 		KIFDataText += "後手:" + _name_labels[1].text + "\n";
-		KIFDataText += "手数----持E��---------消費時間--\n";
+		KIFDataText += "手数----指手---------消費時間--\n";
 		for (var i:int = 1; i < kifu_list.length ; i++){
 			KIFDataText += "   " + String(i) + " ";
 			KIFDataText += kifu_list[i].moveKIF + "\n";
