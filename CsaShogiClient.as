@@ -21,6 +21,8 @@ package{
     public static var MONITOR:String = 'monitor';
     public static var START_WATCH:String = 'start_watch';
     public static var LIST:String = 'list';
+	public static var GAME_SUMMARY:String = 'game_summary';
+	public static var REJECT:String = 'reject';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -52,7 +54,7 @@ package{
       _player_names = new Array(2);
       _buffer = "";
       _buffers = new Object();
-      for each(var key:String in [WHO,LIST,MONITOR,GAME_END]){
+      for each(var key:String in [WHO,LIST,MONITOR,GAME_END,GAME_SUMMARY]){
         _buffers[key] = "";
       }
       //Security.loadPolicyFile("xmlSocket://"+_host+":8430");
@@ -112,6 +114,11 @@ package{
       trace("AGREE");
       send("AGREE");
     }
+	
+	public function reject():void {
+		trace("REJECT");
+		send("REJECT");
+	}
 
     public function move(movement:String):void{
       send(movement);
@@ -170,13 +177,16 @@ package{
             _my_turn = match[1] == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
           } else if(match = line.match(/^Name\+\:(.*)/)){
             _player_names[0] = match[1];
+			_buffer_response(GAME_SUMMARY, match[1]);
           } else if(match = line.match(/^Name\-\:(.*)/)){
             _player_names[1] = match[1];
+			_buffer_response(GAME_SUMMARY, match[1]);
           } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
             _current_state = STATE_AGREE_WAITING;
             _reading_game_summary_flag = false;
-            agree(); //agree automatically for now.
+			_dispatchServerMessageEvent(GAME_SUMMARY);
+         //   agree(); //agree automatically for now.
           }
         }
         if(line.match(/^##\[CHAT\]/)){
@@ -224,7 +234,11 @@ package{
                 _current_state = STATE_GAME;
 			          //dispatchEvent(new Event(GAME_STARTED));
 			          dispatchEvent(new ServerMessageEvent(GAME_STARTED,line));
-              }
+              } else if (line.match(/^REJECT\:/) != null) {
+				  trace("state change to connected");
+				  _current_state = STATE_CONNECTED;
+				  dispatchEvent(new ServerMessageEvent(REJECT,line));
+			  }
               break;
             case STATE_START_WAITING:
               break;

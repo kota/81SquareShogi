@@ -61,8 +61,8 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 1min  - 30sec" value="0" selected="true"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="1" />
+	<mx:RadioButton groupName="timeSetting" label="Rated, 1min  - 30sec" value="0"/>
+	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="1"  selected="true"/>
 	<mx:RadioButton groupName="timeSetting" label="Rated, 30min - 60sec" value="2"/>
 	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3"/>
 	<mx:HBox paddingLeft="50">

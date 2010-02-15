@@ -22,16 +22,20 @@
 		private var _login_name:String;
     private var _watch_user:Object;
     private var _monitoring:Boolean;
+	private var _challenging:Boolean = false;
 
 		[Embed(source = "/sound/win.mp3")]
-		private var sound_win:Class;
-		private var _sound_win:Sound = new sound_win();
+		private var Sound_win:Class;
+		private var _sound_win:Sound = new Sound_win();
 		[Embed(source = "/sound/lose.mp3")]
-		private var sound_lose:Class;
-		private var _sound_lose:Sound = new sound_lose();
+		private var Sound_lose:Class;
+		private var _sound_lose:Sound = new Sound_lose();
 		[Embed(source = "/sound/chat.mp3")]
-		private var sound_chat:Class;
-		private var _sound_chat:Sound = new sound_chat();
+		private var Sound_chat:Class;
+		private var _sound_chat:Sound = new Sound_chat();
+		[Embed(source = "/sound/challenger.mp3")]
+		private var Sound_challenger:Class;
+		private var _sound_challenger:Sound = new Sound_challenger();
 		private var optionWindow:OptionDialog;
 		private var _end_sound_play:Boolean = true;
 		private var _chat_sound_play:Boolean = true;
@@ -62,7 +66,9 @@
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
-      _client.addEventListener(CsaShogiClient.LIST,_handleList);
+      _client.addEventListener(CsaShogiClient.LIST, _handleList);
+	  _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
+	  _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -100,6 +106,36 @@
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
+	
+	private function _handleGameSummary(e:ServerMessageEvent):void {
+		if (_challenging) {
+			_challenging = false;
+			_client.agree();
+		} else {
+			_sound_challenger.play();
+			Alert.yesLabel = "Accept";
+			Alert.noLabel = "Reject";
+			Alert.buttonWidth = 140;
+			Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!", Alert.YES | Alert.NO, this, _handleGameSummaryAlert);
+			//set properties back to default.
+			Alert.yesLabel = "Yes";
+			Alert.noLabel = "No";
+			Alert.buttonWidth = 60;	
+		}
+	}
+	
+	 private function _handleGameSummaryAlert(e:CloseEvent):void{
+  		var user:Object = userListGrid.selectedItem;
+      if(e.detail == Alert.YES){
+        _client.agree();
+      } else {
+        _client.reject();
+      }
+    }
+	
+	private function _handleReject(e:ServerMessageEvent):void {
+		_writeUserMessage("Rejected by the opponent.\n");
+	}
 
     private function _handleGameStarted(e:ServerMessageEvent):void{
 			userMessage.text = '';
@@ -242,7 +278,7 @@
         Alert.noLabel = "Offer your setting";
         Alert.buttonWidth = 140;
         //Only YES works now.
-        Alert.show("Opponent:" + match[1] + "\nTime:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES,this,_handleChallengeAlert);
+        Alert.show("Opponent:" + match[1] + "\nTime:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
         //set properties back to default.
         Alert.yesLabel = "Yes";
         Alert.noLabel = "No";
@@ -252,14 +288,18 @@
 
     private function _handleChallengeAlert(e:CloseEvent):void{
   		var user:Object = userListGrid.selectedItem;
-      if(e.detail == Alert.YES){
-        _client.challenge(user);
+      if (e.detail == Alert.YES) {
+		  _challenging = true;
+		  _writeUserMessage("Challenging.....\n");
+         _client.challenge(user);
+	  } else if (e.detail == Alert.CANCEL) {
       } else {
         var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
 				PopUpManager.centerPopUp(challengeWindow);
 	      challengeWindow.title = "Challenge to " + user.name;
 	      challengeWindow.challengeButton.addEventListener("click",_challenge);
       }
+	  challengeButton.enabled = false;
     }
 
     private function _newGameForm():void{
