@@ -91,6 +91,11 @@ package {
 			if(_accumulated_time < _total){
 				trace("accumulate:"+_accumulated_time.toString());
 				_time_left = _total - _accumulated_time;
+			} else {
+				_byoyomi_flag = true;
+				this.setStyle('backgroundColor',0xFFFF00);
+				_time_left = _byoyomi;
+				_display();
 			}
 		}
 

@@ -81,6 +81,7 @@
     private function _handleLoggedIn(e:Event):void{
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
+	  _writeUserMessage("Note: Private chat isn't implemented yet. All chat messages (even in a game room) will be seen by all users.\n");
       _client.who();
     }
 
@@ -94,7 +95,7 @@
 			if (_chat_sound_play) _sound_chat.play();
     }
 
-    private function _handleMove(e:ServerMessageEvent):void{
+    private function _handleMove(e:ServerMessageEvent):void {
       board.makeMove(e.message);
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
@@ -176,11 +177,21 @@
             match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
             total = parseInt(match[2]) / 60 ;
             user.rule = total + "-" + match[3];
-            if (user.name != match[1]) user.opponent = match[1];  //Temporary Feature(Opponent is shown only for one side^^)
+            if (user.name != match[1]) user.opponent = match[1];  //Show the user's opponent only when he is a challenger
           }
           user_list.push(user);
         }
       }
+	  for (var i:int = 0; i < user_list.length ; i++) {                       //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
+		if (user_list[i].status == "game" && user_list[i].opponent == null) {
+			for (var j:int = 0; j < user_list.length ; j++) {
+				if (user_list[j].opponent == user_list[i].name) {
+					user_list[i].opponent = user_list[j].name;
+					break;
+				}
+			}
+		}
+	  }
       userListGrid.dataProvider = user_list;
     }
 
@@ -353,6 +364,8 @@
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
 	  if (board.watch_game_end) {
+		  _writeUserMessage("Game End.\n");
+          if (_end_sound_play) _sound_win.play();
 		  kifuCopyButton.enabled = true;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
@@ -442,7 +455,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/02/14"/>
+      <mx:Label text="ver.2010/02/15"/>
     </mx:VBox>
     
     <mx:VBox>
@@ -453,7 +466,7 @@
 				<mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
 				<mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 				<mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="false"/>
+				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 			</mx:HBox>
 	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
 	       <mx:columns>
@@ -467,8 +480,7 @@
 	        <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
 	       </mx:columns>
 	      </mx:DataGrid>
-	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115"
-	      	      	 text="Note: All chat messages (even in a game room) will be seen by all users."/>   
+	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115" fontSize="12"/>   
 	      		  <mx:TextInput id="chatMessage2" width="430"/>    
       </mx:Panel>
     </mx:VBox>
@@ -478,7 +490,7 @@
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
       	<mx:Panel id="messagePanel" title="Message Panel" width="435" height="155">
-	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115"/>      		
+	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115" fontSize="12" />      		
       	</mx:Panel>
       	<mx:Panel id="controlPanel" title="Control Panel" width="340" height="155" verticalAlign="middle" paddingLeft="8">
       	  <mx:HBox>

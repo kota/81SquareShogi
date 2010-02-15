@@ -343,7 +343,7 @@ package  {
     }
     public function setPieceType(i:int):void{
     	piece_type = i;
-    	setPosition(_position);
+    	if (_position != null) setPosition(_position);
     }
 
     public function monitor(game_info:String,watch_user:Object):void{
@@ -425,7 +425,7 @@ package  {
       var running_timer:int = turn == _my_turn ? 0 : 1;
       _timers[running_timer].start();
       _timers[1-running_timer].stop();
-      if(moves.length > 0){
+      if (moves.length > 0) {
         for each(var move:Object in moves){
           makeMove(move.move + "," + move.time,false);
         }

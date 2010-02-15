@@ -181,7 +181,7 @@ package{
         }
         if(line.match(/^##\[CHAT\]/)){
           dispatchEvent(new ServerMessageEvent(CHAT,line+"\n"));
-        } else if(line.match(/^[-+][0-9]{4}/)){
+        } else if(line.match(/^[-+][0-9]{4}[A-Z]{2},T/)){
           dispatchEvent(new ServerMessageEvent(MOVE,line));
         } else if(line.match(/^##\[WHO\]/) != null){
           _buffer_response(WHO,line);
