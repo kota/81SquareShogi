@@ -173,12 +173,12 @@ package{
       var match:Array;
       for each(var line:String in lines){
         if(_reading_game_summary_flag){
-          if(match = line.match(/^Your_Turn\:([+-])/)) {
+          if((match = line.match(/^Your_Turn\:([+-])/))) {
             _my_turn = match[1] == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
-          } else if(match = line.match(/^Name\+\:(.*)/)){
+          } else if((match = line.match(/^Name\+\:(.*)/))){
             _player_names[0] = match[1];
 			_buffer_response(GAME_SUMMARY, match[1]);
-          } else if(match = line.match(/^Name\-\:(.*)/)){
+          } else if((match = line.match(/^Name\-\:(.*)/))){
             _player_names[1] = match[1];
 			_buffer_response(GAME_SUMMARY, match[1]);
           } else if(line == "END Game_Summary"){
@@ -243,7 +243,7 @@ package{
             case STATE_START_WAITING:
               break;
             case STATE_GAME:
-              if(match = line.match(/^#(WIN|LOSE|TIMEUP|ILLEGAL_MOVE)/)){
+              if((match = line.match(/^#(WIN|LOSE|TIMEUP|ILLEGAL_MOVE)/))){
                 _buffer_response(GAME_END,line);
                 if(match[1] == "WIN" || match[1] == "LOSE"){
                   trace("state change to connected");

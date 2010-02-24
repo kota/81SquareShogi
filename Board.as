@@ -351,7 +351,7 @@ package  {
       var match:Array;
       if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
         _startMonitor(game_info,watch_user);
-      } else if(match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/)) {
+      } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
 	  } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) {
