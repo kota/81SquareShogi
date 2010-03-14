@@ -88,10 +88,10 @@ package  {
     private var _to:Point;
     private var _position:Kyokumen;
 
+    private var _player_names:Array;
     private var _my_turn:int;
-
-    private var _game_started:Boolean;
-	public var watch_game_end: Boolean;
+    private var _in_game:Boolean;
+    public var watch_game_end: Boolean;
 
     private var _selected_square:Square;
     private var _last_square:Square;
@@ -229,7 +229,7 @@ package  {
       var kifuMove:Object = new Object();
       kifuMove.num = "0";
       kifuMove.move = "Start";
-	  kifu_list.push(kifuMove);
+      kifu_list.push(kifuMove);
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -301,6 +301,7 @@ package  {
 
     public function startGame(my_turn:int,player_names:Array,time_total:int,time_byoyomi:int):void{
       trace("game started");
+      _player_names = player_names;
       _my_turn = my_turn;
       reset();
       _position = new Kyokumen();
@@ -314,7 +315,7 @@ package  {
 			_timers[0].reset(time_total,time_byoyomi);
 			_timers[1].reset(time_total,time_byoyomi);
 			_timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
-      _game_started = true;
+      _in_game = true;
     }
 
     public function endGame():void{
@@ -326,13 +327,26 @@ package  {
         _from = null;
         _selected_square = null;
       }
-      _game_started = false;
+      _in_game = false;
     }
 	
+    public function closeGame():void{
+      _player_names = null;
+    }
+
 		public function timeout():void{
 			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
 			_timers[running_timer].timeout();
 		}
+
+  	public function get inGame():Boolean{
+  		return _in_game;
+  	}
+
+  	public function get playerNames():Array{
+  		return _player_names;
+  	}
+
 
   	public function get my_turn():int{
   		return _my_turn;
@@ -354,15 +368,12 @@ package  {
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
-	  } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) {
-		  watch_game_end = true;
-			_timers[0].stop();
-			_timers[1].stop();
-	  } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
-		  watch_game_end = true;
-			_timers[0].stop();
-			_timers[1].stop();
-	  } else {
+      } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/) ||
+               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
+    	  watch_game_end = true;
+    		_timers[0].stop();
+    		_timers[1].stop();
+      } else {
         return;
       }
     }
@@ -388,10 +399,6 @@ package  {
             var time_match:Array = token.match(/\$EVENT:(.*)\-(.*)\-(.*?)\+/)
             total_time = parseInt(time_match[2]);
             byoyomi = parseInt(time_match[3]);
-//          } else if (token.indexOf("Last_Move") == 0){
-//            var x:int = parseInt(token.substr(13,1));
-//            var y:int = parseInt(token.substr(14,1));
-//            last_move = Kyokumen.translateHumanCoordinates(new Point(x,y));
           } else if (token.match(/([-+][0-9]{4}.{2}$)/)) {
             var move_and_time:Object = new Object();
             move_and_time.move = token
@@ -409,7 +416,8 @@ package  {
         _position.loadFromString(_parsePosition(game_info));
         setPosition(_position);
       }
-	  watch_game_end = false;
+      _player_names = names;
+      watch_game_end = false;
 
       _name_labels[0].text = names[_my_turn];
       _name_labels[1].text = names[1-_my_turn];
@@ -421,7 +429,7 @@ package  {
       _timers[0].reset(total_time,byoyomi);
       _timers[1].reset(total_time,byoyomi);
 
-	  var turn:int = Kyokumen.SENTE;
+      var turn:int = Kyokumen.SENTE;
       var running_timer:int = turn == _my_turn ? 0 : 1;
       _timers[running_timer].start();
       _timers[1-running_timer].stop();
@@ -430,10 +438,6 @@ package  {
           makeMove(move.move + "," + move.time,false);
         }
       }
-//      if(last_move){
-//        var _last_square:Square = _cells[last_move.y][last_move.x];
-//        _last_square.setStyle('backgroundColor','0xCC3333');      
-//      }
     }
 
     private function _parsePosition(game_info:String):String{
@@ -449,7 +453,7 @@ package  {
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if(_game_started && _position.turn == _my_turn){
+      if(_in_game && _position.turn == _my_turn){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
@@ -490,7 +494,7 @@ package  {
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if(_game_started && _position.turn == _my_turn){
+      if(_in_game && _position.turn == _my_turn){
         if(_from == null){
           e.currentTarget.setStyle('backgroundColor','0x33CCCC');
           _selected_square = Square(e.currentTarget);
@@ -529,20 +533,20 @@ package  {
       setPosition(_position);
 	  }
 	
-	public function copyKIFtoClipboard():void{
-		var KIFDataText:String = "";
-		KIFDataText += "開始日時:\n";
-		KIFDataText += "棋戦:the 81-square Universe\n";
-		KIFDataText += "手合割:平手\n";
-		KIFDataText += "先手:" + _name_labels[0].text + "\n";
-		KIFDataText += "後手:" + _name_labels[1].text + "\n";
-		KIFDataText += "手数----指手---------消費時間--\n";
-		for (var i:int = 1; i < kifu_list.length ; i++){
-			KIFDataText += "   " + String(i) + " ";
-			KIFDataText += kifu_list[i].moveKIF + "\n";
-		}
-		System.setClipboard(KIFDataText);
-	}
+    public function copyKIFtoClipboard():void{
+		  var KIFDataText:String = "";
+		  KIFDataText += "開始日時:\n";
+		  KIFDataText += "棋戦:the 81-square Universe\n";
+		  KIFDataText += "手合割:平手\n";
+		  KIFDataText += "先手:" + _name_labels[0].text + "\n";
+		  KIFDataText += "後手:" + _name_labels[1].text + "\n";
+		  KIFDataText += "手数----指手---------消費時間--\n";
+		  for (var i:int = 1; i < kifu_list.length ; i++){
+		  	KIFDataText += "   " + String(i) + " ";
+		  	KIFDataText += kifu_list[i].moveKIF + "\n";
+		  }
+		  System.setClipboard(KIFDataText);
+    }
 
   }
 }

@@ -34,8 +34,8 @@ package{
 
 		private var _socket:Socket;
 
-		//private var _host:String = '127.0.0.1';
-		private var _host:String = '81square-shogi.homeip.net';
+		private var _host:String = '127.0.0.1';
+		//private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
 		//private var _port:int = 2195;
@@ -177,16 +177,15 @@ package{
             _my_turn = match[1] == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
           } else if((match = line.match(/^Name\+\:(.*)/))){
             _player_names[0] = match[1];
-			_buffer_response(GAME_SUMMARY, match[1]);
+            _buffer_response(GAME_SUMMARY, match[1]);
           } else if((match = line.match(/^Name\-\:(.*)/))){
             _player_names[1] = match[1];
-			_buffer_response(GAME_SUMMARY, match[1]);
+            _buffer_response(GAME_SUMMARY, match[1]);
           } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
             _current_state = STATE_AGREE_WAITING;
             _reading_game_summary_flag = false;
-			_dispatchServerMessageEvent(GAME_SUMMARY);
-         //   agree(); //agree automatically for now.
+            _dispatchServerMessageEvent(GAME_SUMMARY);
           }
         }
         if(line.match(/^##\[CHAT\]/)){
@@ -232,7 +231,6 @@ package{
               if (line.match(/^START\:/) != null){
                 trace("state change to game");
                 _current_state = STATE_GAME;
-			          //dispatchEvent(new Event(GAME_STARTED));
 			          dispatchEvent(new ServerMessageEvent(GAME_STARTED,line));
               } else if (line.match(/^REJECT\:/) != null) {
 				  trace("state change to connected");

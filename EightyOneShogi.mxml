@@ -22,7 +22,7 @@
 		private var _login_name:String;
     private var _watch_user:Object;
     private var _monitoring:Boolean;
-	private var _challenging:Boolean = false;
+    private var _challenging:Boolean = false;
 
 		[Embed(source = "/sound/win.mp3")]
 		private var Sound_win:Class;
@@ -48,7 +48,7 @@
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
-      chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
+      chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER,_handleLogin);
       _user_list = new Array();
@@ -67,8 +67,8 @@
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
       _client.addEventListener(CsaShogiClient.LIST, _handleList);
-	  _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
-	  _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
+      _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
+      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -87,7 +87,6 @@
     private function _handleLoggedIn(e:Event):void{
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
-	  _writeUserMessage("Note: Private chat isn't implemented yet. All chat messages (even in a game room) will be seen by all users.\n");
       _client.who();
     }
 
@@ -97,8 +96,42 @@
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
-			_writeUserMessage(e.message.substr(8));
-			if (_chat_sound_play) _sound_chat.play();
+      if(_isMessageAudible(e.message)){
+			  _writeUserMessage(e.message.substr(8));
+			  if (_chat_sound_play) _sound_chat.play();
+      }
+    }
+
+    private function _isMessageAudible(message:String):Boolean{
+      var sender_name:String = message.match(/\#\#\[CHAT\]\[(.*)\]/)[1];
+      if(board.inGame){
+        if(_isPlayer(sender_name)){
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        var match:Array = message.match(/\#\#\[CHAT\]\[(.*)\] ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
+        if(match != null){
+          var game_name:String = match[2];
+          if(_game_name && _game_name == game_name){
+            if(_isPlayer(sender_name) && _monitoring && !board.watch_game_end){
+              return false;
+            }
+            return true;
+          }
+        } else {
+          //No game id => public chat.
+          return true;
+        }
+      }
+      return false;
+    }
+
+    private function _isPlayer(user_name:String):Boolean{
+      trace("player names:");
+      trace(board.playerNames);
+      return board.playerNames != null && board.playerNames[0] == user_name || board.playerNames[1] == user_name
     }
 
     private function _handleMove(e:ServerMessageEvent):void {
@@ -116,7 +149,8 @@
 			Alert.yesLabel = "Accept";
 			Alert.noLabel = "Reject";
 			Alert.buttonWidth = 140;
-			Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!", Alert.YES | Alert.NO, this, _handleGameSummaryAlert);
+			Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!",
+                Alert.YES | Alert.NO, this, _handleGameSummaryAlert);
 			//set properties back to default.
 			Alert.yesLabel = "Yes";
 			Alert.noLabel = "No";
@@ -146,7 +180,8 @@
       }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       board.startGame(_client.myTurn, _client.playerNames, match[3], match[4]);
-	  stopButton.enabled = false;
+      _game_name = e.message.substr(6);
+      stopButton.enabled = false;
       closeButton.enabled = false;
       resignButton.enabled = true;
       rewindAllButton.enabled = false;
@@ -163,9 +198,9 @@
 				board.timeout();
         _writeUserMessage("Time out.\n");
 			}
-	  if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-	  	_writeUserMessage("Illegal Move.\n");
-	  }
+      if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
+      	_writeUserMessage("Illegal Move.\n");
+      }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
         if (_end_sound_play) _sound_lose.play();
@@ -218,16 +253,16 @@
           user_list.push(user);
         }
       }
-	  for (var i:int = 0; i < user_list.length ; i++) {                       //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
-		if (user_list[i].status == "game" && user_list[i].opponent == null) {
-			for (var j:int = 0; j < user_list.length ; j++) {
-				if (user_list[j].opponent == user_list[i].name) {
-					user_list[i].opponent = user_list[j].name;
-					break;
-				}
-			}
-		}
-	  }
+      for (var i:int = 0; i < user_list.length ; i++) {                       //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
+        if (user_list[i].status == "game" && user_list[i].opponent == null) {
+          for (var j:int = 0; j < user_list.length ; j++) {
+            if (user_list[j].opponent == user_list[i].name) {
+              user_list[i].opponent = user_list[j].name;
+              break;
+            }
+          }
+        }
+      }
       userListGrid.dataProvider = user_list;
     }
 
@@ -254,7 +289,7 @@
     	PopUpManager.centerPopUp(optionWindow);
     	optionWindow.title = "Options";
     	optionWindow.RadioGroup1.selectedValue = board.piece_type;
-      	optionWindow.pieceSoundCheckBox.selected = board.piece_sound_play;
+      optionWindow.pieceSoundCheckBox.selected = board.piece_sound_play;
     	optionWindow.gameEndSoundCheckBox.selected = _end_sound_play;
     	optionWindow.chatSoundCheckBox.selected = _chat_sound_play;
     	optionWindow.OkButton.addEventListener("click",_handleOption);
@@ -299,7 +334,7 @@
 	      challengeWindow.title = "Challenge to " + user.name;
 	      challengeWindow.challengeButton.addEventListener("click",_challenge);
       }
-	  challengeButton.enabled = false;
+      challengeButton.enabled = false;
     }
 
     private function _newGameForm():void{
@@ -309,11 +344,11 @@
 	    newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
     }
 	
-	private function _stopWaiting():void {
-		_client.stopWaiting();
-		_refresh();
-		stopButton.enabled = false;
-	}
+    private function _stopWaiting():void {
+    	_client.stopWaiting();
+    	_refresh();
+    	stopButton.enabled = false;
+    }
 
     private function _handleRuleSelected(e:GameRuleEvent):void{
       _waitForGame(e.total,e.byoyomi);
@@ -344,12 +379,15 @@
 		private function _closeGame():void{
       if(_game_name && _monitoring){
         _client.monitorOff(_game_name);
-        _game_name = null;
         _monitoring = false;
       }
+      if(_game_name){
+        _game_name = null;
+      }
+      board.closeGame();
       mainViewStack.selectedIndex = 1;
-		challengeButton.enabled = false;
-		watchButton.enabled = false;
+      challengeButton.enabled = false;
+      watchButton.enabled = false;
 			_refresh();
 		}
 
@@ -377,11 +415,12 @@
 		}
 
     private function _handleList(e:ServerMessageEvent):void{
-      trace("list original message:"+e.message);
+      trace("list:"+e.message);
       if(_watch_user != null){
         var lines:Array = e.message.split("\n");
         for each(var line:String in lines){
           var tokens:Array = line.split("+");
+          trace(tokens[0]+":"+tokens[1]+":"+tokens[2]+":"+tokens[3]);
           if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
             var match:Array = line.match(/##\[LIST\] (.*)/);
             if(match != null){
@@ -403,17 +442,17 @@
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
-	  if (board.watch_game_end) {
-		  _writeUserMessage("Game End.\n");
-          if (_end_sound_play) _sound_win.play();
-		  kifuCopyButton.enabled = true;
-		  rewindAllButton.enabled = true;
-		  rewindOneButton.enabled = true;
-		  forwardOneButton.enabled = true;
-		  forwardAllButton.enabled = true;
-		  kifuDataGrid.selectable = true;
-		  kifuDataGrid.selectedIndex = board.kifu_list.length;
-	  }
+      if (board.watch_game_end) {
+        _writeUserMessage("Game End.\n");
+        if (_end_sound_play) _sound_win.play();
+        kifuCopyButton.enabled = true;
+        rewindAllButton.enabled = true;
+        rewindOneButton.enabled = true;
+        forwardOneButton.enabled = true;
+        forwardAllButton.enabled = true;
+        kifuDataGrid.selectable = true;
+        kifuDataGrid.selectedIndex = board.kifu_list.length;
+      }
     }
 
     private function _watch():void{
@@ -431,13 +470,12 @@
     }
 
     private function _handleSendChat(e:FlexEvent):void{
-      _client.chat(chatMessage.text);
-      chatMessage.text = "";
-    }
-    
-    private function _handleSendChat2(e:FlexEvent):void{
-      _client.chat(chatMessage2.text);
-      chatMessage2.text = "";
+      if(_game_name){
+        _client.chat(_game_name + " " + e.target.text);
+      } else {
+        _client.chat(e.target.text);
+      }
+      e.target.text = "";
     }
     
     private function replay():void{
@@ -495,7 +533,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/02/15"/>
+      <mx:Label text="ver.2010/03/14"/>
     </mx:VBox>
     
     <mx:VBox>
