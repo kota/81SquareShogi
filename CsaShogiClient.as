@@ -21,8 +21,8 @@ package{
     public static var MONITOR:String = 'monitor';
     public static var START_WATCH:String = 'start_watch';
     public static var LIST:String = 'list';
-	public static var GAME_SUMMARY:String = 'game_summary';
-	public static var REJECT:String = 'reject';
+    public static var GAME_SUMMARY:String = 'game_summary';
+    public static var REJECT:String = 'reject';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -34,8 +34,8 @@ package{
 
 		private var _socket:Socket;
 
-		private var _host:String = '127.0.0.1';
-		//private var _host:String = '81square-shogi.homeip.net';
+		//private var _host:String = '127.0.0.1';
+		private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
 		//private var _port:int = 2195;

@@ -97,9 +97,18 @@
 
     private function _handleChat(e:ServerMessageEvent):void{
       if(_isMessageAudible(e.message)){
-			  _writeUserMessage(e.message.substr(8));
+			  _writeUserMessage(_format_message(e.message));
 			  if (_chat_sound_play) _sound_chat.play();
       }
+    }
+
+    private function _format_message(message:String):String{
+      message = message.substr(8);
+      var match:Array = message.match(/(\[.+?\]) ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
+      if(match != null){
+        message = match[1] + " " + match[3] + "\n";
+      }
+      return message;
     }
 
     private function _isMessageAudible(message:String):Boolean{
@@ -129,7 +138,6 @@
     }
 
     private function _isPlayer(user_name:String):Boolean{
-      trace("player names:");
       trace(board.playerNames);
       return board.playerNames != null && board.playerNames[0] == user_name || board.playerNames[1] == user_name
     }
@@ -253,7 +261,7 @@
           user_list.push(user);
         }
       }
-      for (var i:int = 0; i < user_list.length ; i++) {                       //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
+      for (var i:int = 0; i < user_list.length ; i++) { //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
         if (user_list[i].status == "game" && user_list[i].opponent == null) {
           for (var j:int = 0; j < user_list.length ; j++) {
             if (user_list[j].opponent == user_list[i].name) {
@@ -423,6 +431,7 @@
           trace(tokens[0]+":"+tokens[1]+":"+tokens[2]+":"+tokens[3]);
           if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
             var match:Array = line.match(/##\[LIST\] (.*)/);
+            trace("Line = " + line);
             if(match != null){
               var game_name:String = match[1];
               trace("WATCH GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
@@ -533,7 +542,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/03/14"/>
+      <mx:Label text="ver.2010/04/11"/>
     </mx:VBox>
     
     <mx:VBox>
