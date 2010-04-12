@@ -272,8 +272,8 @@ package  {
 
 			var time:int = mv.time;
 
-			_timers[running_timer].suspend();
 			_timers[running_timer].accumulateTime(time);
+			_timers[running_timer].suspend();
 			_timers[1-running_timer].resume();
 
       _position.move(mv);
