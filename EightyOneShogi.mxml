@@ -14,6 +14,7 @@
     import Board;
     import ChallengeForm;
     import GameRuleEvent;
+    import mx.utils.StringUtil;
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -235,6 +236,7 @@
         if(user_data.match("##[WHO] +OK") != null){
           break;
         }
+        trace("user_data:" + user_data);
         var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+) x1 (.*)/);
         if(match != null && match[2] != "OK"){
           var name:String = match[1];
@@ -242,21 +244,27 @@
           user.name = name;
           user.country = "81SU";
           user.rating = 1500;
+          "game_waiting", "start_waiting", "agree_waiting", "game"
           user.rank = makeRankFromRating(user.rating);
-          user.status = match[3].split(" ")[0];
+          user.status = StringUtil.trim(match[3].split(" ")[0]);
           if(user.status.indexOf("game_waiting") == 0){
             user.game_name = match[3].split(" ")[1];
 	          user.status2 = "W";
-	          match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-	          var total:int = parseInt(match[2]) / 60 ;
-	          user.rule = total + "-" + match[3];
+	          var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+	          var total:int = parseInt(game_info[2]) / 60 ;
+	          user.rule = total + "-" + game_info[3];
           } else if(user.status.indexOf("game") == 0){
             user.game_name = match[3].split(" ")[1];
             user.status2 = "G(" + (match[3].split(" ")[2] == "+" ? "▲" : "△") + ")";
-            match = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-            total = parseInt(match[2]) / 60 ;
-            user.rule = total + "-" + match[3];
-            if (user.name != match[1]) user.opponent = match[1];  //Show the user's opponent only when he is a challenger
+            game_info = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+            total = parseInt(game_info[2]) / 60 ;
+            user.rule = total + "-" + game_info[3];
+            if (user.name != game_info[1]) user.opponent = game_info[1];  //Show the user's opponent only when he is a challenger
+          }
+          if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
+            user.rating = parseInt(match[3].split(' ')[3]);
+          } else {
+            user.rating = parseInt(match[3].split(' ')[1]);
           }
           user_list.push(user);
         }
