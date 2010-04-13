@@ -125,21 +125,21 @@
         if(match != null){
           var game_name:String = match[2];
           if(_game_name && _game_name == game_name){
-            if(_isPlayer(sender_name) && _monitoring && !board.watch_game_end){
-              return false;
-            }
             return true;
           }
         } else {
           //No game id => public chat.
-          return true;
+          if(_monitoring){
+            return false;
+          } else {
+            return true;
+          }
         }
       }
       return false;
     }
 
     private function _isPlayer(user_name:String):Boolean{
-      trace(board.playerNames);
       return board.playerNames != null && board.playerNames[0] == user_name || board.playerNames[1] == user_name
     }
 
