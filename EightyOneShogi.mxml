@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xdddd77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
 
 	<mx:Script>
 	  <![CDATA[
@@ -40,6 +40,7 @@
 		private var optionWindow:OptionDialog;
 		private var _end_sound_play:Boolean = true;
 		private var _chat_sound_play:Boolean = true;
+		private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 
     private var _keepAliveTimer:Timer;
 
@@ -529,12 +530,14 @@
 	
 	//TO DO: Move to another class maybe?
 	private function makeRankFromRating(i:int):String{
-		var rank_borders:Array = new Array(50, 150, 250, 350, 450, 550, 650, 750, 850, 950, 1050, 1150, 1250, 1350, 1450, 1550, 1700, 1900, 2100, 2300, 2450,10000);
-		var rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
-		for (var j:int = 0; j < 22; j++) {
-			if (i < rank_borders[j]) return rank_names[j];
-		}
-		return "";
+//		const rank_borders:Array = new Array(50, 150, 250, 350, 450, 550, 650, 750, 850, 950, 1050, 1150, 1250, 1350, 1450, 1550, 1700, 1900, 2100, 2300, 2450,10000);
+//		for (var j:int = 0; j < 22; j++) {
+//			if (i < rank_borders[j]) return rank_names[j];
+//		}
+		if (i < 1550) return rank_names[int((i + 50) / 100)];
+		else if (i < 2300) return rank_names[int((i + 1700) / 200)];
+		else if (i < 2450) return rank_names[20];
+		else return rank_names[21];
 	}
 
 	  ]]>
