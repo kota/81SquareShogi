@@ -34,8 +34,8 @@ package{
 
 		private var _socket:Socket;
 
-		//private var _host:String = '127.0.0.1';
-		private var _host:String = '81square-shogi.homeip.net';
+		private var _host:String = '127.0.0.1';
+		//private var _host:String = '81square-shogi.homeip.net';
 		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
 		//private var _port:int = 2195;
@@ -152,6 +152,11 @@ package{
       send("%%LIST");
     }
 
+    public function keepAlive():void{
+      trace("keepAlive");
+      send("\n");
+    }
+
 		private function _handleConnect(e:Event):void{
 			trace("connected.");
 			dispatchEvent(new Event(CsaShogiClient.CONNECTED));
@@ -169,7 +174,7 @@ package{
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
       var lines:Array = response.split("\n");
-      trace(response);
+      trace("Response:"+response);
       var match:Array;
       for each(var line:String in lines){
         if(_reading_game_summary_flag){
@@ -233,10 +238,10 @@ package{
                 _current_state = STATE_GAME;
 			          dispatchEvent(new ServerMessageEvent(GAME_STARTED,line));
               } else if (line.match(/^REJECT\:/) != null) {
-				  trace("state change to connected");
-				  _current_state = STATE_CONNECTED;
-				  dispatchEvent(new ServerMessageEvent(REJECT,line));
-			  }
+                trace("state change to connected");
+                _current_state = STATE_CONNECTED;
+                dispatchEvent(new ServerMessageEvent(REJECT,line));
+			        }
               break;
             case STATE_START_WAITING:
               break;

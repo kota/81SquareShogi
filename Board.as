@@ -425,7 +425,6 @@ package  {
       _info_labels[1].text = "R:1500, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-      trace("Byoyomi="+byoyomi.toString());
       _timers[0].reset(total_time,byoyomi);
       _timers[1].reset(total_time,byoyomi);
 

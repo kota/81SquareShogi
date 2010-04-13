@@ -41,7 +41,8 @@
 		private var _end_sound_play:Boolean = true;
 		private var _chat_sound_play:Boolean = true;
 
-		
+    private var _keepAliveTimer:Timer;
+
 		private function initApp():void
 		{
 		  trace("application initialized..");
@@ -75,6 +76,10 @@
       _client.connect();
     } 
 
+    private function _handleKeepAlive(e:Event):void{
+      _client.keepAlive();
+    }
+
     private function _handleLogin(e:Event):void{
       _connectAndLogin();
     }
@@ -89,6 +94,9 @@
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
       _client.who();
+      _keepAliveTimer = new Timer(30000);
+      _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
+      _keepAliveTimer.start();
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
