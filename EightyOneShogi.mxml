@@ -77,7 +77,8 @@
     } 
 
     private function _handleKeepAlive(e:Event):void{
-      _client.keepAlive();
+      //_client.keepAlive();
+      _refresh();
     }
 
     private function _handleLogin(e:Event):void{
