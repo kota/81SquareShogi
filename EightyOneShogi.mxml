@@ -252,10 +252,14 @@
           var user:Object = new Object();
           user.name = name;
           user.country = "81SU";
-          user.rating = 1500;
-          "game_waiting", "start_waiting", "agree_waiting", "game"
-          user.rank = makeRankFromRating(user.rating);
+          user.rating = 1000;
           user.status = StringUtil.trim(match[3].split(" ")[0]);
+          if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
+            user.rating = parseInt(match[3].split(' ')[3]);
+          } else {
+            user.rating = parseInt(match[3].split(' ')[1]);
+          }
+          user.rank = makeRankFromRating(user.rating);
           if(user.status.indexOf("game_waiting") == 0){
             user.game_name = match[3].split(" ")[1];
 	          user.status2 = "W";
@@ -269,11 +273,6 @@
             total = parseInt(game_info[2]) / 60 ;
             user.rule = total + "-" + game_info[3];
             if (user.name != game_info[1]) user.opponent = game_info[1];  //Show the user's opponent only when he is a challenger
-          }
-          if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
-            user.rating = parseInt(match[3].split(' ')[3]);
-          } else {
-            user.rating = parseInt(match[3].split(' ')[1]);
           }
           user_list.push(user);
         }
