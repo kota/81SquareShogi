@@ -14,11 +14,12 @@ package  {
 
 		private var _turn:int;
 		private var _ban:Array;
-		private var _komadai:Array;
+		private var _komadai:Array; 
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
     private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
-    private static const koma_japanese_names:Array = new Array('玉','飛','角','金','銀','桂','香','歩','','龍','馬','','成銀','成桂','成香','と');
+    private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
+	private static const koma_impasse_points:Array = new Array(0, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
     private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
     private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
     private static const file_japanese_names:Array = new Array('１','２','３','４','５','６','７','８','９');
@@ -295,6 +296,19 @@ package  {
 				koma.depromote();
 			}
 			_komadai[turn].addKoma(koma);
+		}
+		
+		public function calcImpasse(turn:int):int {
+			var n:int = 0;
+			for(var y:int=0; y < 9; y++){
+				for (var x:int = 0; x < 9; x++) {
+						if (_ban[x][y] && _ban[x][y].ownerPlayer == turn) n += koma_impasse_points[_ban[x][y].type];
+				}
+			}
+			for (var i:int = 0; i < 8; i++) {
+				n += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
+			}
+			return n;
 		}
 		
 	public function generateWesternNotationFromMovement(mv:Movement):String{

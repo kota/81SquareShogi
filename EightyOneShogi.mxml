@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xdddd77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
 
 	<mx:Script>
 	  <![CDATA[
@@ -392,7 +392,7 @@
 
     private function _resign():void{
       if (board.my_turn == board.position.turn) {
-      	_client.chat("(auto-chat) I resign.\n");
+		_client.chat(_game_name + " (auto-chat) I resign.\n");
       	_client.resign();
       }
     }
@@ -414,6 +414,10 @@
       challengeButton.enabled = false;
       watchButton.enabled = false;
 			_refresh();
+		}
+		
+		private function _showImpasse():void {
+			Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
 		}
 
 		private function _userSelected():void{
@@ -602,6 +606,7 @@
       	  <mx:HBox>
        	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
        	  	<mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
+			<mx:Button id="impasseButton" label="Impasse?" click="_showImpasse();"/>
           	<mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>     	  	
       	  </mx:HBox>
       	  <mx:HBox>
