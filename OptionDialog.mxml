@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="370" height="360">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="370" height="400">
 	<mx:Script>
         <![CDATA[
         	import mx.controls.*;
@@ -35,6 +35,12 @@
 		<mx:Image source="@Embed('images/pieces_hidetchi/sou.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_hidetchi/suma.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_hidetchi/sfu.png')" width="34" height="40"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="30">
+		<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup1"  value="3"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/sou.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/suma.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/sfu.png')" width="34" height="40"/>
 	</mx:HBox>
     <mx:HBox paddingTop="20"> 
         <mx:Button id="OkButton" click="clickOK();" label="OK"/> 
