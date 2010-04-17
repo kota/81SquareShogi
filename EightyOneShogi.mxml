@@ -212,14 +212,28 @@
       mainViewStack.selectedIndex = 2;
     }
 
-    private function _handleGameEnd(e:ServerMessageEvent):void{
+    private function _handleGameEnd(e:ServerMessageEvent):void {
+	  var kifuMove:Object = new Object();
+	  kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
 				board.timeout();
-        _writeUserMessage("Time out.\n");
+        _writeUserMessage("Time up.\n");
+		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+		  kifuMove.moveKIF = "切れ負け";
+		  board.kifu_list.push(kifuMove);
 			}
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
       	_writeUserMessage("Illegal Move.\n");
+		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
+		  kifuMove.moveKIF = "反則負け";
+		  board.kifu_list.push(kifuMove);
       }
+	  if (e.message.indexOf("RESIGN") >= 0) {
+      	_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
+		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
+		  kifuMove.moveKIF = "投了";
+		  board.kifu_list.push(kifuMove);
+	  }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
         if (_end_sound_play) _sound_lose.play();
@@ -234,6 +248,8 @@
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
       forwardAllButton.enabled = true;
+	  kifuDataGrid.dataProvider = board.kifu_list;
+      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
       kifuDataGrid.selectable = true;
       kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
@@ -392,7 +408,7 @@
 
     private function _resign():void{
       if (board.my_turn == board.position.turn) {
-		_client.chat(_game_name + " (auto-chat) I resign.\n");
+//		_client.chat(_game_name + " (auto-chat) I resign.\n");
       	_client.resign();
       }
     }
@@ -508,8 +524,8 @@
       e.target.text = "";
     }
     
-    private function replay():void{
-    	board.replayMoves(int(kifuDataGrid.selectedIndex));
+    private function replay():void {
+		board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
     }
     
     private function replayByButton(i:int):void{
@@ -565,7 +581,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/04/11"/>
+      <mx:Label text="ver.2010/04/17"/>
     </mx:VBox>
     
     <mx:VBox>

@@ -508,8 +508,8 @@ package  {
       }
     }
 
-		private function _checkTimeout(e:Event):void{
-			_timeoutCallback();
+		private function _checkTimeout(e:Event):void {
+			if (_in_game) _timeoutCallback();
 		}
 		
 	  public function replayMoves(n:int):void{
@@ -534,8 +534,9 @@ package  {
 	
     public function copyKIFtoClipboard():void{
 		  var KIFDataText:String = "";
-		  KIFDataText += "開始日時:\n";
-		  KIFDataText += "棋戦:the 81-square Universe\n";
+		  var date:Date = new Date;
+		  KIFDataText += "開始日時: " + date.fullYear + "/" + date.month + "/" + date.date + "\n";
+		  KIFDataText += "場所: 81-Dojo\n";
 		  KIFDataText += "手合割:平手\n";
 		  KIFDataText += "先手:" + _name_labels[0].text + "\n";
 		  KIFDataText += "後手:" + _name_labels[1].text + "\n";

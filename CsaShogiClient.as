@@ -246,7 +246,7 @@ package{
             case STATE_START_WAITING:
               break;
             case STATE_GAME:
-              if((match = line.match(/^#(WIN|LOSE|TIMEUP|ILLEGAL_MOVE)/))){
+              if((match = line.match(/^#(WIN|LOSE|RESIGN|TIME_UP|ILLEGAL_MOVE)/))){
                 _buffer_response(GAME_END,line);
                 if(match[1] == "WIN" || match[1] == "LOSE"){
                   trace("state change to connected");
