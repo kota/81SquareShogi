@@ -433,7 +433,7 @@ package  {
       _timers[running_timer].start();
       _timers[1-running_timer].stop();
       if (moves.length > 0) {
-        for each(var move:Object in moves){
+        for each(var move:Object in moves) {
           makeMove(move.move + "," + move.time,false);
         }
       }
@@ -538,8 +538,8 @@ package  {
 		  KIFDataText += "開始日時: " + date.fullYear + "/" + date.month + "/" + date.date + "\n";
 		  KIFDataText += "場所: 81-Dojo\n";
 		  KIFDataText += "手合割:平手\n";
-		  KIFDataText += "先手:" + _name_labels[0].text + "\n";
-		  KIFDataText += "後手:" + _name_labels[1].text + "\n";
+		  KIFDataText += "先手:" + playerNames[0] + "\n";
+		  KIFDataText += "後手:" + playerNames[1] + "\n";
 		  KIFDataText += "手数----指手---------消費時間--\n";
 		  for (var i:int = 1; i < kifu_list.length ; i++){
 		  	KIFDataText += "   " + String(i) + " ";
