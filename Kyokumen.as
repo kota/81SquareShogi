@@ -120,23 +120,24 @@ package  {
       _ban[p.x][p.y] = koma;
     }
 		
-		public function validateMovement(mv:Movement):Boolean {
-			var koma:Koma = _ban[mv.from.x - 1][mv.from.y - 1]; 
-			if(!koma){
-				return false;
-			}
-			
-			//invalid if from and to are the same.
-			if (mv.from.x == mv.to.x && mv.from.y == mv.to.y) {
-				return false;
-			}
-			
-			//invalid if capturing own piece
-			if (Koma(getKomaAt(mv.to)) && Koma(getKomaAt(mv.to)).ownerPlayer == mv.turn) {
-				return false;
-			}
-			return true;
-		}
+//		public function validateMovement(mv:Movement):Boolean {
+//			var koma:Koma = _ban[mv.from.x - 1][mv.from.y - 1]; 
+//			if (!koma) {
+//				return false;
+//			}
+//
+//			//invalid if from and to are the same.
+//			if (mv.from.x == mv.to.x && mv.from.y == mv.to.y) {
+//				return false;
+//			}
+//			
+//			//invalid if capturing own piece
+//			if (Koma(getKomaAt(mv.to)) && Koma(getKomaAt(mv.to)).ownerPlayer == mv.turn) {
+//				return false;
+//			}
+//			
+//			return true;
+//		}
 		
 		public function canPromote(from:Point,to:Point):Boolean {
       to = translateHumanCoordinates(to);

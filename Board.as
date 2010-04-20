@@ -465,7 +465,7 @@ package  {
         } else {
           koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           _selected_square.setStyle('backgroundColor',undefined);
-          if( koma != null && koma.ownerPlayer == _my_turn){
+          if( koma != null && (koma.ownerPlayer == _my_turn || _from.x >= Kyokumen.HAND)){
           	_from = null;
           	_selected_square = null;
           } else {
