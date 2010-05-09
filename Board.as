@@ -392,7 +392,7 @@ package  {
           if(token.indexOf("N+") == 0){
             var name:String = token.match(/N\+(.*)/)[1]
             names[0] = name;
-            _my_turn = name == watch_user.name ? Kyokumen.SENTE : Kyokumen.GOTE;
+            _my_turn = name.toLowerCase() == watch_user.name ? Kyokumen.SENTE : Kyokumen.GOTE;
           } else if (token.indexOf("N-") == 0){
             names[1] = token.match(/N\-(.*)/)[1];
           } else if (token.indexOf("$EVENT:") == 0) {
