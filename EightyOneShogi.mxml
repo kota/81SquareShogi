@@ -234,13 +234,19 @@
 		  kifuMove.moveKIF = "投了";
 		  board.kifu_list.push(kifuMove);
 	  }
+	  if (e.message.indexOf("SENNICHITE") >= 0) {
+      	_writeUserMessage("Sennichite.\n");
+	  }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
         if (_end_sound_play) _sound_lose.play();
-      } else {
+      } else if(e.message.indexOf("WIN") >= 0){
         _writeUserMessage("You Win.\n");
         if (_end_sound_play) _sound_win.play();
-      }
+      } else if(e.message.indexOf("DRAW") >=0){
+		_writeUserMessage("Draw.\n");
+		if (_end_sound_play) _sound_win.play();
+	  }
       closeButton.enabled = true;
       resignButton.enabled = false;
       kifuCopyButton.enabled = true;
