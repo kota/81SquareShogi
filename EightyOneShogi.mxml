@@ -275,7 +275,6 @@
           var user:Object = new Object();
           user.name = name;
           user.country = "81SU";
-          user.rating = 1000;
           user.status = StringUtil.trim(match[3].split(" ")[0]);
           if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
             user.rating = parseInt(match[3].split(' ')[3]);
@@ -312,6 +311,12 @@
       }
 	  user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       userListGrid.dataProvider = user_list;
+	  for (i = 0; i < user_list.length; i++) {
+		  if (user_list[i].name == _login_name.toLowerCase()) {
+			  userListGrid.selectedIndex = i;
+		      break;
+		  }
+	  }
     }
 
     private function _writeUserMessage(message:String):void{
