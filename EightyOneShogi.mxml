@@ -310,6 +310,7 @@
           }
         }
       }
+	  user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       userListGrid.dataProvider = user_list;
     }
 
