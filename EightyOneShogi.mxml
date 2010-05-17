@@ -475,6 +475,7 @@
               _game_name = game_name;
               _monitoring = true;
               _client.monitorOn(game_name);
+              _client.watchers(game_name);
               break;
             }
           }

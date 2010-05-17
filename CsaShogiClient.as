@@ -153,8 +153,11 @@ package{
     }
 
     public function keepAlive():void{
-      trace("keepAlive");
       send("\n");
+    }
+
+    public function watchers(game_name:String):void{
+      send("%%%WATCHERS " + game_name);
     }
 
 		private function _handleConnect(e:Event):void{
