@@ -234,13 +234,19 @@
 		  kifuMove.moveKIF = "投了";
 		  board.kifu_list.push(kifuMove);
 	  }
+	  if (e.message.indexOf("SENNICHITE") >= 0) {
+      	_writeUserMessage("Sennichite.\n");
+	  }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
         if (_end_sound_play) _sound_lose.play();
-      } else {
+      } else if(e.message.indexOf("WIN") >= 0){
         _writeUserMessage("You Win.\n");
         if (_end_sound_play) _sound_win.play();
-      }
+      } else if(e.message.indexOf("DRAW") >=0){
+		_writeUserMessage("Draw.\n");
+		if (_end_sound_play) _sound_win.play();
+	  }
       closeButton.enabled = true;
       resignButton.enabled = false;
       kifuCopyButton.enabled = true;
@@ -269,7 +275,6 @@
           var user:Object = new Object();
           user.name = name;
           user.country = "81SU";
-          user.rating = 1000;
           user.status = StringUtil.trim(match[3].split(" ")[0]);
           if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
             user.rating = parseInt(match[3].split(' ')[3]);
@@ -289,7 +294,7 @@
             game_info = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
             total = parseInt(game_info[2]) / 60 ;
             user.rule = total + "-" + game_info[3];
-            if (user.name != game_info[1]) user.opponent = game_info[1];  //Show the user's opponent only when he is a challenger
+            if (user.name != game_info[1].toLowerCase()) user.opponent = game_info[1].toLowerCase();  //Show the user's opponent only when he is a challenger
           }
           user_list.push(user);
         }
@@ -304,7 +309,14 @@
           }
         }
       }
+	  user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       userListGrid.dataProvider = user_list;
+	  for (i = 0; i < user_list.length; i++) {
+		  if (user_list[i].name == _login_name.toLowerCase()) {
+			  userListGrid.selectedIndex = i;
+		      break;
+		  }
+	  }
     }
 
     private function _writeUserMessage(message:String):void{
@@ -466,7 +478,7 @@
         for each(var line:String in lines){
           var tokens:Array = line.split("+");
           trace(tokens[0]+":"+tokens[1]+":"+tokens[2]+":"+tokens[3]);
-          if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
+          if(tokens != null && (tokens[2].toLowerCase() == _watch_user.name || tokens[3].toLowerCase() == _watch_user.name)){
             var match:Array = line.match(/##\[LIST\] (.*)/);
             trace("Line = " + line);
             if(match != null){
@@ -565,7 +577,7 @@
 	</mx:Script>
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-      <mx:Label text="81-Dojo" fontSize="17"/>
+	  <mx:Image source="http://www.81squareuniverse.com/test/images/81Dojo.jpg"/>
       <mx:Label text="(powered by ShogiServer and 81SU)" fontSize="11"/>
       <mx:Form>
         <mx:FormItem label="loginname">
@@ -582,7 +594,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/04/17"/>
+      <mx:Label text="ver.2010/05/15"/>
     </mx:VBox>
     
     <mx:VBox>
