@@ -72,6 +72,7 @@
       _client.addEventListener(CsaShogiClient.LIST, _handleList);
       _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
       _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
+      _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -189,6 +190,25 @@
 	private function _handleReject(e:ServerMessageEvent):void {
 		_writeUserMessage("Rejected by the opponent.\n");
 	}
+
+    private function _handleWatchers(e:ServerMessageEvent):void{
+      var watchers:Array = e.message.split("\n");
+      var watcher_list:Array = new Array();
+      for each(var watcher_data:String in watchers){
+        if(watcher_data.match(/^##\[WATCHERS\] \+OK$/)){
+          break;
+        }
+        var watcher:Object = new Object();
+        var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*)/);
+        if(match){
+          watcher.name = match[1];
+          watcher.country = '81SU';
+          watcher.rating = '';
+          watcher_list.push(watcher);
+        }
+      }
+      watcherListGrid.dataProvider = watcher_list;
+    }
 
     private function _handleGameStarted(e:ServerMessageEvent):void{
 			userMessage.text = '';
@@ -358,7 +378,6 @@
     private function _challengeForm():void{
   		var user:Object = userListGrid.selectedItem;
 			if(user != null){
-        trace("gamename:"+user.game_name);
         var match:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
         var total:int = parseInt(match[2]) / 60 ;
         var rule:String = total + "min -" + match[3] + "sec";
@@ -472,18 +491,14 @@
 		}
 
     private function _handleList(e:ServerMessageEvent):void{
-      trace("list:"+e.message);
       if(_watch_user != null){
         var lines:Array = e.message.split("\n");
         for each(var line:String in lines){
           var tokens:Array = line.split("+");
-          trace(tokens[0]+":"+tokens[1]+":"+tokens[2]+":"+tokens[3]);
           if(tokens != null && (tokens[2].toLowerCase() == _watch_user.name || tokens[3].toLowerCase() == _watch_user.name)){
             var match:Array = line.match(/##\[LIST\] (.*)/);
-            trace("Line = " + line);
             if(match != null){
               var game_name:String = match[1];
-              trace("WATCH GAME:" + game_name + "," + match[0].toString() + "," + match[1].toString());
               _game_name = game_name;
               _monitoring = true;
               _client.monitorOn(game_name);
@@ -561,12 +576,7 @@
     	}
     }
 	
-	//TO DO: Move to another class maybe?
 	private function makeRankFromRating(i:int):String{
-//		const rank_borders:Array = new Array(50, 150, 250, 350, 450, 550, 650, 750, 850, 950, 1050, 1150, 1250, 1350, 1450, 1550, 1700, 1900, 2100, 2300, 2450,10000);
-//		for (var j:int = 0; j < 22; j++) {
-//			if (i < rank_borders[j]) return rank_names[j];
-//		}
 		if (i < 1550) return rank_names[int((i + 50) / 100)];
 		else if (i < 2300) return rank_names[int((i + 1700) / 200)];
 		else if (i < 2450) return rank_names[20];

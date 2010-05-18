@@ -23,6 +23,7 @@ package{
     public static var LIST:String = 'list';
     public static var GAME_SUMMARY:String = 'game_summary';
     public static var REJECT:String = 'reject';
+    public static var WATCHERS:String = 'watchers';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -35,8 +36,7 @@ package{
 		private var _socket:Socket;
 
 		//private var _host:String = '127.0.0.1';
-		private var _host:String = '81square-shogi.homeip.net';
-		//private var _host:String = '81squareuniverse.com';
+		private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
 		//private var _port:int = 2195;
 
@@ -54,10 +54,9 @@ package{
       _player_names = new Array(2);
       _buffer = "";
       _buffers = new Object();
-      for each(var key:String in [WHO,LIST,MONITOR,GAME_END,GAME_SUMMARY]){
+      for each(var key:String in [WHO,LIST,MONITOR,GAME_END,GAME_SUMMARY,WATCHERS]){
         _buffers[key] = "";
       }
-      //Security.loadPolicyFile("xmlSocket://"+_host+":8430");
 		}
 
 		public function connect():void{
@@ -209,6 +208,11 @@ package{
           _buffer_response(LIST,line);
           if(line == "##[LIST] +OK"){
 			      _dispatchServerMessageEvent(LIST);
+          }
+        } else if(line.match(/^##\[WATCHERS\]/) != null){
+          _buffer_response(WATCHERS,line);
+          if(line.match(/^##\[WATCHERS\] \+OK$/)){
+			      _dispatchServerMessageEvent(WATCHERS);
           }
         } else {
           switch(_current_state) {
