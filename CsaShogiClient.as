@@ -36,7 +36,8 @@ package{
 		private var _socket:Socket;
 
 		//private var _host:String = '127.0.0.1';
-		private var _host:String = '81squareuniverse.com';
+		private var _host:String = '81square-shogi.homeip.net';
+		//private var _host:String = '81squareuniverse.com';
 		private var _port:int = 4081;
 		//private var _port:int = 2195;
 

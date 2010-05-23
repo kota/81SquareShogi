@@ -604,7 +604,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/05/15"/>
+      <mx:Label text="ver.2010/05/19"/>
     </mx:VBox>
     
     <mx:VBox>
