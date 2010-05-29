@@ -245,7 +245,7 @@
 			}
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
       	_writeUserMessage("Illegal Move.\n");
-		if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move));
+		if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
 		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
 		  kifuMove.moveKIF = "反則負け";
 		  board.kifu_list.push(kifuMove);
