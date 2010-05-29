@@ -535,7 +535,7 @@ package  {
     public function copyKIFtoClipboard():void{
 		  var KIFDataText:String = "";
 		  var date:Date = new Date;
-		  KIFDataText += "開始日時: " + date.fullYear + "/" + date.month + "/" + date.date + "\n";
+		  KIFDataText += "開始日時: " + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
 		  KIFDataText += "場所: 81-Dojo\n";
 		  KIFDataText += "手合割:平手\n";
 		  KIFDataText += "先手:" + playerNames[0] + "\n";
