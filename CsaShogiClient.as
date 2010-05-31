@@ -176,8 +176,12 @@ package{
 
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
-      var lines:Array = response.split("\n");
-      trace("Response:"+response);
+			_buffer = _buffer + response;
+			if (_buffer.match(/^##\[MONITOR2\]/) && !_buffer.match(/\+OK$/)) {
+				return;
+			}
+      var lines:Array = _buffer.split("\n");
+      trace("Response:"+_buffer);
       var match:Array;
       for each(var line:String in lines){
         if(_reading_game_summary_flag){
@@ -268,6 +272,7 @@ package{
           }
         }
       }
+	  _buffer = "";
     }
 
     private function _dispatchServerMessageEvent(event_name:String):void{
