@@ -81,7 +81,7 @@
 
     private function _handleKeepAlive(e:Event):void{
       //_client.keepAlive();
-      _refresh();
+	  if (_game_name) _client.watchers(_game_name) else _refresh();
     }
 
     private function _handleLogin(e:Event):void{
@@ -613,7 +613,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/05/19"/>
+      <mx:Label text="ver.2010/06/01"/>
     </mx:VBox>
     
     <mx:VBox>
