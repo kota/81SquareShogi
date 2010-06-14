@@ -490,6 +490,8 @@
 
 		private function _checkTimeout():void{
 			_client.checkTimeout();
+      // immitate game end message.
+      _handleGameEnd(new ServerMessageEvent(CsaShogiClient.GAME_END,"TIME_UP"));
 		}
 
     private function _handleList(e:ServerMessageEvent):void{
