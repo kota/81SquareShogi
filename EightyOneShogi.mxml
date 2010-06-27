@@ -42,6 +42,7 @@
 		private var _chat_sound_play:Boolean = true;
 		private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 
+		private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
 
 		private function initApp():void
@@ -79,7 +80,7 @@
     } 
 
     private function _handleKeepAlive(e:Event):void{
-      _refresh();
+	    if (_game_name) _client.watchers(_game_name) else _refresh();
     }
 
     private function _handleLogin(e:Event):void{
@@ -243,6 +244,7 @@
 			}
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
       	_writeUserMessage("Illegal Move.\n");
+		if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
 		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
 		  kifuMove.moveKIF = "反則負け";
 		  board.kifu_list.push(kifuMove);
@@ -455,7 +457,8 @@
         _client.monitorOff(_game_name);
         _monitoring = false;
       }
-      if(_game_name){
+      if (_game_name) {
+		  _sendAutoChat("I have left this room.");
         _game_name = null;
       }
       board.closeGame();
@@ -484,8 +487,8 @@
 		}
 
     private function _playerMove(from:Point,to:Point,promote:Boolean):void{
-      var mv:Movement = board.position.generateMovementFromCoordinates(from,to,promote);
-      _client.move(mv.toCSA());
+      _my_last_move = board.position.generateMovementFromCoordinates(from, to, promote);
+      _client.move(_my_last_move.toCSA());
     }
 
 		private function _checkTimeout():void{
@@ -555,6 +558,12 @@
       }
       e.target.text = "";
     }
+	
+	private function _sendAutoChat(str:String):void {
+		if (_game_name) {
+			_client.chat(_game_name + " [auto-chat] " + str);
+		}
+	}
     
     private function replay():void {
 		board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
@@ -608,7 +617,7 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/05/19"/>
+      <mx:Label text="ver.2010/06/01"/>
     </mx:VBox>
     
     <mx:VBox>
