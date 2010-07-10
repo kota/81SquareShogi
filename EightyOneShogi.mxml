@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
 
-	<mx:Script>
-	  <![CDATA[
+  <mx:Script>
+    <![CDATA[
     import flash.display.*;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
@@ -20,35 +20,35 @@
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array;
-		private var _login_name:String;
+    private var _login_name:String;
     private var _watch_user:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
 
-		[Embed(source = "/sound/win.mp3")]
-		private var Sound_win:Class;
-		private var _sound_win:Sound = new Sound_win();
-		[Embed(source = "/sound/lose.mp3")]
-		private var Sound_lose:Class;
-		private var _sound_lose:Sound = new Sound_lose();
-		[Embed(source = "/sound/chat.mp3")]
-		private var Sound_chat:Class;
-		private var _sound_chat:Sound = new Sound_chat();
-		[Embed(source = "/sound/challenger.mp3")]
-		private var Sound_challenger:Class;
-		private var _sound_challenger:Sound = new Sound_challenger();
-		private var optionWindow:OptionDialog;
-		private var _end_sound_play:Boolean = true;
-		private var _chat_sound_play:Boolean = true;
-		private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
+    [Embed(source = "/sound/win.mp3")]
+    private var Sound_win:Class;
+    private var _sound_win:Sound = new Sound_win();
+    [Embed(source = "/sound/lose.mp3")]
+    private var Sound_lose:Class;
+    private var _sound_lose:Sound = new Sound_lose();
+    [Embed(source = "/sound/chat.mp3")]
+    private var Sound_chat:Class;
+    private var _sound_chat:Sound = new Sound_chat();
+    [Embed(source = "/sound/challenger.mp3")]
+    private var Sound_challenger:Class;
+    private var _sound_challenger:Sound = new Sound_challenger();
+    private var optionWindow:OptionDialog;
+    private var _end_sound_play:Boolean = true;
+    private var _chat_sound_play:Boolean = true;
+    private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 
-		private var _my_last_move:Movement;
+    private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
 
-		private function initApp():void
-		{
-		  trace("application initialized..");
-		  _client = new CsaShogiClient();
+    private function initApp():void
+    {
+      trace("application initialized..");
+      _client = new CsaShogiClient();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
@@ -57,10 +57,10 @@
       password.addEventListener(FlexEvent.ENTER,_handleLogin);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
-		}
+    }
 
     private function _connectAndLogin():void{
-		  trace("connecting.");
+      trace("connecting.");
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
       _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
       _client.addEventListener(CsaShogiClient.LOGIN_FAILED,_handleLoginFailed);
@@ -80,7 +80,7 @@
     } 
 
     private function _handleKeepAlive(e:Event):void{
-	    if (_game_name) _client.watchers(_game_name) else _refresh();
+      if (_game_name) _client.watchers(_game_name) else _refresh();
     }
 
     private function _handleLogin(e:Event):void{
@@ -90,7 +90,7 @@
     private function _handleConnected(e:Event):void{
       loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
-			_login_name = loginname.text;
+      _login_name = loginname.text;
     } 
 
     private function _handleLoggedIn(e:Event):void{
@@ -109,8 +109,8 @@
 
     private function _handleChat(e:ServerMessageEvent):void{
       if(_isMessageAudible(e.message)){
-			  _writeUserMessage(_format_message(e.message));
-			  if (_chat_sound_play) _sound_chat.play();
+        _writeUserMessage(_format_message(e.message));
+        if (_chat_sound_play) _sound_chat.play();
       }
     }
 
@@ -159,37 +159,37 @@
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
-	
-	private function _handleGameSummary(e:ServerMessageEvent):void {
-		if (_challenging) {
-			_challenging = false;
-			_client.agree();
-		} else {
-			_sound_challenger.play();
-			Alert.yesLabel = "Accept";
-			Alert.noLabel = "Reject";
-			Alert.buttonWidth = 140;
-			Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!",
+  
+  private function _handleGameSummary(e:ServerMessageEvent):void {
+    if (_challenging) {
+      _challenging = false;
+      _client.agree();
+    } else {
+      _sound_challenger.play();
+      Alert.yesLabel = "Accept";
+      Alert.noLabel = "Reject";
+      Alert.buttonWidth = 140;
+      Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!",
                 Alert.YES | Alert.NO, this, _handleGameSummaryAlert);
-			//set properties back to default.
-			Alert.yesLabel = "Yes";
-			Alert.noLabel = "No";
-			Alert.buttonWidth = 60;	
-		}
-	}
-	
-	 private function _handleGameSummaryAlert(e:CloseEvent):void{
-  		var user:Object = userListGrid.selectedItem;
+      //set properties back to default.
+      Alert.yesLabel = "Yes";
+      Alert.noLabel = "No";
+      Alert.buttonWidth = 60;  
+    }
+  }
+  
+   private function _handleGameSummaryAlert(e:CloseEvent):void{
+      var user:Object = userListGrid.selectedItem;
       if(e.detail == Alert.YES){
         _client.agree();
       } else {
         _client.reject();
       }
     }
-	
-	private function _handleReject(e:ServerMessageEvent):void {
-		_writeUserMessage("Rejected by the opponent.\n");
-	}
+  
+  private function _handleReject(e:ServerMessageEvent):void {
+    _writeUserMessage("Rejected by the opponent.\n");
+  }
 
     private function _handleWatchers(e:ServerMessageEvent):void{
       var watchers:Array = e.message.split("\n");
@@ -211,7 +211,7 @@
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void{
-			userMessage.text = '';
+      userMessage.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Sente(Black).\n");
       } else {
@@ -233,31 +233,31 @@
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void {
-	  var kifuMove:Object = new Object();
-	  kifuMove.num = board.kifu_list.length;
+      var kifuMove:Object = new Object();
+      kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
-				board.timeout();
+        board.timeout();
         _writeUserMessage("Time up.\n");
-		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
-		  kifuMove.moveKIF = "切れ負け";
-		  board.kifu_list.push(kifuMove);
-			}
-      if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-      	_writeUserMessage("Illegal Move.\n");
-		if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
-		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
-		  kifuMove.moveKIF = "反則負け";
-		  board.kifu_list.push(kifuMove);
+        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+        kifuMove.moveKIF = "切れ負け";
+        board.kifu_list.push(kifuMove);
       }
-	  if (e.message.indexOf("RESIGN") >= 0) {
-      	_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
-		  kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
-		  kifuMove.moveKIF = "投了";
-		  board.kifu_list.push(kifuMove);
-	  }
-	  if (e.message.indexOf("SENNICHITE") >= 0) {
-      	_writeUserMessage("Sennichite.\n");
-	  }
+      if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
+        _writeUserMessage("Illegal Move.\n");
+        if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
+          kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
+          kifuMove.moveKIF = "反則負け";
+          board.kifu_list.push(kifuMove);
+        }
+      if (e.message.indexOf("RESIGN") >= 0) {
+        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
+        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
+        kifuMove.moveKIF = "投了";
+        board.kifu_list.push(kifuMove);
+      }
+      if (e.message.indexOf("SENNICHITE") >= 0) {
+          _writeUserMessage("Sennichite.\n");
+      }
       if(e.message.indexOf("LOSE") >= 0){
         _writeUserMessage("You Lose.\n");
         if (_end_sound_play) _sound_lose.play();
@@ -265,9 +265,9 @@
         _writeUserMessage("You Win.\n");
         if (_end_sound_play) _sound_win.play();
       } else if(e.message.indexOf("DRAW") >=0){
-		_writeUserMessage("Draw.\n");
-		if (_end_sound_play) _sound_win.play();
-	  }
+        _writeUserMessage("Draw.\n");
+        if (_end_sound_play) _sound_win.play();
+      }
       closeButton.enabled = true;
       resignButton.enabled = false;
       kifuCopyButton.enabled = true;
@@ -275,7 +275,7 @@
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
       forwardAllButton.enabled = true;
-	  kifuDataGrid.dataProvider = board.kifu_list;
+      kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
       kifuDataGrid.selectable = true;
       kifuDataGrid.selectedIndex = board.kifu_list.length;
@@ -290,32 +290,26 @@
           break;
         }
         trace("user_data:" + user_data);
-        var match:Array = user_data.match(/\#\#\[WHO\] (.*)\+(.+) x1 (.*)/);
-        if(match != null && match[2] != "OK"){
-          var name:String = match[1];
-          var user:Object = new Object();
-          user.name = name;
-          user.country = "81SU";
-          user.status = StringUtil.trim(match[3].split(" ")[0]);
+        var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
+        if(match != null){
+          var user:Object = {'name':match[1], 'country':'81SU','status':StringUtil.trim(match[2].split(" ")[0])}
           if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
-            user.rating = parseInt(match[3].split(' ')[3]);
+            user.rating = parseInt(match[2].split(' ')[3]);
           } else {
-            user.rating = parseInt(match[3].split(' ')[1]);
+            user.rating = parseInt(match[2].split(' ')[1]);
           }
           user.rank = makeRankFromRating(user.rating);
-          if(user.status.indexOf("game_waiting") == 0){
-            user.game_name = match[3].split(" ")[1];
-	          user.status2 = "W";
-	          var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-	          var total:int = parseInt(game_info[2]) / 60 ;
-	          user.rule = total + "-" + game_info[3];
-          } else if(user.status.indexOf("game") == 0){
-            user.game_name = match[3].split(" ")[1];
-            user.status2 = "G(" + (match[3].split(" ")[2] == "+" ? "▲" : "△") + ")";
-            game_info = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-            total = parseInt(game_info[2]) / 60 ;
+          if(user.status == "game_waiting" || user.status == "game"){
+            user.game_name = match[2].split(" ")[1];
+            var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
+            var total:int = parseInt(game_info[2]) / 60 ;
             user.rule = total + "-" + game_info[3];
-            if (user.name != game_info[1].toLowerCase()) user.opponent = game_info[1].toLowerCase();  //Show the user's opponent only when he is a challenger
+            if(user.status == "game_waiting"){
+              user.status2 = "W";
+            } else {
+              user.status2 = "G(" + (match[2].split(" ")[2] == "+" ? "▲" : "△") + ")";
+              if (user.name != game_info[1].toLowerCase()) user.opponent = game_info[1].toLowerCase();  //Show the user's opponent only when he is a challenger
+            }
           }
           user_list.push(user);
         }
@@ -330,14 +324,14 @@
           }
         }
       }
-	  user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       userListGrid.dataProvider = user_list;
-	  for (i = 0; i < user_list.length; i++) {
-		  if (user_list[i].name == _login_name.toLowerCase()) {
-			  userListGrid.selectedIndex = i;
-		      break;
-		  }
-	  }
+      for (i = 0; i < user_list.length; i++) {
+        if (user_list[i].name == _login_name.toLowerCase()) {
+          userListGrid.selectedIndex = i;
+          break;
+        }
+      }
     }
 
     private function _writeUserMessage(message:String):void{
@@ -354,31 +348,33 @@
     
     private function _waitForGame(total:int=1500,byoyomi:int=30):void{
       _client.waitForGame(total,byoyomi);
-			_refresh();
-			stopButton.enabled = true;
+      _refresh();
+      stopButton.enabled = true;
     }
     
     private function _showOptions():void{
-    	optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
-    	PopUpManager.centerPopUp(optionWindow);
-    	optionWindow.title = "Options";
-    	optionWindow.RadioGroup1.selectedValue = board.piece_type;
-      optionWindow.pieceSoundCheckBox.selected = board.piece_sound_play;
-    	optionWindow.gameEndSoundCheckBox.selected = _end_sound_play;
-    	optionWindow.chatSoundCheckBox.selected = _chat_sound_play;
-    	optionWindow.OkButton.addEventListener("click",_handleOption);
+      optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
+      PopUpManager.centerPopUp(optionWindow);
+      with(optionWindow){
+        title = "Options";
+        RadioGroup1.selectedValue = board.piece_type;
+        pieceSoundCheckBox.selected = board.piece_sound_play;
+        gameEndSoundCheckBox.selected = _end_sound_play;
+        chatSoundCheckBox.selected = _chat_sound_play;
+        OkButton.addEventListener("click",_handleOption);
+      }
     }
     
     private function _handleOption(e:Event):void{
-    	board.setPieceType(int(optionWindow.RadioGroup1.selectedValue));
-    	board.piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
-    	_end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
-    	_chat_sound_play = optionWindow.chatSoundCheckBox.selected;
+      board.setPieceType(int(optionWindow.RadioGroup1.selectedValue));
+      board.piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
+      _end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
+      _chat_sound_play = optionWindow.chatSoundCheckBox.selected;
     }
 
     private function _challengeForm():void{
-  		var user:Object = userListGrid.selectedItem;
-			if(user != null){
+      var user:Object = userListGrid.selectedItem;
+      if(user != null){
         var match:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
         var total:int = parseInt(match[2]) / 60 ;
         var rule:String = total + "min -" + match[3] + "sec";
@@ -391,36 +387,36 @@
         Alert.yesLabel = "Yes";
         Alert.noLabel = "No";
         Alert.buttonWidth = 60;
-			}  	
+      }    
     }
 
     private function _handleChallengeAlert(e:CloseEvent):void{
-  		var user:Object = userListGrid.selectedItem;
+      var user:Object = userListGrid.selectedItem;
       if (e.detail == Alert.YES) {
-		  _challenging = true;
-		  _writeUserMessage("Challenging.....\n");
+      _challenging = true;
+      _writeUserMessage("Challenging.....\n");
          _client.challenge(user);
-	  } else if (e.detail == Alert.CANCEL) {
+    } else if (e.detail == Alert.CANCEL) {
       } else {
         var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
-				PopUpManager.centerPopUp(challengeWindow);
-	      challengeWindow.title = "Challenge to " + user.name;
-	      challengeWindow.challengeButton.addEventListener("click",_challenge);
+        PopUpManager.centerPopUp(challengeWindow);
+        challengeWindow.title = "Challenge to " + user.name;
+        challengeWindow.challengeButton.addEventListener("click",_challenge);
       }
       challengeButton.enabled = false;
     }
 
     private function _newGameForm():void{
-			var newGameWindow:NewGameForm = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
-			PopUpManager.centerPopUp(newGameWindow);
-	    newGameWindow.title = "Create new game";
-	    newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+      var newGameWindow:NewGameForm = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
+      PopUpManager.centerPopUp(newGameWindow);
+      newGameWindow.title = "Create new game";
+      newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
     }
-	
+  
     private function _stopWaiting():void {
-    	_client.stopWaiting();
-    	_refresh();
-    	stopButton.enabled = false;
+      _client.stopWaiting();
+      _refresh();
+      stopButton.enabled = false;
     }
 
     private function _handleRuleSelected(e:GameRuleEvent):void{
@@ -428,23 +424,23 @@
     }
 
     private function _challenge(e:Event):void{
-    	var user:Object = userListGrid.selectedItem;
+      var user:Object = userListGrid.selectedItem;
       if(user != null){
-    	  _client.challenge(user);
+        _client.challenge(user);
       }
     }
 
-		private function _refresh():void{
-			_client.who();	
+    private function _refresh():void{
+      _client.who();  
       if(_game_name){
         _client.watchers(_game_name);
       }
-		}
+    }
 
     private function _resign():void{
       if (board.my_turn == board.position.turn) {
-//		_client.chat(_game_name + " (auto-chat) I resign.\n");
-      	_client.resign();
+//    _client.chat(_game_name + " (auto-chat) I resign.\n");
+        _client.resign();
       }
     }
 
@@ -452,50 +448,50 @@
       _client.who();
     }
 
-		private function _closeGame():void{
+    private function _closeGame():void{
       if(_game_name && _monitoring){
         _client.monitorOff(_game_name);
         _monitoring = false;
       }
       if (_game_name) {
-		  _sendAutoChat("I have left this room.");
+      _sendAutoChat("I have left this room.");
         _game_name = null;
       }
       board.closeGame();
       mainViewStack.selectedIndex = 1;
       challengeButton.enabled = false;
       watchButton.enabled = false;
-			_refresh();
-		}
-		
-		private function _showImpasse():void {
-			Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
-		}
+      _refresh();
+    }
+    
+    private function _showImpasse():void {
+      Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
+    }
 
-		private function _userSelected():void{
-			var user:Object = userListGrid.selectedItem;
-			if(user != null && user.name != _login_name && user.status == "game_waiting"){
-				challengeButton.enabled = true;
-				watchButton.enabled = false;
-			} else if (user != null && user.status == "game") {
-				challengeButton.enabled = false;
-				watchButton.enabled = true;
-			} else {
-				challengeButton.enabled = false;
-				watchButton.enabled = false;
-			}
-		}
+    private function _userSelected():void{
+      var user:Object = userListGrid.selectedItem;
+      if(user != null && user.name != _login_name && user.status == "game_waiting"){
+        challengeButton.enabled = true;
+        watchButton.enabled = false;
+      } else if (user != null && user.status == "game") {
+        challengeButton.enabled = false;
+        watchButton.enabled = true;
+      } else {
+        challengeButton.enabled = false;
+        watchButton.enabled = false;
+      }
+    }
 
     private function _playerMove(from:Point,to:Point,promote:Boolean):void{
       _my_last_move = board.position.generateMovementFromCoordinates(from, to, promote);
       _client.move(_my_last_move.toCSA());
     }
 
-		private function _checkTimeout():void{
-			_client.checkTimeout();
+    private function _checkTimeout():void{
+      _client.checkTimeout();
       // immitate game end message.
       _handleGameEnd(new ServerMessageEvent(CsaShogiClient.GAME_END,"TIME_UP"));
-		}
+    }
 
     private function _handleList(e:ServerMessageEvent):void{
       if(_watch_user != null){
@@ -558,61 +554,61 @@
       }
       e.target.text = "";
     }
-	
-	private function _sendAutoChat(str:String):void {
-		if (_game_name) {
-			_client.chat(_game_name + " [auto-chat] " + str);
-		}
-	}
-    
-    private function replay():void {
-		board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
+  
+  private function _sendAutoChat(str:String):void {
+    if (_game_name) {
+      _client.chat(_game_name + " [auto-chat] " + str);
     }
+  }
     
-    private function replayByButton(i:int):void{
-    	switch (i) {
-    		case -2:
-    			kifuDataGrid.selectedIndex = 0; replay();
-    			break;
-    		case -1:
-    			if (kifuDataGrid.selectedIndex > 0) {
-	    			kifuDataGrid.selectedIndex--; replay();
-	    		}
-	    		break;
-	    	case 1:
-	    		if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
-	    			kifuDataGrid.selectedIndex++; replay();
-	    		}
-	    		break;
-	    	case 2:
-	    		kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
-    	}
+  private function replay():void {
+    board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
+  }
+    
+  private function replayByButton(i:int):void{
+    switch (i) {
+      case -2:
+        kifuDataGrid.selectedIndex = 0; replay();
+        break;
+      case -1:
+        if (kifuDataGrid.selectedIndex > 0) {
+          kifuDataGrid.selectedIndex--; replay();
+        }
+        break;
+      case 1:
+        if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
+          kifuDataGrid.selectedIndex++; replay();
+        }
+        break;
+      case 2:
+        kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
     }
-	
-	private function makeRankFromRating(i:int):String{
-		if (i < 1550) return rank_names[int((i + 50) / 100)];
-		else if (i < 2300) return rank_names[int((i + 1700) / 200)];
-		else if (i < 2450) return rank_names[20];
-		else return rank_names[21];
-	}
+  }
+  
+  private function makeRankFromRating(i:int):String{
+    if (i < 1550) return rank_names[int((i + 50) / 100)];
+    else if (i < 2300) return rank_names[int((i + 1700) / 200)];
+    else if (i < 2450) return rank_names[20];
+    else return rank_names[21];
+  }
 
-	  ]]>
-	</mx:Script>
+    ]]>
+  </mx:Script>
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-	  <mx:Image source="http://www.81squareuniverse.com/test/images/81Dojo.jpg"/>
+    <mx:Image source="http://www.81squareuniverse.com/test/images/81Dojo.jpg"/>
       <mx:Label text="(powered by ShogiServer and 81SU)" fontSize="11"/>
       <mx:Form>
         <mx:FormItem label="loginname">
             <mx:TextInput id="loginname" width="200"/>
-	      </mx:FormItem>
-	      <mx:FormItem label="password">
+        </mx:FormItem>
+        <mx:FormItem label="password">
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
-	      </mx:FormItem>
-	      <mx:FormItem>
+        </mx:FormItem>
+        <mx:FormItem>
             <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
-	      </mx:FormItem>
-	    </mx:Form>
+        </mx:FormItem>
+      </mx:Form>
       <mx:Label id="loginMessage"/>
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
@@ -621,29 +617,29 @@
     </mx:VBox>
     
     <mx:VBox>
-    	<mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
-			<mx:HBox>
-				<mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
-				<mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
-				<mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
-				<mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-				<mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
-			</mx:HBox>
-	      <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
-	       <mx:columns>
-	        <mx:DataGridColumn dataField="rank" width="65"/>
-	        <mx:DataGridColumn dataField="name" width="120"/>
-	        <mx:DataGridColumn dataField="country" width="110"/>
-	        <mx:DataGridColumn dataField="rating" width="60"/>
-			<mx:DataGridColumn dataField="status2" headerText="status" width="60"/>
-			<mx:DataGridColumn dataField="rule" width="60"/>
-	        <mx:DataGridColumn dataField="opponent" width="120"/>
-	        <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
-	       </mx:columns>
-	      </mx:DataGrid>
-	      	      <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115" fontSize="12"/>   
-	      		  <mx:TextInput id="chatMessage2" width="430"/>    
+      <mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
+      <mx:HBox>
+        <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
+        <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
+        <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
+        <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
+        <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
+        <mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+      </mx:HBox>
+        <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
+         <mx:columns>
+          <mx:DataGridColumn dataField="rank" width="65"/>
+          <mx:DataGridColumn dataField="name" width="120"/>
+          <mx:DataGridColumn dataField="country" width="110"/>
+          <mx:DataGridColumn dataField="rating" width="60"/>
+          <mx:DataGridColumn dataField="status2" headerText="status" width="60"/>
+          <mx:DataGridColumn dataField="rule" width="60"/>
+          <mx:DataGridColumn dataField="opponent" width="120"/>
+          <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
+         </mx:columns>
+        </mx:DataGrid>
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115" fontSize="12"/>   
+        <mx:TextInput id="chatMessage2" width="430"/>    
       </mx:Panel>
     </mx:VBox>
     
@@ -651,48 +647,48 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-      	<mx:Panel id="messagePanel" title="Message Panel" width="435" height="155">
-	      <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115" fontSize="12" />      		
-      	</mx:Panel>
-      	<mx:Panel id="controlPanel" title="Control Panel" width="340" height="155" verticalAlign="middle" paddingLeft="8">
-      	  <mx:HBox>
-       	  	<mx:Button id="resignButton" label="Resign" click="_resign();"/>
-       	  	<mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
-			<mx:Button id="impasseButton" label="Impasse?" click="_showImpasse();"/>
-          	<mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>     	  	
-      	  </mx:HBox>
-      	  <mx:HBox>
-       	  	<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
-          	<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>  	
-       	  	<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
-          	<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
-      	  </mx:HBox>
-	       <mx:Label text="Chat"/>
-		   <mx:TextInput id="chatMessage" width="300"/>     	  	
-      	</mx:Panel>
+        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="155">
+        <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115" fontSize="12" />          
+        </mx:Panel>
+        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="155" verticalAlign="middle" paddingLeft="8">
+          <mx:HBox>
+            <mx:Button id="resignButton" label="Resign" click="_resign();"/>
+            <mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
+            <mx:Button id="impasseButton" label="Impasse?" click="_showImpasse();"/>
+            <mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>           
+          </mx:HBox>
+          <mx:HBox>
+            <mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
+            <mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
+            <mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
+            <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
+          </mx:HBox>
+         <mx:Label text="Chat"/>
+       <mx:TextInput id="chatMessage" width="300"/>           
+        </mx:Panel>
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="635">
           <mx:Label text="Watchers" fontWeight="bold"/>
-	      <mx:DataGrid id="watcherListGrid" width="160" height="220">
-	       <mx:columns>
-	        <mx:DataGridColumn dataField="name" width="57"/>
-	        <mx:DataGridColumn dataField="country" width="56"/>
-	        <mx:DataGridColumn dataField="rating"/>
-	       </mx:columns>
-	      </mx:DataGrid>
-	      <mx:Label text="Kifu" fontWeight="bold"/>
-	      <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287" change="replay();" selectable="false">
-	       <mx:columns>
-	        <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
-	        <mx:DataGridColumn dataField="move"/>
-	       </mx:columns>
-	      </mx:DataGrid>
-	      <mx:HBox>
-       	  	<mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard();" enabled="false"/>
-       	  	<mx:Button id="kifuSaveButton" label="Save" enabled="false"/>	      	
-	      </mx:HBox>
-      	</mx:Panel>
+        <mx:DataGrid id="watcherListGrid" width="160" height="220">
+         <mx:columns>
+          <mx:DataGridColumn dataField="name" width="57"/>
+          <mx:DataGridColumn dataField="country" width="56"/>
+          <mx:DataGridColumn dataField="rating"/>
+         </mx:columns>
+        </mx:DataGrid>
+        <mx:Label text="Kifu" fontWeight="bold"/>
+        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287" change="replay();" selectable="false">
+         <mx:columns>
+          <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
+          <mx:DataGridColumn dataField="move"/>
+         </mx:columns>
+        </mx:DataGrid>
+        <mx:HBox>
+             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard();" enabled="false"/>
+             <mx:Button id="kifuSaveButton" label="Save" enabled="false"/>          
+        </mx:HBox>
+        </mx:Panel>
     </mx:HBox>
   </mx:ViewStack>
 
