@@ -396,7 +396,7 @@ package  {
           } else if (token.indexOf("N-") == 0){
             names[1] = token.match(/N\-(.*)/)[1];
           } else if (token.indexOf("$EVENT:") == 0) {
-            var time_match:Array = token.match(/\$EVENT:(.*)\-(.*)\-(.*?)\+/)
+            var time_match:Array = token.match(/\$EVENT:(.*)\-([0-9]+)\-([0-9]+)\+/);
             total_time = parseInt(time_match[2]);
             byoyomi = parseInt(time_match[3]);
           } else if (token.match(/([-+][0-9]{4}.{2}$)/)) {
