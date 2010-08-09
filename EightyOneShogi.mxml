@@ -585,11 +585,14 @@
     }
   }
   
-  private function makeRankFromRating(i:int):String{
-    if (i < 1550) return rank_names[int((i + 50) / 100)];
-    else if (i < 2300) return rank_names[int((i + 1700) / 200)];
-    else if (i < 2450) return rank_names[20];
-    else return rank_names[21];
+  private function makeRankFromRating(i:int):String {
+	  if (i < 790) return rank_names[0];     //smaller rank range (temporarily)
+	  else if (i < 1190) return rank_names[int((i - 770) / 20)];
+	  else return rank_names[21];
+   // if (i < 1550) return rank_names[int((i + 50) / 100)];
+   // else if (i < 2300) return rank_names[int((i + 1700) / 200)];
+   // else if (i < 2450) return rank_names[20];
+   // else return rank_names[21];
   }
 
     ]]>
