@@ -66,7 +66,8 @@ package  {
     private var _name_labels:Array;
     private var _info_labels:Array;
     private var _turn_symbols:Array;
-		private var _timers:Array;
+	private var _timers:Array;
+	private var _avatar_images:Array;
 
     private var _cells:Array;
     private var _board_bg_image:Image = new Image();
@@ -149,6 +150,7 @@ package  {
       _info_labels = new Array(2);
       _turn_symbols = new Array(2);
       _timers = new Array(2);
+	  _avatar_images = new Array(2);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
         
@@ -164,34 +166,41 @@ package  {
 		timer.x = hand.x + KOMADAI_WIDTH/2 - 40
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
 		_timers[i] = timer;
-		addChild(timer)
+		addChild(timer);
 
         var turn_symbol:Image = new Image();
-        turn_symbol.x = 2
-        turn_symbol.y = i == 0 ? 122 : 2
+        turn_symbol.x = 2;
+        turn_symbol.y = i == 0 ? 142 : 4;
         _turn_symbols[i] = turn_symbol;
+		var avatar_image:Image = new Image();
+		avatar_image.x = 14;
+		avatar_image.y = i == 0 ? 6 : 52;
+		avatar_image.width = KOMADAI_WIDTH - 42
+		avatar_image.height = avatar_image.width
+		_avatar_images[i] = avatar_image;
         var name_label:Label = new Label();
-        name_label.setStyle('fontSize',12)
-        name_label.setStyle('fontWeight','bold')
-        name_label.x = turn_symbol.x + 20
-        name_label.y = turn_symbol.y + 5
+        name_label.setStyle('fontSize', 12);
+        name_label.setStyle('fontWeight', 'bold');
+        name_label.x = turn_symbol.x + 20;
+        name_label.y = turn_symbol.y + 5;
         _name_labels[i] = name_label;
         var info_label:Label = new Label();
-        info_label.setStyle('fontSize',11)
-        info_label.x = name_label.x
-        info_label.y = name_label.y + 20
+        info_label.setStyle('fontSize', 11);
+        info_label.x = name_label.x;
+        info_label.y = name_label.y + 20;
         _info_labels[i] = info_label;       
 
         var h_box:Canvas = new Canvas();
         h_box.setStyle('backgroundColor',0xddee88);
         h_box.setStyle('borderStyle','solid');
         h_box.width = KOMADAI_WIDTH - 10
-        h_box.height = KOMADAI_HEIGHT - 30
+        h_box.height = KOMADAI_HEIGHT - 10
         h_box.x = i == 0 ? hand.x + 10 : hand.x
-        h_box.y = i == 0 ? BAN_TOP_MARGIN + 28 : BAN_TOP_MARGIN + hand.height + 55 ;
+        h_box.y = i == 0 ? BAN_TOP_MARGIN + 6 : BAN_TOP_MARGIN + hand.height + 57 ;
         h_box.addChild(turn_symbol);
         h_box.addChild(name_label);
         h_box.addChild(info_label);
+		h_box.addChild(avatar_image);
         addChild(h_box);
       }
     }
@@ -311,7 +320,9 @@ package  {
       _name_labels[0].text = player_names[_my_turn];
       _name_labels[1].text = player_names[1-_my_turn];
       _info_labels[0].text = player_infos[_my_turn]; // "R:1500, (Country)"
-      _info_labels[1].text = player_infos[1-_my_turn]; // "R:1500, (Country)"
+      _info_labels[1].text = player_infos[1 - _my_turn]; // "R:1500, (Country)"
+	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[_my_turn].split(" ")[1] + ".jpg";
+	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[1 - _my_turn].split(" ")[1] + ".jpg";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);
@@ -436,6 +447,8 @@ package  {
       _name_labels[1].text = names[1-_my_turn];
       _info_labels[0].text = _player_infos[_my_turn]; // "R:1500, (Country)"
       _info_labels[1].text = _player_infos[1 - _my_turn]; // "R:1500, (Country)"
+	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[_my_turn].split(" ")[1] + ".jpg";
+	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[1 - _my_turn].split(" ")[1] + ".jpg";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _timers[0].reset(total_time,byoyomi);

@@ -41,6 +41,7 @@
     private var optionWindow:OptionDialog;
     private var _end_sound_play:Boolean = true;
     private var _chat_sound_play:Boolean = true;
+	private var _chat_auto_scroll:Boolean = true;
     private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 
     private var _my_last_move:Movement;
@@ -349,14 +350,14 @@
 
     private function _writeUserMessage(message:String):void{
       userMessage.text += message;
-      userMessage.callLater(_scrollDown);
+//      userMessage.callLater(_scrollDown);
       userMessage2.text += message;
       userMessage2.callLater(_scrollDown);
     }
 
     private function _scrollDown():void{
       userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
-      userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
+      if (_chat_auto_scroll) userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
     }
     
     private function _waitForGame(total:int=1500,byoyomi:int=30):void{
@@ -573,6 +574,10 @@
       _client.chat(_game_name + " [auto-chat] " + str);
     }
   }
+  
+  private function _change_auto_scroll():void {
+	  _chat_auto_scroll = autoScrollCheck.selected;
+  }
     
   private function replay():void {
     board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
@@ -612,7 +617,7 @@
   </mx:Script>
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
-    <mx:Image source="http://www.81squareuniverse.com/test/images/81Dojo.jpg"/>
+    <mx:Image source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
       <mx:Label text="(powered by ShogiServer and 81SU)" fontSize="11"/>
       <mx:Form>
         <mx:FormItem label="loginname">
@@ -629,11 +634,11 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/07/10"/>
+      <mx:Label text="ver.2010/08/09"/>
     </mx:VBox>
     
     <mx:VBox>
-      <mx:Panel title="User List Panel" width="640" height="480" paddingLeft="10" paddingTop="10">
+      <mx:Panel title="User List Panel" width="640" height="560" paddingLeft="10" paddingTop="10">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
@@ -654,8 +659,12 @@
           <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
          </mx:columns>
         </mx:DataGrid>
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="430" height="115" fontSize="12"/>   
-        <mx:TextInput id="chatMessage2" width="430"/>    
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
+		<mx:HBox>
+			<mx:Label text="Chat"/>
+			<mx:TextInput id="chatMessage2" width="430"/>
+			<mx:CheckBox id="autoScrollCheck" label="Auto-scroll" selected="true" click="_change_auto_scroll();" />
+		</mx:HBox>
       </mx:Panel>
     </mx:VBox>
     
