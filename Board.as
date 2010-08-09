@@ -89,6 +89,7 @@ package  {
     private var _position:Kyokumen;
 
     private var _player_names:Array;
+	private var _player_infos:Array;
     private var _my_turn:int;
     private var _in_game:Boolean;
     public var watch_game_end: Boolean;
@@ -299,17 +300,18 @@ package  {
       _timeoutCallback = callback;
     }
 
-    public function startGame(my_turn:int,player_names:Array,time_total:int,time_byoyomi:int):void{
+    public function startGame(my_turn:int,player_names:Array,player_infos:Array,time_total:int,time_byoyomi:int):void{
       trace("game started");
       _player_names = player_names;
+	  _player_infos = player_infos;
       _my_turn = my_turn;
       reset();
       _position = new Kyokumen();
       setPosition(_position);
-      _name_labels[0].text = player_names[_my_turn]; 
+      _name_labels[0].text = player_names[_my_turn];
       _name_labels[1].text = player_names[1-_my_turn];
-      _info_labels[0].text = "R:1500, (Country)"
-      _info_labels[1].text = "R:1500, (Country)"
+      _info_labels[0].text = player_infos[_my_turn]; // "R:1500, (Country)"
+      _info_labels[1].text = player_infos[1-_my_turn]; // "R:1500, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);
@@ -360,11 +362,11 @@ package  {
     	if (_position != null) setPosition(_position);
     }
 
-    public function monitor(game_info:String,watch_user:Object):void{
+    public function monitor(game_info:String,watch_user:Object,user_list:Object):void{
       trace("MONITOR");
       var match:Array;
       if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
-        _startMonitor(game_info,watch_user);
+        _startMonitor(game_info,watch_user,user_list);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
@@ -378,7 +380,7 @@ package  {
       }
     }
 
-    private function _startMonitor(game_info:String,watch_user:Object):void{
+    private function _startMonitor(game_info:String,watch_user:Object,user_list:Object):void{
       var names:Array = new Array(2);
       var total_time:int;
       var byoyomi:int;
@@ -419,10 +421,21 @@ package  {
       _player_names = names;
       watch_game_end = false;
 
+	  _player_infos = new Array;
+	  for (var j:int = 0; j < 2 ; j++) {
+		var _str1:String = names[j].toLowerCase();
+		for (var i:int = 0; i < user_list.length ; i++) { 
+			if (user_list[i].name == _str1) {
+				_player_infos[j] = "R:" + user_list[i].rating + ", " + user_list[i].rank
+				break;
+				}
+		}
+	  }
+	  
       _name_labels[0].text = names[_my_turn];
       _name_labels[1].text = names[1-_my_turn];
-      _info_labels[0].text = "R:1500, (Country)"
-      _info_labels[1].text = "R:1500, (Country)"
+      _info_labels[0].text = _player_infos[_my_turn]; // "R:1500, (Country)"
+      _info_labels[1].text = _player_infos[1 - _my_turn]; // "R:1500, (Country)"
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _timers[0].reset(total_time,byoyomi);

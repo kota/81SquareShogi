@@ -21,6 +21,7 @@
     private var _game_name:String;
     private var _user_list:Array;
     private var _login_name:String;
+	private var _player_infos:Array;
     private var _watch_user:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
@@ -165,6 +166,7 @@
       _challenging = false;
       _client.agree();
     } else {
+	  _refresh();
       _sound_challenger.play();
       Alert.yesLabel = "Accept";
       Alert.noLabel = "Reject";
@@ -210,7 +212,17 @@
       watcherListGrid.dataProvider = watcher_list;
     }
 
-    private function _handleGameStarted(e:ServerMessageEvent):void{
+    private function _handleGameStarted(e:ServerMessageEvent):void {
+	  _player_infos = new Array;
+	  for (var j:int = 0; j < 2 ; j++) {
+		var _str1:String = _client.playerNames[j].toLowerCase();
+		for (var i:int = 0; i < _user_list.length ; i++) {
+			if (_user_list[i].name == _str1) {
+				_player_infos[j] = "R:" + _user_list[i].rating + ", " + _user_list[i].rank
+				break;
+				}
+		}
+	  }
       userMessage.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Sente(Black).\n");
@@ -218,7 +230,7 @@
         _writeUserMessage("You are Gote(White).\n");
       }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
-      board.startGame(_client.myTurn, _client.playerNames, match[3], match[4]);
+      board.startGame(_client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
       _game_name = e.message.substr(6);
       stopButton.enabled = false;
       closeButton.enabled = false;
@@ -325,9 +337,10 @@
         }
       }
       user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
-      userListGrid.dataProvider = user_list;
+	  _user_list = user_list;
+      userListGrid.dataProvider = _user_list;
       for (i = 0; i < user_list.length; i++) {
-        if (user_list[i].name == _login_name.toLowerCase()) {
+        if (_user_list[i].name == _login_name.toLowerCase()) {
           userListGrid.selectedIndex = i;
           break;
         }
@@ -515,7 +528,7 @@
 
     private function _handleMonitor(e:ServerMessageEvent):void{
       if(_watch_user != null){
-        board.monitor(e.message,_watch_user);
+        board.monitor(e.message,_watch_user,_user_list);  // _user_list is sent only for refering to the players' ratings on the board
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
