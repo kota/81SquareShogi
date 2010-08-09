@@ -93,6 +93,7 @@ package  {
 	private var _player_infos:Array;
     private var _my_turn:int;
     private var _in_game:Boolean;
+	private var _client_timeout:Boolean;
     public var watch_game_end: Boolean;
 
     private var _selected_square:Square;
@@ -329,6 +330,7 @@ package  {
 			_timers[1].reset(time_total,time_byoyomi);
 			_timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
       _in_game = true;
+	  _client_timeout = false;
     }
 
     public function endGame():void{
@@ -341,6 +343,7 @@ package  {
         _selected_square = null;
       }
       _in_game = false;
+	  _client_timeout = false;
     }
 	
     public function closeGame():void{
@@ -350,6 +353,10 @@ package  {
 		public function timeout():void{
 			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
 			_timers[running_timer].timeout();
+		}
+		
+		public function clientTimeout():void {
+			_client_timeout = true;
 		}
 
   	public function get inGame():Boolean{
@@ -503,7 +510,7 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-              _playerMoveCallback(_from,_to,false);
+              if (!_client_timeout) _playerMoveCallback(_from,_to,false);
               _from = null;
               _to = null;
             }
@@ -513,7 +520,7 @@ package  {
     }
 
     private function _promotionHandler(e:CloseEvent):void{
-      _playerMoveCallback(_from,_to,e.detail == Alert.YES);
+      if (! _client_timeout) _playerMoveCallback(_from,_to,e.detail == Alert.YES);
       _from = null;
       _to = null;
     }
@@ -535,7 +542,7 @@ package  {
     }
 
 		private function _checkTimeout(e:Event):void {
-			if (_in_game) _timeoutCallback();
+			if (_in_game && _position.turn == _my_turn) _timeoutCallback();
 		}
 		
 	  public function replayMoves(n:int):void{

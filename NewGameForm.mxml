@@ -45,7 +45,7 @@
               default:
                 break;
             }
-            if(total && byoyomi){
+            if(total >=0 && byoyomi){
               var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,0);
               dispatchEvent(gameRuleEvent);
             }

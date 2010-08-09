@@ -501,10 +501,11 @@
       _client.move(_my_last_move.toCSA());
     }
 
-    private function _checkTimeout():void{
+    private function _checkTimeout():void {
+	  board.clientTimeout();
       _client.checkTimeout();
       // immitate game end message.
-      _handleGameEnd(new ServerMessageEvent(CsaShogiClient.GAME_END,"TIME_UP"));
+      //_handleGameEnd(new ServerMessageEvent(CsaShogiClient.GAME_END,"TIME_UP"));
     }
 
     private function _handleList(e:ServerMessageEvent):void{

@@ -61,15 +61,20 @@ package {
 			_time_left = _byoyomi_flag ? _byoyomi : _total;
 			_accumulated_time = 0;
 			_timeout_flag = false;
-			this.setStyle('backgroundColor',0xFFFFFF);
+			if (_byoyomi_flag) {
+				if (_byoyomi <= 10) this.setStyle('backgroundColor',0xFF5500);
+					else this.setStyle('backgroundColor',0xFFFF00);
+			}
+			else this.setStyle('backgroundColor',0xFFFFFF);
 			_display();
 		}
 
 		public function suspend():void{
 			if(_timer.running){
 				_timer.stop();
-				if (_byoyomi_flag){
-					this.setStyle('backgroundColor',0xFFFF00);
+				if (_byoyomi_flag) {
+					if (_byoyomi <= 10) this.setStyle('backgroundColor',0xFF5500);
+					else this.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
 				}
 			}
@@ -105,9 +110,9 @@ package {
 		}
 
 		private function _tickHandler(e:TimerEvent):void{
-			if(_timeout_flag){
-				dispatchEvent(new Event(CHECK_TIMEOUT));
-			}
+			//if(_timeout_flag){
+				//dispatchEvent(new Event(CHECK_TIMEOUT));
+			//}
 			_time_left--;
 			if(_time_left <= 0){
 				_time_left = 0;
@@ -119,11 +124,13 @@ package {
 				} else {
           //time's up
 					_timeout_flag = true;
+					this.setStyle('backgroundColor',0xFF0000);
+					dispatchEvent(new Event(CHECK_TIMEOUT));
 					//_timer.stop();
 				}
 			}
 			if(_byoyomi_flag && _time_left == 10){
-				this.setStyle('backgroundColor',0xFF0000);
+				this.setStyle('backgroundColor',0xFF5500);
 				_sound_timer.play();
 			}
 			if(_byoyomi_flag && _time_left <= 5 && _time_left >= 1){
