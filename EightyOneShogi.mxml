@@ -43,7 +43,7 @@
     private var _chat_sound_play:Boolean = true;
 	private var _chat_auto_scroll:Boolean = true;
     private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
-
+	private const VERSION:String = "ver.2010/08/11";
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
 
@@ -635,10 +635,10 @@
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
-      <mx:Label text="ver.2010/08/09"/>
+      <mx:Label text="{VERSION}"/>
     </mx:VBox>
     
-    <mx:VBox>
+    <mx:VBox horizontalAlign="center">
       <mx:Panel title="User List Panel" width="640" height="560" paddingLeft="10" paddingTop="10">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
@@ -669,7 +669,7 @@
       </mx:Panel>
     </mx:VBox>
     
-    <mx:HBox>
+    <mx:HBox horizontalAlign="center" verticalAlign="middle">
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
@@ -711,7 +711,7 @@
          </mx:columns>
         </mx:DataGrid>
         <mx:HBox>
-             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard();" enabled="false"/>
+             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(VERSION);" enabled="false"/>
              <mx:Button id="kifuSaveButton" label="Save" enabled="false"/>          
         </mx:HBox>
         </mx:Panel>
