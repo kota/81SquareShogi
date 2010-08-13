@@ -41,7 +41,8 @@
     private var optionWindow:OptionDialog;
     private var _end_sound_play:Boolean = true;
     private var _chat_sound_play:Boolean = true;
-	private var _chat_auto_scroll:Boolean = true;
+	private var _chat_auto_scroll1:Boolean = true;
+	private var _chat_auto_scroll2:Boolean = true;
     private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 	private const VERSION:String = "ver.2010/08/11";
     private var _my_last_move:Movement;
@@ -211,6 +212,7 @@
         }
       }
       watcherListGrid.dataProvider = watcher_list;
+	  watcherListTitle.text = "Watchers (" + watcher_list.length +")";
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
@@ -356,8 +358,8 @@
     }
 
     private function _scrollDown():void{
-      userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
-      if (_chat_auto_scroll) userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
+      if (_chat_auto_scroll1) userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
+      if (_chat_auto_scroll2) userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
     }
     
     private function _waitForGame(total:int=1500,byoyomi:int=30):void{
@@ -576,10 +578,14 @@
     }
   }
   
-  private function _change_auto_scroll():void {
-	  _chat_auto_scroll = autoScrollCheck.selected;
+  private function _change_auto_scroll1():void {
+	  _chat_auto_scroll1 = autoScrollCheck1.selected;
   }
-    
+   
+  private function _change_auto_scroll2():void {
+	  _chat_auto_scroll2 = autoScrollCheck2.selected;
+  }
+  
   private function replay():void {
     board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
   }
@@ -664,7 +670,7 @@
 		<mx:HBox>
 			<mx:Label text="Chat"/>
 			<mx:TextInput id="chatMessage2" width="430"/>
-			<mx:CheckBox id="autoScrollCheck" label="Auto-scroll" selected="true" click="_change_auto_scroll();" />
+			<mx:CheckBox id="autoScrollCheck2" label="Auto-scroll" selected="true" click="_change_auto_scroll2();" />
 		</mx:HBox>
       </mx:Panel>
     </mx:VBox>
@@ -673,10 +679,10 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="155">
-        <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="115" fontSize="12" />          
+        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="206">
+        <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />          
         </mx:Panel>
-        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="155" verticalAlign="middle" paddingLeft="8">
+        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="206" verticalAlign="middle" paddingLeft="8">
           <mx:HBox>
             <mx:Button id="resignButton" label="Resign" click="_resign();"/>
             <mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
@@ -690,16 +696,17 @@
             <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
           </mx:HBox>
          <mx:Label text="Chat"/>
-       <mx:TextInput id="chatMessage" width="300"/>           
+         <mx:TextInput id="chatMessage" width="300"/>
+	   	 <mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="635">
-          <mx:Label text="Watchers" fontWeight="bold"/>
-        <mx:DataGrid id="watcherListGrid" width="160" height="220">
+        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="686">
+          <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold"/>
+        <mx:DataGrid id="watcherListGrid" width="160" height="271">
          <mx:columns>
-          <mx:DataGridColumn dataField="name" width="57"/>
-          <mx:DataGridColumn dataField="country" width="56"/>
+          <mx:DataGridColumn dataField="name" width="70"/>
+          <mx:DataGridColumn dataField="country" width="35"/>
           <mx:DataGridColumn dataField="rating"/>
          </mx:columns>
         </mx:DataGrid>
