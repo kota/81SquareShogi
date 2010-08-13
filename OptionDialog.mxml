@@ -20,27 +20,27 @@
 	<mx:RadioButtonGroup id="RadioGroup1"/>
 	<mx:HBox paddingLeft="30">
 		<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup1" value="0"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/sou.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/suma.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/sfu.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/Sou.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/Suma.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_ryoko1/Sfu.png')" width="31" height="36"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
 		<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup1"  value="1"/>
-		<mx:Image source="@Embed('images/pieces_kinki/sou.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_kinki/suma.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_kinki/sfu.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_kinki/Sou.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_kinki/Suma.png')" width="31" height="36"/>
+		<mx:Image source="@Embed('images/pieces_kinki/Sfu.png')" width="31" height="36"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
 		<mx:RadioButton label="Hidetchi's internationalized" groupName="RadioGroup1"  value="2"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/sou.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/suma.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/sfu.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/Sou.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/Suma.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_hidetchi/Sfu.png')" width="34" height="40"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
 		<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup1"  value="3"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/sou.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/suma.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/sfu.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/Sou.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/Suma.png')" width="34" height="40"/>
+		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
 	</mx:HBox>
     <mx:HBox paddingTop="20"> 
         <mx:Button id="OkButton" click="clickOK();" label="OK"/> 
