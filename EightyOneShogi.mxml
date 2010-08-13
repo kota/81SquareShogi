@@ -83,8 +83,8 @@
       _client.connect();
     } 
 
-    private function _handleKeepAlive(e:Event):void{
-      if (_game_name) _client.watchers(_game_name) else _refresh();
+    private function _handleKeepAlive(e:Event):void {
+      if (_game_name && !_post_game) _client.watchers(_game_name) else _refresh();
     }
 
     private function _handleLogin(e:Event):void{
@@ -458,10 +458,7 @@
     }
 
     private function _refresh():void{
-      _client.who();  
-      if(_game_name && !_post_game){
-        _client.watchers(_game_name);
-      }
+      _client.who();
     }
 
     private function _resign():void{
