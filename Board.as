@@ -348,6 +348,8 @@ package  {
 	
     public function closeGame():void{
       _player_names = null;
+      _timers[0].stop();
+      _timers[1].stop();
     }
 
 		public function timeout():void{

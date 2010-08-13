@@ -217,6 +217,11 @@
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
+	  if(_game_name && _monitoring){
+        _client.monitorOff(_game_name);
+        _monitoring = false;
+		board.closeGame();
+      }
 	  _post_game = false;
 	  _player_infos = new Array;
 	  for (var j:int = 0; j < 2 ; j++) {

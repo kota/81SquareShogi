@@ -243,6 +243,12 @@ package{
               if (line == "BEGIN Game_Summary") {
                 _reading_game_summary_flag = true;
               }
+              if(line.match(/^##\[MONITOR2\]/)){
+                _buffer_response(MONITOR,line);
+                if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
+			            _dispatchServerMessageEvent(MONITOR);
+                }
+              }
               break;
             case STATE_AGREE_WAITING:
               if (line.match(/^START\:/) != null){
