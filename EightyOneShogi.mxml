@@ -261,20 +261,22 @@
       kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
         board.timeout();
-        _writeUserMessage("Time up.\n");
+        //_writeUserMessage("Time up.\n");
+		if (board.position.turn == board.my_turn) _sendAutoChat("Time out.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
       }
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-        _writeUserMessage("Illegal Move.\n");
-        if (board.position.turn == board.my_turn) _sendAutoChat("My last move was " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
+        //_writeUserMessage("Illegal Move.\n");
+        if (board.position.turn == board.my_turn) _sendAutoChat("Made illegal move: " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
           kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
         }
       if (e.message.indexOf("RESIGN") >= 0) {
-        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
+        //_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
+		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
         kifuMove.moveKIF = "投了";
         board.kifu_list.push(kifuMove);
