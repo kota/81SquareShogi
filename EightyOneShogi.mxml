@@ -4,6 +4,9 @@
   <mx:Script>
     <![CDATA[
     import flash.display.*;
+	import flash.events.Event;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -47,9 +50,10 @@
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
     private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
-	private const VERSION:String = "ver.2010/08/13";
+	private const VERSION:String = "ver.2010/08/16";
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
+	private var _initMessage:URLLoader = new URLLoader();
 
     private function initApp():void
     {
@@ -60,10 +64,16 @@
       chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat);
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
-      password.addEventListener(FlexEvent.ENTER,_handleLogin);
+      password.addEventListener(FlexEvent.ENTER, _handleLogin);
+	  _initMessage.addEventListener(Event.COMPLETE, _showInitMessage);
+	  _initMessage.load(new URLRequest("http://www.81squareuniverse.com/dojo/initMessage.txt"));
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
     }
+	
+	private function _showInitMessage(e:Event):void {
+		_writeUserMessage(_initMessage.data, 1);
+	}
 
     private function _connectAndLogin():void{
       trace("connecting.");
@@ -107,6 +117,7 @@
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
       _keepAliveTimer.start();
+	  if (_chat_sound_play) _sound_chat.play();
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -671,6 +682,7 @@
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
         <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
         <mx:Button id="playerInfo" label="Player Info" enabled="false"/>
+		<mx:Label text="{VERSION}"/>
       </mx:HBox>
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();">
          <mx:columns>
