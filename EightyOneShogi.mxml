@@ -43,6 +43,8 @@
     private var _chat_sound_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
+	private var _userMessageScrollPos1:int;
+	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
     private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 	private const VERSION:String = "ver.2010/08/13";
@@ -55,7 +57,7 @@
       _client = new CsaShogiClient();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
-      chatMessage.addEventListener(FlexEvent.ENTER,_handleSendChat);
+      chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat);
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER,_handleLogin);
@@ -112,10 +114,10 @@
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
-      if(_isMessageAudible(e.message)){
-        _writeUserMessage(_format_message(e.message));
+ //     if(_isMessageAudible(e.message)){
+        _writeUserMessage(_format_message(e.message),_messageAudible(e.message));
         if (_chat_sound_play) _sound_chat.play();
-      }
+ //     }
     }
 
     private function _format_message(message:String):String{
@@ -127,31 +129,19 @@
       return message;
     }
 
-    private function _isMessageAudible(message:String):Boolean{
-      var sender_name:String = message.match(/\#\#\[CHAT\]\[(.*)\]/)[1];
-      if(board.inGame){
-        if(_isPlayer(sender_name)){
-          return true;
-        } else {
-          return false;
-        }
-      } else {
+    private function _messageAudible(message:String):int{
+		var sender_name:String = message.match(/\#\#\[CHAT\]\[(.*)\]/)[1];
         var match:Array = message.match(/\#\#\[CHAT\]\[(.*)\] ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
         if(match != null){
           var game_name:String = match[2];
-          if(_game_name && _game_name == game_name){
-            return true;
-          }
-        } else {
+          if (_game_name && _game_name == game_name) {
+			  if (board.inGame) {
+				  if (_isPlayer(sender_name)) return 2;
+				  else return 0;
+			  } else return 2;
+          } else return 0;
+        } else return 1;
           //No game id => public chat.
-          if(_monitoring){
-            return false;
-          } else {
-            return true;
-          }
-        }
-      }
-      return false;
     }
 
     private function _isPlayer(user_name:String):Boolean{
@@ -193,7 +183,7 @@
     }
   
   private function _handleReject(e:ServerMessageEvent):void {
-    _writeUserMessage("Rejected by the opponent.\n");
+    _writeUserMessage("Rejected by the opponent.\n",1);
   }
 
     private function _handleWatchers(e:ServerMessageEvent):void{
@@ -233,11 +223,11 @@
 				}
 		}
 	  }
-      userMessage.text = '';
+      userMessage2.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
-        _writeUserMessage("You are Sente(Black).\n");
+        _writeUserMessage("You are Sente(Black).\n",2);
       } else {
-        _writeUserMessage("You are Gote(White).\n");
+        _writeUserMessage("You are Gote(White).\n",2);
       }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       board.startGame(_client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
@@ -261,37 +251,37 @@
       kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
         board.timeout();
-        //_writeUserMessage("Time up.\n");
+        //_writeUserMessage("Time up.\n",2);
 		if (board.position.turn == board.my_turn) _sendAutoChat("Time out.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
       }
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-        //_writeUserMessage("Illegal Move.\n");
+        //_writeUserMessage("Illegal Move.\n",2);
         if (board.position.turn == board.my_turn) _sendAutoChat("Made illegal move: " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
           kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
         }
       if (e.message.indexOf("RESIGN") >= 0) {
-        //_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n");
+        //_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n",2);
 		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
         kifuMove.moveKIF = "投了";
         board.kifu_list.push(kifuMove);
       }
       if (e.message.indexOf("SENNICHITE") >= 0) {
-          _writeUserMessage("Sennichite.\n");
+          _writeUserMessage("Sennichite.\n",2);
       }
       if(e.message.indexOf("LOSE") >= 0){
-        _writeUserMessage("You Lose.\n");
+        _writeUserMessage("You Lose.\n",2);
         if (_end_sound_play) _sound_lose.play();
       } else if(e.message.indexOf("WIN") >= 0){
-        _writeUserMessage("You Win.\n");
+        _writeUserMessage("You Win.\n",2);
         if (_end_sound_play) _sound_win.play();
       } else if(e.message.indexOf("DRAW") >=0){
-        _writeUserMessage("Draw.\n");
+        _writeUserMessage("Draw.\n",2);
         if (_end_sound_play) _sound_win.play();
       }
       closeButton.enabled = true;
@@ -361,16 +351,31 @@
       }
     }
 
-    private function _writeUserMessage(message:String):void{
-      userMessage.text += message;
-//      userMessage.callLater(_scrollDown);
-      userMessage2.text += message;
-      userMessage2.callLater(_scrollDown);
+    private function _writeUserMessage(message:String, n:int):void {
+		switch (n) {
+			case 0:
+				break;
+			case 1:
+				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
+				userMessage1.text += message;
+				userMessage1.callLater(_scrollDown1);
+				break;
+			case 2:
+				_userMessageScrollPos2 = userMessage2.verticalScrollPosition
+				userMessage2.text += message;
+				userMessage2.callLater(_scrollDown2);
+				break;		
+		}
     }
 
-    private function _scrollDown():void{
-      if (_chat_auto_scroll1) userMessage.verticalScrollPosition = userMessage.maxVerticalScrollPosition;
-      if (_chat_auto_scroll2) userMessage2.verticalScrollPosition =  userMessage2.maxVerticalScrollPosition;
+    private function _scrollDown1():void{
+      if (_chat_auto_scroll1) userMessage1.verticalScrollPosition = userMessage1.maxVerticalScrollPosition;
+	  else userMessage1.verticalScrollPosition = _userMessageScrollPos1;
+    }
+
+	private function _scrollDown2():void{
+      if (_chat_auto_scroll1) userMessage2.verticalScrollPosition = userMessage2.maxVerticalScrollPosition;
+	  else userMessage2.verticalScrollPosition = _userMessageScrollPos2;
     }
     
     private function _waitForGame(total:int=1500,byoyomi:int=30):void{
@@ -421,7 +426,7 @@
       var user:Object = userListGrid.selectedItem;
       if (e.detail == Alert.YES) {
       _challenging = true;
-      _writeUserMessage("Challenging.....\n");
+      _writeUserMessage("Challenging.....\n",1);
          _client.challenge(user);
     } else if (e.detail == Alert.CANCEL) {
       } else {
@@ -547,7 +552,7 @@
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
       if (board.watch_game_end) {
 		_post_game = true;
-        _writeUserMessage("Game End.\n");
+        _writeUserMessage("Game End.\n",2);
         if (_end_sound_play) _sound_win.play();
         kifuCopyButton.enabled = true;
         rewindAllButton.enabled = true;
@@ -676,11 +681,11 @@
           <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
          </mx:columns>
         </mx:DataGrid>
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
+        <mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
 		<mx:HBox>
 			<mx:Label text="Chat"/>
-			<mx:TextInput id="chatMessage2" width="430"/>
-			<mx:CheckBox id="autoScrollCheck2" label="Auto-scroll" selected="true" click="_change_auto_scroll2();" />
+			<mx:TextInput id="chatMessage1" width="430"/>
+			<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
 		</mx:HBox>
       </mx:Panel>
     </mx:VBox>
@@ -690,7 +695,7 @@
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
         <mx:Panel id="messagePanel" title="Message Panel" width="435" height="206">
-        <mx:TextArea id="userMessage" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />          
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />          
         </mx:Panel>
         <mx:Panel id="controlPanel" title="Control Panel" width="340" height="206" verticalAlign="middle" paddingLeft="8">
           <mx:HBox>
@@ -706,8 +711,8 @@
             <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
           </mx:HBox>
          <mx:Label text="Chat"/>
-         <mx:TextInput id="chatMessage" width="300"/>
-	   	 <mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
+         <mx:TextInput id="chatMessage2" width="300"/>
+	   	 <mx:CheckBox id="autoScrollCheck2" label="Auto-scroll" selected="true" click="_change_auto_scroll2();" />
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
