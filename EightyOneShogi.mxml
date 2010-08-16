@@ -86,7 +86,8 @@
     } 
 
     private function _handleKeepAlive(e:Event):void {
-      if (_game_name && !_post_game) _client.watchers(_game_name) else _refresh();
+	  _refresh();
+      if (_game_name && !_post_game) _client.watchers(_game_name)
     }
 
     private function _handleLogin(e:Event):void{
@@ -349,6 +350,7 @@
           break;
         }
       }
+	  userListPanel.title = "User List Panel (" + _user_list.length + " players)";
     }
 
     private function _writeUserMessage(message:String, n:int):void {
@@ -464,6 +466,7 @@
 
     private function _refresh():void{
       _client.who();
+	  challengeButton.enabled = false;
     }
 
     private function _resign():void{
@@ -660,16 +663,16 @@
     </mx:VBox>
     
     <mx:VBox horizontalAlign="center">
-      <mx:Panel title="User List Panel" width="640" height="560" paddingLeft="10" paddingTop="10">
+      <mx:Panel id="userListPanel" title="User List Panel" width="765" height="560" paddingLeft="10" paddingTop="10">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
         <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-        <mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+        <mx:Button id="playerInfo" label="Player Info" enabled="false"/>
       </mx:HBox>
-        <mx:DataGrid id="userListGrid" width="580" height="250" change="_userSelected();">
+        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();">
          <mx:columns>
           <mx:DataGridColumn dataField="rank" width="65"/>
           <mx:DataGridColumn dataField="name" width="120"/>
@@ -681,11 +684,16 @@
           <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
          </mx:columns>
         </mx:DataGrid>
-        <mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
 		<mx:HBox>
-			<mx:Label text="Chat"/>
-			<mx:TextInput id="chatMessage1" width="430"/>
-			<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
+			<mx:VBox>
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
+				<mx:HBox>
+					<mx:Label text="Chat"/>
+					<mx:TextInput id="chatMessage1" width="430"/>
+					<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
+				</mx:HBox>
+			</mx:VBox>
+			<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 		</mx:HBox>
       </mx:Panel>
     </mx:VBox>
