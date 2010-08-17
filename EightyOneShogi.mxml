@@ -5,8 +5,6 @@
     <![CDATA[
     import flash.display.*;
 	import flash.events.Event;
-	import flash.net.URLLoader;
-	import flash.net.URLRequest;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -14,6 +12,7 @@
     import mx.managers.PopUpManager;
     import mx.core.IFlexDisplayObject;
     import CsaShogiClient;
+	import InfoFetcher;
     import Board;
     import ChallengeForm;
     import GameRuleEvent;
@@ -49,11 +48,10 @@
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
-    private const rank_names:Array = new Array('Novice', '15-kyu', '14-kyu', '13-kyu', '12-kyu', '11-kyu', '10-kyu', '9-kyu', '8-kyu', '7-kyu', '6-kyu', '5-kyu', '4-kyu', '3-kyu', '2-kyu', '1-kyu', '1-dan', '2-dan', '3-dan', '4-dan', '5-dan', '6-dan');
 	private const VERSION:String = "ver.2010/08/16";
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
-	private var _initMessage:URLLoader = new URLLoader();
+	private var _infoFetcher:InfoFetcher;
 
     private function initApp():void
     {
@@ -65,15 +63,10 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
-	  _initMessage.addEventListener(Event.COMPLETE, _showInitMessage);
-	  _initMessage.load(new URLRequest("http://www.81squareuniverse.com/dojo/initMessage.txt"));
+	  _infoFetcher = new InfoFetcher();
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
     }
-	
-	private function _showInitMessage(e:Event):void {
-		_writeUserMessage(_initMessage.data, 1);
-	}
 
     private function _connectAndLogin():void{
       trace("connecting.");
@@ -117,6 +110,7 @@
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
       _keepAliveTimer.start();
+	  _writeUserMessage(_infoFetcher.initMessage, 1);
 	  if (_chat_sound_play) _sound_chat.play();
     }
 
@@ -325,7 +319,7 @@
           } else {
             user.rating = parseInt(match[2].split(' ')[1]);
           }
-          user.rank = makeRankFromRating(user.rating);
+          user.rank = _infoFetcher.makeRankFromRating(user.rating);
           if(user.status == "game_waiting" || user.status == "game"){
             user.game_name = match[2].split(" ")[1];
             var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
@@ -636,16 +630,6 @@
       case 2:
         kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
     }
-  }
-  
-  private function makeRankFromRating(i:int):String {
-	  if (i < 790) return rank_names[0];     //smaller rank range (temporarily)
-	  else if (i < 1190) return rank_names[int((i - 770) / 20)];
-	  else return rank_names[21];
-   // if (i < 1550) return rank_names[int((i + 50) / 100)];
-   // else if (i < 2300) return rank_names[int((i + 1700) / 200)];
-   // else if (i < 2450) return rank_names[20];
-   // else return rank_names[21];
   }
 
     ]]>
