@@ -126,10 +126,9 @@
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
- //     if(_isMessageAudible(e.message)){
-        _writeUserMessage(_format_message(e.message),_messageAudible(e.message));
-        if (_chat_sound_play) _sound_chat.play();
- //     }
+		var mNum:int = _messageAudible(e.message);
+        _writeUserMessage(_format_message(e.message),mNum);
+        if ((mainViewStack.selectedIndex == mNum) && _chat_sound_play) _sound_chat.play();
     }
 
     private function _format_message(message:String):String{
