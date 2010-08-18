@@ -17,6 +17,8 @@
     import ChallengeForm;
     import GameRuleEvent;
     import mx.utils.StringUtil;
+	
+	private const VERSION:String = "ver.2010/08/18";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -48,7 +50,6 @@
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
-	private const VERSION:String = "ver.2010/08/16";
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
 	private var _infoFetcher:InfoFetcher;
@@ -110,7 +111,8 @@
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
       _keepAliveTimer.start();
-	  _writeUserMessage(_infoFetcher.initMessage, 1);
+	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1);
+	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1);
 	  if (_chat_sound_play) _sound_chat.play();
     }
 
@@ -345,6 +347,15 @@
           }
         }
       }
+	  for (j = 0; j < _infoFetcher.titleUser.length; j++) {
+		  for (i = 0; i < user_list.length; i++) {
+			  if (user_list[i].name == _infoFetcher.titleUser[j]) {
+				  user_list[i].titleName = _infoFetcher.titleName[j];
+				  break;
+			  }
+		  }
+	  }
+
       user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _user_list = user_list;
       userListGrid.dataProvider = _user_list;
@@ -669,13 +680,14 @@
       </mx:HBox>
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();">
          <mx:columns>
-          <mx:DataGridColumn dataField="rank" width="65"/>
-          <mx:DataGridColumn dataField="name" width="120"/>
-          <mx:DataGridColumn dataField="country" width="110"/>
-          <mx:DataGridColumn dataField="rating" width="60"/>
-          <mx:DataGridColumn dataField="status2" headerText="status" width="60"/>
-          <mx:DataGridColumn dataField="rule" width="60"/>
-          <mx:DataGridColumn dataField="opponent" width="120"/>
+		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
+          <mx:DataGridColumn dataField="rank" headerText="Rank" width="65"/>
+          <mx:DataGridColumn dataField="name" headerText="Name" width="120"/>
+          <mx:DataGridColumn dataField="country" headerText="Country" width="110"/>
+          <mx:DataGridColumn dataField="rating" headerText="Rating" width="60"/>
+          <mx:DataGridColumn dataField="status2" headerText="Status" width="60"/>
+          <mx:DataGridColumn dataField="rule" headerText="Rule" width="60"/>
+          <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="120"/>
           <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
          </mx:columns>
         </mx:DataGrid>
