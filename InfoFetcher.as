@@ -11,23 +11,25 @@
 	public class InfoFetcher
 	{
 		private var _urlLoader:URLLoader = new URLLoader();
-		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/infoData.txt";
+		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/infoData.txt?";
 		public var newestVer:String;
 		public var titleUser:Array = new Array;
 		public var titleName:Array = new Array;
 		private var rank_thresholds:Array = new Array;
 		private var rank_names:Array = new Array;
+		public var country_names:Array = new Array;
 		public var initMessage:String
 		
 		public function InfoFetcher()
 		{
 	  _urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
-	  _urlLoader.load(new URLRequest(SOURCE));	
+	  var nowDate:Date = new Date(); 
+	  _urlLoader.load(new URLRequest(SOURCE + nowDate.getTime().toString()));	
 		}
 		
 		private function _parseInfo(e:Event):void { 
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###END/s);
+			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
 			newestVer = match[1];
 			initMessage = match[2];
 			var lines:Array = match[3].split("\n");
@@ -39,6 +41,10 @@
 			for each(line in lines) {
 				rank_thresholds.push(line.split("\t")[0]);
 				rank_names.push(line.split("\t")[1]);
+			}
+			lines = match[5].split("\n");
+			for each(line in lines) {
+				country_names[line.split("\t")[0]] = line.split("\t")[1];
 			}
 		}
 		

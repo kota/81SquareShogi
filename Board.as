@@ -9,6 +9,7 @@ package  {
 	import flash.geom.Point;
 	import flash.media.Sound;
 	import flash.system.System;
+	import mx.controls.SWFLoader;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Alert;
@@ -68,6 +69,7 @@ package  {
     private var _turn_symbols:Array;
 	private var _timers:Array;
 	private var _avatar_images:Array;
+	private var _player_flags:Array;
 
     private var _cells:Array;
     private var _board_bg_image:Image = new Image();
@@ -152,6 +154,7 @@ package  {
       _turn_symbols = new Array(2);
       _timers = new Array(2);
 	  _avatar_images = new Array(2);
+	  _player_flags = new Array(2);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
         
@@ -164,10 +167,17 @@ package  {
         
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
-		timer.x = hand.x + KOMADAI_WIDTH/2 - 40
+		timer.x = i == 0 ? hand.x + 13 : hand.x + KOMADAI_WIDTH / 2 - 15 + 3;
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
 		_timers[i] = timer;
 		addChild(timer);
+		var flag_loader:SWFLoader = new SWFLoader();
+		flag_loader.width = 56;
+		flag_loader.height = 44;
+		flag_loader.x = i == 0 ? hand.x + KOMADAI_WIDTH / 2 +28 : hand.x + 5;
+		flag_loader.y = timer.y - 5;
+		_player_flags[i] = flag_loader;
+		addChild(flag_loader);
 
         var turn_symbol:Image = new Image();
         turn_symbol.x = 2;
@@ -189,7 +199,7 @@ package  {
         info_label.setStyle('fontSize', 11);
         info_label.x = name_label.x;
         info_label.y = name_label.y + 20;
-        _info_labels[i] = info_label;       
+        _info_labels[i] = info_label;
 
         var h_box:Canvas = new Canvas();
         h_box.setStyle('backgroundColor',0xddee88);
@@ -324,6 +334,8 @@ package  {
       _info_labels[1].text = player_infos[1 - _my_turn]; // "R:1500, (Country)"
 	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[_my_turn].split(" ")[1] + ".jpg";
 	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[1 - _my_turn].split(" ")[1] + ".jpg";
+	  _player_flags[0].source = "http://www.81squareuniverse.com/dojo/images/flags_m/392.swf";
+	  _player_flags[1].source = "http://www.81squareuniverse.com/dojo/images/flags_m/000.swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);
@@ -350,6 +362,10 @@ package  {
       _player_names = null;
       _timers[0].stop();
       _timers[1].stop();
+	  _avatar_images[0].source = null;
+	  _avatar_images[1].source = null;
+	  _player_flags[0].source = null;
+	  _player_flags[1].source = null;
     }
 
 		public function timeout():void{
@@ -458,6 +474,8 @@ package  {
       _info_labels[1].text = _player_infos[1 - _my_turn]; // "R:1500, (Country)"
 	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[_my_turn].split(" ")[1] + ".jpg";
 	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _player_infos[1 - _my_turn].split(" ")[1] + ".jpg";
+	  _player_flags[0].source = "http://www.81squareuniverse.com/dojo/images/flags_m/392.swf";
+	  _player_flags[1].source = "http://www.81squareuniverse.com/dojo/images/flags_m/000.swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _timers[0].reset(total_time,byoyomi);

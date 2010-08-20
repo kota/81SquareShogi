@@ -18,7 +18,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/18";
+	private const VERSION:String = "ver.2010/08/20";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -315,7 +315,8 @@
         trace("user_data:" + user_data);
         var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
         if(match != null){
-          var user:Object = {'name':match[1], 'country':'81SU','status':StringUtil.trim(match[2].split(" ")[0])}
+          var user:Object = { 'name':match[1], 'country':'81SU', 'status':StringUtil.trim(match[2].split(" ")[0]) }
+		  user.country = _infoFetcher.country_names[392];
           if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
             user.rating = parseInt(match[2].split(' ')[3]);
           } else {
