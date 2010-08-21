@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*">
-
-  <mx:Script>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
+	<mx:Style>
+		Alert {
+			fontSize : 13px;
+		}
+	</mx:Style>
+	<mx:Script>
     <![CDATA[
     import flash.display.*;
 	import flash.events.Event;
@@ -18,7 +22,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/20";
+	private const VERSION:String = "ver.2010/08/21";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -60,8 +64,8 @@
       _client = new CsaShogiClient();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
-      chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat);
-      chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat);
+      chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat1);
+      chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
 	  _infoFetcher = new InfoFetcher();
@@ -366,7 +370,7 @@
           break;
         }
       }
-	  userListPanel.title = "User List Panel (" + _user_list.length + " players)";
+	  userListPanel.title = "Main Lobby (" + _user_list.length + " players)";
     }
 
     private function _writeUserMessage(message:String, n:int):void {
@@ -478,11 +482,13 @@
       if(user != null){
         _client.challenge(user);
       }
+	  challengeButton.enabled = false;
     }
 
     private function _refresh():void{
       _client.who();
 	  challengeButton.enabled = false;
+	  watchButton.enabled = false;
     }
 
     private function _resign():void{
@@ -516,7 +522,8 @@
       Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
     }
 
-    private function _userSelected():void{
+    private function _userSelected():void {
+	  if (_game_name) return;
       var user:Object = userListGrid.selectedItem;
       if(user != null && user.name != _login_name && user.status == "game_waiting"){
         challengeButton.enabled = true;
@@ -585,6 +592,7 @@
 
     private function _watch():void{
       _client.list();
+	  watchButton.enabled = false;
       _watch_user = userListGrid.selectedItem;
       mainViewStack.selectedIndex = 2;
       closeButton.enabled = true;
@@ -597,12 +605,13 @@
       kifuDataGrid.dataProvider = board.kifu_list;
     }
 
-    private function _handleSendChat(e:FlexEvent):void{
-      if(_game_name){
-        _client.chat(_game_name + " " + e.target.text);
-      } else {
-        _client.chat(e.target.text);
-      }
+    private function _handleSendChat1(e:FlexEvent):void{
+      _client.chat(e.target.text);
+      e.target.text = "";
+    }
+	
+    private function _handleSendChat2(e:FlexEvent):void{
+      if(_game_name) _client.chat(_game_name + " " + e.target.text);
       e.target.text = "";
     }
   
@@ -618,6 +627,18 @@
    
   private function _change_auto_scroll2():void {
 	  _chat_auto_scroll2 = autoScrollCheck2.selected;
+  }
+  
+  private function _checkLobby():void {
+	  mainViewStack.selectedIndex = 1;
+	  backToGameButton.visible = true;
+	  startButton.enabled = false;
+  }
+
+  private function _backToGame():void {
+	  mainViewStack.selectedIndex = 2;
+	  backToGameButton.visible = false;
+	  startButton.enabled = true;
   }
   
   private function replay():void {
@@ -646,10 +667,11 @@
 
     ]]>
   </mx:Script>
+  <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
-    <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%">
+    <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
-      <mx:Label text="(powered by ShogiServer and 81SU)" fontSize="11"/>
+      <mx:Label text="(powered by ShogiServer and 81SU)"/>
       <mx:Form>
         <mx:FormItem label="loginname">
             <mx:TextInput id="loginname" width="200"/>
@@ -664,12 +686,12 @@
       <mx:Label id="loginMessage"/>
       <mx:Label id="errorMessage" color="#ff6666" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
-      <mx:Label text="Chief Programmer: Kota" fontSize="10"/>
+      <mx:Label text="Chief Programmer: Kota"/>
       <mx:Label text="{VERSION}"/>
     </mx:VBox>
     
-    <mx:VBox horizontalAlign="center">
-      <mx:Panel id="userListPanel" title="User List Panel" width="765" height="560" paddingLeft="10" paddingTop="10">
+    <mx:VBox horizontalAlign="center" fontSize="11">
+      <mx:Panel id="userListPanel" width="765" height="560" paddingLeft="10" paddingTop="10">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
@@ -679,7 +701,7 @@
         <mx:Button id="playerInfo" label="Player Info" enabled="false"/>
 		<mx:Label text="{VERSION}"/>
       </mx:HBox>
-        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();">
+        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21">
          <mx:columns>
 		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
           <mx:DataGridColumn dataField="rank" headerText="Rank" width="65"/>
@@ -701,7 +723,10 @@
 					<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
 				</mx:HBox>
 			</mx:VBox>
-			<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+			<mx:VBox>
+				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+				<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
+			</mx:VBox>
 		</mx:HBox>
       </mx:Panel>
     </mx:VBox>
@@ -710,10 +735,10 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="206">
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />          
+        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="200" headerHeight="22">
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />
         </mx:Panel>
-        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="206" verticalAlign="middle" paddingLeft="8">
+        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22">
           <mx:HBox>
             <mx:Button id="resignButton" label="Resign" click="_resign();"/>
             <mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
@@ -728,13 +753,16 @@
           </mx:HBox>
          <mx:Label text="Chat"/>
          <mx:TextInput id="chatMessage2" width="300"/>
-	   	 <mx:CheckBox id="autoScrollCheck2" label="Auto-scroll" selected="true" click="_change_auto_scroll2();" />
+		 <mx:HBox>
+			<mx:CheckBox id="autoScrollCheck2" label="Auto-scroll" selected="true" click="_change_auto_scroll2();" />
+			<mx:Button id="checkLobbyButton" label="Check Lobby" enabled="true" click="_checkLobby();" />
+		</mx:HBox>
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="686">
-          <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold"/>
-        <mx:DataGrid id="watcherListGrid" width="160" height="271">
+        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
+          <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
+        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21">
          <mx:columns>
           <mx:DataGridColumn dataField="name" width="70"/>
           <mx:DataGridColumn dataField="country" width="35"/>
@@ -742,7 +770,7 @@
          </mx:columns>
         </mx:DataGrid>
         <mx:Label text="Kifu" fontWeight="bold"/>
-        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="287" change="replay();" selectable="false">
+        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="318" change="replay();" selectable="false" fontSize="10" rowHeight="20">
          <mx:columns>
           <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
           <mx:DataGridColumn dataField="move"/>
