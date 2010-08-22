@@ -22,7 +22,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/21";
+	private const VERSION:String = "ver.2010/08/22-b";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -229,7 +229,7 @@
 		var _str1:String = _client.playerNames[j].toLowerCase();
 		for (var i:int = 0; i < _user_list.length ; i++) {
 			if (_user_list[i].name == _str1) {
-				_player_infos[j] = "R:" + _user_list[i].rating + ", " + _user_list[i].rank
+				_player_infos[j] = "R:" + _user_list[i].rating + ", " + _user_list[i].rank + "\t" + String(_user_list[i].country_code + 1000).substring(1);
 				break;
 				}
 		}
@@ -320,13 +320,15 @@
         var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
         if(match != null){
           var user:Object = { 'name':match[1], 'country':'81SU', 'status':StringUtil.trim(match[2].split(" ")[0]) }
-		  user.country = _infoFetcher.country_names[392];
           if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
             user.rating = parseInt(match[2].split(' ')[3]);
+			user.country_code = parseInt(match[2].split(' ')[4]);
           } else {
             user.rating = parseInt(match[2].split(' ')[1]);
+			user.country_code = parseInt(match[2].split(' ')[2]);
           }
           user.rank = _infoFetcher.makeRankFromRating(user.rating);
+		  user.country = _infoFetcher.country_names[user.country_code];
           if(user.status == "game_waiting" || user.status == "game"){
             user.game_name = match[2].split(" ")[1];
             var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
@@ -396,7 +398,7 @@
     }
 
 	private function _scrollDown2():void{
-      if (_chat_auto_scroll1) userMessage2.verticalScrollPosition = userMessage2.maxVerticalScrollPosition;
+      if (_chat_auto_scroll2) userMessage2.verticalScrollPosition = userMessage2.maxVerticalScrollPosition;
 	  else userMessage2.verticalScrollPosition = _userMessageScrollPos2;
     }
     
@@ -572,7 +574,7 @@
 
     private function _handleMonitor(e:ServerMessageEvent):void{
       if(_watch_user != null){
-        board.monitor(e.message,_watch_user,_user_list);  // _user_list is sent only for refering to the players' ratings on the board
+        board.monitor(e.message,_watch_user,_user_list);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
