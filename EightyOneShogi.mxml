@@ -22,7 +22,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/22-b";
+	private const VERSION:String = "ver.2010/08/23";
 
     private var _client:CsaShogiClient;
     [Bindable]

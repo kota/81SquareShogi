@@ -552,11 +552,9 @@ package  {
           _selected_square = Square(e.currentTarget);
           _from = new Point(e.currentTarget.coord_x,e.currentTarget.coord_y);
         } else {
-          if(_selected_square == e.currentTarget){
             _selected_square.setStyle('backgroundColor',undefined);
             _from = null;
             _selected_square = null;
-          }
         }
       }
     }
