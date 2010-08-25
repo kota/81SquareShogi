@@ -9,6 +9,7 @@
     <![CDATA[
     import flash.display.*;
 	import flash.events.Event;
+	import flash.events.MouseEvent;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -22,14 +23,14 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/23";
+	private const VERSION:String = "ver.2010/08/25";
 
     private var _client:CsaShogiClient;
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array;
     private var _login_name:String;
-	private var _player_infos:Array;
+	private var _player_infos:Array = new Array;
     private var _watch_user:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
@@ -46,7 +47,6 @@
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     private var _sound_challenger:Sound = new Sound_challenger();
-    private var optionWindow:OptionDialog;
     private var _end_sound_play:Boolean = true;
     private var _chat_sound_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
@@ -57,6 +57,10 @@
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
 	private var _infoFetcher:InfoFetcher;
+	
+    private var _optionWindow:OptionDialog;
+	private var _newGameWindow:NewGameForm; 
+    private var _playerInfoWindow:PlayerInfoWindow;
 
     private function initApp():void
     {
@@ -68,6 +72,7 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
+	  
 	  _infoFetcher = new InfoFetcher();
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
@@ -208,8 +213,6 @@
         var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*)/);
         if(match){
           watcher.name = match[1];
-          watcher.country = '81SU';
-          watcher.rating = '';
           watcher_list.push(watcher);
         }
       }
@@ -224,15 +227,8 @@
 		board.closeGame();
       }
 	  _post_game = false;
-	  _player_infos = new Array;
 	  for (var j:int = 0; j < 2 ; j++) {
-		var _str1:String = _client.playerNames[j].toLowerCase();
-		for (var i:int = 0; i < _user_list.length ; i++) {
-			if (_user_list[i].name == _str1) {
-				_player_infos[j] = "R:" + _user_list[i].rating + ", " + _user_list[i].rank + "\t" + String(_user_list[i].country_code + 1000).substring(1);
-				break;
-				}
-		}
+		_player_infos[j] = _findPlayerFromList(_client.playerNames[j].toLowerCase());
 	  }
       userMessage2.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
@@ -329,6 +325,7 @@
           }
           user.rank = _infoFetcher.makeRankFromRating(user.rating);
 		  user.country = _infoFetcher.country_names[user.country_code];
+		  user.titleName = "";
           if(user.status == "game_waiting" || user.status == "game"){
             user.game_name = match[2].split(" ")[1];
             var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
@@ -409,9 +406,9 @@
     }
     
     private function _showOptions():void{
-      optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
-      PopUpManager.centerPopUp(optionWindow);
-      with(optionWindow){
+      _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
+      PopUpManager.centerPopUp(_optionWindow);
+      with(_optionWindow){
         title = "Options";
         RadioGroup1.selectedValue = board.piece_type;
         pieceSoundCheckBox.selected = board.piece_sound_play;
@@ -422,10 +419,10 @@
     }
     
     private function _handleOption(e:Event):void{
-      board.setPieceType(int(optionWindow.RadioGroup1.selectedValue));
-      board.piece_sound_play = optionWindow.pieceSoundCheckBox.selected;
-      _end_sound_play = optionWindow.gameEndSoundCheckBox.selected;
-      _chat_sound_play = optionWindow.chatSoundCheckBox.selected;
+      board.setPieceType(int(_optionWindow.RadioGroup1.selectedValue));
+      board.piece_sound_play = _optionWindow.pieceSoundCheckBox.selected;
+      _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
+      _chat_sound_play = _optionWindow.chatSoundCheckBox.selected;
     }
 
     private function _challengeForm():void{
@@ -463,10 +460,10 @@
     }
 
     private function _newGameForm():void{
-      var newGameWindow:NewGameForm = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
-      PopUpManager.centerPopUp(newGameWindow);
-      newGameWindow.title = "Create new game";
-      newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+      _newGameWindow = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
+      PopUpManager.centerPopUp(_newGameWindow);
+      _newGameWindow.title = "Create new game";
+      _newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
     }
   
     private function _stopWaiting():void {
@@ -606,6 +603,20 @@
       kifuDataGrid.selectable = false;
       kifuDataGrid.dataProvider = board.kifu_list;
     }
+	
+	private function _findPlayerFromList(str:String):Object {
+		for (var i:int = 0; i < _user_list.length; i++) {
+			if (_user_list[i].name == str) return _user_list[i];
+		}
+		return null;
+	}
+	
+	private function _openPlayerInfo(user:Object):void {
+	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, true));
+      PopUpManager.centerPopUp(_playerInfoWindow);
+      _playerInfoWindow.title = "Player Info";
+	  _playerInfoWindow.user = user;
+	}
 
     private function _handleSendChat1(e:FlexEvent):void{
       _client.chat(e.target.text);
@@ -700,10 +711,10 @@
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
         <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-        <mx:Button id="playerInfo" label="Player Info" enabled="false"/>
+        <mx:Button id="playerInfo" label="Player Info" click="_openPlayerInfo(userListGrid.selectedItem);" />
 		<mx:Label text="{VERSION}"/>
       </mx:HBox>
-        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21">
+        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
          <mx:columns>
 		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
           <mx:DataGridColumn dataField="rank" headerText="Rank" width="65"/>
@@ -764,11 +775,10 @@
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
-        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21">
+        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name.toLowerCase()));">
          <mx:columns>
-          <mx:DataGridColumn dataField="name" width="70"/>
-          <mx:DataGridColumn dataField="country" width="35"/>
-          <mx:DataGridColumn dataField="rating"/>
+          <mx:DataGridColumn dataField="name" headerText="Name" width="110"/>
+		  <mx:DataGridColumn dataField="rating" headerText="Rating"/>
          </mx:columns>
         </mx:DataGrid>
         <mx:Label text="Kifu" fontWeight="bold"/>

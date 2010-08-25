@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="420" height="240" fontSize="12">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+		  
+		  [Bindable]
+		  public var user:Object;
+		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
+		  
+		  private function _swfError():void {
+			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
+		  }
+
+          private function _closeButton():void {
+            PopUpManager.removePopUp(this);
+          }
+
+        ]]>
+    </mx:Script>
+	<mx:HBox>
+		<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{user.rank}.jpg"/>
+		<mx:VBox>
+			<mx:HBox>
+				<mx:VBox>
+					<mx:Label text="{user.name}" fontSize="15" fontWeight="bold" />
+					<mx:Label text="Country:  {user.country}"/>
+				</mx:VBox>
+				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{String(user.country_code + 1000).substring(1)}.swf" ioError="_swfError();" />
+			</mx:HBox>
+			<mx:Label text="Rating:  {user.rating},  ({user.rank})"/>
+			<mx:Label text="Title:  {user.titleName}"/>
+			<mx:HBox>
+				<mx:Label text="Win:"/>
+				<mx:Label text="Loss:"/>
+				<mx:Label text="Total:"/>
+				<mx:Label text="(**.*%)"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:Label text="Streak Wins: Best (Current)"/>
+			</mx:HBox>
+		</mx:VBox>
+	</mx:HBox>
+	<mx:VBox width="100%" horizontalAlign="center">
+		<mx:Button id="close" click="_closeButton();" label="Close"/>	
+	</mx:VBox>
+</mx:TitleWindow>

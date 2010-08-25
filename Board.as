@@ -62,9 +62,10 @@ package  {
 	[Embed(source = "/sound/piece.mp3")]
 	private var sound_piece:Class;
 	private var _sound_piece:Sound = new sound_piece();
+	private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
 
     public var handBoxes:Array;
-    private var _name_labels:Array;
+    public var name_labels:Array;
     private var _info_labels:Array;
     private var _turn_symbols:Array;
 	private var _timers:Array;
@@ -92,7 +93,7 @@ package  {
     private var _position:Kyokumen;
 
     private var _player_names:Array;
-	private var _player_infos:Array;
+	private var _player_infos:Array = new Array;
     private var _my_turn:int;
     private var _in_game:Boolean;
 	private var _client_timeout:Boolean;
@@ -149,7 +150,7 @@ package  {
       addChild(_board_ghand_image);
 	
       handBoxes = new Array(2);
-      _name_labels = new Array(2);
+      name_labels = new Array(2);
       _info_labels = new Array(2);
       _turn_symbols = new Array(2);
       _timers = new Array(2);
@@ -194,7 +195,7 @@ package  {
         name_label.setStyle('fontWeight', 'bold');
         name_label.x = turn_symbol.x + 20;
         name_label.y = turn_symbol.y + 5;
-        _name_labels[i] = name_label;
+        name_labels[i] = name_label;
         var info_label:Label = new Label();
         info_label.setStyle('fontSize', 11);
         info_label.x = name_label.x;
@@ -328,14 +329,14 @@ package  {
       reset();
       _position = new Kyokumen();
       setPosition(_position);
-      _name_labels[0].text = player_names[_my_turn];
-      _name_labels[1].text = player_names[1-_my_turn];
-      _info_labels[0].text = player_infos[_my_turn].split("\t")[0];
-      _info_labels[1].text = player_infos[1 - _my_turn].split("\t")[0];
-	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _info_labels[0].text.split(" ")[1] + ".jpg";
-	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _info_labels[1].text.split(" ")[1] + ".jpg";
-	  _player_flags[0].source = "http://www.81squareuniverse.com/dojo/images/flags_m/" + player_infos[_my_turn].split("\t")[1] + ".swf";
-	  _player_flags[1].source = "http://www.81squareuniverse.com/dojo/images/flags_m/" + player_infos[1 - _my_turn].split("\t")[1] + ".swf";
+      name_labels[0].text = player_names[_my_turn];
+      name_labels[1].text = player_names[1 - _my_turn];
+      _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
+      _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
+	  _avatar_images[0].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+	  _avatar_images[1].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
+	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			_timers[0].reset(time_total,time_byoyomi);
@@ -457,25 +458,24 @@ package  {
       _player_names = names;
       watch_game_end = false;
 
-	  _player_infos = new Array;
 	  for (var j:int = 0; j < 2 ; j++) {
 		var _str1:String = names[j].toLowerCase();
 		for (var i:int = 0; i < user_list.length ; i++) { 
 			if (user_list[i].name == _str1) {
-				_player_infos[j] = "R:" + user_list[i].rating + ", " + user_list[i].rank + "\t" + String(user_list[i].country_code + 1000).substring(1);
+				_player_infos[j] = user_list[i];
 				break;
 				}
 		}
 	  }
 	  
-      _name_labels[0].text = names[_my_turn];
-      _name_labels[1].text = names[1-_my_turn];
-      _info_labels[0].text = _player_infos[_my_turn].split("\t")[0]; // "R:1500, (Country)"
-      _info_labels[1].text = _player_infos[1 - _my_turn].split("\t")[0]; // "R:1500, (Country)"
-	  _avatar_images[0].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _info_labels[0].text.split(" ")[1] + ".jpg";
-	  _avatar_images[1].source = "http://www.81squareuniverse.com/dojo/images/avatars/" + _info_labels[1].text.split(" ")[1] + ".jpg";
-	  _player_flags[0].source = "http://www.81squareuniverse.com/dojo/images/flags_m/" + _player_infos[_my_turn].split("\t")[1] + ".swf";
-	  _player_flags[1].source = "http://www.81squareuniverse.com/dojo/images/flags_m/" + _player_infos[1 - _my_turn].split("\t")[1] + ".swf";
+      name_labels[0].text = names[_my_turn];
+      name_labels[1].text = names[1-_my_turn];
+      _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
+      _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
+	  _avatar_images[0].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+	  _avatar_images[1].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
+	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       _timers[0].reset(total_time,byoyomi);
