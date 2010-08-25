@@ -744,6 +744,20 @@
 			</mx:VBox>
 		</mx:HBox>
       </mx:Panel>
+	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold">
+		  <mx:VBox horizontalAlign="center">
+			  <mx:Label text="Los Angeles"/>
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-blue.swf?TimeZone=USA_WashingtonDC" width="300" height="30"/>
+		  </mx:VBox>
+		  <mx:VBox horizontalAlign="center">
+			  <mx:Label text="UTC"/>
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-white.swf?TimeZone=GMT" width="300" height="30"/>			  
+		  </mx:VBox>
+		  <mx:VBox horizontalAlign="center">
+			  <mx:Label text="Tokyo"/>
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-red.swf?TimeZone=Japan_Tokyo" width="300" height="30"/>			  
+		  </mx:VBox>
+	  </mx:HBox>
     </mx:VBox>
     
     <mx:HBox horizontalAlign="center" verticalAlign="middle">
