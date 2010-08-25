@@ -132,8 +132,10 @@
 
     private function _handleChat(e:ServerMessageEvent):void{
 		var mNum:int = _messageAudible(e.message);
-        _writeUserMessage(_format_message(e.message),mNum);
-        if ((mainViewStack.selectedIndex == mNum) && _chat_sound_play) _sound_chat.play();
+        _writeUserMessage(_format_message(e.message), mNum);
+		if (_chat_sound_play) {
+			if (mNum == 2 || (mainViewStack.selectedIndex == 1 && mNum == 1)) _sound_chat.play();	
+		}
     }
 
     private function _format_message(message:String):String{
