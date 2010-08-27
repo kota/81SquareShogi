@@ -389,6 +389,7 @@
       for (i = 0; i < user_list.length; i++) {
         if (_user_list[i].name == _login_name.toLowerCase()) {
           userListGrid.selectedIndex = i;
+		  userListGrid.scrollToIndex(i + 1);
           break;
         }
       }
