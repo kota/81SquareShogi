@@ -25,7 +25,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/26";
+	private const VERSION:String = "ver.2010/08/27";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -708,7 +708,8 @@
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
-      <mx:Label text="(powered by ShogiServer and 81SU)"/>
+	  <mx:Label text="{VERSION}"/>
+      <mx:Label text="(powered by ShogiServer and 81SquareUniverse.com)"/>
       <mx:Form>
         <mx:FormItem label="loginname">
             <mx:TextInput id="loginname" width="200"/>
@@ -720,11 +721,15 @@
             <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
         </mx:FormItem>
       </mx:Form>
-      <mx:Label id="loginMessage"/>
-      <mx:Label id="errorMessage" color="#ff6666" />
+      <mx:Label id="loginMessage" fontSize="10" />
+      <mx:Label id="errorMessage" color="#ff6666" fontSize="10" />
       <mx:LinkButton label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
-      <mx:Label text="Chief Programmer: Kota"/>
-      <mx:Label text="{VERSION}"/>
+      <mx:Label paddingTop="15" text="Chief Programmer: Kota" fontSize="13" />
+	  <mx:Label text="Assistant: Hidetchi"/>
+	  <mx:Label paddingTop="12" text="- Materials -" fontSize="10" />
+	  <mx:LinkButton label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
+      <mx:LinkButton label="www.otosozai.com - ONGAKUSITU" click="navigateToURL(new URLRequest('http://www.otosozai.com/'), 'quote')"/>
+	  <mx:LinkButton label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
     </mx:VBox>
     
     <mx:VBox horizontalAlign="center" fontSize="11">
