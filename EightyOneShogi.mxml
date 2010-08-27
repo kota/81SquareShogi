@@ -10,6 +10,8 @@
     import flash.display.*;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -23,7 +25,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/25";
+	private const VERSION:String = "ver.2010/08/26";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -56,11 +58,13 @@
 	private var _post_game:Boolean = true;
     private var _my_last_move:Movement;
     private var _keepAliveTimer:Timer;
+	private var _challengerTicker:Timer;
 	private var _infoFetcher:InfoFetcher;
 	
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
     private var _playerInfoWindow:PlayerInfoWindow;
+	private var _challengerAlertWindow:ChallengerAlertWindow;
 
     private function initApp():void
     {
@@ -72,7 +76,8 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
-	  
+	  _challengerTicker = new Timer(1000);
+	  _challengerTicker.addEventListener(TimerEvent.TIMER, _challengerTickHandler);
 	  _infoFetcher = new InfoFetcher();
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
@@ -174,34 +179,49 @@
   
   private function _handleGameSummary(e:ServerMessageEvent):void {
     if (_challenging) {
-      _challenging = false;
       _client.agree();
     } else {
 	  _refresh();
+	  var challengerName:String = _login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
       _sound_challenger.play();
-      Alert.yesLabel = "Accept";
-      Alert.noLabel = "Reject";
-      Alert.buttonWidth = 140;
-      Alert.show("Opponent:" + (_login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0]), "Here comes a new challenger!!",
-                Alert.YES | Alert.NO, this, _handleGameSummaryAlert);
-      //set properties back to default.
-      Alert.yesLabel = "Yes";
-      Alert.noLabel = "No";
-      Alert.buttonWidth = 60;  
+	  _challengerTicker.reset();
+	  _challengerTicker.start();
+      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, false));
+      PopUpManager.centerPopUp(_challengerAlertWindow);
+      with(_challengerAlertWindow){
+        title = "Here comes a new challenger!!";
+		remainTime = 20;
+		user = _findPlayerFromList(challengerName.toLowerCase());
+        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
+		rejectButton.addEventListener("click", _handleChallengerRejectButton);
+      }
     }
   }
   
-   private function _handleGameSummaryAlert(e:CloseEvent):void{
-      var user:Object = userListGrid.selectedItem;
-      if(e.detail == Alert.YES){
-        _client.agree();
-      } else {
-        _client.reject();
-      }
-    }
+  private function _handleChallengerAcceptButton(e:MouseEvent):void {
+	  _challengerTicker.reset();
+	  _client.agree();
+  }
+  
+  private function _handleChallengerRejectButton(e:MouseEvent):void {
+	  _challengerTicker.reset();
+	  _client.reject();
+  }
+	
+	private function _challengerTickHandler(e:TimerEvent):void {
+		_challengerAlertWindow.remainTime -= 1
+		if (_challengerAlertWindow.remainTime <= 0) {
+			_challengerTicker.reset();
+			_client.reject();
+			PopUpManager.removePopUp(_challengerAlertWindow);
+		}
+	}
   
   private function _handleReject(e:ServerMessageEvent):void {
-    _writeUserMessage("Rejected by the opponent.\n",1);
+	if (_challenging) {
+		_writeUserMessage("Rejected by the opponent.\n", 1);
+		_challenging = false;
+	}
   }
 
     private function _handleWatchers(e:ServerMessageEvent):void{
@@ -223,6 +243,7 @@
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
+	  _challenging = false;
 	  if(_game_name && _monitoring){
         _client.monitorOff(_game_name);
         _monitoring = false;
@@ -429,7 +450,7 @@
 
     private function _challengeForm():void{
       var user:Object = userListGrid.selectedItem;
-      if(user != null){
+      if (user != null) {
         var match:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
         var total:int = parseInt(match[2]) / 60 ;
         var rule:String = total + "min -" + match[3] + "sec";
@@ -449,7 +470,7 @@
       var user:Object = userListGrid.selectedItem;
       if (e.detail == Alert.YES) {
       _challenging = true;
-      _writeUserMessage("Challenging.....\n",1);
+      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n",1);
          _client.challenge(user);
     } else if (e.detail == Alert.CANCEL) {
       } else {
@@ -747,15 +768,15 @@
 	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold">
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Los Angeles"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-blue.swf?TimeZone=USA_WashingtonDC" width="300" height="30"/>
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-blue.swf?TimeZone=USA_LosAngeles" width="300" height="25"/>
 		  </mx:VBox>
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="UTC"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-white.swf?TimeZone=GMT" width="300" height="30"/>			  
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-green.swf?TimeZone=GMT" width="300" height="25"/>			  
 		  </mx:VBox>
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Tokyo"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5007-red.swf?TimeZone=Japan_Tokyo" width="300" height="30"/>			  
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=Japan_Tokyo" width="300" height="25"/>			  
 		  </mx:VBox>
 	  </mx:HBox>
     </mx:VBox>

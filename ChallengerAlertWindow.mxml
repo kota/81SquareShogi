@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="175" fontSize="13">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+		  
+		  [Bindable]
+		  public var user:Object;
+		  [Bindable]
+		  public var remainTime:int;
+
+          private function _closeButton():void {
+            PopUpManager.removePopUp(this);
+          }
+
+        ]]>
+    </mx:Script>
+	<mx:VBox horizontalAlign="left" paddingLeft="10">
+		<mx:Label text="{user.name}" fontSize="16" fontWeight="bold" />
+		<mx:Label text="  Rating: {user.rating}, ({user.rank})"/>
+		<mx:Label text="  Country: {user.country}"/>
+	</mx:VBox>
+	<mx:VBox width="100%" horizontalAlign="center">
+		<mx:HBox>
+			<mx:Button id="acceptButton" click="_closeButton();" label="Accept"/>
+			<mx:Button id="rejectButton" click="_closeButton();" label="Reject"/>
+			<mx:Label text="{remainTime}" fontSize="16" fontWeight="bold" />
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>
