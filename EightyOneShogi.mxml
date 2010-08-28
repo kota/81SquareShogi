@@ -25,7 +25,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/27";
+	private const VERSION:String = "ver.2010/08/28";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -44,13 +44,17 @@
     private var Sound_lose:Class;
     private var _sound_lose:Sound = new Sound_lose();
     [Embed(source = "/sound/chat.mp3")]
-    private var Sound_chat:Class;
-    private var _sound_chat:Sound = new Sound_chat();
+    private var Sound_chat1:Class;
+    private var _sound_chat1:Sound = new Sound_chat1();
+    [Embed(source = "/sound/chat.mp3")]
+    private var Sound_chat2:Class;
+    private var _sound_chat2:Sound = new Sound_chat2();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     private var _sound_challenger:Sound = new Sound_challenger();
     private var _end_sound_play:Boolean = true;
-    private var _chat_sound_play:Boolean = true;
+    private var _chat_sound1_play:Boolean = true;
+    private var _chat_sound2_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
 	private var _userMessageScrollPos1:int;
@@ -135,7 +139,7 @@
       _keepAliveTimer.start();
 	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1);
 	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1);
-	  if (_chat_sound_play) _sound_chat.play();
+	  if (_chat_sound1_play) _sound_chat1.play();
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -146,8 +150,10 @@
     private function _handleChat(e:ServerMessageEvent):void{
 		var mNum:int = _messageAudible(e.message);
         _writeUserMessage(_format_message(e.message), mNum);
-		if (_chat_sound_play) {
-			if (mNum == 2 || (mainViewStack.selectedIndex == 1 && mNum == 1)) _sound_chat.play();	
+		if (mNum == 1 && mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
+			_sound_chat1.play();
+		} else if (mNum == 2 && _chat_sound2_play) {
+			_sound_chat2.play();
 		}
     }
 
@@ -442,19 +448,24 @@
       PopUpManager.centerPopUp(_optionWindow);
       with(_optionWindow){
         title = "Options";
-        RadioGroup1.selectedValue = board.piece_type;
+		RadioGroup1.selectedValue = board.timers[0].soundType;
+        RadioGroup2.selectedValue = board.piece_type;
         pieceSoundCheckBox.selected = board.piece_sound_play;
         gameEndSoundCheckBox.selected = _end_sound_play;
-        chatSoundCheckBox.selected = _chat_sound_play;
+        chatSound1CheckBox.selected = _chat_sound1_play;
+        chatSound2CheckBox.selected = _chat_sound2_play;
         OkButton.addEventListener("click",_handleOption);
       }
     }
     
-    private function _handleOption(e:Event):void{
-      board.setPieceType(int(_optionWindow.RadioGroup1.selectedValue));
+    private function _handleOption(e:Event):void {
+	  board.timers[0].soundType = int(_optionWindow.RadioGroup1.selectedValue);
+	  board.timers[1].soundType = int(_optionWindow.RadioGroup1.selectedValue);
+      board.setPieceType(int(_optionWindow.RadioGroup2.selectedValue));
       board.piece_sound_play = _optionWindow.pieceSoundCheckBox.selected;
       _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
-      _chat_sound_play = _optionWindow.chatSoundCheckBox.selected;
+      _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
+      _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
     }
 
     private function _challengeForm():void{
@@ -748,7 +759,7 @@
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
     </mx:VBox>
     
-    <mx:VBox horizontalAlign="center" fontSize="11">
+    <mx:VBox paddingTop="10" horizontalAlign="center" fontSize="11">
       <mx:Panel id="userListPanel" width="765" height="560" paddingLeft="10" paddingTop="10">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>

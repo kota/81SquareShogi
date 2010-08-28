@@ -22,9 +22,57 @@ package {
 
 		private var _timer:Timer;
 		
+		private var _sound_type:int = 0;
+		
 		[Embed(source = "/sound/timer.mp3")]
-		private var sound_timer:Class;
-		private var _sound_timer:Sound = new sound_timer();
+		private static var sound_timer:Class;
+		private static var _sound_timer:Sound = new sound_timer();
+		[Embed(source = "/sound/jp_voice/01.mp3")]
+		private static var Voice01:Class;
+		private static var _voice01:Sound = new Voice01();
+		[Embed(source = "/sound/jp_voice/02.mp3")]
+		private static var Voice02:Class;
+		private static var _voice02:Sound = new Voice02();
+		[Embed(source = "/sound/jp_voice/03.mp3")]
+		private static var Voice03:Class;
+		private static var _voice03:Sound = new Voice03();
+		[Embed(source = "/sound/jp_voice/04.mp3")]
+		private static var Voice04:Class;
+		private static var _voice04:Sound = new Voice04();
+		[Embed(source = "/sound/jp_voice/05.mp3")]
+		private static var Voice05:Class;
+		private static var _voice05:Sound = new Voice05();
+		[Embed(source = "/sound/jp_voice/06.mp3")]
+		private static var Voice06:Class;
+		private static var _voice06:Sound = new Voice06();
+		[Embed(source = "/sound/jp_voice/07.mp3")]
+		private static var Voice07:Class;
+		private static var _voice07:Sound = new Voice07();
+		[Embed(source = "/sound/jp_voice/08.mp3")]
+		private static var Voice08:Class;
+		private static var _voice08:Sound = new Voice08();
+		[Embed(source = "/sound/jp_voice/09.mp3")]
+		private static var Voice09:Class;
+		private static var _voice09:Sound = new Voice09();
+		[Embed(source = "/sound/jp_voice/10.mp3")]
+		private static var Voice10:Class;
+		private static var _voice10:Sound = new Voice10();
+		[Embed(source = "/sound/jp_voice/20.mp3")]
+		private static var Voice20:Class;
+		private static var _voice20:Sound = new Voice20();
+		[Embed(source = "/sound/jp_voice/30.mp3")]
+		private static var Voice30:Class;
+		private static var _voice30:Sound = new Voice30();
+		[Embed(source = "/sound/jp_voice/40.mp3")]
+		private static var Voice40:Class;
+		private static var _voice40:Sound = new Voice40();
+		[Embed(source = "/sound/jp_voice/50.mp3")]
+		private static var Voice50:Class;
+		private static var _voice50:Sound = new Voice50();
+		[Embed(source = "/sound/jp_voice/byoyomi.mp3")]
+		private static var VoiceByoyomi:Class;
+		private static var _voiceByoyomi:Sound = new VoiceByoyomi();
+		private static var _voices:Array;
 
 		public function GameTimer() {
 			this.width = 85;
@@ -35,11 +83,12 @@ package {
 			_label = new Label();
 			_label.setStyle('textAlign','right');
 			_label.setStyle('fontSize',18);
-			_label.setStyle('fontWeight','bold');
+			_label.setStyle('fontWeight', 'bold');
 			_label.x = 10
 			addChild(_label);
 			_timer = new Timer(1000);
-			_timer.addEventListener(TimerEvent.TIMER,_tickHandler);
+			_timer.addEventListener(TimerEvent.TIMER, _tickHandler);
+			_voices = new Array(null,_voice01, _voice02, _voice03, _voice04, _voice05, _voice06, _voice07, _voice08, _voice09,_voice10,_voice20,_voice30,_voice40,_voice50);
 		}
 
 		public function start():void{
@@ -120,7 +169,11 @@ package {
 					_byoyomi_flag = true;
 					this.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
-					_sound_timer.play();
+					if (_sound_type == 0) {
+						_sound_timer.play();
+					} else {
+						_voiceByoyomi.play();
+					}
 				} else {
           //time's up
 					_timeout_flag = true;
@@ -128,13 +181,23 @@ package {
 					dispatchEvent(new Event(CHECK_TIMEOUT));
 					//_timer.stop();
 				}
-			}
-			if(_byoyomi_flag && _time_left == 10){
-				this.setStyle('backgroundColor',0xFF5500);
-				_sound_timer.play();
-			}
-			if(_byoyomi_flag && _time_left <= 5 && _time_left >= 1){
-				_sound_timer.play();
+			} else if (_byoyomi_flag) {
+				if (_time_left % 10 == 0) {
+					if (_sound_type == 1) {
+						_voices[9 + int((_byoyomi - _time_left)/10)].play();
+					}
+				}
+				if(_time_left == 10){
+					this.setStyle('backgroundColor', 0xFF5500);
+					if (_sound_type == 0) _sound_timer.play();
+				}
+				if (_time_left <= 9 && _time_left >= 1) {
+					if (_sound_type == 0 && _time_left <= 5) {
+						_sound_timer.play();
+					} else if (_sound_type == 1) {
+						_voices[10 - _time_left].play();
+					}
+				}
 			}
 			_display();
 		}
@@ -146,5 +209,13 @@ package {
 			_label.text = time;
 		}
 
+		public function set soundType(v:int):void {
+			this._sound_type = v;
+		}
+		
+		public function get soundType():int {
+			return this._sound_type;
+		}
+		
 	}
 }

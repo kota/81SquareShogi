@@ -68,7 +68,7 @@ package  {
     public var name_labels:Array;
     private var _info_labels:Array;
     private var _turn_symbols:Array;
-	private var _timers:Array;
+	public var timers:Array;
 	private var _avatar_images:Array;
 	private var _player_flags:Array;
 
@@ -153,7 +153,7 @@ package  {
       name_labels = new Array(2);
       _info_labels = new Array(2);
       _turn_symbols = new Array(2);
-      _timers = new Array(2);
+      timers = new Array(2);
 	  _avatar_images = new Array(2);
 	  _player_flags = new Array(2);
       for(i=0;i<2;i++){
@@ -170,7 +170,7 @@ package  {
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
 		timer.x = i == 0 ? hand.x + 13 : hand.x + KOMADAI_WIDTH / 2 - 12;
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
-		_timers[i] = timer;
+		timers[i] = timer;
 		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
@@ -295,9 +295,9 @@ package  {
 
 			var time:int = mv.time;
 
-			_timers[running_timer].accumulateTime(time);
-			_timers[running_timer].suspend();
-			_timers[1-running_timer].resume();
+			timers[running_timer].accumulateTime(time);
+			timers[running_timer].suspend();
+			timers[1-running_timer].resume();
 
       _position.move(mv);
       if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
@@ -340,17 +340,17 @@ package  {
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-			_timers[0].reset(time_total,time_byoyomi);
-			_timers[1].reset(time_total,time_byoyomi);
-			_timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
+			timers[0].reset(time_total,time_byoyomi);
+			timers[1].reset(time_total,time_byoyomi);
+			timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
       _in_game = true;
 	  _client_timeout = false;
     }
 
     public function endGame():void{
       trace("game end");
-			_timers[0].stop();
-			_timers[1].stop();
+			timers[0].stop();
+			timers[1].stop();
 	    if(_selected_square != null){
         _selected_square.setStyle('backgroundColor',undefined);
         _from = null;
@@ -362,8 +362,8 @@ package  {
 	
     public function closeGame():void{
       _player_names = null;
-      _timers[0].stop();
-      _timers[1].stop();
+      timers[0].stop();
+      timers[1].stop();
 	  _avatar_images[0].source = null;
 	  _avatar_images[1].source = null;
 	  _player_flags[0].source = null;
@@ -372,7 +372,7 @@ package  {
 
 		public function timeout():void{
 			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
-			_timers[running_timer].timeout();
+			timers[running_timer].timeout();
 		}
 		
 		public function clientTimeout():void {
@@ -411,8 +411,8 @@ package  {
       } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/) ||
                game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
     	  watch_game_end = true;
-    		_timers[0].stop();
-    		_timers[1].stop();
+    		timers[0].stop();
+    		timers[1].stop();
       } else {
         return;
       }
@@ -479,13 +479,13 @@ package  {
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-      _timers[0].reset(total_time,byoyomi);
-      _timers[1].reset(total_time,byoyomi);
+      timers[0].reset(total_time,byoyomi);
+      timers[1].reset(total_time,byoyomi);
 
       var turn:int = Kyokumen.SENTE;
       var running_timer:int = turn == _my_turn ? 0 : 1;
-      _timers[running_timer].start();
-      _timers[1-running_timer].stop();
+      timers[running_timer].start();
+      timers[1-running_timer].stop();
       if (moves.length > 0) {
         for each(var move:Object in moves) {
           makeMove(move.move + "," + move.time,false);
