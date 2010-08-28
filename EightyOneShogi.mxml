@@ -76,6 +76,8 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
+	  board.name_labels[0].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
+	  board.name_labels[1].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  _challengerTicker = new Timer(1000);
 	  _challengerTicker.addEventListener(TimerEvent.TIMER, _challengerTickHandler);
 	  _infoFetcher = new InfoFetcher();
@@ -646,6 +648,10 @@
       PopUpManager.centerPopUp(_playerInfoWindow);
       _playerInfoWindow.title = "Player Info";
 	  _playerInfoWindow.user = user;
+	}
+	
+	private function _gamePlayerInfo(e:MouseEvent):void {
+	  _openPlayerInfo(_findPlayerFromList(e.target.text));
 	}
 
     private function _handleSendChat1(e:FlexEvent):void{

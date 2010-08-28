@@ -195,6 +195,7 @@ package  {
         name_label.setStyle('fontWeight', 'bold');
         name_label.x = turn_symbol.x + 20;
         name_label.y = turn_symbol.y + 5;
+		name_label.doubleClickEnabled = true;
         name_labels[i] = name_label;
         var info_label:Label = new Label();
         info_label.setStyle('fontSize', 11);
