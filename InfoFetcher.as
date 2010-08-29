@@ -3,15 +3,22 @@
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.events.Event;
+	import flash.net.URLVariables;
+	import flash.net.sendToURL;
+	import flash.net.URLRequestMethod;
+	import mx.collections.ArrayCollection;
+	import mx.rpc.events.ResultEvent;
+	import mx.rpc.http.HTTPService;
+	import flash.events.EventDispatcher;
 	
 	/**
 	 * ...
 	 * @author Hidetchi
 	 */
-	public class InfoFetcher
+	public class InfoFetcher extends EventDispatcher
 	{
 		private var _urlLoader:URLLoader = new URLLoader();
-		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/infoData.txt?";
+		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
 		public var newestVer:String;
 		public var titleUser:Array = new Array;
 		public var titleName:Array = new Array;
@@ -19,12 +26,19 @@
 		private var rank_names:Array = new Array;
 		public var country_names:Array = new Array;
 		public var initMessage:String
+		private var _urlRequest:URLRequest = new URLRequest();
+		private var _httpService:HTTPService = new HTTPService();
+		public var userSettings:Object = new Object();
+		private var _login_name:String;
 		
 		public function InfoFetcher()
 		{
 	  _urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
 	  var nowDate:Date = new Date(); 
-	  _urlLoader.load(new URLRequest(SOURCE + nowDate.getTime().toString()));	
+	  _urlLoader.load(new URLRequest(SOURCE + "infoData.txt?" + nowDate.getTime().toString()));
+	  _urlRequest.url = SOURCE + "users/write.php";
+	  _urlRequest.method = URLRequestMethod.GET;
+	  _httpService.url = SOURCE + "users/userConfig.xml";
 		}
 		
 		private function _parseInfo(e:Event):void { 
@@ -62,6 +76,36 @@
 	        // else if (i < 2450) return rank_names[20];
 	        // else return rank_names[21];
 	    }
+		
+		public function writeSettings(v:URLVariables):void {
+			_urlRequest.data = v;
+			sendToURL(_urlRequest);
+		}
+		
+		public function loadSettings(str:String):void{
+			_login_name = str;
+			_httpService.addEventListener(ResultEvent.RESULT, _handleSettings);
+			_httpService.send();
+		}
+		
+		private function _handleSettings(e:ResultEvent):void {
+			var userData:ArrayCollection = new ArrayCollection();
+			userData = e.result.users.user as ArrayCollection;
+			userSettings.pieceSound = true;
+			userSettings.chatSound1 = true;
+			userSettings.chatSound2 = true;
+			userSettings.endSound = true;
+			userSettings.pieceType = 0;
+			userSettings.byoyomi = 1;
+			for (var i:int = 0; i < userData.length; i++) {
+				if (userData[i].name == _login_name) {
+					userSettings = userData[i];
+					break;
+				}
+			}
+			dispatchEvent(new Event("loadComplete"));
+		}
+		
 	}
 	
 }

@@ -4,10 +4,6 @@
         <![CDATA[
         	import mx.controls.*;
             import mx.managers.PopUpManager;
-            
-            private function clickOK():void {
-                PopUpManager.removePopUp(this);
-            }
         ]]>
     </mx:Script>
     <mx:Label text="Sound" fontWeight="bold"/>
@@ -22,8 +18,9 @@
 		<mx:HBox>
 			<mx:Label text="byoyomi sound"/>
 			<mx:RadioButtonGroup id="RadioGroup1"/>
-			<mx:RadioButton label="Chime" groupName="RadioGroup1" value="0"/>
-			<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="1"/>
+			<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
+			<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
+			<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="2"/>
 		</mx:HBox>
     </mx:VBox>
     <mx:Label text="Piece Type" fontWeight="bold"/>
@@ -53,7 +50,8 @@
 		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
 	</mx:HBox>
     <mx:HBox paddingTop="10"> 
-        <mx:Button id="OkButton" click="clickOK();" label="OK"/> 
+        <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 
         <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+		<mx:Button id="saveSettingsButton" label="Save settings to server"/>
     </mx:HBox> 
 </mx:TitleWindow>

@@ -22,10 +22,10 @@
 	<mx:HBox>
 		<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{user.rank}.jpg"/>
 		<mx:VBox>
-			<mx:HBox>
+			<mx:HBox verticalAlign="middle">
 				<mx:VBox>
 					<mx:Label text="{user.name}" fontSize="15" fontWeight="bold" />
-					<mx:Label text="Country:  {user.country}"/>
+					<mx:Label paddingRight="10" text="Country:  {user.country}"/>
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{String(user.country_code + 1000).substring(1)}.swf" ioError="_swfError();" />
 			</mx:HBox>

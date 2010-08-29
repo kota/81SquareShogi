@@ -22,7 +22,7 @@ package {
 
 		private var _timer:Timer;
 		
-		private var _sound_type:int = 0;
+		public static var soundType:int = 1;
 		
 		[Embed(source = "/sound/timer.mp3")]
 		private static var sound_timer:Class;
@@ -169,9 +169,9 @@ package {
 					_byoyomi_flag = true;
 					this.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
-					if (_sound_type == 0) {
+					if (soundType == 1) {
 						_sound_timer.play();
-					} else {
+					} else if (soundType == 2) {
 						_voiceByoyomi.play();
 					}
 				} else {
@@ -183,18 +183,18 @@ package {
 				}
 			} else if (_byoyomi_flag) {
 				if (_time_left % 10 == 0) {
-					if (_sound_type == 1) {
+					if (soundType == 2) {
 						_voices[9 + int((_byoyomi - _time_left)/10)].play();
 					}
 				}
 				if(_time_left == 10){
 					this.setStyle('backgroundColor', 0xFF5500);
-					if (_sound_type == 0) _sound_timer.play();
+					if (soundType == 1) _sound_timer.play();
 				}
 				if (_time_left <= 9 && _time_left >= 1) {
-					if (_sound_type == 0 && _time_left <= 5) {
+					if (soundType == 1 && _time_left <= 5) {
 						_sound_timer.play();
-					} else if (_sound_type == 1) {
+					} else if (soundType == 2) {
 						_voices[10 - _time_left].play();
 					}
 				}
@@ -207,14 +207,6 @@ package {
 			var sec:int = _time_left % 60;
 			time = int(_time_left / 60).toString() + ":" + (sec < 10 ? '0' : '') + sec.toString();
 			_label.text = time;
-		}
-
-		public function set soundType(v:int):void {
-			this._sound_type = v;
-		}
-		
-		public function get soundType():int {
-			return this._sound_type;
 		}
 		
 	}

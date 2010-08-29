@@ -11,6 +11,7 @@
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
+	import flash.net.URLVariables;
 	import flash.utils.Timer;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
@@ -21,11 +22,12 @@
     import CsaShogiClient;
 	import InfoFetcher;
     import Board;
+	import GameTimer;
     import ChallengeForm;
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/28";
+	private const VERSION:String = "ver.2010/08/29";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -133,6 +135,8 @@
     private function _handleLoggedIn(e:Event):void{
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
+	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
+	  _infoFetcher.loadSettings(_login_name);
       _client.who();
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
@@ -448,25 +452,47 @@
       PopUpManager.centerPopUp(_optionWindow);
       with(_optionWindow){
         title = "Options";
-		RadioGroup1.selectedValue = board.timers[0].soundType;
+		RadioGroup1.selectedValue = GameTimer.soundType;
         RadioGroup2.selectedValue = board.piece_type;
         pieceSoundCheckBox.selected = board.piece_sound_play;
         gameEndSoundCheckBox.selected = _end_sound_play;
         chatSound1CheckBox.selected = _chat_sound1_play;
         chatSound2CheckBox.selected = _chat_sound2_play;
-        OkButton.addEventListener("click",_handleOption);
+        OkButton.addEventListener("click", _handleOption);
+		saveSettingsButton.addEventListener("click", _handleSaveSettings);
       }
     }
     
     private function _handleOption(e:Event):void {
-	  board.timers[0].soundType = int(_optionWindow.RadioGroup1.selectedValue);
-	  board.timers[1].soundType = int(_optionWindow.RadioGroup1.selectedValue);
+	  GameTimer.soundType = int(_optionWindow.RadioGroup1.selectedValue);
       board.setPieceType(int(_optionWindow.RadioGroup2.selectedValue));
       board.piece_sound_play = _optionWindow.pieceSoundCheckBox.selected;
       _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
       _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
     }
+	
+	private function _handleSaveSettings(e:Event):void {
+		var urlVariables:URLVariables = new URLVariables();
+		_handleOption(e);
+		urlVariables.name = _login_name;
+		urlVariables.pieceSound = board.piece_sound_play;
+		urlVariables.endSound = _end_sound_play;
+		urlVariables.chatSound1 = _chat_sound1_play;
+		urlVariables.chatSound2 = _chat_sound2_play;
+		urlVariables.byoyomi = GameTimer.soundType;
+		urlVariables.pieceType = board.piece_type;
+		_infoFetcher.writeSettings(urlVariables);
+	}
+	
+	private function _handleLoadOption(e:Event):void {
+		board.piece_sound_play = _infoFetcher.userSettings.pieceSound;
+		_end_sound_play = _infoFetcher.userSettings.endSound;
+		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
+		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
+		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
+		board.setPieceType(_infoFetcher.userSettings.pieceType);
+	}
 
     private function _challengeForm():void{
       var user:Object = userListGrid.selectedItem;
