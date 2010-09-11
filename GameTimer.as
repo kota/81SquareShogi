@@ -76,15 +76,17 @@ package {
 
 		public function GameTimer() {
 			this.width = 85;
+			this.horizontalScrollPolicy = "no";
 			this.setStyle('borderStyle','solid');
 			this.setStyle('borderColor',0x000000);
 			this.setStyle('textAlign','center');
 			this.setStyle('backgroundColor',0xffffff);
 			_label = new Label();
-			_label.setStyle('textAlign','right');
+			_label.setStyle('textAlign','center');
 			_label.setStyle('fontSize',18);
 			_label.setStyle('fontWeight', 'bold');
-			_label.x = 10
+			_label.x = 0;
+			_label.width = 85;
 			addChild(_label);
 			_timer = new Timer(1000);
 			_timer.addEventListener(TimerEvent.TIMER, _tickHandler);

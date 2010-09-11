@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/08/29";
+	private const VERSION:String = "ver.2010/09/05";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -396,6 +396,10 @@
 		  for (i = 0; i < user_list.length; i++) {
 			  if (user_list[i].name == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
+				  if (_infoFetcher.titleName[j] == "livebot") {
+					  user_list[i].rating = 3000;
+					  user_list[i].rank = "pro"
+				  }
 				  break;
 			  }
 		  }
@@ -688,7 +692,7 @@
 	}
 	
 	private function _gamePlayerInfo(e:MouseEvent):void {
-	  _openPlayerInfo(_findPlayerFromList(e.target.text));
+	  _openPlayerInfo(_findPlayerFromList(e.target.text.toLowerCase()));
 	}
 
     private function _handleSendChat1(e:FlexEvent):void{
