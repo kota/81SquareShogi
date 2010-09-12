@@ -531,7 +531,10 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-              if (!_client_timeout) _playerMoveCallback(_from,_to,false);
+              if (!_client_timeout) {
+				  timers[0].suspend();
+				  _playerMoveCallback(_from, _to, false);
+			  }
               _from = null;
               _to = null;
             }
@@ -541,7 +544,10 @@ package  {
     }
 
     private function _promotionHandler(e:CloseEvent):void{
-      if (! _client_timeout) _playerMoveCallback(_from,_to,e.detail == Alert.YES);
+      if (! _client_timeout) {
+		  timers[0].suspend();
+		  _playerMoveCallback(_from, _to, e.detail == Alert.YES);
+	  }
       _from = null;
       _to = null;
     }
