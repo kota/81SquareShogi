@@ -11,6 +11,7 @@
             [{label:"60min", data:3600},
              {label:"30min", data:1800},
              {label:"15min", data:900},
+			 {label:"5min", data:300},
              {label:"1min", data:60},
              {label:"0min", data:0}]
           );

@@ -59,6 +59,9 @@
     private var _chat_sound2_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
+	private var _ur_total_selected:int = 0;
+	private var _ur_byoyomi_selected:int = 0;
+	private var _ur_handicap_selected:int = 0;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
@@ -535,8 +538,13 @@
     private function _newGameForm():void{
       _newGameWindow = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
       PopUpManager.centerPopUp(_newGameWindow);
-      _newGameWindow.title = "Create new game";
-      _newGameWindow.addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+      with(_newGameWindow){
+        title = "Create new game";
+		nonrated_total.selectedIndex = _ur_total_selected;
+		nonrated_byoyomi.selectedIndex = _ur_byoyomi_selected;
+		nonrated_handicap.selectedIndex = _ur_handicap_selected;
+		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+      }
     }
   
     private function _stopWaiting():void {
@@ -545,7 +553,10 @@
       stopButton.enabled = false;
     }
 
-    private function _handleRuleSelected(e:GameRuleEvent):void{
+    private function _handleRuleSelected(e:GameRuleEvent):void {
+	  _ur_total_selected = _newGameWindow.nonrated_total.selectedIndex;
+	  _ur_byoyomi_selected = _newGameWindow.nonrated_byoyomi.selectedIndex;
+	  _ur_handicap_selected = _newGameWindow.nonrated_handicap.selectedIndex;
       _waitForGame(e.total,e.byoyomi);
     }
 
