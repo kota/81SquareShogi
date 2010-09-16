@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/05";
+	private const VERSION:String = "ver.2010/09/16";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -217,7 +217,7 @@
       with(_challengerAlertWindow){
         title = "Here comes a new challenger!!";
 		remainTime = 20;
-		user = _findPlayerFromList(challengerName.toLowerCase());
+		user = _findPlayerFromList(challengerName);
         acceptButton.addEventListener("click", _handleChallengerAcceptButton);
 		rejectButton.addEventListener("click", _handleChallengerRejectButton);
       }
@@ -277,7 +277,7 @@
       }
 	  _post_game = false;
 	  for (var j:int = 0; j < 2 ; j++) {
-		_player_infos[j] = _findPlayerFromList(_client.playerNames[j].toLowerCase());
+		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
       userMessage2.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
@@ -364,27 +364,26 @@
         trace("user_data:" + user_data);
         var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
         if(match != null){
-          var user:Object = { 'name':match[1], 'country':'81SU', 'status':StringUtil.trim(match[2].split(" ")[0]) }
-          if(user.status == 'game_waiting' || user.status == 'start_waiting' || user.status == 'agree_waiting' || user.status == 'game'){
-            user.rating = parseInt(match[2].split(' ')[3]);
-			user.country_code = parseInt(match[2].split(' ')[4]);
-          } else {
-            user.rating = parseInt(match[2].split(' ')[1]);
-			user.country_code = parseInt(match[2].split(' ')[2]);
-          }
+          var user:Object = {
+			  'name':match[1],
+			  'status':StringUtil.trim(match[2].split(" ")[0]),
+			  'game_name':match[2].split(" ")[1],
+			  'turn':match[2].split(" ")[2],
+			  'rating':parseInt(match[2].split(" ")[3]),
+			  'country_code':parseInt(match[2].split(" ")[4]),
+			  'titleName':""
+			  }
           user.rank = _infoFetcher.makeRankFromRating(user.rating);
 		  user.country = _infoFetcher.country_names[user.country_code];
-		  user.titleName = "";
           if(user.status == "game_waiting" || user.status == "game"){
-            user.game_name = match[2].split(" ")[1];
             var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-            var total:int = parseInt(game_info[2]) / 60 ;
+            var total:int = parseInt(game_info[2]) / 60;
             user.rule = total + "-" + game_info[3];
             if(user.status == "game_waiting"){
               user.status2 = "W";
             } else {
-              user.status2 = "G(" + (match[2].split(" ")[2] == "+" ? "▲" : "△") + ")";
-              if (user.name != game_info[1].toLowerCase()) user.opponent = game_info[1].toLowerCase();  //Show the user's opponent only when he is a challenger
+              user.status2 = "G(" + (user.turn == "+" ? "▲" : "△") + ")";
+              if (user.name != game_info[1]) user.opponent = game_info[1];  //Show the user's opponent only when he is a challenger
             }
           }
           user_list.push(user);
@@ -417,7 +416,7 @@
 	  _user_list = user_list;
       userListGrid.dataProvider = _user_list;
       for (i = 0; i < user_list.length; i++) {
-        if (_user_list[i].name == _login_name.toLowerCase()) {
+        if (_user_list[i].name == _login_name) {
           userListGrid.selectedIndex = i;
 		  userListGrid.scrollToIndex(i + 1);
           break;
@@ -642,7 +641,7 @@
         var lines:Array = e.message.split("\n");
         for each(var line:String in lines){
           var tokens:Array = line.split("+");
-          if(tokens != null && (tokens[2].toLowerCase() == _watch_user.name || tokens[3].toLowerCase() == _watch_user.name)){
+          if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
             var match:Array = line.match(/##\[LIST\] (.*)/);
             if(match != null){
               var game_name:String = match[1];
@@ -708,7 +707,7 @@
 	}
 	
 	private function _gamePlayerInfo(e:MouseEvent):void {
-	  _openPlayerInfo(_findPlayerFromList(e.target.text.toLowerCase()));
+	  _openPlayerInfo(_findPlayerFromList(e.target.text));
 	}
 
     private function _handleSendChat1(e:FlexEvent):void{
@@ -819,14 +818,16 @@
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
          <mx:columns>
 		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
-          <mx:DataGridColumn dataField="rank" headerText="Rank" width="65"/>
+          <mx:DataGridColumn dataField="rank" headerText="Rank" width="55"/>
           <mx:DataGridColumn dataField="name" headerText="Name" width="120"/>
           <mx:DataGridColumn dataField="country" headerText="Country" width="110"/>
-          <mx:DataGridColumn dataField="rating" headerText="Rating" width="60"/>
+          <mx:DataGridColumn dataField="rating" headerText="Rating" width="50"/>
           <mx:DataGridColumn dataField="status2" headerText="Status" width="60"/>
           <mx:DataGridColumn dataField="rule" headerText="Rule" width="60"/>
           <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="120"/>
-          <mx:DataGridColumn dataField="status" headerText="status(inside)" width="120"/>
+          <mx:DataGridColumn dataField="status" headerText="debug1" />
+		  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
+		  <mx:DataGridColumn dataField="turn" headerText="debug3" />
          </mx:columns>
         </mx:DataGrid>
 		<mx:HBox>
@@ -891,7 +892,7 @@
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
-        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name.toLowerCase()));">
+        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="Name" width="110"/>
 		  <mx:DataGridColumn dataField="rating" headerText="Rating"/>
