@@ -22,21 +22,23 @@ package  {
 	private static const koma_impasse_points:Array = new Array(0, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
     private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
     private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
-    private static const file_japanese_names:Array = new Array('１','２','３','４','５','６','７','８','９');
+    private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
+	
+	public var initialPositionStr:String;
 
-    public function initialPositionStr():String{
-      var tmp:String = "";
-      tmp += "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n";
-      tmp += "P2 * -HI *  *  *  *  * -KA * \n";
-      tmp += "P3-FU-FU-FU-FU-FU-FU-FU-FU-FU\n";
-      tmp += "P4 *  *  *  *  *  *  *  *  * \n";
-      tmp += "P5 *  *  *  *  *  *  *  *  * \n";
-      tmp += "P6 *  *  *  *  *  *  *  *  * \n";
-      tmp += "P7+FU+FU+FU+FU+FU+FU+FU+FU+FU\n";
-      tmp += "P8 * +KA *  *  *  *  * +HI * \n";
-      tmp += "P9+KY+KE+GI+KI+OU+KI+GI+KE+KY\n";
-      return tmp;
-    }
+//    public function initialPositionStr():String{
+//     var tmp:String = "";
+//      tmp += "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n";
+//      tmp += "P2 * -HI *  *  *  *  * -KA * \n";
+//      tmp += "P3-FU-FU-FU-FU-FU-FU-FU-FU-FU\n";
+//      tmp += "P4 *  *  *  *  *  *  *  *  * \n";
+//      tmp += "P5 *  *  *  *  *  *  *  *  * \n";
+//      tmp += "P6 *  *  *  *  *  *  *  *  * \n";
+//      tmp += "P7+FU+FU+FU+FU+FU+FU+FU+FU+FU\n";
+//      tmp += "P8 * +KA *  *  *  *  * +HI * \n";
+//      tmp += "P9+KY+KE+GI+KI+OU+KI+GI+KE+KY\n";
+//      return tmp;
+//    }
 
     public static const HAND:int = 100;
     public static const HAND_OU:int = HAND+0;
@@ -48,7 +50,8 @@ package  {
     public static const HAND_KY:int = HAND+6;
     public static const HAND_FU:int = HAND+7;
 
-		public function Kyokumen():void {
+		public function Kyokumen(kyokumen_str:String):void {
+			initialPositionStr = kyokumen_str;
 			this._turn = SENTE;
 			this._ban = new Array(9);
 			for (var i:int; i < 9; i++ ) {
@@ -58,7 +61,7 @@ package  {
 			_komadai[0] = new Komadai();
 			_komadai[1] = new Komadai();
 
-      loadFromString(initialPositionStr());
+      loadFromString(initialPositionStr);
 		}
 
     public function loadFromString(position_str:String):void{

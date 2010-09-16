@@ -59,13 +59,14 @@
     private var _chat_sound2_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
-	private var _ur_total_selected:int = 0;
-	private var _ur_byoyomi_selected:int = 0;
+	private var _ur_total_selected:int = 3;
+	private var _ur_byoyomi_selected:int = 4;
 	private var _ur_handicap_selected:int = 0;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
     private var _my_last_move:Movement;
+	private var _initPositionStr:String;
     private var _keepAliveTimer:Timer;
 	private var _challengerTicker:Timer;
 	private var _infoFetcher:InfoFetcher;
@@ -199,6 +200,10 @@
     }
   
   private function _handleGameSummary(e:ServerMessageEvent):void {
+	  _initPositionStr = "";
+	  for each(var line:String in e.message.split("\n")) {
+		  if (line.match(/^P[0-9]/)) _initPositionStr += line + "\n";
+	  }
     if (_challenging) {
       _client.agree();
     } else {
@@ -281,7 +286,7 @@
         _writeUserMessage("You are Gote(White).\n",2);
       }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
-      board.startGame(_client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
+      board.startGame(_initPositionStr, _client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
       _game_name = e.message.substr(6);
 	  _client.watchers(_game_name);
       stopButton.enabled = false;
@@ -448,8 +453,8 @@
 	  else userMessage2.verticalScrollPosition = _userMessageScrollPos2;
     }
     
-    private function _waitForGame(total:int=1500,byoyomi:int=30):void{
-      _client.waitForGame(total,byoyomi);
+    private function _waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void{
+      _client.waitForGame(total,byoyomi,handicap);
       _refresh();
       stopButton.enabled = true;
     }
@@ -557,7 +562,7 @@
 	  _ur_total_selected = _newGameWindow.nonrated_total.selectedIndex;
 	  _ur_byoyomi_selected = _newGameWindow.nonrated_byoyomi.selectedIndex;
 	  _ur_handicap_selected = _newGameWindow.nonrated_handicap.selectedIndex;
-      _waitForGame(e.total,e.byoyomi);
+      _waitForGame(e.total,e.byoyomi,e.handicap);
     }
 
     private function _challenge(e:Event):void{

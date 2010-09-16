@@ -91,9 +91,13 @@ package{
       send("LOGIN " + login_name + " " + password +" x1");//connect with extended mode.
     }
 
-    public function waitForGame(total:int=1500,byoyomi:int=30):void {
+    public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void {
       _current_state = STATE_GAME_WAITING;
-      send("%%GAME " + _login_name + "-"+total.toString()+"-"+byoyomi.toString()+" *");
+	  if (handicap.match(/^hc/)) {
+		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " +");
+	  } else {
+		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " *");
+	  }
     }
 	
 	public function stopWaiting():void {
@@ -106,7 +110,11 @@ package{
 		public function challenge(user:Object):void {
       if(user.game_name){
         _current_state = STATE_GAME_WAITING;
-        send("%%GAME " + user.game_name+ " *");
+		if (user.game_name.match(/^hc/)) {
+			send("%%GAME " + user.game_name + " -");
+		} else {
+			send("%%GAME " + user.game_name + " *");
+		}
       }
     }
 
@@ -193,6 +201,8 @@ package{
           } else if((match = line.match(/^Name\-\:(.*)/))){
             _player_names[1] = match[1];
             _buffer_response(GAME_SUMMARY, match[1]);
+		  } else if (line.match(/^P[0-9]/)) {
+			  _buffer_response(GAME_SUMMARY, line);
           } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
             _current_state = STATE_AGREE_WAITING;

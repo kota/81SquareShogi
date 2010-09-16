@@ -8,47 +8,73 @@
           
           [Bindable]
           public var totals:ArrayCollection = new ArrayCollection(
-            [{label:"60min", data:3600},
+            [{label:"0min", data:0},
+             {label:"5min", data:300},
+             {label:"10min", data:600},
+			 {label:"15min", data:900},
+             {label:"20min", data:1200},
              {label:"30min", data:1800},
-             {label:"15min", data:900},
-			 {label:"5min", data:300},
-             {label:"1min", data:60},
-             {label:"0min", data:0}]
+			 {label:"45min", data:2700},
+			 {label:"60min", data:3600}]
           );
 
           [Bindable]
           public var byoyomis:ArrayCollection = new ArrayCollection(
-            [{label:"60sec", data:60},
-             {label:"30sec", data:30},
-             {label:"10sec", data:10}]
+            [{label:"10sec", data:10},
+             {label:"20sec", data:20},
+			 {label:"30sec", data:30},
+             {label:"60sec", data:60}]
           );
+		  
+		  [Bindable]
+		  public var handicaps:ArrayCollection = new ArrayCollection(
+		   [{label:"Even Game", data:"ur"},
+			{label:"Lance Down", data:"hclance"},
+			{label:"Bishop Down", data:"hcbishop" },
+			{label:"Rook Down", data:"hcrook" },
+			{label:"Rook-Lance Down", data:"hcrooklance" },
+			{label:"2-piece Down", data:"hc2p" },
+			{label:"4-piece Down", data:"hc4p" },
+			{label:"6-piece Down", data:"hc6p" },
+			{label:"8-piece Down", data:"hc8p" },
+			{label:"Dragonfly", data:"hctombo" },
+			{label:"10-piece Down", data:"hc10p"},
+			{label:"Three Pawns", data:"hcfu3" },
+			{label:"Naked King", data:"hcnaked" } ]
+		  );
 
           private function submit():void {
             var total:int;
             var byoyomi:int;
+			var handicap:String;
             trace("Challenge Clicked");
             switch(timeSetting.selectedValue){
               case 0:
                 total = 60;
                 byoyomi = 30;
+				handicap = "r";
                 break;
               case 1:
                 total = 900;
                 byoyomi = 60;
+				handicap = "r";
                 break;
               case 2:
                 total = 1800;
                 byoyomi = 60;
+				handicap = "r";
                 break;
               case 3:
                 total = nonrated_total.selectedItem.data;
                 byoyomi = nonrated_byoyomi.selectedItem.data;
+				handicap = nonrated_handicap.selectedItem.data;
               default:
                 break;
             }
             if(total >=0 && byoyomi){
-              var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,0);
+              var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,handicap);
               dispatchEvent(gameRuleEvent);
+			  trace("created");
             }
             PopUpManager.removePopUp(this);
           }
@@ -67,29 +93,11 @@
 	<mx:RadioButton groupName="timeSetting" label="Rated, 30min - 60sec" value="2" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_total" selectedIndex="2" dataProvider="{totals}" enabled="false"/>
-		<mx:ComboBox id="nonrated_byoyomi" selectedIndex="0" dataProvider="{byoyomis}" enabled="false"/>
+		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false"/>
+		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_handicap" enabled="false">
-			<mx:dataProvider>
-				<mx:Array>
-					<mx:String>Even Game</mx:String>
-					<mx:String>Lance Down</mx:String>
-					<mx:String>Bishop Down</mx:String>
-					<mx:String>Rook Down</mx:String>
-					<mx:String>Rook-Lance Down</mx:String>
-					<mx:String>2-piece Down</mx:String>
-					<mx:String>4-piece Down</mx:String>
-					<mx:String>6-piece Down</mx:String>
-					<mx:String>8-piece Down</mx:String>
-					<mx:String>Dragonfly</mx:String>
-					<mx:String>10-piece Down</mx:String>
-					<mx:String>3-pawns</mx:String>
-					<mx:String>Naked King</mx:String>
-				</mx:Array>
-			</mx:dataProvider>
-		</mx:ComboBox>
+		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
   </mx:HBox>
   <mx:HBox paddingTop="20"> 
       <mx:Button id="Submit" click="submit();" label="Create Game"/> 

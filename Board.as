@@ -322,13 +322,13 @@ package  {
       _timeoutCallback = callback;
     }
 
-    public function startGame(my_turn:int,player_names:Array,player_infos:Array,time_total:int,time_byoyomi:int):void{
+    public function startGame(kyokumen_str:String,  my_turn:int, player_names:Array, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
       _player_names = player_names;
 	  _player_infos = player_infos;
       _my_turn = my_turn;
       reset();
-      _position = new Kyokumen();
+      _position = new Kyokumen(kyokumen_str);
       setPosition(_position);
       name_labels[0].text = player_names[_my_turn];
       name_labels[1].text = player_names[1 - _my_turn];
@@ -449,11 +449,10 @@ package  {
         }
       }
       var kyokumen_str:String = _parsePosition(game_info);
-
       if(kyokumen_str != ""){
         reset();
-        _position = new Kyokumen();
-        _position.loadFromString(_parsePosition(game_info));
+        _position = new Kyokumen(kyokumen_str);
+//        _position.loadFromString(kyokumen_str);
         setPosition(_position);
       }
       _player_names = names;
@@ -578,7 +577,7 @@ package  {
 		  _position.turn = Kyokumen.SENTE;
 		  _position.getKomadai(0).clearKoma();
 		  _position.getKomadai(1).clearKoma();
-		  _position.loadFromString(_position.initialPositionStr());
+		  _position.loadFromString(_position.initialPositionStr);
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {
 			      var mv:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
