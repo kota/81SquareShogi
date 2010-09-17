@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="425">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="450">
 	<mx:Script>
         <![CDATA[
         	import mx.controls.*;
@@ -38,7 +38,7 @@
 		<mx:Image source="@Embed('images/pieces_kinki/Sfu.png')" width="31" height="36"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Hidetchi's internationalized" groupName="RadioGroup2"  value="2"/>
+		<mx:RadioButton label="Hidetchi's Internationalized" groupName="RadioGroup2"  value="2"/>
 		<mx:Image source="@Embed('images/pieces_hidetchi/Sou.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_hidetchi/Suma.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_hidetchi/Sfu.png')" width="34" height="40"/>
@@ -48,6 +48,9 @@
 		<mx:Image source="@Embed('images/pieces_alphabet/Sou.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_alphabet/Suma.png')" width="34" height="40"/>
 		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
+	</mx:HBox>
+	<mx:HBox paddingLeft="30">
+		<mx:RadioButton label="Semi-Blind" groupName="RadioGroup2"  value="4"/>
 	</mx:HBox>
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 

@@ -826,7 +826,7 @@
       </mx:HBox>
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
          <mx:columns>
-		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="55"/>
+		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
           <mx:DataGridColumn dataField="rank" headerText="Rank" width="52"/>
           <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>
           <mx:DataGridColumn dataField="country" headerText="Country" width="100"/>
@@ -901,14 +901,14 @@
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
-        <mx:DataGrid id="watcherListGrid" width="160" height="240" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
+        <mx:DataGrid id="watcherListGrid" width="160" height="236" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="Name" width="110"/>
 		  <mx:DataGridColumn dataField="rating" headerText="Rating"/>
          </mx:columns>
         </mx:DataGrid>
         <mx:Label text="Kifu" fontWeight="bold"/>
-        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="318" change="replay();" selectable="false" fontSize="10" rowHeight="20">
+        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="replay();" selectable="false" fontSize="10" rowHeight="20">
          <mx:columns>
           <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
           <mx:DataGridColumn dataField="move"/>

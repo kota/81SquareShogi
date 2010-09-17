@@ -233,6 +233,12 @@ package
     public var gfu4:Class
     [Embed(source = "/images/pieces_alphabet/Gto.png")]
     public var gto4:Class
+	
+    [Bindable]
+    [Embed(source = "/images/pieces_blind/Ssemi.png")]
+    public var ssemi:Class
+    [Embed(source = "/images/pieces_blind/Gsemi.png")]
+    public var gsemi:Class
 
     public var koma_images_sente:Array;
     public var koma_images_gote:Array;
@@ -249,6 +255,8 @@ package
     		koma_images_gote[2] = new Array(gou3, ghi3, gkaku3, gkin3, ggin3, gkei3, gkyo3, gfu3, null, gryu3, guma3, null, gngin3, gnkei3, gnkyo3, gto3);
 			koma_images_sente[3] = new Array(sou4,shi4,skaku4,skin4,sgin4,skei4,skyo4,sfu4,null,sryu4,suma4,null,sngin4,snkei4,snkyo4,sto4);
     		koma_images_gote[3] = new Array(gou4,ghi4,gkaku4,gkin4,ggin4,gkei4,gkyo4,gfu4,null,gryu4,guma4,null,gngin4,gnkei4,gnkyo4,gto4);
+			koma_images_sente[4] = new Array(ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,null,ssemi,ssemi,null,ssemi,ssemi,ssemi,ssemi);
+    		koma_images_gote[4] = new Array(gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,null,gsemi,gsemi,null,gsemi,gsemi,gsemi,gsemi);
   		}
 
 	}
