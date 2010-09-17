@@ -459,7 +459,7 @@ package  {
       watch_game_end = false;
 
 	  for (var j:int = 0; j < 2 ; j++) {
-		var _str1:String = names[j].toLowerCase();
+		var _str1:String = names[j];
 		for (var i:int = 0; i < user_list.length ; i++) { 
 			if (user_list[i].name == _str1) {
 				_player_infos[j] = user_list[i];

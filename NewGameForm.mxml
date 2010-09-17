@@ -28,7 +28,7 @@
 		  
 		  [Bindable]
 		  public var handicaps:ArrayCollection = new ArrayCollection(
-		   [{label:"Even Game", data:"ur"},
+		   [{label:"Even Game", data:"nr"},
 			{label:"Lance Down", data:"hclance"},
 			{label:"Bishop Down", data:"hcbishop" },
 			{label:"Rook Down", data:"hcrook" },

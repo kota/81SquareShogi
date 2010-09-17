@@ -77,6 +77,40 @@
 	        // else return rank_names[21];
 	    }
 		
+		public static function gameType(str:String):String {
+			switch (str) {
+			case "r":
+				return "Rated";
+			case "nr":
+				return "Non-rated";
+			case "hclance":
+				return "Lance Handicap (Non-rated)";
+			case "hcbishop":
+				return "Bishop Handicap (Non-rated)";
+			case "hcrook":
+				return "Rook Handicap (Non-rated)";
+			case "hcrooklance":
+				return "Rook-Lance Handicap (Non-rated)";
+			case "hc2p":
+				return "2-piece Handicap (Non-rated)";
+			case "hc4p":
+				return "4-piece Handicap (Non-rated)";
+			case "hc6p":
+				return "6-piece Handicap (Non-rated)";
+			case "hc8p":
+				return "8-piece Handicap (Non-rated)";
+			case "hctombo":
+				return "Dragonfly Handicap (Non-rated)";
+			case "hc10p":
+				return "10-piece Handicap (Non-rated)";
+			case "hcfu3":
+				return "Three Pawns Handicap (Non-rated)";
+			case "hcnaked":
+				return "Naked King Handicap (Non-rated)";
+			}
+			return "";
+		}
+		
 		public function writeSettings(v:URLVariables):void {
 			_urlRequest.data = v;
 			sendToURL(_urlRequest);

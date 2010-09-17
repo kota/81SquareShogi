@@ -376,14 +376,22 @@
           user.rank = _infoFetcher.makeRankFromRating(user.rating);
 		  user.country = _infoFetcher.country_names[user.country_code];
           if(user.status == "game_waiting" || user.status == "game"){
-            var game_info:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-            var total:int = parseInt(game_info[2]) / 60;
-            user.rule = total + "-" + game_info[3];
+            var game_info:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+            var total:int = parseInt(game_info[3]) / 60;
+			var hc:String;
+			if (game_info[1] == "r") {
+				hc = "R";
+			} else if (game_info[1].match(/^hc/)) {
+				hc = "HC";
+			} else {
+				hc = "NR";
+			}
+            user.rule = hc + ": " + total + "-" + game_info[4];
             if(user.status == "game_waiting"){
               user.status2 = "W";
             } else {
               user.status2 = "G(" + (user.turn == "+" ? "▲" : "△") + ")";
-              if (user.name != game_info[1]) user.opponent = game_info[1];  //Show the user's opponent only when he is a challenger
+              if (user.name != game_info[2]) user.opponent = game_info[2];  //Show the user's opponent only when he is a challenger
             }
           }
           user_list.push(user);
@@ -401,7 +409,7 @@
       }
 	  for (j = 0; j < _infoFetcher.titleUser.length; j++) {
 		  for (i = 0; i < user_list.length; i++) {
-			  if (user_list[i].name == _infoFetcher.titleUser[j]) {
+			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
 				  if (_infoFetcher.titleName[j] == "livebot") {
 					  user_list[i].rating = 3000;
@@ -508,14 +516,15 @@
     private function _challengeForm():void{
       var user:Object = userListGrid.selectedItem;
       if (user != null) {
-        var match:Array = user.game_name.match(/^(.*)-([0-9]*)-([0-9]*)/);
-        var total:int = parseInt(match[2]) / 60 ;
-        var rule:String = total + "min -" + match[3] + "sec";
+        var match:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+        var total:int = parseInt(match[3]) / 60 ;
+        var rule:String = total + "min -" + match[4] + "sec";
+		var hc:String = InfoFetcher.gameType(match[1]);
         Alert.yesLabel = "Challenge";
         Alert.noLabel = "Offer your setting";
         Alert.buttonWidth = 140;
         //Only YES works now.
-        Alert.show("Opponent:" + match[1] + "\nTime:" + rule + "\nHandicap: NONE","Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
+        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
         //set properties back to default.
         Alert.yesLabel = "Yes";
         Alert.noLabel = "No";
@@ -817,14 +826,14 @@
       </mx:HBox>
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
          <mx:columns>
-		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
-          <mx:DataGridColumn dataField="rank" headerText="Rank" width="55"/>
-          <mx:DataGridColumn dataField="name" headerText="Name" width="120"/>
-          <mx:DataGridColumn dataField="country" headerText="Country" width="110"/>
+		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="55"/>
+          <mx:DataGridColumn dataField="rank" headerText="Rank" width="52"/>
+          <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>
+          <mx:DataGridColumn dataField="country" headerText="Country" width="100"/>
           <mx:DataGridColumn dataField="rating" headerText="Rating" width="50"/>
           <mx:DataGridColumn dataField="status2" headerText="Status" width="60"/>
-          <mx:DataGridColumn dataField="rule" headerText="Rule" width="60"/>
-          <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="120"/>
+          <mx:DataGridColumn dataField="rule" headerText="Rule" width="70"/>
+          <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="100"/>
           <mx:DataGridColumn dataField="status" headerText="debug1" />
 		  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
 		  <mx:DataGridColumn dataField="turn" headerText="debug3" />
