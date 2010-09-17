@@ -66,8 +66,13 @@ package  {
 
     public function loadFromString(position_str:String):void{
       var lines:Array = position_str.split("\n");
+	  if (lines[0].substr(2) == "+") {
+		  _turn = SENTE;
+	  } else {
+		  _turn = GOTE;
+	  }
       for(var y:int=0;y<9;y++){
-        var line:String = lines[y].substr(2);
+        var line:String = lines[y+1].substr(2);
         for(var x:int=0;x<9;x++){
           var koma_str:String = line.slice(x*3,x*3+3)
           if(koma_str != " * "){
@@ -79,7 +84,7 @@ package  {
           }
         }
       }
-      if(lines.length > 9){
+      if(lines.length > 10){
         for(var i:int = 9; i< lines.length; i++){
           var match:Array = lines[i].match(/P([+-])00(.*)/);
           if(match != null){

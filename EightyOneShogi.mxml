@@ -202,7 +202,7 @@
   private function _handleGameSummary(e:ServerMessageEvent):void {
 	  _initPositionStr = "";
 	  for each(var line:String in e.message.split("\n")) {
-		  if (line.match(/^P[0-9]/)) _initPositionStr += line + "\n";
+		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
 	  }
     if (_challenging) {
       _client.agree();
@@ -279,16 +279,16 @@
 	  for (var j:int = 0; j < 2 ; j++) {
 		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
-      userMessage2.text = '';
-      if(_client.myTurn == Kyokumen.SENTE){
-        _writeUserMessage("You are Sente(Black).\n",2);
-      } else {
-        _writeUserMessage("You are Gote(White).\n",2);
-      }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       board.startGame(_initPositionStr, _client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
       _game_name = e.message.substr(6);
 	  _client.watchers(_game_name);
+      userMessage2.text = '';
+      if(_client.myTurn == Kyokumen.SENTE){
+        _writeUserMessage("You are Black " + (_game_name.match(/^hc/) ? "(Sente).\n" : "(Handicap taker).\n"),2);
+      } else {
+        _writeUserMessage("You are White " + (_game_name.match(/^hc/) ? "(Gote).\n" : "(Handicap giver).\n"),2);
+      }
       stopButton.enabled = false;
       closeButton.enabled = false;
       resignButton.enabled = true;
@@ -314,9 +314,9 @@
         board.kifu_list.push(kifuMove);
       }
       if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-        //_writeUserMessage("Illegal Move.\n",2);
+        _writeUserMessage("Illegal Move.\n",2);
         if (board.position.turn == board.my_turn) _sendAutoChat("Made illegal move: " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
-          kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Illegal";
+          kifuMove.move = "Illegal Move";
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
         }

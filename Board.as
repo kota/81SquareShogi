@@ -322,7 +322,7 @@ package  {
       _timeoutCallback = callback;
     }
 
-    public function startGame(kyokumen_str:String,  my_turn:int, player_names:Array, player_infos:Array, time_total:int, time_byoyomi:int):void {
+    public function startGame(kyokumen_str:String, my_turn:int, player_names:Array, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
       _player_names = player_names;
 	  _player_infos = player_infos;
@@ -342,7 +342,7 @@ package  {
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 			timers[0].reset(time_total,time_byoyomi);
 			timers[1].reset(time_total,time_byoyomi);
-			timers[_my_turn == Kyokumen.SENTE ? 0 : 1].start();
+			timers[_my_turn == _position.turn ? 0 : 1].start();
       _in_game = true;
 	  _client_timeout = false;
     }
@@ -481,8 +481,8 @@ package  {
       timers[0].reset(total_time,byoyomi);
       timers[1].reset(total_time,byoyomi);
 
-      var turn:int = Kyokumen.SENTE;
-      var running_timer:int = turn == _my_turn ? 0 : 1;
+//      var turn:int = Kyokumen.SENTE;
+      var running_timer:int = _position.turn == _my_turn ? 0 : 1;
       timers[running_timer].start();
       timers[1-running_timer].stop();
       if (moves.length > 0) {
@@ -494,7 +494,7 @@ package  {
 
     private function _parsePosition(game_info:String):String{
       var lines:Array = game_info.split("\n");
-      var kyokumen_str:String = "";
+      var kyokumen_str:String = "P0+\n";
       for each (var line:String in lines ){
         var match:Array = line.match(/##\[MONITOR2\]\[.*\] (P[0-9+-].*)/);
         if(match != null){
@@ -574,7 +574,7 @@ package  {
 		  	_last_square.setStyle('backgroundColor',undefined);
 		  	_last_square = null;
 		  }
-		  _position.turn = Kyokumen.SENTE;
+//		  _position.turn = Kyokumen.SENTE;
 		  _position.getKomadai(0).clearKoma();
 		  _position.getKomadai(1).clearKoma();
 		  _position.loadFromString(_position.initialPositionStr);

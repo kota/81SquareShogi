@@ -193,7 +193,7 @@ package{
       var match:Array;
       for each(var line:String in lines){
         if(_reading_game_summary_flag){
-          if((match = line.match(/^Your_Turn\:([+-])/))) {
+          if ((match = line.match(/^Your_Turn\:([+-])/))) {
             _my_turn = match[1] == '+' ? Kyokumen.SENTE : Kyokumen.GOTE;
           } else if((match = line.match(/^Name\+\:(.*)/))){
             _player_names[0] = match[1];
@@ -201,7 +201,9 @@ package{
           } else if((match = line.match(/^Name\-\:(.*)/))){
             _player_names[1] = match[1];
             _buffer_response(GAME_SUMMARY, match[1]);
-		  } else if (line.match(/^P[0-9]/)) {
+		  } else if ((match = line.match(/^To_Move\:([+-])/))) {
+			  _buffer_response(GAME_SUMMARY, "P0" + match[1]);
+		  } else if (line.match(/^P[0-9\+\-]/)) {
 			  _buffer_response(GAME_SUMMARY, line);
           } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
