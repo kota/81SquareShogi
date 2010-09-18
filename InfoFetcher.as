@@ -111,6 +111,83 @@
 			return "";
 		}
 		
+		public static function gameTypeKIF(str:String):String {
+			var type_str:String = "手合割："
+			switch (str) {
+			case "r":
+				type_str += "平手\n"; break;
+			case "nr":
+				type_str += "平手\n"; break;
+			case "hclance":
+				type_str += "香落ち\n"; break;
+			case "hcbishop":
+				type_str += "角落ち\n"; break;
+			case "hcrook":
+				type_str += "飛車落ち\n"; break;
+			case "hcrooklance":
+				type_str += "飛香落ち\n"; break;
+			case "hc2p":
+				type_str += "二枚落ち\n"; break;
+			case "hc4p":
+				type_str += "四枚落ち\n"; break;
+			case "hc6p":
+				type_str += "六枚落ち\n"; break;
+			case "hc8p":
+				type_str += "八枚落ち\n"; break;
+			case "hctombo":
+				type_str += "その他\n";
+				type_str += "上手の持駒：なし\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
+				type_str += "+---------------------------+\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
+				type_str += "| ・v飛 ・ ・ ・ ・ ・v角 ・|二\n";
+				type_str += "|v歩v歩v歩v歩v歩v歩v歩v歩v歩|三\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
+				type_str += "+---------------------------+\n";
+				type_str += "上手番\n"; break;
+			case "hc10p":
+				type_str += "十枚落ち"; break;
+			case "hcfu3":
+				type_str += "その他\n";
+				type_str += "上手の持駒：歩三\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
+				type_str += "+---------------------------+\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
+				type_str += "+---------------------------+\n";
+				type_str += "上手番\n"; break;
+			case "hcnaked":
+				type_str += "その他\n";
+				type_str += "上手の持駒：なし\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
+				type_str += "+---------------------------+\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
+				type_str += "+---------------------------+\n";
+				type_str += "上手番\n"; break;
+			}
+			return type_str;
+		}
+		
 		public function writeSettings(v:URLVariables):void {
 			_urlRequest.data = v;
 			sendToURL(_urlRequest);

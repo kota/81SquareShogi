@@ -285,9 +285,9 @@
 	  _client.watchers(_game_name);
       userMessage2.text = '';
       if(_client.myTurn == Kyokumen.SENTE){
-        _writeUserMessage("You are Black " + (_game_name.match(/^hc/) ? "(Sente).\n" : "(Handicap taker).\n"),2);
+        _writeUserMessage("You are Black " + (_game_name.split("+")[1].match(/^hc/) ? "(Handicap taker).\n" : "(Sente).\n"),2);
       } else {
-        _writeUserMessage("You are White " + (_game_name.match(/^hc/) ? "(Gote).\n" : "(Handicap giver).\n"),2);
+        _writeUserMessage("You are White " + (_game_name.split("+")[1].match(/^hc/) ? "(Handicap giver).\n" : "(Gote).\n"),2);
       }
       stopButton.enabled = false;
       closeButton.enabled = false;
@@ -312,32 +312,37 @@
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
-      }
-      if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
+      } else if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
         _writeUserMessage("Illegal Move.\n",2);
         if (board.position.turn == board.my_turn) _sendAutoChat("Made illegal move: " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
           kifuMove.move = "Illegal Move";
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
-        }
-      if (e.message.indexOf("RESIGN") >= 0) {
+      } else if (e.message.indexOf("RESIGN") >= 0) {
         //_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n",2);
 		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
         kifuMove.moveKIF = "投了";
         board.kifu_list.push(kifuMove);
-      }
-      if (e.message.indexOf("SENNICHITE") >= 0) {
-          _writeUserMessage("Sennichite.\n",2);
+      } else if (e.message.indexOf("OUTE_SENNICHITE") >= 0) {
+        _writeUserMessage("Illegal Perpetual Check.\n", 2);
+		kifuMove.move = "Perpetual Check";
+		kifuMove.moveKIF = "王手千日手";
+		board.kifu_list.push(kifuMove);
+      } else if (e.message.indexOf("SENNICHITE") >= 0) {
+        _writeUserMessage("Sennichite. (Repetition)\n", 2);
+		kifuMove.move = "Repetition Draw";
+		kifuMove.moveKIF = "千日手";
+		board.kifu_list.push(kifuMove);
       }
       if(e.message.indexOf("LOSE") >= 0){
-        _writeUserMessage("You Lose.\n",2);
+        _writeUserMessage("### You Lose ###\n",2);
         if (_end_sound_play) _sound_lose.play();
       } else if(e.message.indexOf("WIN") >= 0){
-        _writeUserMessage("You Win.\n",2);
+        _writeUserMessage("### You Win ###\n",2);
         if (_end_sound_play) _sound_win.play();
       } else if(e.message.indexOf("DRAW") >=0){
-        _writeUserMessage("Draw.\n",2);
+        _writeUserMessage("### Draw ###\n",2);
         if (_end_sound_play) _sound_win.play();
       }
       closeButton.enabled = true;
@@ -666,24 +671,64 @@
       }
     }
 
-    private function _handleMonitor(e:ServerMessageEvent):void{
+    private function _handleMonitor(e:ServerMessageEvent):void {
+      var kifuMove:Object = new Object();
+	  var end_game:Boolean = false;
+      if(e.message.indexOf("#TIME_UP") >= 0){
+		end_game = true;
+        board.timeout();
+        _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2);
+		kifuMove.num = board.kifu_list.length;
+        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+        kifuMove.moveKIF = "切れ負け";
+        board.kifu_list.push(kifuMove);
+      } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
+		end_game = true;  
+        _writeUserMessage("Illegal Move.\n", 2);
+		kifuMove.num = board.kifu_list.length;
+		kifuMove.move = "Illegal Move";
+		kifuMove.moveKIF = "反則負け";
+		board.kifu_list.push(kifuMove);
+      } else if (e.message.indexOf("#RESIGN") >= 0) {
+		  end_game = true;
+		  _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2);
+	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
+		  end_game = true;
+          _writeUserMessage("Illegal Perpetual Check.\n", 2);
+		  kifuMove.num = board.kifu_list.length;
+		  kifuMove.move = "Perpetual Check";
+		  kifuMove.moveKIF = "王手千日手";
+		  board.kifu_list.push(kifuMove);		  
+      } else if (e.message.indexOf("#SENNICHITE") >= 0) {
+		  end_game = true;
+          _writeUserMessage("Sennichite. (Repetition)\n", 2);
+		  kifuMove.num = board.kifu_list.length;
+		  kifuMove.move = "Repetition Draw";
+		  kifuMove.moveKIF = "千日手";
+		  board.kifu_list.push(kifuMove);
+      }
+	  if (end_game) {
+		  _post_game = true;
+			_writeUserMessage("### Game End ###\n",2);
+			if (_end_sound_play) _sound_win.play();
+			kifuCopyButton.enabled = true;
+			rewindAllButton.enabled = true;
+			rewindOneButton.enabled = true;
+			forwardOneButton.enabled = true;
+			forwardAllButton.enabled = true;
+			kifuDataGrid.dataProvider = board.kifu_list;
+			kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
+			kifuDataGrid.selectable = true;
+			kifuDataGrid.selectedIndex = board.kifu_list.length;
+			board.endGame();
+			return;
+	  }
+	  
       if(_watch_user != null){
         board.monitor(e.message,_watch_user,_user_list);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
-      if (board.watch_game_end) {
-		_post_game = true;
-        _writeUserMessage("Game End.\n",2);
-        if (_end_sound_play) _sound_win.play();
-        kifuCopyButton.enabled = true;
-        rewindAllButton.enabled = true;
-        rewindOneButton.enabled = true;
-        forwardOneButton.enabled = true;
-        forwardAllButton.enabled = true;
-        kifuDataGrid.selectable = true;
-        kifuDataGrid.selectedIndex = board.kifu_list.length;
-      }
     }
 
     private function _watch():void{
@@ -865,7 +910,7 @@
 		  </mx:VBox>
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Tokyo"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=Japan_Tokyo" width="300" height="25"/>			  
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>			  
 		  </mx:VBox>
 	  </mx:HBox>
     </mx:VBox>
@@ -915,7 +960,7 @@
          </mx:columns>
         </mx:DataGrid>
         <mx:HBox>
-             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(VERSION);" enabled="false"/>
+             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(_game_name, VERSION);" enabled="false"/>
              <mx:Button id="kifuSaveButton" label="Save" enabled="false"/>          
         </mx:HBox>
         </mx:Panel>

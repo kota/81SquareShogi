@@ -50,18 +50,18 @@
             trace("Challenge Clicked");
             switch(timeSetting.selectedValue){
               case 0:
-                total = 60;
-                byoyomi = 30;
-				handicap = "r";
-                break;
-              case 1:
                 total = 900;
                 byoyomi = 60;
 				handicap = "r";
                 break;
+              case 1:
+                total = 300;
+                byoyomi = 30;
+				handicap = "r";
+                break;
               case 2:
-                total = 1800;
-                byoyomi = 60;
+                total = 0;
+                byoyomi = 30;
 				handicap = "r";
                 break;
               case 3:
@@ -88,9 +88,9 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 1min  - 30sec" value="0" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="1" fontSize="11" selected="true"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 30min - 60sec" value="2" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="0" fontSize="11" selected="true" />
+	<mx:RadioButton groupName="timeSetting" label="Rated,  5min - 30sec" value="1" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="Rated,  0min - 30sec" value="2" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false"/>

@@ -97,7 +97,7 @@ package  {
     private var _my_turn:int;
     private var _in_game:Boolean;
 	private var _client_timeout:Boolean;
-    public var watch_game_end: Boolean;
+//    public var watch_game_end: Boolean;
 
     private var _selected_square:Square;
     private var _last_square:Square;
@@ -290,9 +290,8 @@ package  {
     }
 
     public function makeMove(move:String,withSound:Boolean=true):void{
-      var mv:Movement = _position.generateMovementFromString(move);
+			var mv:Movement = _position.generateMovementFromString(move);
 			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
-
 			var time:int = mv.time;
 
 			timers[running_timer].accumulateTime(time);
@@ -401,18 +400,24 @@ package  {
     }
 
     public function monitor(game_info:String,watch_user:Object,user_list:Object):void{
-      trace("MONITOR");
       var match:Array;
       if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
         _startMonitor(game_info,watch_user,user_list);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
-      } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/) ||
-               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
-    	  watch_game_end = true;
-    		timers[0].stop();
-    		timers[1].stop();
+      } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) { //||
+//               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
+//    	  watch_game_end = true;
+//    		timers[0].stop();
+//   		timers[1].stop();
+		  time = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
+		  var kifuMove:Object = new Object();
+		  kifuMove.num = kifu_list.length;										//No. of the Move
+		  kifuMove.move = (_position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + time.substr(1) + ")";	//Western Notation
+		  kifuMove.moveStr = "%TORYO";												//CSA
+		  kifuMove.moveKIF = "投了";			//Japanese Notation
+		  kifu_list.push(kifuMove);
       } else {
         return;
       }
@@ -456,7 +461,7 @@ package  {
         setPosition(_position);
       }
       _player_names = names;
-      watch_game_end = false;
+//      watch_game_end = false;
 
 	  for (var j:int = 0; j < 2 ; j++) {
 		var _str1:String = names[j];
@@ -589,12 +594,12 @@ package  {
       setPosition(_position);
 	  }
 	
-    public function copyKIFtoClipboard(str:String):void{
+    public function copyKIFtoClipboard(game_name:String, version:String):void{
 		  var KIFDataText:String = "";
 		  var date:Date = new Date;
 		  KIFDataText += "開始日時: " + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
-		  KIFDataText += "場所: 81-Dojo (" + str +")\n";
-		  KIFDataText += "手合割:平手\n";
+		  KIFDataText += "場所: 81-Dojo (" + version +")\n";
+		  KIFDataText += InfoFetcher.gameTypeKIF(game_name.split("+")[1].match(/^([0-9a-z]+)_/)[1]);
 		  KIFDataText += "先手:" + playerNames[0] + "\n";
 		  KIFDataText += "後手:" + playerNames[1] + "\n";
 		  KIFDataText += "手数----指手---------消費時間--\n";

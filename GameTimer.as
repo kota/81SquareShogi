@@ -157,6 +157,7 @@ package {
 
 		public function timeout():void{
 			_time_left = 0;
+			this.setStyle('backgroundColor', 0xFF0000);
 			_display();
 		}
 
