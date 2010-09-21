@@ -26,6 +26,7 @@
 		private var rank_names:Array = new Array;
 		public var country_names:Array = new Array;
 		public var initMessage:String
+		public var gameMessage:String
 		private var _urlRequest:URLRequest = new URLRequest();
 		private var _httpService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
@@ -43,20 +44,21 @@
 		
 		private function _parseInfo(e:Event):void { 
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
+			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
 			newestVer = match[1];
 			initMessage = match[2];
-			var lines:Array = match[3].split("\n");
+			gameMessage = match[3];
+			var lines:Array = match[4].split("\n");
 			for each(var line:String in lines) {
 				titleUser.push(line.split("\t")[0]);
 				titleName.push(line.split("\t")[1]);
 			}
-			lines = match[4].split("\n");
+			lines = match[5].split("\n");
 			for each(line in lines) {
 				rank_thresholds.push(line.split("\t")[0]);
 				rank_names.push(line.split("\t")[1]);
 			}
-			lines = match[5].split("\n");
+			lines = match[6].split("\n");
 			for each(line in lines) {
 				country_names[line.split("\t")[0]] = line.split("\t")[1];
 			}

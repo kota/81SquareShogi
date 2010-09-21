@@ -320,7 +320,7 @@ package  {
 			return n;
 		}
 		
-	public function generateWesternNotationFromMovement(mv:Movement):String{
+	public function generateWesternNotationFromMovement(mv:Movement):String {
 	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
 	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
 	  notationStr += koma_western_names[originalType];

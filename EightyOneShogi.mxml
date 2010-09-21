@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/16";
+	private const VERSION:String = "ver.2010/09/21";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -38,6 +38,8 @@
     private var _watch_user:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
+	[Bindable]
+	private var _lastChatTime:String;
 
     [Embed(source = "/sound/win.mp3")]
     private var Sound_win:Class;
@@ -45,12 +47,15 @@
     [Embed(source = "/sound/lose.mp3")]
     private var Sound_lose:Class;
     private var _sound_lose:Sound = new Sound_lose();
-    [Embed(source = "/sound/chat.mp3")]
+    [Embed(source = "/sound/chat_board.mp3")]
     private var Sound_chat1:Class;
     private var _sound_chat1:Sound = new Sound_chat1();
-    [Embed(source = "/sound/chat.mp3")]
+    [Embed(source = "/sound/chat_board.mp3")]
     private var Sound_chat2:Class;
     private var _sound_chat2:Sound = new Sound_chat2();
+    [Embed(source = "/sound/chat_namecall.mp3")]
+    private var Sound_chat3:Class;
+    private var _sound_chat3:Sound = new Sound_chat3();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     private var _sound_challenger:Sound = new Sound_challenger();
@@ -59,13 +64,13 @@
     private var _chat_sound2_play:Boolean = true;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
+	private var _regExpCalled:RegExp;
 	private var _ur_total_selected:int = 3;
 	private var _ur_byoyomi_selected:int = 4;
 	private var _ur_handicap_selected:int = 0;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _post_game:Boolean = true;
-    private var _my_last_move:Movement;
 	private var _initPositionStr:String;
     private var _keepAliveTimer:Timer;
 	private var _challengerTicker:Timer;
@@ -134,6 +139,7 @@
       loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
       _login_name = loginname.text;
+	  _regExpCalled = new RegExp("@" + _login_name.toLowerCase(), "i");
     } 
 
     private function _handleLoggedIn(e:Event):void{
@@ -159,9 +165,17 @@
 		var mNum:int = _messageAudible(e.message);
         _writeUserMessage(_format_message(e.message), mNum);
 		if (mNum == 1 && mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
-			_sound_chat1.play();
+			if (e.message.match(_regExpCalled)) {
+				_sound_chat3.play();
+			} else {
+				_sound_chat1.play();
+			}
 		} else if (mNum == 2 && _chat_sound2_play) {
-			_sound_chat2.play();
+			if (e.message.match(_regExpCalled)) {
+				_sound_chat3.play();
+			} else {
+				_sound_chat1.play();
+			}
 		}
     }
 
@@ -283,12 +297,13 @@
       board.startGame(_initPositionStr, _client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
       _game_name = e.message.substr(6);
 	  _client.watchers(_game_name);
-      userMessage2.text = '';
+      userMessage2.text = _infoFetcher.gameMessage + "\n\n";
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Black " + (_game_name.split("+")[1].match(/^hc/) ? "(Handicap taker).\n" : "(Sente).\n"),2);
       } else {
         _writeUserMessage("You are White " + (_game_name.split("+")[1].match(/^hc/) ? "(Handicap giver).\n" : "(Gote).\n"),2);
       }
+	  startButton.enabled = false;
       stopButton.enabled = false;
       closeButton.enabled = false;
       resignButton.enabled = true;
@@ -312,9 +327,10 @@
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
+	  } else if (e.message.indexOf("DISCONNECT") >= 0) {
+        _writeUserMessage("Opponent disconnected.\n",2);
       } else if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
         _writeUserMessage("Illegal Move.\n",2);
-        if (board.position.turn == board.my_turn) _sendAutoChat("Made illegal move: " + board.position.generateWesternNotationFromMovement(_my_last_move).split(" ")[0] + ".");
           kifuMove.move = "Illegal Move";
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
@@ -352,6 +368,7 @@
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
       forwardAllButton.enabled = true;
+	  startButton.enabled = true;
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
       kifuDataGrid.selectable = true;
@@ -372,15 +389,21 @@
           var user:Object = {
 			  'name':match[1],
 			  'status':StringUtil.trim(match[2].split(" ")[0]),
+			  'status2':"",
+			  'opponent':"",
 			  'game_name':match[2].split(" ")[1],
 			  'turn':match[2].split(" ")[2],
 			  'rating':parseInt(match[2].split(" ")[3]),
 			  'country_code':parseInt(match[2].split(" ")[4]),
-			  'titleName':""
+			  'titleName':"",
+			  'monitor_game':match[2].split(" ")[6],
+			  'moves':match[2].split(" ")[7]
 			  }
           user.rank = _infoFetcher.makeRankFromRating(user.rating);
 		  user.country = _infoFetcher.country_names[user.country_code];
-          if(user.status == "game_waiting" || user.status == "game"){
+		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
+		  if (user.monitor_game != "*") user.status2 = "M ";
+          if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
             var game_info:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
             var total:int = parseInt(game_info[3]) / 60;
 			var hc:String;
@@ -393,27 +416,29 @@
 			}
             user.rule = hc + ": " + total + "-" + game_info[4];
             if(user.status == "game_waiting"){
-              user.status2 = "W";
-            } else {
-              user.status2 = "G(" + (user.turn == "+" ? "▲" : "△") + ")";
-              if (user.name != game_info[2]) user.opponent = game_info[2];  //Show the user's opponent only when he is a challenger
+              user.status2 += "W";
+            } else if (user.status == "post_game") {
+				user.status2 = "P(" + (user.turn == "+" ? "▲" : "△") + ")";
+			} else {
+              user.status2 = "G(" + (user.turn == "+" ? "▲" : "△") + ") " + user.moves;
+//              if (user.name != game_info[2]) user.opponent = game_info[2];  //Show the user's opponent only when he is a challenger
             }
           }
           user_list.push(user);
         }
       }
-      for (var i:int = 0; i < user_list.length ; i++) { //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
-        if (user_list[i].status == "game" && user_list[i].opponent == null) {
-          for (var j:int = 0; j < user_list.length ; j++) {
-            if (user_list[j].opponent == user_list[i].name) {
-              user_list[i].opponent = user_list[j].name;
-              break;
-            }
-          }
-        }
-      }
-	  for (j = 0; j < _infoFetcher.titleUser.length; j++) {
-		  for (i = 0; i < user_list.length; i++) {
+//      for (var i:int = 0; i < user_list.length ; i++) { //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
+//        if (user_list[i].status == "game" && user_list[i].opponent == null) {
+//          for (var j:int = 0; j < user_list.length ; j++) {
+//            if (user_list[j].opponent == user_list[i].name) {
+//              user_list[i].opponent = user_list[j].name;
+//              break;
+//            }
+//          }
+//        }
+//      }
+	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
+		  for (var i:int = 0; i < user_list.length; i++) {
 			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
 				  if (_infoFetcher.titleName[j] == "livebot") {
@@ -443,6 +468,8 @@
 			case 0:
 				break;
 			case 1:
+				var nowDate:Date = new Date(); 
+				_lastChatTime = "Last chat receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
 				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
 				userMessage1.text += message;
 				userMessage1.callLater(_scrollDown1);
@@ -528,7 +555,6 @@
         Alert.yesLabel = "Challenge";
         Alert.noLabel = "Offer your setting";
         Alert.buttonWidth = 140;
-        //Only YES works now.
         Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
         //set properties back to default.
         Alert.yesLabel = "Yes";
@@ -594,7 +620,6 @@
 
     private function _resign():void{
       if (board.my_turn == board.position.turn) {
-//    _client.chat(_game_name + " (auto-chat) I resign.\n");
         _client.resign();
       }
     }
@@ -603,15 +628,17 @@
       _client.who();
     }
 
-    private function _closeGame():void{
-      if(_game_name && _monitoring){
-        _client.monitorOff(_game_name);
-        _monitoring = false;
-      }
-      if (_game_name) {
-      _sendAutoChat("I have left this room.");
-        _game_name = null;
-      }
+    private function _closeGame():void {
+	  if (_game_name) {
+		  if (_monitoring) {
+			  _client.monitorOff(_game_name);
+			  _monitoring = false;
+		  } else {
+			  _client.closeGame();
+		  }
+          _sendAutoChat("I have left this room.");
+          _game_name = null;		  
+	  }
       board.closeGame();
       mainViewStack.selectedIndex = 1;
       challengeButton.enabled = false;
@@ -629,7 +656,7 @@
       if(user != null && user.name != _login_name && user.status == "game_waiting"){
         challengeButton.enabled = true;
         watchButton.enabled = false;
-      } else if (user != null && user.status == "game") {
+      } else if (user != null && (user.status == "game" || user.status == "post_game")) {
         challengeButton.enabled = false;
         watchButton.enabled = true;
       } else {
@@ -639,15 +666,12 @@
     }
 
     private function _playerMove(from:Point,to:Point,promote:Boolean):void{
-      _my_last_move = board.position.generateMovementFromCoordinates(from, to, promote);
-      _client.move(_my_last_move.toCSA());
+      _client.move(board.position.generateMovementFromCoordinates(from, to, promote).toCSA());
     }
 
     private function _checkTimeout():void {
 	  board.clientTimeout();
       _client.checkTimeout();
-      // immitate game end message.
-      //_handleGameEnd(new ServerMessageEvent(CsaShogiClient.GAME_END,"TIME_UP"));
     }
 
     private function _handleList(e:ServerMessageEvent):void{
@@ -682,6 +706,9 @@
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
+	  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
+		  end_game = true;
+		  _writeUserMessage("Player disconnected.\n", 2);
       } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
 		end_game = true;  
         _writeUserMessage("Illegal Move.\n", 2);
@@ -735,6 +762,7 @@
       _client.list();
 	  watchButton.enabled = false;
       _watch_user = userListGrid.selectedItem;
+	  userMessage2.text = _infoFetcher.gameMessage + "\n\n";
       mainViewStack.selectedIndex = 2;
       closeButton.enabled = true;
       resignButton.enabled = false;
@@ -757,7 +785,7 @@
 	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, true));
       PopUpManager.centerPopUp(_playerInfoWindow);
       _playerInfoWindow.title = "Player Info";
-	  _playerInfoWindow.user = user;
+	  _playerInfoWindow.readUser(user);
 	}
 	
 	private function _gamePlayerInfo(e:MouseEvent):void {
@@ -791,13 +819,11 @@
   private function _checkLobby():void {
 	  mainViewStack.selectedIndex = 1;
 	  backToGameButton.visible = true;
-	  startButton.enabled = false;
   }
 
   private function _backToGame():void {
 	  mainViewStack.selectedIndex = 2;
 	  backToGameButton.visible = false;
-	  startButton.enabled = true;
   }
   
   private function replay():void {
@@ -876,27 +902,27 @@
           <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>
           <mx:DataGridColumn dataField="country" headerText="Country" width="100"/>
           <mx:DataGridColumn dataField="rating" headerText="Rating" width="50"/>
-          <mx:DataGridColumn dataField="status2" headerText="Status" width="60"/>
+          <mx:DataGridColumn dataField="status2" headerText="Status" width="65"/>
           <mx:DataGridColumn dataField="rule" headerText="Rule" width="70"/>
           <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="100"/>
           <mx:DataGridColumn dataField="status" headerText="debug1" />
 		  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
 		  <mx:DataGridColumn dataField="turn" headerText="debug3" />
+		  <mx:DataGridColumn dataField="monitor_game" headerText="debug4"/>
          </mx:columns>
         </mx:DataGrid>
 		<mx:HBox>
-			<mx:VBox>
-				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
-				<mx:HBox>
-					<mx:Label text="Chat"/>
-					<mx:TextInput id="chatMessage1" width="430"/>
-					<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
-				</mx:HBox>
-			</mx:VBox>
+			<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
 			<mx:VBox>
 				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 				<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
 			</mx:VBox>
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Label text="Chat"/>
+			<mx:TextInput id="chatMessage1" width="430"/>
+			<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
+			<mx:Label id="lastChatTime" text="{_lastChatTime}" />
 		</mx:HBox>
       </mx:Panel>
 	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold">

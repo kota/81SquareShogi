@@ -499,11 +499,14 @@ package  {
 
     private function _parsePosition(game_info:String):String{
       var lines:Array = game_info.split("\n");
-      var kyokumen_str:String = "P0+\n";
-      for each (var line:String in lines ){
-        var match:Array = line.match(/##\[MONITOR2\]\[.*\] (P[0-9+-].*)/);
-        if(match != null){
-          kyokumen_str += match[1] + "\n";
+      var kyokumen_str:String = "";
+      for each (var line:String in lines ) {
+		var match:Array = line.match(/##\[MONITOR2\]\[.*\] To_Move:([\+\-])/);
+		if (match != null) {
+			kyokumen_str += "P0" + match[1] + "\n";
+		} else {
+			match = line.match(/##\[MONITOR2\]\[.*\] (P[0-9+-].*)/);
+			if(match != null) kyokumen_str += match[1] + "\n";
         }
       }
       return kyokumen_str;

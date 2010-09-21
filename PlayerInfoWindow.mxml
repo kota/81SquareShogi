@@ -6,8 +6,36 @@
           import mx.managers.PopUpManager;
 		  
 		  [Bindable]
-		  public var user:Object;
+		  private var _name:String;
+		  [Bindable]
+		  private var _country:String;
+		  [Bindable]
+		  private var _country_code:String;
+		  [Bindable]
+		  private var _rating:int;
+		  [Bindable]
+		  private var _rank:String;
+		  [Bindable]
+		  private var _title:String;
+		  [Bindable]
+		  private var _status:String;
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
+		  
+		  public function readUser(user:Object):void {
+			  _name = user.name;
+			  _country = user.country;
+			  _country_code = String(user.country_code + 1000).substring(1);
+			  _rating = user.rating;
+			  _rank = user.rank;
+			  _title = user.titleName;
+			  if (user.monitor_game != "*") {
+				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs. " + user.monitor_game.split("+")[1];
+			  } else if (user.opponent != "*") {
+				  _status = "Now playing against " + user.opponent;
+			  } else {
+				  _status = "";
+			  }
+		  }
 		  
 		  private function _swfError():void {
 			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
@@ -20,17 +48,19 @@
         ]]>
     </mx:Script>
 	<mx:HBox>
-		<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{user.rank}.jpg"/>
+		<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_rank}.jpg"/>
 		<mx:VBox>
 			<mx:HBox verticalAlign="middle">
 				<mx:VBox>
-					<mx:Label text="{user.name}" fontSize="15" fontWeight="bold" />
-					<mx:Label paddingRight="10" text="Country:  {user.country}"/>
+					<mx:HBox>
+						<mx:Label text="{_name}" fontSize="15" fontWeight="bold" />
+						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" />
+					</mx:HBox>
+					<mx:Label paddingRight="10" text="Country:  {_country}"/>
 				</mx:VBox>
-				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{String(user.country_code + 1000).substring(1)}.swf" ioError="_swfError();" />
+				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:Label text="Rating:  {user.rating},  ({user.rank})"/>
-			<mx:Label text="Title:  {user.titleName}"/>
+			<mx:Label text="Rating:  {_rating}  ({_rank})"/>
 			<mx:HBox>
 				<mx:Label text="Win:"/>
 				<mx:Label text="Loss:"/>
@@ -43,6 +73,7 @@
 		</mx:VBox>
 	</mx:HBox>
 	<mx:VBox width="100%" horizontalAlign="center">
+		<mx:Label text="{_status}" color="#FF0000" />
 		<mx:Button id="close" click="_closeButton();" label="Close"/>	
 	</mx:VBox>
 </mx:TitleWindow>

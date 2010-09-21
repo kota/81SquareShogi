@@ -94,7 +94,7 @@ package{
     public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void {
       _current_state = STATE_GAME_WAITING;
 	  if (handicap.match(/^hc/)) {
-		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " +");
+		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -");
 	  } else {
 		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " *");
 	  }
@@ -111,7 +111,7 @@ package{
       if(user.game_name){
         _current_state = STATE_GAME_WAITING;
 		if (user.game_name.match(/^hc/)) {
-			send("%%GAME " + user.game_name + " -");
+			send("%%GAME " + user.game_name + " +");
 		} else {
 			send("%%GAME " + user.game_name + " *");
 		}
@@ -126,6 +126,11 @@ package{
 	public function reject():void {
 		trace("REJECT");
 		send("REJECT");
+	}
+	
+	public function closeGame():void {
+		trace("CLOSE");
+		send("CLOSE");
 	}
 
     public function move(movement:String):void{
@@ -276,7 +281,7 @@ package{
             case STATE_START_WAITING:
               break;
             case STATE_GAME:
-              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE)/))){
+              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/))){
                 _buffer_response(GAME_END,line);
                 if(match[1] == "WIN" || match[1] == "LOSE" || match[1] == "DRAW"){
                   trace("state change to connected");
