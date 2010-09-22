@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/21";
+	private const VERSION:String = "ver.2010/09/22";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -104,7 +104,8 @@
       trace("connecting.");
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
       _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
-      _client.addEventListener(CsaShogiClient.LOGIN_FAILED,_handleLoginFailed);
+      _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
+	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
       _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
       _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
       _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
@@ -133,6 +134,23 @@
 		loginname.text = "test" + i;
 		password.text = "81dojo" + i;
 		_connectAndLogin();
+	}
+	
+	private function _localLogin():void {
+		_client.setHostToLocal();
+		loginButton.setStyle("color", '#FF0000');
+	}
+	
+	private function _logout():void {
+		_client.logout();
+	}
+	
+	private function _handleLogout(e:ServerMessageEvent):void {
+		_keepAliveTimer.stop();
+		loginMessage.text = "logged out successfully";
+		titleBanner.source = "http://www.81squareuniverse.com/dojo/images/81Dojo_bye.jpg";
+		loginButton.enabled = false;
+		mainViewStack.selectedIndex = 0;
 	}
     
     private function _handleConnected(e:Event):void{
@@ -312,6 +330,7 @@
       forwardOneButton.enabled = false;
       forwardAllButton.enabled = false;
       kifuDataGrid.selectable = false;
+	  logoutButton.enabled = false;
       kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
     }
@@ -335,8 +354,8 @@
           kifuMove.moveKIF = "反則負け";
           board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("RESIGN") >= 0) {
-        //_writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n",2);
-		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
+        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n",2);
+//		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
         kifuMove.moveKIF = "投了";
         board.kifu_list.push(kifuMove);
@@ -643,6 +662,7 @@
       mainViewStack.selectedIndex = 1;
       challengeButton.enabled = false;
       watchButton.enabled = false;
+	  logoutButton.enabled = true;
       _refresh();
     }
     
@@ -761,6 +781,7 @@
     private function _watch():void{
       _client.list();
 	  watchButton.enabled = false;
+	  logoutButton.enabled = false;
       _watch_user = userListGrid.selectedItem;
 	  userMessage2.text = _infoFetcher.gameMessage + "\n\n";
       mainViewStack.selectedIndex = 2;
@@ -855,7 +876,7 @@
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
-    <mx:Image source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
+    <mx:Image id="titleBanner" source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
       <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
       <mx:Form>
@@ -874,9 +895,11 @@
       <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
       <mx:Label paddingTop="15" text="Chief Programmer: Kota" fontSize="13" />
 	  <mx:HBox>
+		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_localLogin();"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
 		  <mx:Label text="Assistant: Hidetchi"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/>
+		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0" label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
@@ -892,7 +915,8 @@
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
         <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
-        <mx:Button id="playerInfo" label="Player Info" click="_openPlayerInfo(userListGrid.selectedItem);" />
+		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
+        <!-- <mx:Button id="playerInfo" label="Player Info" click="_openPlayerInfo(userListGrid.selectedItem);" /> -->
 		<mx:Label text="{VERSION}"/>
       </mx:HBox>
         <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">

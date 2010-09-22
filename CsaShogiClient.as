@@ -12,6 +12,7 @@ package{
 		public static var CONNECTED:String = 'connected';
 		public static var LOGIN:String = 'login';
 		public static var LOGIN_FAILED:String = 'login_failed';
+		public static var LOGOUT_COMPLETED:String = 'logout_completed';
 		public static var GAME_STARTED:String = 'game_started';
 		public static var GAME_END:String = 'game_end';
 		public static var SERVER_MESSAGE:String = 'receive_message';
@@ -90,6 +91,10 @@ package{
 			_login_name = login_name;
       send("LOGIN " + login_name + " " + password +" x1");//connect with extended mode.
     }
+	
+	public function logout():void {
+		send("LOGOUT");
+	}
 
     public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void {
       _current_state = STATE_GAME_WAITING;
@@ -254,7 +259,9 @@ package{
                 if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
 			            _dispatchServerMessageEvent(MONITOR);
                 }
-              }
+              } else if (line.match(/^LOGOUT:completed/)) {
+				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  }
               break;
             case STATE_GAME_WAITING:
               if (line == "BEGIN Game_Summary") {
@@ -265,7 +272,9 @@ package{
                 if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
 			            _dispatchServerMessageEvent(MONITOR);
                 }
-              }
+              } else if (line.match(/^LOGOUT:completed/)) {
+				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  }
               break;
             case STATE_AGREE_WAITING:
               if (line.match(/^START\:/) != null){
@@ -327,6 +336,10 @@ package{
     public function get playerNames():Array{
       return _player_names;
     }
+	
+	public function setHostToLocal():void {
+		_host = '127.0.0.1';
+	}
 
 	}
 }

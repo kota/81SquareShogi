@@ -17,7 +17,7 @@ package  {
 		private var _komadai:Array; 
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
-    private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','+R','+B','','+S','+N','+L','+P');
+    private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
     private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
 	private static const koma_impasse_points:Array = new Array(0, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
     private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');

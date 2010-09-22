@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="420" height="240" fontSize="12">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="430" height="240" fontSize="12" horizontalScrollPolicy="off">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
@@ -30,7 +30,7 @@
 			  _title = user.titleName;
 			  if (user.monitor_game != "*") {
 				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs. " + user.monitor_game.split("+")[1];
-			  } else if (user.opponent != "*") {
+			  } else if (user.opponent != "") {
 				  _status = "Now playing against " + user.opponent;
 			  } else {
 				  _status = "";
@@ -54,7 +54,7 @@
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Label text="{_name}" fontSize="15" fontWeight="bold" />
-						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" />
+						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
 					<mx:Label paddingRight="10" text="Country:  {_country}"/>
 				</mx:VBox>
