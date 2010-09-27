@@ -20,11 +20,12 @@
 		private var _urlLoader:URLLoader = new URLLoader();
 		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
 		public var newestVer:String;
-		public var titleUser:Array = new Array;
-		public var titleName:Array = new Array;
-		private var rank_thresholds:Array = new Array;
-		private var rank_names:Array = new Array;
-		public var country_names:Array = new Array;
+		public var titleUser:Array = new Array();
+		public var titleName:Array = new Array();
+		private var rank_thresholds:Array = new Array();
+		private var rank_names:Array = new Array();
+		public var country_names:Array = new Array();
+		public var country_names3:Array = new Array();
 		public var initMessage:String
 		public var gameMessage:String
 		private var _urlRequest:URLRequest = new URLRequest();
@@ -60,7 +61,8 @@
 			}
 			lines = match[6].split("\n");
 			for each(line in lines) {
-				country_names[line.split("\t")[0]] = line.split("\t")[1];
+				country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
+				country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
 			}
 		}
 		
@@ -109,6 +111,40 @@
 				return "Three Pawns Handicap (Non-rated)";
 			case "hcnaked":
 				return "Naked King Handicap (Non-rated)";
+			}
+			return "";
+		}
+		
+		public static function gameTypeShort(str:String):String {
+			switch (str) {
+			case "r":
+				return "-";
+			case "nr":
+				return "-";
+			case "hclance":
+				return "Lance HC";
+			case "hcbishop":
+				return "Bishop HC";
+			case "hcrook":
+				return "Rook HC";
+			case "hcrooklance":
+				return "1.5";
+			case "hc2p":
+				return "2-piece HC";
+			case "hc4p":
+				return "4-piece HC";
+			case "hc6p":
+				return "6-piece HC";
+			case "hc8p":
+				return "8-piece HC";
+			case "hctombo":
+				return "Dragonfly";
+			case "hc10p":
+				return "10-piece HC";
+			case "hcfu3":
+				return "Three Pawns";
+			case "hcnaked":
+				return "Naked King";
 			}
 			return "";
 		}

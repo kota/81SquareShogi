@@ -399,10 +399,10 @@ package  {
     	if (_position != null) setPosition(_position);
     }
 
-    public function monitor(game_info:String,watch_user:Object,user_list:Object):void{
+    public function monitor(game_info:String,watch_user:Object,user_list:Object,watch_game:Object):void{
       var match:Array;
       if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
-        _startMonitor(game_info,watch_user,user_list);
+        _startMonitor(game_info,watch_user,user_list,watch_game);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
@@ -423,7 +423,7 @@ package  {
       }
     }
 
-    private function _startMonitor(game_info:String,watch_user:Object,user_list:Object):void{
+    private function _startMonitor(game_info:String,watch_user:Object,user_list:Object,watch_game:Object):void{
       var names:Array = new Array(2);
       var total_time:int;
       var byoyomi:int;
@@ -434,17 +434,7 @@ package  {
         var match:Array = line.match(/^##\[MONITOR2\]\[.*\] (.*)$/);
         if (match != null && match[1]) {
           var token:String = match[1];
-          if(token.indexOf("N+") == 0){
-            var name:String = token.match(/N\+(.*)/)[1]
-            names[0] = name;
-            _my_turn = name == watch_user.name ? Kyokumen.SENTE : Kyokumen.GOTE;
-          } else if (token.indexOf("N-") == 0){
-            names[1] = token.match(/N\-(.*)/)[1];
-          } else if (token.indexOf("$EVENT:") == 0) {
-            var time_match:Array = token.match(/\$EVENT:(.*)\-([0-9]+)\-([0-9]+)\+/);
-            total_time = parseInt(time_match[2]);
-            byoyomi = parseInt(time_match[3]);
-          } else if (token.match(/([-+][0-9]{4}.{2}$)/)) {
+          if(token.match(/([-+][0-9]{4}.{2}$)/)) {
             var move_and_time:Object = new Object();
             move_and_time.move = token
             moves.push(move_and_time);
@@ -453,6 +443,13 @@ package  {
           }
         }
       }
+
+	  names[0] = watch_game.blackName;
+	  names[1] = watch_game.whiteName;
+	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+	  total_time = parseInt(match[3]);
+	  byoyomi = parseInt(match[4]);
+	  
       var kyokumen_str:String = _parsePosition(game_info);
       if(kyokumen_str != ""){
         reset();
@@ -463,15 +460,20 @@ package  {
       _player_names = names;
 //      watch_game_end = false;
 
-	  for (var j:int = 0; j < 2 ; j++) {
-		var _str1:String = names[j];
-		for (var i:int = 0; i < user_list.length ; i++) { 
-			if (user_list[i].name == _str1) {
-				_player_infos[j] = user_list[i];
-				break;
-				}
-		}
+	  var blackInfo:Object = {
+		  'rating':watch_game.blackRating,
+		  'rank':watch_game.blackRank,
+		  'titleName':watch_game.blackTitle,
+		  'country_code':watch_game.blackCountryCode
 	  }
+	  var whiteInfo:Object = {
+		  'rating':watch_game.whiteRating,
+		  'rank':watch_game.whiteRank,
+		  'titleName':watch_game.whiteTitle,
+		  'country_code':watch_game.whiteCountryCode
+	  }
+	  _player_infos[0] = blackInfo;
+	  _player_infos[1] = whiteInfo;
 	  
       name_labels[0].text = names[_my_turn];
       name_labels[1].text = names[1-_my_turn];
@@ -486,7 +488,6 @@ package  {
       timers[0].reset(total_time,byoyomi);
       timers[1].reset(total_time,byoyomi);
 
-//      var turn:int = Kyokumen.SENTE;
       var running_timer:int = _position.turn == _my_turn ? 0 : 1;
       timers[running_timer].start();
       timers[1-running_timer].stop();

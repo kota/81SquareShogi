@@ -19,6 +19,16 @@
 		  private var _title:String;
 		  [Bindable]
 		  private var _status:String;
+		  [Bindable]
+		  private var _wins:int;
+		  [Bindable]
+		  private var _losses:int;
+		  [Bindable]
+		  private var _percentage:Number;
+		  [Bindable]
+		  private var _streak:int;
+		  [Bindable]
+		  private var _streak_best:int;
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
 		  
 		  public function readUser(user:Object):void {
@@ -28,6 +38,15 @@
 			  _rating = user.rating;
 			  _rank = user.rank;
 			  _title = user.titleName;
+			  _wins = user.wins;
+			  _losses = user.losses;
+			  _streak = user.streak;
+			  _streak_best = user.streak_best;
+			  if (_wins + _losses == 0) {
+				  _percentage = 0;
+			  } else {
+				  _percentage = _wins / (_wins + _losses) * 100;
+			  }
 			  if (user.monitor_game != "*") {
 				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs. " + user.monitor_game.split("+")[1];
 			  } else if (user.opponent != "") {
@@ -62,13 +81,14 @@
 			</mx:HBox>
 			<mx:Label text="Rating:  {_rating}  ({_rank})"/>
 			<mx:HBox>
-				<mx:Label text="Win:"/>
-				<mx:Label text="Loss:"/>
-				<mx:Label text="Total:"/>
-				<mx:Label text="(**.*%)"/>
+				<mx:Label text="{_wins} Wins"/>
+				<mx:Label text="{_losses} Losses"/>
+				<mx:Label text="({_percentage.toFixed(1)}%)"/>
+				<mx:Label text="Total: {_wins + _losses}"/>
 			</mx:HBox>
 			<mx:HBox>
-				<mx:Label text="Streak Wins: Best (Current)"/>
+				<mx:Label text="Best Streak: {_streak_best}"/>
+				<mx:Label text="(Current: {_streak})"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:HBox>

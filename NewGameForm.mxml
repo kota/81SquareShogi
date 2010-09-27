@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="250" height="265" paddingLeft="10">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="255" height="295" paddingLeft="10">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
@@ -48,23 +48,28 @@
             var byoyomi:int;
 			var handicap:String;
             trace("Challenge Clicked");
-            switch(timeSetting.selectedValue){
-              case 0:
+            switch(timeSetting.selectedValue) {
+			  case 0:
+			    total = 2700;
+				byoyomi = 60;
+				handicap = "r";
+				break;
+              case 1:
                 total = 900;
                 byoyomi = 60;
 				handicap = "r";
                 break;
-              case 1:
+              case 2:
                 total = 300;
                 byoyomi = 30;
 				handicap = "r";
                 break;
-              case 2:
+              case 3:
                 total = 0;
                 byoyomi = 30;
 				handicap = "r";
                 break;
-              case 3:
+              case 4:
                 total = nonrated_total.selectedItem.data;
                 byoyomi = nonrated_byoyomi.selectedItem.data;
 				handicap = nonrated_handicap.selectedItem.data;
@@ -80,18 +85,19 @@
           }
 
           private function _toggleTimeSelection(e:Event):void{
-            nonrated_total.enabled = timeSetting.selectedValue == 3;
-            nonrated_byoyomi.enabled = timeSetting.selectedValue == 3;
-            nonrated_handicap.enabled = timeSetting.selectedValue == 3;
+            nonrated_total.enabled = timeSetting.selectedValue == 4;
+            nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
+            nonrated_handicap.enabled = timeSetting.selectedValue == 4;
           }
 
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated, 15min - 60sec" value="0" fontSize="11" selected="true" />
-	<mx:RadioButton groupName="timeSetting" label="Rated,  5min - 30sec" value="1" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="Rated,  0min - 30sec" value="2" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="3" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , Rated (x2.0)" value="0" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , Rated (x1.3)" value="1" fontSize="11" selected="true" />
+	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , Rated (x1.0)" value="2" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , Rated (x0.8)" value="3" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false"/>
 		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false"/>

@@ -27,15 +27,18 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/22";
+	private const VERSION:String = "ver.2010/09/26";
 
     private var _client:CsaShogiClient;
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array;
+	private var _waiter_list:Array;
+	private var _game_list:Array;
     private var _login_name:String;
 	private var _player_infos:Array = new Array;
     private var _watch_user:Object;
+	private var _watch_game:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
 	[Bindable]
@@ -123,7 +126,8 @@
 
     private function _handleKeepAlive(e:Event):void {
 	  _refresh();
-      if (_game_name && !_post_game) _client.watchers(_game_name)
+	  if (_game_name) _client.watchers(_game_name);
+//      if (_game_name && !_post_game) _client.watchers(_game_name)
     }
 
     private function _handleLogin(e:Event):void{
@@ -166,6 +170,7 @@
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(_login_name);
       _client.who();
+	  _client.list();
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
       _keepAliveTimer.start();
@@ -290,9 +295,11 @@
           break;
         }
         var watcher:Object = new Object();
-        var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*)/);
+        var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*) (\d+) (\d+)$/);
         if(match){
           watcher.name = match[1];
+		  watcher.rating = parseInt(match[2]);
+		  watcher.country = _infoFetcher.country_names3[parseInt(match[3])];
           watcher_list.push(watcher);
         }
       }
@@ -398,6 +405,7 @@
     private function _handleWho(e:ServerMessageEvent):void{
       var users:Array = e.message.split("\n");
       var user_list:Array = new Array();
+	  var waiter_list:Array = new Array();
       for each(var user_data:String in users){
         if(user_data.match("##[WHO] +OK") != null){
           break;
@@ -418,9 +426,12 @@
 			  'monitor_game':match[2].split(" ")[6],
 			  'moves':match[2].split(" ")[7]
 			  }
-          user.rank = _infoFetcher.makeRankFromRating(user.rating);
 		  user.country = _infoFetcher.country_names[user.country_code];
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
+		  user.wins = (match[2].split(" ")[8]) ? (match[2].split(" ")[8]) : 0;
+		  user.losses = (match[2].split(" ")[9]) ? (match[2].split(" ")[9]) : 0; 
+		  user.streak = (match[2].split(" ")[10]) ? (match[2].split(" ")[10]) : 0; 
+		  user.streak_best = (match[2].split(" ")[11]) ? (match[2].split(" ")[11]) : 0; 
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
             var game_info:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -437,35 +448,45 @@
             if(user.status == "game_waiting"){
               user.status2 += "W";
             } else if (user.status == "post_game") {
-				user.status2 = "P(" + (user.turn == "+" ? "▲" : "△") + ")";
+				user.status2 = "P" + (user.turn == "+" ? "▲" : "△"); // + ")";
 			} else {
-              user.status2 = "G(" + (user.turn == "+" ? "▲" : "△") + ") " + user.moves;
-//              if (user.name != game_info[2]) user.opponent = game_info[2];  //Show the user's opponent only when he is a challenger
+              user.status2 = "G" + (user.turn == "+" ? "▲" : "△"); // + ") " + user.moves;
             }
           }
           user_list.push(user);
         }
       }
-//      for (var i:int = 0; i < user_list.length ; i++) { //Show the user's opponent when he is a challengee (by searching his own name in the opponents' list)
-//        if (user_list[i].status == "game" && user_list[i].opponent == null) {
-//          for (var j:int = 0; j < user_list.length ; j++) {
-//            if (user_list[j].opponent == user_list[i].name) {
-//              user_list[i].opponent = user_list[j].name;
-//              break;
-//            }
-//          }
-//        }
-//      }
+
 	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
 		  for (var i:int = 0; i < user_list.length; i++) {
 			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
 				  if (_infoFetcher.titleName[j] == "livebot") {
 					  user_list[i].rating = 3000;
-					  user_list[i].rank = "pro"
 				  }
 				  break;
 			  }
+		  }
+	  }
+	  for (i = 0; i < user_list.length; i++) {
+		  user_list[i].rank = _infoFetcher.makeRankFromRating(user_list[i].rating);
+		  if (user_list[i].status2.match(/W/)) {
+			  user = {
+				  'name':user_list[i].name,
+				  'rating':user_list[i].rating,
+				  'game_name': user_list[i].game_name,
+				  'country':_infoFetcher.country_names3[user_list[i].country_code]
+				  }
+		  	  game_info = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+			  total = parseInt(game_info[3]) / 60;
+			  if (game_info[1] == "r") {
+				  user.rated = "R"
+			  } else {
+				  user.rated = "NR"
+			  }
+			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
+			  user.time = total + "-" + game_info[4] ;
+			  waiter_list.push(user);
 		  }
 	  }
 
@@ -480,6 +501,10 @@
         }
       }
 	  userListPanel.title = "Main Lobby (" + _user_list.length + " players)";
+	  
+	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+	  _waiter_list = waiter_list;
+	  waiterListGrid.dataProvider = _waiter_list;
     }
 
     private function _writeUserMessage(message:String, n:int):void {
@@ -565,7 +590,7 @@
 	}
 
     private function _challengeForm():void{
-      var user:Object = userListGrid.selectedItem;
+      var user:Object = waiterListGrid.selectedItem;
       if (user != null) {
         var match:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
         var total:int = parseInt(match[3]) / 60 ;
@@ -583,7 +608,7 @@
     }
 
     private function _handleChallengeAlert(e:CloseEvent):void{
-      var user:Object = userListGrid.selectedItem;
+      var user:Object = waiterListGrid.selectedItem;
       if (e.detail == Alert.YES) {
       _challenging = true;
       _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n",1);
@@ -633,6 +658,7 @@
 
     private function _refresh():void{
       _client.who();
+	  _client.list();
 	  challengeButton.enabled = false;
 	  watchButton.enabled = false;
     }
@@ -673,16 +699,36 @@
     private function _userSelected():void {
 	  if (_game_name) return;
       var user:Object = userListGrid.selectedItem;
-      if(user != null && user.name != _login_name && user.status == "game_waiting"){
+//      if(user != null && user.name != _login_name && user.status == "game_waiting"){
+//        challengeButton.enabled = true;
+//        watchButton.enabled = false;
+//      } else if (user != null && (user.status == "game" || user.status == "post_game")) {
+//        challengeButton.enabled = false;
+//        watchButton.enabled = true;
+//      } else {
+//        challengeButton.enabled = false;
+//        watchButton.enabled = false;
+//      }
+    }
+	
+    private function _waiterSelected():void {
+	  if (_game_name) return;
+      var user:Object = waiterListGrid.selectedItem;
+      if(user != null && user.name != _login_name){
         challengeButton.enabled = true;
-        watchButton.enabled = false;
-      } else if (user != null && (user.status == "game" || user.status == "post_game")) {
-        challengeButton.enabled = false;
+      } else {
+		challengeButton.enabled = false;
+	  }
+    }
+	
+    private function _gameSelected():void {
+	  if (_game_name) return;
+      var game:Object = gameListGrid.selectedItem;
+      if(game != null){
         watchButton.enabled = true;
       } else {
-        challengeButton.enabled = false;
-        watchButton.enabled = false;
-      }
+		watchButton.enabled = false;
+	  }
     }
 
     private function _playerMove(from:Point,to:Point,promote:Boolean):void{
@@ -695,24 +741,62 @@
     }
 
     private function _handleList(e:ServerMessageEvent):void{
-      if(_watch_user != null){
-        var lines:Array = e.message.split("\n");
-        for each(var line:String in lines){
-          var tokens:Array = line.split("+");
-          if(tokens != null && (tokens[2] == _watch_user.name || tokens[3] == _watch_user.name)){
-            var match:Array = line.match(/##\[LIST\] (.*)/);
-            if(match != null){
-              var game_name:String = match[1];
-              _game_name = game_name;
-              _monitoring = true;
-			  _post_game = false;
-              _client.monitorOn(game_name);
-              _client.watchers(game_name);
-              break;
-            }
-          }
+	  var game_list:Array = new Array();
+	  var lines:Array = e.message.split("\n");
+        for each(var line:String in lines) {
+		  if (line.match(/^##\[LIST\] \+OK$/)) break;
+          var tokens:Array = line.split(" ");
+          var game:Object = {
+			  'id':tokens[1], //line.substr(9),
+			  'blackName':tokens[1].split("+")[2],
+			  'whiteName':tokens[1].split("+")[3],
+			  'blackRating':parseInt(tokens[3]),
+			  'whiteRating':parseInt(tokens[4]),
+			  'blackCountryCode':parseInt(tokens[5]),
+			  'whiteCountryCode':parseInt(tokens[6]),
+			  'watchers':parseInt(tokens[10]),
+			  'blackTitle':"",
+			  'whiteTitle':""
+			  }
+		  game.blackCountry = _infoFetcher.country_names3[game.blackCountryCode];
+		  game.whiteCountry = _infoFetcher.country_names3[game.whiteCountryCode];
+		  if (tokens[7] == "true") {
+			  game.status = parseInt(tokens[2]);
+		  } else {
+			  game.status = "P";
+			  if (tokens[8] == "true") game.status += "▲";
+			  if (tokens[9] == "true") game.status += "△";
+		  }
+		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
+				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
+					game.blackTitle = _infoFetcher.titleName[i];
+					if (game.blackTitle == "livebot") game.blackRating = 3000;
+				}
+				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
+					game.whiteTitle = _infoFetcher.titleName[i];
+					if (game.whiteTitle == "livebot") game.whiteRating = 3000;
+				}
+		  }
+		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
+		  game.blackRank = _infoFetcher.makeRankFromRating(game.blackRating);
+		  game.whiteRank = _infoFetcher.makeRankFromRating(game.whiteRating);
+		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+		  var total:int = parseInt(game_info[3]) / 60;
+		  var hc:String;
+		  if (game_info[1] == "r") {
+			hc = "R";
+		  } else if (game_info[1].match(/^hc/)) {
+			hc = "HC";
+		  } else {
+			hc = "NR";
+		  }
+		  game.rule = hc + ": " + total + "-" + game_info[4];
+		  game_list.push(game);
         }
-      }
+		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
+		for (i = 0; i < game_list.length; i++) game_list[i].gameNo = i + 1;
+		_game_list = game_list;
+		gameListGrid.dataProvider = _game_list;
     }
 
     private function _handleMonitor(e:ServerMessageEvent):void {
@@ -772,27 +856,35 @@
 	  }
 	  
       if(_watch_user != null){
-        board.monitor(e.message,_watch_user,_user_list);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
+        board.monitor(e.message,_watch_user,_user_list,_watch_game);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
     }
 
     private function _watch():void{
-      _client.list();
-	  watchButton.enabled = false;
-	  logoutButton.enabled = false;
-      _watch_user = userListGrid.selectedItem;
-	  userMessage2.text = _infoFetcher.gameMessage + "\n\n";
-      mainViewStack.selectedIndex = 2;
-      closeButton.enabled = true;
-      resignButton.enabled = false;
-      rewindAllButton.enabled = false;
-      rewindOneButton.enabled = false;
-      forwardOneButton.enabled = false;
-      forwardAllButton.enabled = false;
-      kifuDataGrid.selectable = false;
-      kifuDataGrid.dataProvider = board.kifu_list;
+      _watch_game = gameListGrid.selectedItem;
+      if (_watch_game != null) {
+		 _watch_user = _findPlayerFromList(_watch_game.blackName); //Temporarily
+		 _game_name = _watch_game.id;
+		_monitoring = true;
+		_post_game = false;
+		_client.monitorOn(_game_name);
+		_client.watchers(_game_name);
+		
+		  watchButton.enabled = false;
+		  logoutButton.enabled = false;
+		  userMessage2.text = _infoFetcher.gameMessage + "\n\n";
+		  mainViewStack.selectedIndex = 2;
+		  closeButton.enabled = true;
+		  resignButton.enabled = false;
+		  rewindAllButton.enabled = false;
+		  rewindOneButton.enabled = false;
+		  forwardOneButton.enabled = false;
+		  forwardAllButton.enabled = false;
+		  kifuDataGrid.selectable = false;
+		  kifuDataGrid.dataProvider = board.kifu_list;
+	  }
     }
 	
 	private function _findPlayerFromList(str:String):Object {
@@ -820,6 +912,7 @@
 	
     private function _handleSendChat2(e:FlexEvent):void{
       if(_game_name) _client.chat(_game_name + " " + e.target.text);
+//	  if (_game_name) _client.gameChat(_game_name, e.target.text);
       e.target.text = "";
     }
   
@@ -908,7 +1001,7 @@
     </mx:VBox>
     
     <mx:VBox paddingTop="10" horizontalAlign="center" fontSize="11">
-      <mx:Panel id="userListPanel" width="765" height="560" paddingLeft="10" paddingTop="10">
+      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
@@ -916,38 +1009,65 @@
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
         <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
+					<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+					<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
         <!-- <mx:Button id="playerInfo" label="Player Info" click="_openPlayerInfo(userListGrid.selectedItem);" /> -->
-		<mx:Label text="{VERSION}"/>
+		<!-- <mx:Label text="{VERSION}"/> -->
       </mx:HBox>
-        <mx:DataGrid id="userListGrid" width="720" height="250" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
-         <mx:columns>
-		  <mx:DataGridColumn dataField="titleName" headerText="Title" width="60"/>
-          <mx:DataGridColumn dataField="rank" headerText="Rank" width="52"/>
-          <mx:DataGridColumn dataField="name" headerText="Name" width="100"/>
-          <mx:DataGridColumn dataField="country" headerText="Country" width="100"/>
-          <mx:DataGridColumn dataField="rating" headerText="Rating" width="50"/>
-          <mx:DataGridColumn dataField="status2" headerText="Status" width="65"/>
-          <mx:DataGridColumn dataField="rule" headerText="Rule" width="70"/>
-          <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="100"/>
-          <mx:DataGridColumn dataField="status" headerText="debug1" />
-		  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
-		  <mx:DataGridColumn dataField="turn" headerText="debug3" />
-		  <mx:DataGridColumn dataField="monitor_game" headerText="debug4"/>
-         </mx:columns>
-        </mx:DataGrid>
-		<mx:HBox>
-			<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="580" height="185" fontSize="12"/>
-			<mx:VBox>
-				<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
-				<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
-			</mx:VBox>
-		</mx:HBox>
-		<mx:HBox>
-			<mx:Label text="Chat"/>
-			<mx:TextInput id="chatMessage1" width="430"/>
-			<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
-			<mx:Label id="lastChatTime" text="{_lastChatTime}" />
-		</mx:HBox>
+	  <mx:HBox>
+		<mx:VDividedBox>
+			<mx:DataGrid id="userListGrid" width="360" height="360" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
+			 <mx:columns>
+			  <mx:DataGridColumn dataField="status2" headerText="Status" width="33" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="titleName" headerText="Title" width="58" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="rank" headerText="Rank" width="52" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="name" headerText="Name" width="100" paddingLeft="2" />
+			  <mx:DataGridColumn dataField="country" headerText="Country" width="90" paddingLeft="2" />
+			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="45" paddingRight="3" textAlign="right" />
+			  <!-- <mx:DataGridColumn dataField="rule" headerText="Rule" width="5"/>
+			  <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="5" />
+	          <mx:DataGridColumn dataField="status" headerText="debug1" />
+			  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
+			  <mx:DataGridColumn dataField="turn" headerText="debug3" />
+			  <mx:DataGridColumn dataField="monitor_game" headerText="debug4"/> -->
+			 </mx:columns>
+			</mx:DataGrid>
+			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21">
+			 <mx:columns>
+			  <mx:DataGridColumn dataField="name" headerText="Waiting Player" width="90" paddingLeft="2" />
+			  <mx:DataGridColumn dataField="country" headerText="Ctry" width="30" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="35" paddingRight="3" textAlign="right" />
+			  <mx:DataGridColumn dataField="time" headerText="Time" width="40" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="handicap" headerText="Handicap" width="60" paddingLeft="0" textAlign="center" />
+			 </mx:columns>
+			</mx:DataGrid>
+		</mx:VDividedBox>
+		<mx:VBox>
+			<mx:VDividedBox>
+				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21">
+				 <mx:columns>
+				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="25" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="blackRank" headerText="" width="45" paddingRight="2" textAlign="right" />
+				  <mx:DataGridColumn dataField="blackCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="90" paddingLeft="4"/>
+				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="90" paddingRight="4" textAlign="right"  />
+				  <mx:DataGridColumn dataField="whiteCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="45" paddingLeft="2" />
+				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="63" paddingLeft="3" />
+				  <mx:DataGridColumn dataField="status" headerText="Status" width="50"/>
+				  <mx:DataGridColumn dataField="watchers" headerText="Watch" width="50" />
+				 </mx:columns>
+				</mx:DataGrid>
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12"/> <!-- height="185" -->
+			</mx:VDividedBox>
+			<mx:HBox>
+				<mx:Label text="Chat"/>
+				<mx:TextInput id="chatMessage1" width="430"/>
+				<mx:CheckBox id="autoScrollCheck1" label="Auto-scroll" selected="true" click="_change_auto_scroll1();" />
+			</mx:HBox>
+		</mx:VBox>
+	  </mx:HBox>
       </mx:Panel>
 	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold">
 		  <mx:VBox horizontalAlign="center">
@@ -998,8 +1118,9 @@
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
         <mx:DataGrid id="watcherListGrid" width="160" height="236" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
-          <mx:DataGridColumn dataField="name" headerText="Name" width="110"/>
-		  <mx:DataGridColumn dataField="rating" headerText="Rating"/>
+          <mx:DataGridColumn dataField="name" headerText="Name" width="80" paddingLeft="2" />
+		  <mx:DataGridColumn dataField="country" headerText="Ctry" width="40" paddingLeft="2" textAlign="center" />
+		  <mx:DataGridColumn dataField="rating" headerText="Rate" width="40" paddingRight="3" textAlign="right" />
          </mx:columns>
         </mx:DataGrid>
         <mx:Label text="Kifu" fontWeight="bold"/>

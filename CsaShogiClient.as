@@ -153,6 +153,14 @@ package{
     public function chat(message:String):void{
       send("%%CHAT " + message);
     }
+	
+	public function privateChat(sendTo:String, message:String):void {
+		send("%%PRIVATECHAT " + sendTo + " " + message);
+	}
+	
+	public function gameChat(game_name:String, message:String):void {
+		send("%%GAMECHAT " + game_name + " " + message);
+	}
 
 		public function checkTimeout():void{
 			send("%%%TIMEOUT");
