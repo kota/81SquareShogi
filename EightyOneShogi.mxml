@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/26";
+	private const VERSION:String = "ver.2010/09/27";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -37,7 +37,6 @@
 	private var _game_list:Array;
     private var _login_name:String;
 	private var _player_infos:Array = new Array;
-    private var _watch_user:Object;
 	private var _watch_game:Object;
     private var _monitoring:Boolean;
     private var _challenging:Boolean = false;
@@ -319,8 +318,15 @@
 		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
-      board.startGame(_initPositionStr, _client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
       _game_name = e.message.substr(6);
+	  if (_game_name.split("+")[1].match(/^hc/)) {
+		  board.superior = Kyokumen.GOTE;
+	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
+		  board.superior = Kyokumen.SENTE;
+	  } else {
+		  board.superior = Kyokumen.GOTE;		  
+	  }
+      board.startGame(_initPositionStr, _client.myTurn, _client.playerNames, _player_infos,match[3], match[4]);
 	  _client.watchers(_game_name);
       userMessage2.text = _infoFetcher.gameMessage + "\n\n";
       if(_client.myTurn == Kyokumen.SENTE){
@@ -699,35 +705,64 @@
     private function _userSelected():void {
 	  if (_game_name) return;
       var user:Object = userListGrid.selectedItem;
-//      if(user != null && user.name != _login_name && user.status == "game_waiting"){
-//        challengeButton.enabled = true;
-//        watchButton.enabled = false;
-//      } else if (user != null && (user.status == "game" || user.status == "post_game")) {
-//        challengeButton.enabled = false;
-//        watchButton.enabled = true;
-//      } else {
-//        challengeButton.enabled = false;
-//        watchButton.enabled = false;
-//      }
+	  for (var i:int = 0; i < _waiter_list.length; i++) {
+		  if (_waiter_list[i].name == user.name) {
+			  waiterListGrid.selectedIndex = i;
+			  break;
+		  }
+		  waiterListGrid.selectedIndex = -1;
+	  }
+	  for (i = 0; i < _game_list.length; i++) {
+		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
+			  gameListGrid.selectedIndex = i;
+			  break;
+		  }
+		  gameListGrid.selectedIndex = -1;
+	  }
+	  _waiterSelected();
+	  _gameSelected();
     }
 	
     private function _waiterSelected():void {
 	  if (_game_name) return;
       var user:Object = waiterListGrid.selectedItem;
+	  if (!user) {
+		  challengeButton.enabled = false;
+		  return;
+	  }
       if(user != null && user.name != _login_name){
         challengeButton.enabled = true;
       } else {
 		challengeButton.enabled = false;
+	  }
+	  for (var i:int = 0; i < _user_list.length; i++) {
+		  if (_user_list[i].name == user.name) {
+			  userListGrid.selectedIndex = i;
+			  break;
+		  }
+		  userListGrid.selectedIndex = -1;
 	  }
     }
 	
     private function _gameSelected():void {
 	  if (_game_name) return;
       var game:Object = gameListGrid.selectedItem;
+	  if (!game) {
+		  watchButton.enabled = false;
+		  return;
+	  }
       if(game != null){
         watchButton.enabled = true;
       } else {
 		watchButton.enabled = false;
+	  }
+	  if (userListGrid.selectedItem.name == game.blackName || userListGrid.selectedItem.name == game.whiteName) return;
+	  for (var i:int = 0; i < _user_list.length; i++) {
+		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
+			  userListGrid.selectedIndex = i;
+			  break;
+		  }
+		  userListGrid.selectedIndex = -1;
 	  }
     }
 
@@ -854,9 +889,8 @@
 			board.endGame();
 			return;
 	  }
-	  
-      if(_watch_user != null){
-        board.monitor(e.message,_watch_user,_user_list,_watch_game);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
+      if(_watch_game != null){
+        board.monitor(e.message,_watch_game);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
       }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
@@ -865,8 +899,14 @@
     private function _watch():void{
       _watch_game = gameListGrid.selectedItem;
       if (_watch_game != null) {
-		 _watch_user = _findPlayerFromList(_watch_game.blackName); //Temporarily
 		 _game_name = _watch_game.id;
+		 if (_watch_game.rule.match(/^HC/)) {
+			 board.superior = Kyokumen.GOTE;
+		 } else if (_watch_game.blackRating > _watch_game.whiteRating) {
+			 board.superior = Kyokumen.SENTE;
+		 } else {
+			 board.superior = Kyokumen.GOTE;
+		 }
 		_monitoring = true;
 		_post_game = false;
 		_client.monitorOn(_game_name);
@@ -1032,7 +1072,7 @@
 			  <mx:DataGridColumn dataField="monitor_game" headerText="debug4"/> -->
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21">
+			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">
 			 <mx:columns>
 			  <mx:DataGridColumn dataField="name" headerText="Waiting Player" width="90" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="country" headerText="Ctry" width="30" paddingLeft="0" textAlign="center" />

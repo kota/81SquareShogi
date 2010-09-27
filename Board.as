@@ -102,6 +102,7 @@ package  {
     private var _selected_square:Square;
     private var _last_square:Square;
     public var piece_type:int = 0;
+	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
 
 		private var _time_sente:int;
@@ -263,6 +264,7 @@ package  {
           if(koma != null){
             var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
+			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
             _cells[y][x].source = images[image_index];
           } else {
             _cells[y][x].source = emptyImage;
@@ -399,10 +401,10 @@ package  {
     	if (_position != null) setPosition(_position);
     }
 
-    public function monitor(game_info:String,watch_user:Object,user_list:Object,watch_game:Object):void{
+    public function monitor(game_info:String, watch_game:Object):void{
       var match:Array;
       if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
-        _startMonitor(game_info,watch_user,user_list,watch_game);
+        _startMonitor(game_info, watch_game);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
         makeMove(match[1] + ',' + time);
@@ -423,7 +425,7 @@ package  {
       }
     }
 
-    private function _startMonitor(game_info:String,watch_user:Object,user_list:Object,watch_game:Object):void{
+    private function _startMonitor(game_info:String, watch_game:Object):void{
       var names:Array = new Array(2);
       var total_time:int;
       var byoyomi:int;

@@ -14,7 +14,8 @@ package  {
 
 		private var _turn:int;
 		private var _ban:Array;
-		private var _komadai:Array; 
+		private var _komadai:Array;
+		private var _superior:int;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
     private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
@@ -76,7 +77,7 @@ package  {
         for(var x:int=0;x<9;x++){
           var koma_str:String = line.slice(x*3,x*3+3)
           if(koma_str != " * "){
-            var owner:int = koma_str.charAt(0) == '+' ? SENTE : GOTE 
+            var owner:int = koma_str.charAt(0) == '+' ? SENTE : GOTE
             var koma:Koma = new Koma(koma_names.indexOf(koma_str.slice(1,3)),x,y,owner);
             _ban[x][y] = koma;
           } else {
@@ -189,6 +190,7 @@ package  {
 	        var dy:Number = koma.ownerPlayer == SENTE ? to.y - from.y : from.y - to.y;
 	        switch (koma.type){
 	        	case Koma.OU:
+				case Koma.OU+Koma.PROMOTE:
 	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        		break;
 	        	case Koma.KI:

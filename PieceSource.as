@@ -5,6 +5,8 @@ package
     [Bindable]
     [Embed(source = "/images/pieces_ryoko1/Sou.png")]
     public var sou1:Class
+    [Embed(source = "/images/pieces_ryoko1/Sgyoku.png")]
+    public var sgyoku1:Class
     [Embed(source = "/images/pieces_ryoko1/Shi.png")]
     public var shi1:Class
     [Embed(source = "/images/pieces_ryoko1/Sryu.png")]
@@ -33,6 +35,8 @@ package
     public var sto1:Class
     [Embed(source = "/images/pieces_ryoko1/Gou.png")]
     public var gou1:Class
+    [Embed(source = "/images/pieces_ryoko1/Ggyoku.png")]
+    public var ggyoku1:Class
     [Embed(source = "/images/pieces_ryoko1/Ghi.png")]
     public var ghi1:Class
     [Embed(source = "/images/pieces_ryoko1/Gryu.png")]
@@ -63,6 +67,8 @@ package
     [Bindable]
     [Embed(source = "/images/pieces_kinki/Sou.png")]
     public var sou2:Class
+    [Embed(source = "/images/pieces_kinki/Sgyoku.png")]
+    public var sgyoku2:Class
     [Embed(source = "/images/pieces_kinki/Shi.png")]
     public var shi2:Class
     [Embed(source = "/images/pieces_kinki/Sryu.png")]
@@ -91,6 +97,8 @@ package
     public var sto2:Class
     [Embed(source = "/images/pieces_kinki/Gou.png")]
     public var gou2:Class
+    [Embed(source = "/images/pieces_kinki/Ggyoku.png")]
+    public var ggyoku2:Class
     [Embed(source = "/images/pieces_kinki/Ghi.png")]
     public var ghi2:Class
     [Embed(source = "/images/pieces_kinki/Gryu.png")]
@@ -121,6 +129,8 @@ package
     [Bindable]
     [Embed(source = "/images/pieces_hidetchi/Sou.png")]
     public var sou3:Class
+    [Embed(source = "/images/pieces_hidetchi/Sgyoku.png")]
+    public var sgyoku3:Class
     [Embed(source = "/images/pieces_hidetchi/Shi.png")]
     public var shi3:Class
     [Embed(source = "/images/pieces_hidetchi/Sryu.png")]
@@ -149,6 +159,8 @@ package
     public var sto3:Class
     [Embed(source = "/images/pieces_hidetchi/Gou.png")]
     public var gou3:Class
+    [Embed(source = "/images/pieces_hidetchi/Ggyoku.png")]
+    public var ggyoku3:Class
     [Embed(source = "/images/pieces_hidetchi/Ghi.png")]
     public var ghi3:Class
     [Embed(source = "/images/pieces_hidetchi/Gryu.png")]
@@ -179,6 +191,8 @@ package
     [Bindable]
     [Embed(source = "/images/pieces_alphabet/Sou.png")]
     public var sou4:Class
+    [Embed(source = "/images/pieces_alphabet/Sgyoku.png")]
+    public var sgyoku4:Class
     [Embed(source = "/images/pieces_alphabet/Shi.png")]
     public var shi4:Class
     [Embed(source = "/images/pieces_alphabet/Sryu.png")]
@@ -207,6 +221,8 @@ package
     public var sto4:Class
     [Embed(source = "/images/pieces_alphabet/Gou.png")]
     public var gou4:Class
+    [Embed(source = "/images/pieces_alphabet/Ggyoku.png")]
+    public var ggyoku4:Class
     [Embed(source = "/images/pieces_alphabet/Ghi.png")]
     public var ghi4:Class
     [Embed(source = "/images/pieces_alphabet/Gryu.png")]
@@ -245,18 +261,18 @@ package
 
 		public function PieceSource()
 		{
-			koma_images_sente = new Array(3);
-			koma_images_gote = new Array(3);
-			koma_images_sente[0] = new Array(sou1,shi1,skaku1,skin1,sgin1,skei1,skyo1,sfu1,null,sryu1,suma1,null,sngin1,snkei1,snkyo1,sto1);
-    		koma_images_gote[0] = new Array(gou1,ghi1,gkaku1,gkin1,ggin1,gkei1,gkyo1,gfu1,null,gryu1,guma1,null,gngin1,gnkei1,gnkyo1,gto1);
-			koma_images_sente[1] = new Array(sou2,shi2,skaku2,skin2,sgin2,skei2,skyo2,sfu2,null,sryu2,suma2,null,sngin2,snkei2,snkyo2,sto2);
-    		koma_images_gote[1] = new Array(gou2,ghi2,gkaku2,gkin2,ggin2,gkei2,gkyo2,gfu2,null,gryu2,guma2,null,gngin2,gnkei2,gnkyo2,gto2);
-			koma_images_sente[2] = new Array(sou3,shi3,skaku3,skin3,sgin3,skei3,skyo3,sfu3,null,sryu3,suma3,null,sngin3,snkei3,snkyo3,sto3);
-    		koma_images_gote[2] = new Array(gou3, ghi3, gkaku3, gkin3, ggin3, gkei3, gkyo3, gfu3, null, gryu3, guma3, null, gngin3, gnkei3, gnkyo3, gto3);
-			koma_images_sente[3] = new Array(sou4,shi4,skaku4,skin4,sgin4,skei4,skyo4,sfu4,null,sryu4,suma4,null,sngin4,snkei4,snkyo4,sto4);
-    		koma_images_gote[3] = new Array(gou4,ghi4,gkaku4,gkin4,ggin4,gkei4,gkyo4,gfu4,null,gryu4,guma4,null,gngin4,gnkei4,gnkyo4,gto4);
-			koma_images_sente[4] = new Array(ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,null,ssemi,ssemi,null,ssemi,ssemi,ssemi,ssemi);
-    		koma_images_gote[4] = new Array(gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,null,gsemi,gsemi,null,gsemi,gsemi,gsemi,gsemi);
+			koma_images_sente = new Array();
+			koma_images_gote = new Array();
+			koma_images_sente[0] = new Array(sgyoku1,shi1,skaku1,skin1,sgin1,skei1,skyo1,sfu1,sou1,sryu1,suma1,null,sngin1,snkei1,snkyo1,sto1);
+    		koma_images_gote[0] = new Array(ggyoku1,ghi1,gkaku1,gkin1,ggin1,gkei1,gkyo1,gfu1,gou1,gryu1,guma1,null,gngin1,gnkei1,gnkyo1,gto1);
+			koma_images_sente[1] = new Array(sgyoku2,shi2,skaku2,skin2,sgin2,skei2,skyo2,sfu2,sou2,sryu2,suma2,null,sngin2,snkei2,snkyo2,sto2);
+    		koma_images_gote[1] = new Array(ggyoku2,ghi2,gkaku2,gkin2,ggin2,gkei2,gkyo2,gfu2,gou2,gryu2,guma2,null,gngin2,gnkei2,gnkyo2,gto2);
+			koma_images_sente[2] = new Array(sgyoku3,shi3,skaku3,skin3,sgin3,skei3,skyo3,sfu3,sou3,sryu3,suma3,null,sngin3,snkei3,snkyo3,sto3);
+    		koma_images_gote[2] = new Array(ggyoku3,ghi3,gkaku3,gkin3,ggin3,gkei3,gkyo3,gfu3,gou3,gryu3,guma3,null,gngin3,gnkei3,gnkyo3,gto3);
+			koma_images_sente[3] = new Array(sgyoku4,shi4,skaku4,skin4,sgin4,skei4,skyo4,sfu4,sou4,sryu4,suma4,null,sngin4,snkei4,snkyo4,sto4);
+    		koma_images_gote[3] = new Array(ggyoku4,ghi4,gkaku4,gkin4,ggin4,gkei4,gkyo4,gfu4,gou4,gryu4,guma4,null,gngin4,gnkei4,gnkyo4,gto4);
+			koma_images_sente[4] = new Array(ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,null,ssemi,ssemi,ssemi,ssemi);
+    		koma_images_gote[4] = new Array(gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,null,gsemi,gsemi,gsemi,gsemi);
   		}
 
 	}

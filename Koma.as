@@ -69,7 +69,7 @@ package  {
 		}
 
 		public function isPromoted():Boolean {
-		  return this._type > PROMOTE;
+		  return this._type >= PROMOTE;
     }
 
 		public function promote():void {
