@@ -1,5 +1,9 @@
 package {
+	import flash.display.Graphics;
+	import flash.display.Shape;
+	import mx.containers.Box;
 	import mx.containers.Canvas;
+	import mx.controls.Image;
 	import mx.controls.Label;
 	import flash.utils.Timer;
 	import flash.events.Event;
@@ -11,7 +15,8 @@ package {
 		public static var CHECK_TIMEOUT:String = 'check_timeout';
 
 		private var _label:Label;
-
+		private var _box:Canvas;
+		private var _arrows:Image;
 		private var _total:int;
 		private var _byoyomi:int;
 		private var _time_left:int;
@@ -23,7 +28,9 @@ package {
 		private var _timer:Timer;
 		
 		public static var soundType:int = 1;
-		
+
+		[Embed(source = "/images/timer_arrows.png")]
+		private static var arrows:Class;
 		[Embed(source = "/sound/timer.mp3")]
 		private static var sound_timer:Class;
 		private static var _sound_timer:Sound = new sound_timer();
@@ -75,19 +82,28 @@ package {
 		private static var _voices:Array;
 
 		public function GameTimer() {
-			this.width = 85;
+			this.width = 100;
 			this.horizontalScrollPolicy = "no";
-			this.setStyle('borderStyle','solid');
-			this.setStyle('borderColor',0x000000);
-			this.setStyle('textAlign','center');
-			this.setStyle('backgroundColor',0xffffff);
+			_box = new Canvas();
+			_box.x = 7
+			_box.width = 85;
+			_box.horizontalScrollPolicy = "no";
+			_box.setStyle('borderStyle','solid');
+			_box.setStyle('borderColor',0x000000);
+			_box.setStyle('textAlign','center');
+			_box.setStyle('backgroundColor', 0xffffff);
 			_label = new Label();
 			_label.setStyle('textAlign','center');
 			_label.setStyle('fontSize',18);
 			_label.setStyle('fontWeight', 'bold');
 			_label.x = 0;
 			_label.width = 85;
-			addChild(_label);
+			_box.addChild(_label);
+			addChild(_box);
+			_arrows = new Image();
+			_arrows.source = arrows;
+			_arrows.y = 2
+			addChild(_arrows);
 			_timer = new Timer(1000);
 			_timer.addEventListener(TimerEvent.TIMER, _tickHandler);
 			_voices = new Array(null,_voice01, _voice02, _voice03, _voice04, _voice05, _voice06, _voice07, _voice08, _voice09,_voice10,_voice20,_voice30,_voice40,_voice50);
@@ -96,12 +112,14 @@ package {
 		public function start():void{
 			if(!_timer.running){
 				_timer.start();
+				_arrows.visible = true;
 			}
 		}
 
 		public function stop():void{
 			if(_timer.running){
 				_timer.stop();
+				_arrows.visible = false;
 			}
 		}
 
@@ -113,10 +131,11 @@ package {
 			_accumulated_time = 0;
 			_timeout_flag = false;
 			if (_byoyomi_flag) {
-				if (_byoyomi <= 10) this.setStyle('backgroundColor',0xFF5500);
-					else this.setStyle('backgroundColor',0xFFFF00);
+				if (_byoyomi <= 10) _box.setStyle('backgroundColor',0xFF5500);
+					else _box.setStyle('backgroundColor',0xFFFF00);
 			}
-			else this.setStyle('backgroundColor',0xFFFFFF);
+			else _box.setStyle('backgroundColor', 0xFFFFFF);
+			_arrows.visible = false;
 			_display();
 		}
 
@@ -124,11 +143,12 @@ package {
 			if(_timer.running){
 				_timer.stop();
 				if (_byoyomi_flag) {
-					if (_byoyomi <= 10) this.setStyle('backgroundColor',0xFF5500);
-					else this.setStyle('backgroundColor',0xFFFF00);
+					if (_byoyomi <= 10) _box.setStyle('backgroundColor',0xFF5500);
+					else _box.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
 				}
 			}
+			_arrows.visible = false;
 			_display();
 		}
 
@@ -136,6 +156,7 @@ package {
 			if(!_timer.running){
 				_timer.start();
 			}
+			_arrows.visible = true;
 			_display();
 		}
 
@@ -149,7 +170,7 @@ package {
 				_time_left = _total - _accumulated_time;
 			} else {
 				_byoyomi_flag = true;
-				this.setStyle('backgroundColor',0xFFFF00);
+				_box.setStyle('backgroundColor',0xFFFF00);
 				_time_left = _byoyomi;
 				_display();
 			}
@@ -157,7 +178,7 @@ package {
 
 		public function timeout():void{
 			_time_left = 0;
-			this.setStyle('backgroundColor', 0xFF0000);
+			_box.setStyle('backgroundColor', 0xFF0000);
 			_display();
 		}
 
@@ -170,7 +191,7 @@ package {
 				_time_left = 0;
 				if(_byoyomi > 0 && !_byoyomi_flag){
 					_byoyomi_flag = true;
-					this.setStyle('backgroundColor',0xFFFF00);
+					_box.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
 					if (soundType == 1) {
 						_sound_timer.play();
@@ -180,7 +201,7 @@ package {
 				} else {
           //time's up
 					_timeout_flag = true;
-					this.setStyle('backgroundColor',0xFF0000);
+					_box.setStyle('backgroundColor',0xFF0000);
 					dispatchEvent(new Event(CHECK_TIMEOUT));
 					//_timer.stop();
 				}
@@ -191,7 +212,7 @@ package {
 					}
 				}
 				if(_time_left == 10){
-					this.setStyle('backgroundColor', 0xFF5500);
+					_box.setStyle('backgroundColor', 0xFF5500);
 					if (soundType == 1) _sound_timer.play();
 				}
 				if (_time_left <= 9 && _time_left >= 1) {

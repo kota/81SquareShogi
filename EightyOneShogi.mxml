@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/09/27";
+	private const VERSION:String = "ver.2010/10/01";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -125,8 +125,6 @@
 
     private function _handleKeepAlive(e:Event):void {
 	  _refresh();
-	  if (_game_name) _client.watchers(_game_name);
-//      if (_game_name && !_post_game) _client.watchers(_game_name)
     }
 
     private function _handleLogin(e:Event):void{
@@ -167,12 +165,10 @@
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
-	  _infoFetcher.loadSettings(_login_name);
-      _client.who();
-	  _client.list();
+	  _infoFetcher.loadSettings(_login_name.toLowerCase());
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
-      _keepAliveTimer.start();
+	  _refresh();
 	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1);
 	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1);
 	  if (_chat_sound1_play) _sound_chat1.play();
@@ -299,7 +295,7 @@
           watcher.name = match[1];
 		  watcher.rating = parseInt(match[2]);
 		  watcher.country = _infoFetcher.country_names3[parseInt(match[3])];
-          watcher_list.push(watcher);
+          watcher_list.unshift(watcher);
         }
       }
       watcherListGrid.dataProvider = watcher_list;
@@ -454,9 +450,9 @@
             if(user.status == "game_waiting"){
               user.status2 += "W";
             } else if (user.status == "post_game") {
-				user.status2 = "P" + (user.turn == "+" ? "▲" : "△"); // + ")";
+				user.status2 = "P"; // + (user.turn == "+" ? "▲" : "△");
 			} else {
-              user.status2 = "G" + (user.turn == "+" ? "▲" : "△"); // + ") " + user.moves;
+              user.status2 = "G"; // + (user.turn == "+" ? "▲" : "△) " + user.moves;
             }
           }
           user_list.push(user);
@@ -576,7 +572,7 @@
 	private function _handleSaveSettings(e:Event):void {
 		var urlVariables:URLVariables = new URLVariables();
 		_handleOption(e);
-		urlVariables.name = _login_name;
+		urlVariables.name = _login_name.toLowerCase();
 		urlVariables.pieceSound = board.piece_sound_play;
 		urlVariables.endSound = _end_sound_play;
 		urlVariables.chatSound1 = _chat_sound1_play;
@@ -600,7 +596,7 @@
       if (user != null) {
         var match:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
         var total:int = parseInt(match[3]) / 60 ;
-        var rule:String = total + "min -" + match[4] + "sec";
+        var rule:String = total + "min - " + match[4] + "sec";
 		var hc:String = InfoFetcher.gameType(match[1]);
         Alert.yesLabel = "Challenge";
         Alert.noLabel = "Offer your setting";
@@ -662,9 +658,12 @@
 	  challengeButton.enabled = false;
     }
 
-    private function _refresh():void{
+    private function _refresh():void {
+	  _keepAliveTimer.reset();
+	  _keepAliveTimer.start();
       _client.who();
 	  _client.list();
+	  if (_game_name) _client.watchers(_game_name);
 	  challengeButton.enabled = false;
 	  watchButton.enabled = false;
     }
@@ -895,10 +894,26 @@
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
     }
+	
+	private function _watchDialog():void {
+		Alert.yesLabel = "Black";
+        Alert.noLabel = "White";
+		Alert.buttonWidth = 80;
+        Alert.show("View as:","Choose Side",Alert.YES|Alert.NO,this,_watch);
+        //set properties back to default.
+        Alert.yesLabel = "Yes";
+        Alert.noLabel = "No";
+        Alert.buttonWidth = 60;
+	}
 
-    private function _watch():void{
+    private function _watch(e:CloseEvent):void {
       _watch_game = gameListGrid.selectedItem;
       if (_watch_game != null) {
+		 if (e.detail == Alert.YES) {
+			board.my_turn = Kyokumen.SENTE;
+		 } else {
+			 board.my_turn = Kyokumen.GOTE;
+		 }
 		 _game_name = _watch_game.id;
 		 if (_watch_game.rule.match(/^HC/)) {
 			 board.superior = Kyokumen.GOTE;
@@ -980,6 +995,10 @@
 	  backToGameButton.visible = false;
   }
   
+  private function _killGhost(str:String):void {
+	  _client.send("%%GHOST " + str);
+  }
+  
   private function replay():void {
     board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
   }
@@ -1047,7 +1066,7 @@
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-        <mx:Button id="watchButton" label="Watch" click="_watch();" enabled="false"/>
+        <mx:Button id="watchButton" label="Watch" click="_watchDialog();" enabled="false"/>
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 					<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 					<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
@@ -1058,18 +1077,12 @@
 		<mx:VDividedBox>
 			<mx:DataGrid id="userListGrid" width="360" height="360" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="status2" headerText="Status" width="33" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="status2" headerText="Stat" width="33" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="titleName" headerText="Title" width="58" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="rank" headerText="Rank" width="52" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="name" headerText="Name" width="100" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="country" headerText="Country" width="90" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="45" paddingRight="3" textAlign="right" />
-			  <!-- <mx:DataGridColumn dataField="rule" headerText="Rule" width="5"/>
-			  <mx:DataGridColumn dataField="opponent" headerText="Opponent" width="5" />
-	          <mx:DataGridColumn dataField="status" headerText="debug1" />
-			  <mx:DataGridColumn dataField="game_name" headerText="debug2" />
-			  <mx:DataGridColumn dataField="turn" headerText="debug3" />
-			  <mx:DataGridColumn dataField="monitor_game" headerText="debug4"/> -->
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">
@@ -1088,15 +1101,15 @@
 				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21">
 				 <mx:columns>
 				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="25" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="blackRank" headerText="" width="45" paddingRight="2" textAlign="right" />
+				  <mx:DataGridColumn dataField="blackRank" headerText="" width="50" paddingRight="2" textAlign="right" />
 				  <mx:DataGridColumn dataField="blackCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="90" paddingLeft="4"/>
 				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="90" paddingRight="4" textAlign="right"  />
 				  <mx:DataGridColumn dataField="whiteCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="45" paddingLeft="2" />
+				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="50" paddingLeft="2" />
 				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="63" paddingLeft="3" />
-				  <mx:DataGridColumn dataField="status" headerText="Status" width="50"/>
-				  <mx:DataGridColumn dataField="watchers" headerText="Watch" width="50" />
+				  <mx:DataGridColumn dataField="status" headerText="Stat" width="40"/>
+				  <mx:DataGridColumn dataField="watchers" headerText="Watch" width="45" />
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12"/> <!-- height="185" -->
@@ -1123,6 +1136,7 @@
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>			  
 		  </mx:VBox>
 	  </mx:HBox>
+	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/>-->
     </mx:VBox>
     
     <mx:HBox horizontalAlign="center" verticalAlign="middle">
@@ -1155,8 +1169,11 @@
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
+		<mx:HBox>
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
-        <mx:DataGrid id="watcherListGrid" width="160" height="236" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
+		  <mx:Button id="refreshWatchersButton" label="Refresh" click="_refresh();"/>
+		</mx:HBox>
+		<mx:DataGrid id="watcherListGrid" width="160" height="236" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="Name" width="80" paddingLeft="2" />
 		  <mx:DataGridColumn dataField="country" headerText="Ctry" width="40" paddingLeft="2" textAlign="center" />
@@ -1172,7 +1189,7 @@
         </mx:DataGrid>
         <mx:HBox>
              <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(_game_name, VERSION);" enabled="false"/>
-             <mx:Button id="kifuSaveButton" label="Save" enabled="false"/>          
+             <!-- <mx:Button id="kifuSaveButton" label="Save" enabled="false"/> -->         
         </mx:HBox>
         </mx:Panel>
     </mx:HBox>

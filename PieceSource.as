@@ -255,6 +255,14 @@ package
     public var ssemi:Class
     [Embed(source = "/images/pieces_blind/Gsemi.png")]
     public var gsemi:Class
+    [Embed(source = "/images/pieces_blind/SsemiP.png")]
+    public var ssemip:Class
+    [Embed(source = "/images/pieces_blind/GsemiP.png")]
+    public var gsemip:Class
+    [Embed(source = "/images/pieces_blind/hard.png")]
+    public var hard:Class
+    [Embed(source = "/images/pieces_blind/extreme.png")]
+    public var extreme:Class
 
     public var koma_images_sente:Array;
     public var koma_images_gote:Array;
@@ -271,8 +279,12 @@ package
     		koma_images_gote[2] = new Array(ggyoku3,ghi3,gkaku3,gkin3,ggin3,gkei3,gkyo3,gfu3,gou3,gryu3,guma3,null,gngin3,gnkei3,gnkyo3,gto3);
 			koma_images_sente[3] = new Array(sgyoku4,shi4,skaku4,skin4,sgin4,skei4,skyo4,sfu4,sou4,sryu4,suma4,null,sngin4,snkei4,snkyo4,sto4);
     		koma_images_gote[3] = new Array(ggyoku4,ghi4,gkaku4,gkin4,ggin4,gkei4,gkyo4,gfu4,gou4,gryu4,guma4,null,gngin4,gnkei4,gnkyo4,gto4);
-			koma_images_sente[4] = new Array(ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,null,ssemi,ssemi,ssemi,ssemi);
-    		koma_images_gote[4] = new Array(gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,null,gsemi,gsemi,gsemi,gsemi);
+			koma_images_sente[4] = new Array(ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemi,ssemip,ssemip,null,ssemip,ssemip,ssemip,ssemip);
+    		koma_images_gote[4] = new Array(gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemi,gsemip,gsemip,null,gsemip,gsemip,gsemip,gsemip);
+			koma_images_sente[5] = new Array(hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, null, hard, hard, hard, hard);
+			koma_images_gote[5] = new Array(hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, null, hard, hard, hard, hard);
+			koma_images_sente[6] = new Array(extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, null, extreme, extreme, extreme, extreme);
+			koma_images_gote[6] = new Array(extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, null, extreme, extreme, extreme, extreme);
   		}
 
 	}

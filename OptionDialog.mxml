@@ -50,7 +50,10 @@
 		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Semi-Blind" groupName="RadioGroup2"  value="4"/>
+		<mx:Label text="Blind Piece"/>
+		<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
+		<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
+		<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
 	</mx:HBox>
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 

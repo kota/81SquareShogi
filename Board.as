@@ -96,11 +96,13 @@ package  {
 	private var _player_infos:Array = new Array;
     private var _my_turn:int;
     private var _in_game:Boolean;
+	private var _move_sent:Boolean = false;
 	private var _client_timeout:Boolean;
 //    public var watch_game_end: Boolean;
 
     private var _selected_square:Square;
-    private var _last_square:Square;
+    private var _last_to_square:Square;
+	private var _last_from_square:Square;
     public var piece_type:int = 0;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -169,7 +171,7 @@ package  {
         
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
-		timer.x = i == 0 ? hand.x + 13 : hand.x + KOMADAI_WIDTH / 2 - 12;
+		timer.x = i == 0 ? hand.x + 6 : hand.x + KOMADAI_WIDTH / 2 - 19;
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
 		timers[i] = timer;
 		addChild(timer);
@@ -301,10 +303,16 @@ package  {
 			timers[1-running_timer].resume();
 
       _position.move(mv);
-      if (_last_square != null) _last_square.setStyle('backgroundColor',undefined);
+	  _move_sent = false;
+      if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
+	  if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
       setPosition(_position);
-      _last_square = _cells[mv.to.y][mv.to.x]
-      _last_square.setStyle('backgroundColor','0xCC3333'); 
+      _last_to_square = _cells[mv.to.y][mv.to.x];
+      _last_to_square.setStyle('backgroundColor', '0xFF5555');
+	  if (mv.from.x < Kyokumen.HAND) {
+		_last_from_square = _cells[mv.from.y][mv.from.x];
+		_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
+	  }
       if (piece_sound_play && withSound) _sound_piece.play();
       
       var kifuMove:Object = new Object();
@@ -341,9 +349,9 @@ package  {
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-			timers[0].reset(time_total,time_byoyomi);
-			timers[1].reset(time_total,time_byoyomi);
-			timers[_my_turn == _position.turn ? 0 : 1].start();
+	  timers[0].reset(time_total,time_byoyomi);
+	  timers[1].reset(time_total,time_byoyomi);
+	  timers[_my_turn == _position.turn ? 0 : 1].start();
       _in_game = true;
 	  _client_timeout = false;
     }
@@ -392,6 +400,10 @@ package  {
   	public function get my_turn():int{
   		return _my_turn;
   	}
+	
+	public function set my_turn(v:int):void {
+		this._my_turn = v;
+	}
 
     public function get position():Kyokumen{
       return _position;
@@ -516,10 +528,14 @@ package  {
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if(_in_game && _position.turn == _my_turn){
+      if(_in_game && _position.turn == _my_turn && !_move_sent){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
+		  if (_last_from_square != null) {
+			  _last_from_square.setStyle('backgroundColor', undefined);
+			  _last_from_square = null;
+		  }
           var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           if( koma != null && koma.ownerPlayer == _my_turn){
             e.currentTarget.setStyle('backgroundColor','0x33CCCC');
@@ -543,6 +559,7 @@ package  {
             } else {
               if (!_client_timeout) {
 				  timers[0].suspend();
+				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
 			  }
               _from = null;
@@ -556,6 +573,7 @@ package  {
     private function _promotionHandler(e:CloseEvent):void{
       if (! _client_timeout) {
 		  timers[0].suspend();
+		  _move_sent = true;
 		  _playerMoveCallback(_from, _to, e.detail == Alert.YES);
 	  }
       _from = null;
@@ -563,8 +581,12 @@ package  {
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if(_in_game && _position.turn == _my_turn){
+      if(_in_game && _position.turn == _my_turn && !_move_sent){
         if(_from == null){
+		  if (_last_from_square != null) {
+			  _last_from_square.setStyle('backgroundColor', undefined);
+			  _last_from_square = null;
+		  }
           e.currentTarget.setStyle('backgroundColor','0x33CCCC');
           _selected_square = Square(e.currentTarget);
           _from = new Point(e.currentTarget.coord_x,e.currentTarget.coord_y);
@@ -581,9 +603,13 @@ package  {
 		}
 		
 	  public function replayMoves(n:int):void{
-		  if (_last_square != null){
-		  	_last_square.setStyle('backgroundColor',undefined);
-		  	_last_square = null;
+		  if (_last_to_square != null){
+		  	_last_to_square.setStyle('backgroundColor',undefined);
+		  	_last_to_square = null;
+		  }
+		  if (_last_from_square != null){
+		  	_last_from_square.setStyle('backgroundColor',undefined);
+		  	_last_from_square = null;
 		  }
 //		  _position.turn = Kyokumen.SENTE;
 		  _position.getKomadai(0).clearKoma();
@@ -594,8 +620,12 @@ package  {
 			      var mv:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
 			      _position.move(mv);		  	
 			  }
-		      _last_square = _cells[mv.to.y][mv.to.x]
-		      _last_square.setStyle('backgroundColor','0xCC3333');
+		      _last_to_square = _cells[mv.to.y][mv.to.x];
+		      _last_to_square.setStyle('backgroundColor', '0xCC3333');
+			  if (mv.from.x < Kyokumen.HAND) {
+				_last_from_square = _cells[mv.from.y][mv.from.x];
+				_last_from_square.setStyle('backgroundColor', '0xFF5555');
+			  }
 		  }
       setPosition(_position);
 	  }

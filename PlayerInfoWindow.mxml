@@ -48,7 +48,7 @@
 				  _percentage = _wins / (_wins + _losses) * 100;
 			  }
 			  if (user.monitor_game != "*") {
-				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs. " + user.monitor_game.split("+")[1];
+				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs " + user.monitor_game.split("+")[1];
 			  } else if (user.opponent != "") {
 				  _status = "Now playing against " + user.opponent;
 			  } else {
@@ -81,8 +81,8 @@
 			</mx:HBox>
 			<mx:Label text="Rating:  {_rating}  ({_rank})"/>
 			<mx:HBox>
-				<mx:Label text="{_wins} Wins"/>
-				<mx:Label text="{_losses} Losses"/>
+				<mx:Label text="{_wins} win"/>
+				<mx:Label text="{_losses} loss"/>
 				<mx:Label text="({_percentage.toFixed(1)}%)"/>
 				<mx:Label text="Total: {_wins + _losses}"/>
 			</mx:HBox>
