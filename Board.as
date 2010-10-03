@@ -56,6 +56,8 @@ package  {
     private var black:Class
     [Embed(source = "/images/black_r.png")]
     private var black_r:Class
+    [Embed(source = "/images/medal.png")]
+	private var Medal:Class;
 
 	private var pSrc:PieceSource = new PieceSource();
 
@@ -187,7 +189,7 @@ package  {
         turn_symbol.x = 2;
         turn_symbol.y = i == 0 ? 142 : 4;
         _turn_symbols[i] = turn_symbol;
-		var avatar_image:Image = new Image();
+		var avatar_image:Canvas = new Canvas();
 		avatar_image.x = 14;
 		avatar_image.y = i == 0 ? 6 : 52;
 		avatar_image.width = KOMADAI_WIDTH - 42
@@ -343,8 +345,26 @@ package  {
       name_labels[1].text = player_names[1 - _my_turn];
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
-	  _avatar_images[0].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
-	  _avatar_images[1].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  var avatar:Image = new Image();
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+	  _avatar_images[0].addChild(avatar);
+	  for (var i:int = 1; i <= _player_infos[_my_turn].medals; i++){
+		var medal:Image = new Image();
+		medal.source = Medal;
+		medal.x = 24*(i-1) + 2;
+		medal.y = 96;
+		_avatar_images[0].addChild(medal);
+	  }
+	  avatar = new Image();
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  _avatar_images[1].addChild(avatar);
+	  for (i = 1; i <= _player_infos[1 - _my_turn].medals; i++){
+		medal = new Image();
+		medal.source = Medal;
+		medal.x = 24*(i-1) + 2;
+		medal.y = 96;
+		_avatar_images[1].addChild(medal);
+	  }
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
@@ -373,8 +393,10 @@ package  {
       _player_names = null;
       timers[0].stop();
       timers[1].stop();
-	  _avatar_images[0].source = null;
-	  _avatar_images[1].source = null;
+	  while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
+	  while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
+//	  _avatar_images[0].source = null;
+//	  _avatar_images[1].source = null;
 	  _player_flags[0].source = null;
 	  _player_flags[1].source = null;
     }
@@ -478,13 +500,15 @@ package  {
 		  'rating':watch_game.blackRating,
 		  'rank':watch_game.blackRank,
 		  'titleName':watch_game.blackTitle,
-		  'country_code':watch_game.blackCountryCode
+		  'country_code':watch_game.blackCountryCode,
+		  'medals':watch_game.blackMedals
 	  }
 	  var whiteInfo:Object = {
 		  'rating':watch_game.whiteRating,
 		  'rank':watch_game.whiteRank,
 		  'titleName':watch_game.whiteTitle,
-		  'country_code':watch_game.whiteCountryCode
+		  'country_code':watch_game.whiteCountryCode,
+		  'medals':watch_game.whiteMedals
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
@@ -493,8 +517,26 @@ package  {
       name_labels[1].text = names[1-_my_turn];
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
-	  _avatar_images[0].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
-	  _avatar_images[1].source = IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  var avatar:Image = new Image();
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+	  _avatar_images[0].addChild(avatar);
+	  for (var i:int = 1; i <= _player_infos[_my_turn].medals; i++){
+		var medal:Image = new Image();
+		medal.source = Medal;
+		medal.x = 24*(i-1) + 2;
+		medal.y = 96;
+		_avatar_images[0].addChild(medal);
+	  }
+	  avatar = new Image();
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  _avatar_images[1].addChild(avatar);
+	  for (i = 1; i <= _player_infos[1 - _my_turn].medals; i++){
+		medal = new Image();
+		medal.source = Medal;
+		medal.x = 24*(i-1) + 2;
+		medal.y = 96;
+		_avatar_images[1].addChild(medal);
+	  }	  
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;

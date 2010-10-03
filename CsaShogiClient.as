@@ -18,6 +18,7 @@ package{
 		public static var SERVER_MESSAGE:String = 'receive_message';
     public static var MOVE:String = 'move';
     public static var CHAT:String = 'chat';
+	public static var GAMECHAT:String = 'gamechat';
     public static var WHO:String = 'who';
     public static var MONITOR:String = 'monitor';
     public static var START_WATCH:String = 'start_watch';
@@ -230,7 +231,9 @@ package{
             _dispatchServerMessageEvent(GAME_SUMMARY);
           }
         }
-        if(line.match(/^##\[CHAT\]/)){
+        if(line.match(/^##\[GAMECHAT\]/)){
+          dispatchEvent(new ServerMessageEvent(GAMECHAT, line + "\n"));
+		} else if(line.match(/^##\[CHAT\]/)){
           dispatchEvent(new ServerMessageEvent(CHAT,line+"\n"));
         } else if(line.match(/^[-+][0-9]{4}[A-Z]{2},T/)){
           dispatchEvent(new ServerMessageEvent(MOVE,line));

@@ -27,7 +27,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/01";
+	private const VERSION:String = "ver.2010/10/03";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -82,6 +82,7 @@
 	private var _newGameWindow:NewGameForm; 
     private var _playerInfoWindow:PlayerInfoWindow;
 	private var _challengerAlertWindow:ChallengerAlertWindow;
+	private var _gameResultWindow:GameResultWindow;
 
     private function initApp():void
     {
@@ -110,7 +111,8 @@
 	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
       _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
       _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
-      _client.addEventListener(CsaShogiClient.CHAT,_handleChat);
+      _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
+	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
@@ -189,6 +191,17 @@
 				_sound_chat1.play();
 			}
 		} else if (mNum == 2 && _chat_sound2_play) {
+			if (e.message.match(_regExpCalled)) {
+				_sound_chat3.play();
+			} else {
+				_sound_chat1.play();
+			}
+		}
+    }
+	
+    private function _handleGameChat(e:ServerMessageEvent):void {
+		_writeUserMessage(e.message.substr(12), 2);
+		if (_chat_sound2_play){
 			if (e.message.match(_regExpCalled)) {
 				_sound_chat3.play();
 			} else {
@@ -360,7 +373,7 @@
       } else if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
         _writeUserMessage("Illegal Move.\n",2);
           kifuMove.move = "Illegal Move";
-          kifuMove.moveKIF = "反則負け";
+          kifuMove.moveKIF = "相手の反則にて勝ち";
           board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("RESIGN") >= 0) {
         _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n",2);
@@ -380,12 +393,15 @@
 		board.kifu_list.push(kifuMove);
       }
       if(e.message.indexOf("LOSE") >= 0){
+		_openGameResultWindow(-1);
         _writeUserMessage("### You Lose ###\n",2);
         if (_end_sound_play) _sound_lose.play();
       } else if(e.message.indexOf("WIN") >= 0){
+		_openGameResultWindow(1);
         _writeUserMessage("### You Win ###\n",2);
         if (_end_sound_play) _sound_win.play();
       } else if(e.message.indexOf("DRAW") >=0){
+		_openGameResultWindow(0);
         _writeUserMessage("### Draw ###\n",2);
         if (_end_sound_play) _sound_win.play();
       }
@@ -403,6 +419,12 @@
       kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
     }
+	
+	private function _openGameResultWindow(v:int):void {
+	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(this, GameResultWindow, false));
+      PopUpManager.centerPopUp(_gameResultWindow);
+	  _gameResultWindow.initWindow(v);
+	}
 
     private function _handleWho(e:ServerMessageEvent):void{
       var users:Array = e.message.split("\n");
@@ -426,14 +448,19 @@
 			  'country_code':parseInt(match[2].split(" ")[4]),
 			  'titleName':"",
 			  'monitor_game':match[2].split(" ")[6],
-			  'moves':match[2].split(" ")[7]
+			  'moves':match[2].split(" ")[7],
+			  'wins':match[2].split(" ")[8],
+			  'losses':match[2].split(" ")[9], 
+			  'streak':match[2].split(" ")[10], 
+			  'streak_best':match[2].split(" ")[11], 
+			  'medals':0
 			  }
 		  user.country = _infoFetcher.country_names[user.country_code];
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
-		  user.wins = (match[2].split(" ")[8]) ? (match[2].split(" ")[8]) : 0;
-		  user.losses = (match[2].split(" ")[9]) ? (match[2].split(" ")[9]) : 0; 
-		  user.streak = (match[2].split(" ")[10]) ? (match[2].split(" ")[10]) : 0; 
-		  user.streak_best = (match[2].split(" ")[11]) ? (match[2].split(" ")[11]) : 0; 
+		  user.wins = match[2].split(" ")[8];
+		  user.losses = match[2].split(" ")[9]; 
+		  user.streak = match[2].split(" ")[10]; 
+		  user.streak_best = match[2].split(" ")[11]; 
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
             var game_info:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -472,6 +499,11 @@
 	  }
 	  for (i = 0; i < user_list.length; i++) {
 		  user_list[i].rank = _infoFetcher.makeRankFromRating(user_list[i].rating);
+		  if (user_list[i].rating >= 1090) user_list[i].medals += 1;
+		  if (user_list[i].wins >= 10) user_list[i].medals += 1;
+		  if (user_list[i].streak_best >= 5) user_list[i].medals += 1;
+		  if ((user_list[i].wins + user_list[i].losses >= 10) && ((user_list[i].wins/(user_list[i].wins + user_list[i].losses)) >= 0.7)) user_list[i].medals += 1;
+		  if (user_list[i].titleName != "") user_list[i].medals += 1;
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
 				  'name':user_list[i].name,
@@ -790,10 +822,16 @@
 			  'whiteCountryCode':parseInt(tokens[6]),
 			  'watchers':parseInt(tokens[10]),
 			  'blackTitle':"",
-			  'whiteTitle':""
+			  'whiteTitle':"",
+			  'blackMedals':0,
+			  'whiteMedals':0
 			  }
+		  if (_findPlayerFromList(game.blackName)) game.blackMedals = _findPlayerFromList(game.blackName).medals;
+		  if (_findPlayerFromList(game.whiteName)) game.whiteMedals = _findPlayerFromList(game.whiteName).medals;
 		  game.blackCountry = _infoFetcher.country_names3[game.blackCountryCode];
+		  game.blackFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		  game.whiteCountry = _infoFetcher.country_names3[game.whiteCountryCode];
+		  game.whiteFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
 		  if (tokens[7] == "true") {
 			  game.status = parseInt(tokens[2]);
 		  } else {
@@ -812,6 +850,7 @@
 				}
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
+		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") game.maxRating -= 3000;
 		  game.blackRank = _infoFetcher.makeRankFromRating(game.blackRating);
 		  game.whiteRank = _infoFetcher.makeRankFromRating(game.whiteRating);
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -965,9 +1004,9 @@
       e.target.text = "";
     }
 	
-    private function _handleSendChat2(e:FlexEvent):void{
-      if(_game_name) _client.chat(_game_name + " " + e.target.text);
-//	  if (_game_name) _client.gameChat(_game_name, e.target.text);
+    private function _handleSendChat2(e:FlexEvent):void {
+//      if(_game_name) _client.chat(_game_name + " " + e.target.text);
+	  if (_game_name) _client.gameChat(_game_name, e.target.text);
       e.target.text = "";
     }
   
@@ -1100,16 +1139,18 @@
 			<mx:VDividedBox>
 				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21">
 				 <mx:columns>
-				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="25" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="blackRank" headerText="" width="50" paddingRight="2" textAlign="right" />
-				  <mx:DataGridColumn dataField="blackCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="90" paddingLeft="4"/>
-				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="90" paddingRight="4" textAlign="right"  />
-				  <mx:DataGridColumn dataField="whiteCountry" headerText="" width="30" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="50" paddingLeft="2" />
-				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="63" paddingLeft="3" />
-				  <mx:DataGridColumn dataField="status" headerText="Stat" width="40"/>
-				  <mx:DataGridColumn dataField="watchers" headerText="Watch" width="45" />
+				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" />
+				  <!-- <mx:DataGridColumn dataField="blackCountry" headerText="" width="30" paddingLeft="0" textAlign="center" /> -->
+				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
+				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="100" paddingLeft="4"/>
+				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="100" paddingRight="4" textAlign="right"  />
+				  <!-- <mx:DataGridColumn dataField="whiteCountry" headerText="" width="30" paddingLeft="0" textAlign="center" /> -->
+				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
+				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
+				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="80" paddingLeft="3" />
+				  <mx:DataGridColumn dataField="status" headerText="Stat" width="45"/>
+				  <mx:DataGridColumn dataField="watchers" headerText="Watch"/>
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12"/> <!-- height="185" -->
@@ -1170,10 +1211,10 @@
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
 		<mx:HBox>
-          <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" />
-		  <mx:Button id="refreshWatchersButton" label="Refresh" click="_refresh();"/>
+          <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" paddingRight="0" />
+		  <mx:Button id="refreshWatchersButton" label="Refresh" fontSize="9" click="_refresh();"/>
 		</mx:HBox>
-		<mx:DataGrid id="watcherListGrid" width="160" height="236" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
+		<mx:DataGrid id="watcherListGrid" width="160" height="234" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="Name" width="80" paddingLeft="2" />
 		  <mx:DataGridColumn dataField="country" headerText="Ctry" width="40" paddingLeft="2" textAlign="center" />
