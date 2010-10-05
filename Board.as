@@ -56,7 +56,7 @@ package  {
     private var black:Class
     [Embed(source = "/images/black_r.png")]
     private var black_r:Class
-    [Embed(source = "/images/medal.png")]
+    [Embed(source = "/images/gold_medal.png")]
 	private var Medal:Class;
 
 	private var pSrc:PieceSource = new PieceSource();
@@ -348,23 +348,11 @@ package  {
 	  var avatar:Image = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
 	  _avatar_images[0].addChild(avatar);
-	  for (var i:int = 1; i <= _player_infos[_my_turn].medals; i++){
-		var medal:Image = new Image();
-		medal.source = Medal;
-		medal.x = 24*(i-1) + 2;
-		medal.y = 96;
-		_avatar_images[0].addChild(medal);
-	  }
+	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
 	  _avatar_images[1].addChild(avatar);
-	  for (i = 1; i <= _player_infos[1 - _my_turn].medals; i++){
-		medal = new Image();
-		medal.source = Medal;
-		medal.x = 24*(i-1) + 2;
-		medal.y = 96;
-		_avatar_images[1].addChild(medal);
-	  }
+	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
@@ -501,14 +489,18 @@ package  {
 		  'rank':watch_game.blackRank,
 		  'titleName':watch_game.blackTitle,
 		  'country_code':watch_game.blackCountryCode,
-		  'medals':watch_game.blackMedals
+		  'wins':watch_game.blackWins,
+		  'losses':watch_game.blackLosses,
+		  'streak_best':watch_game.blackStreakBest
 	  }
 	  var whiteInfo:Object = {
 		  'rating':watch_game.whiteRating,
 		  'rank':watch_game.whiteRank,
 		  'titleName':watch_game.whiteTitle,
 		  'country_code':watch_game.whiteCountryCode,
-		  'medals':watch_game.whiteMedals
+		  'wins':watch_game.whiteWins,
+		  'losses':watch_game.whiteLosses,
+		  'streak_best':watch_game.whiteStreakBest
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
@@ -520,23 +512,11 @@ package  {
 	  var avatar:Image = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
 	  _avatar_images[0].addChild(avatar);
-	  for (var i:int = 1; i <= _player_infos[_my_turn].medals; i++){
-		var medal:Image = new Image();
-		medal.source = Medal;
-		medal.x = 24*(i-1) + 2;
-		medal.y = 96;
-		_avatar_images[0].addChild(medal);
-	  }
+	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
 	  _avatar_images[1].addChild(avatar);
-	  for (i = 1; i <= _player_infos[1 - _my_turn].medals; i++){
-		medal = new Image();
-		medal.source = Medal;
-		medal.x = 24*(i-1) + 2;
-		medal.y = 96;
-		_avatar_images[1].addChild(medal);
-	  }	  
+	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;

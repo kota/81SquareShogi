@@ -28,7 +28,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/03";
+	private const VERSION:String = "ver.2010/10/05";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -449,19 +449,14 @@
 			  'country_code':parseInt(match[2].split(" ")[4]),
 			  'titleName':"",
 			  'monitor_game':match[2].split(" ")[6],
-			  'moves':match[2].split(" ")[7],
-			  'wins':match[2].split(" ")[8],
-			  'losses':match[2].split(" ")[9], 
-			  'streak':match[2].split(" ")[10], 
-			  'streak_best':match[2].split(" ")[11], 
-			  'medals':0
+			  'moves':parseInt(match[2].split(" ")[7]),
+			  'wins':parseInt(match[2].split(" ")[8]),
+			  'losses':parseInt(match[2].split(" ")[9]), 
+			  'streak':parseInt(match[2].split(" ")[10]), 
+			  'streak_best':parseInt(match[2].split(" ")[11])
 			  }
 		  user.country = _infoFetcher.country_names[user.country_code];
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
-		  user.wins = match[2].split(" ")[8];
-		  user.losses = match[2].split(" ")[9]; 
-		  user.streak = match[2].split(" ")[10]; 
-		  user.streak_best = match[2].split(" ")[11]; 
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
             var game_info:Array = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -500,11 +495,6 @@
 	  }
 	  for (i = 0; i < user_list.length; i++) {
 		  user_list[i].rank = _infoFetcher.makeRankFromRating(user_list[i].rating);
-		  if (user_list[i].rating >= 1090) user_list[i].medals += 1;
-		  if (user_list[i].wins >= 10) user_list[i].medals += 1;
-		  if (user_list[i].streak_best >= 5) user_list[i].medals += 1;
-		  if ((user_list[i].wins + user_list[i].losses >= 10) && ((user_list[i].wins/(user_list[i].wins + user_list[i].losses)) >= 0.7)) user_list[i].medals += 1;
-		  if (user_list[i].titleName != "") user_list[i].medals += 1;
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
 				  'name':user_list[i].name,
@@ -698,13 +688,16 @@
 	  _client.list();
 	  if (_game_name) _client.watchers(_game_name);
 	  challengeButton.enabled = false;
-	  watchButton.enabled = false;
+//	  watchButton.enabled = false;
     }
 
-    private function _resign():void{
-      if (board.my_turn == board.position.turn) {
-        _client.resign();
-      }
+	private function _resignAlert():void {
+		if (board.my_turn == board.position.turn)
+        Alert.show("","Resign?",Alert.YES|Alert.NO,this,_resign);
+	}
+	
+    private function _resign(e:CloseEvent):void {
+		if (e.detail == Alert.YES) _client.resign();
     }
 
     private function _who():void{
@@ -720,12 +713,12 @@
 			  _client.closeGame();
 		  }
           _sendAutoChat("I have left this room.");
-          _game_name = null;		  
+          _game_name = null;
 	  }
       board.closeGame();
       mainViewStack.selectedIndex = 1;
       challengeButton.enabled = false;
-      watchButton.enabled = false;
+//      watchButton.enabled = false;
 	  logoutButton.enabled = true;
       _refresh();
     }
@@ -735,24 +728,24 @@
     }
 
     private function _userSelected():void {
-	  if (_game_name) return;
       var user:Object = userListGrid.selectedItem;
-	  for (var i:int = 0; i < _waiter_list.length; i++) {
-		  if (_waiter_list[i].name == user.name) {
-			  waiterListGrid.selectedIndex = i;
-			  break;
-		  }
-		  waiterListGrid.selectedIndex = -1;
-	  }
-	  for (i = 0; i < _game_list.length; i++) {
+	  for (var i:int = 0; i < _game_list.length; i++) {
 		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
 			  gameListGrid.selectedIndex = i;
 			  break;
 		  }
 		  gameListGrid.selectedIndex = -1;
 	  }
+	  if (_game_name) return;
+	  for (i = 0; i < _waiter_list.length; i++) {
+		  if (_waiter_list[i].name == user.name) {
+			  waiterListGrid.selectedIndex = i;
+			  break;
+		  }
+		  waiterListGrid.selectedIndex = -1;
+	  }
 	  _waiterSelected();
-	  _gameSelected();
+//	  _gameSelected();
     }
 	
     private function _waiterSelected():void {
@@ -777,18 +770,18 @@
     }
 	
     private function _gameSelected():void {
-	  if (_game_name) return;
+//	  if (_game_name) return;
       var game:Object = gameListGrid.selectedItem;
-	  if (!game) {
-		  watchButton.enabled = false;
-		  return;
-	  }
-      if(game != null){
-        watchButton.enabled = true;
-      } else {
-		watchButton.enabled = false;
-	  }
-	  if (userListGrid.selectedItem.name == game.blackName || userListGrid.selectedItem.name == game.whiteName) return;
+//	  if (!game) {
+//		  watchButton.enabled = false;
+//		  return;
+//	  }
+//      if(game != null){
+//        watchButton.enabled = true;
+//      } else {
+//		watchButton.enabled = false;
+//	  }
+//	  if (userListGrid.selectedItem.name == game.blackName || userListGrid.selectedItem.name == game.whiteName) return;
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
 			  userListGrid.selectedIndex = i;
@@ -823,12 +816,19 @@
 			  'whiteCountryCode':parseInt(tokens[6]),
 			  'watchers':parseInt(tokens[10]),
 			  'blackTitle':"",
-			  'whiteTitle':"",
-			  'blackMedals':0,
-			  'whiteMedals':0
+			  'whiteTitle':""
 			  }
-		  if (_findPlayerFromList(game.blackName)) game.blackMedals = _findPlayerFromList(game.blackName).medals;
-		  if (_findPlayerFromList(game.whiteName)) game.whiteMedals = _findPlayerFromList(game.whiteName).medals;
+		  var user:Object;
+		  if ((user = _findPlayerFromList(game.blackName))) {
+			  game.blackWins = user.wins;
+			  game.blackLosses = user.losses;
+			  game.blackStreakBest = user.streak_best;
+		  }
+		  if ((user = _findPlayerFromList(game.whiteName))) {
+			  game.whiteWins = user.wins;
+			  game.whiteLosses = user.losses;
+			  game.whiteStreakBest = user.streak_best;
+		  }
 		  game.blackCountry = _infoFetcher.country_names3[game.blackCountryCode];
 		  game.blackFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		  game.whiteCountry = _infoFetcher.country_names3[game.whiteCountryCode];
@@ -936,6 +936,7 @@
     }
 	
 	private function _watchDialog():void {
+		if (_game_name) return;
 		Alert.yesLabel = "Black";
         Alert.noLabel = "White";
 		Alert.buttonWidth = 80;
@@ -967,7 +968,7 @@
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
 		
-		  watchButton.enabled = false;
+//		  watchButton.enabled = false;
 		  logoutButton.enabled = false;
 		  userMessage2.text = _infoFetcher.gameMessage + "\n\n";
 		  mainViewStack.selectedIndex = 2;
@@ -1118,7 +1119,7 @@
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-        <mx:Button id="watchButton" label="Watch" click="_watchDialog();" enabled="false"/>
+        <!-- <mx:Button id="watchButton" label="Watch" click="_watchDialog();" enabled="false"/> -->
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
@@ -1151,7 +1152,7 @@
 		</mx:VDividedBox>
 		<mx:VBox>
 			<mx:VDividedBox>
-				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21">
+				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_watchDialog();">
 				 <mx:columns>
 				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" />
@@ -1184,14 +1185,14 @@
 		  </mx:VBox>
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="UTC"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-green.swf?TimeZone=GMT" width="300" height="25"/>			  
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-green.swf?TimeZone=GMT" width="300" height="25"/>
 		  </mx:VBox>
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Tokyo"/>
-			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>			  
+			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
 	  </mx:HBox>
-	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/>-->
+	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/> -->
     </mx:VBox>
     
     <mx:HBox horizontalAlign="center" verticalAlign="middle">
@@ -1203,7 +1204,7 @@
         </mx:Panel>
         <mx:Panel id="controlPanel" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22">
           <mx:HBox>
-            <mx:Button id="resignButton" label="Resign" click="_resign();"/>
+            <mx:Button id="resignButton" label="Resign" click="_resignAlert();"/>
             <mx:Button id="optionButton2" label="Options" click="_showOptions();"/>
             <mx:Button id="impasseButton" label="Impasse?" click="_showImpasse();"/>
             <mx:Button id="closeButton" label="Close" click="_closeGame();" enabled="false"/>           

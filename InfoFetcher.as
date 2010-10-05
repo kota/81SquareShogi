@@ -7,6 +7,8 @@
 	import flash.net.sendToURL;
 	import flash.net.URLRequestMethod;
 	import mx.collections.ArrayCollection;
+	import mx.containers.Canvas;
+	import mx.controls.Image;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	import flash.events.EventDispatcher;
@@ -32,6 +34,12 @@
 		private var _httpService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
 		private var _login_name:String;
+		[Embed(source = "/images/gold_medal.png")]
+		private static var gold_medal:Class;
+		[Embed(source = "/images/silver_medal.png")]
+		private static var silver_medal:Class;
+		[Embed(source = "/images/bronze_medal.png")]
+		private static var bronze_medal:Class;
 		
 		public function InfoFetcher()
 		{
@@ -253,6 +261,88 @@
 				}
 			}
 			dispatchEvent(new Event("loadComplete"));
+		}
+		
+		public static function medalCanvas(user:Object):Canvas {
+			var canvas:Canvas = new Canvas();
+			canvas.x = 2;
+			canvas.y = 96;
+			var i:int = 1;
+			var medal:Image;
+			if (user.titleName != "") {
+				medal = new Image();
+				medal.source = gold_medal;
+				medal.toolTip = "Title Holder";
+				medal.x = 24 * (i - 1);
+				i += 1;
+				if (user.titleName == "admin") {
+					medal.source = silver_medal;
+					medal.toolTip = "admin status";
+				}
+				canvas.addChild(medal);
+			}
+			if (user.rating >= 1090) {
+				medal = new Image();
+				medal.source = bronze_medal;
+				medal.toolTip = "1/2-Dan Holder";
+				medal.x = 24 * (i - 1);
+				i += 1;
+				if (user.rating >= 1210) {
+					medal.source = gold_medal;
+					medal.toolTip = "5/6-Dan Holder";
+				} else if (user.rating >= 1150) {
+					medal.source = silver_medal;
+					medal.toolTip = "3/4-Dan Holder";
+				}
+				canvas.addChild(medal);
+			}
+			if (user.wins >= 10) {
+				medal = new Image();
+				medal.source = bronze_medal;
+				medal.toolTip = "10 wins";
+				medal.x = 24 * (i - 1);
+				i += 1;
+				if (user.wins >= 50) {
+					medal.source = gold_medal;
+					medal.toolTip = "50 wins";
+				} else if (user.wins >= 30) {
+					medal.source = silver_medal;
+					medal.toolTip = "30 wins";
+				}
+				canvas.addChild(medal);
+			}
+			if (user.streak_best >= 5) {
+				medal = new Image();
+				medal.source = bronze_medal;
+				medal.toolTip = "5 streak wins";
+				medal.x = 24 * (i - 1);
+				i += 1;
+				if (user.streak_best >= 15) {
+					medal.source = gold_medal;
+					medal.toolTip = "15 streak wins";
+				} else if (user.streak_best >= 10) {
+					medal.source = silver_medal;
+					medal.toolTip = "10 streak wins";
+				}
+				canvas.addChild(medal);
+			}
+			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.6)) {
+				
+				medal = new Image();
+				medal.source = bronze_medal;
+				medal.toolTip = "60% winning percentage";
+				medal.x = 24 * (i - 1);
+				i += 1;
+				if ((user.wins/(user.wins + user.losses)) >= 0.8) {
+					medal.source = gold_medal;
+					medal.toolTip = "80% winning percentage";
+				} else if ((user.wins/(user.wins + user.losses)) >= 0.7) {
+					medal.source = silver_medal;
+					medal.toolTip = "70% winning percentage";
+				}
+				canvas.addChild(medal);
+			}	
+			return canvas;
 		}
 		
 	}
