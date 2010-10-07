@@ -275,8 +275,8 @@
 				medal.toolTip = "Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "admin") {
-					medal.source = silver_medal;
+				if (user.titleName == "admin" || user.titleName.match(/bot/)) {
+					medal.source = bronze_medal;
 					medal.toolTip = "admin status";
 				}
 				canvas.addChild(medal);
@@ -296,18 +296,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.wins >= 10) {
+			if (user.wins >= 20) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "10 wins";
+				medal.toolTip = "20 wins";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.wins >= 50) {
+				if (user.wins >= 100) {
 					medal.source = gold_medal;
-					medal.toolTip = "50 wins";
-				} else if (user.wins >= 30) {
+					medal.toolTip = "100 wins";
+				} else if (user.wins >= 50) {
 					medal.source = silver_medal;
-					medal.toolTip = "30 wins";
+					medal.toolTip = "50 wins";
 				}
 				canvas.addChild(medal);
 			}
@@ -326,19 +326,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.6)) {
-				
+			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.65)) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "60% winning percentage";
+				medal.toolTip = "65% winning percentage";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if ((user.wins/(user.wins + user.losses)) >= 0.8) {
+				if ((user.wins/(user.wins + user.losses)) >= 0.85) {
 					medal.source = gold_medal;
-					medal.toolTip = "80% winning percentage";
-				} else if ((user.wins/(user.wins + user.losses)) >= 0.7) {
+					medal.toolTip = "85% winning percentage";
+				} else if ((user.wins/(user.wins + user.losses)) >= 0.75) {
 					medal.source = silver_medal;
-					medal.toolTip = "70% winning percentage";
+					medal.toolTip = "75% winning percentage";
 				}
 				canvas.addChild(medal);
 			}	

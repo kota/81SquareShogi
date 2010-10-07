@@ -892,7 +892,7 @@
         _writeUserMessage("Illegal Move.\n", 2);
 		kifuMove.num = board.kifu_list.length;
 		kifuMove.move = "Illegal Move";
-		kifuMove.moveKIF = "反則負け";
+		kifuMove.moveKIF = "相手の反則にて勝ち";
 		board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
 		  end_game = true;
