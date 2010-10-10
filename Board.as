@@ -108,6 +108,11 @@ package  {
     public var piece_type:int = 0;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
+	public var post_game:Boolean = false;
+	public var isWinner:Boolean = false;
+	public var onListen:Boolean = false;
+	public var studyOrigin:int;
+	public var study_list:Array;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -258,6 +263,7 @@ package  {
       kifuMove.num = "0";
       kifuMove.move = "Start";
       kifu_list.push(kifuMove);
+	  study_list = new Array();
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -283,7 +289,7 @@ package  {
           if(hand.getNumOfKoma(j) > 0){
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
               var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
-              if (i==_my_turn) handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
+              handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
               handPiece.source = images[j];
               handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
@@ -296,13 +302,21 @@ package  {
     }
 
     public function makeMove(move:String,withSound:Boolean=true):void{
-			var mv:Movement = _position.generateMovementFromString(move);
+		var mv:Movement = _position.generateMovementFromString(move);
+		
+		if (!post_game){
 			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
 			var time:int = mv.time;
-
 			timers[running_timer].accumulateTime(time);
 			timers[running_timer].suspend();
-			timers[1-running_timer].resume();
+			timers[1 - running_timer].resume();
+		  var kifuMove:Object = new Object();
+		  kifuMove.num = kifu_list.length;										//No. of the Move
+		  kifuMove.move = _position.generateWesternNotationFromMovement(mv);	//Western Notation
+		  kifuMove.moveStr = move;												//CSA
+		  kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);			//Japanese Notation
+		  kifu_list.push(kifuMove);
+		}
 
       _position.move(mv);
 	  _move_sent = false;
@@ -317,12 +331,6 @@ package  {
 	  }
       if (piece_sound_play && withSound) _sound_piece.play();
       
-      var kifuMove:Object = new Object();
-      kifuMove.num = kifu_list.length;										//No. of the Move
-      kifuMove.move = _position.generateWesternNotationFromMovement(mv);	//Western Notation
-      kifuMove.moveStr = move;												//CSA
-      kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);			//Japanese Notation
-	  kifu_list.push(kifuMove);
 	  }
 
     public function setMoveCallback(callback:Function):void{
@@ -550,7 +558,7 @@ package  {
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if(_in_game && _position.turn == _my_turn && !_move_sent){
+      if((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && isWinner)){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
@@ -559,7 +567,7 @@ package  {
 			  _last_from_square = null;
 		  }
           var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
-          if( koma != null && koma.ownerPlayer == _my_turn){
+          if( koma != null && koma.ownerPlayer == _position.turn){
             e.currentTarget.setStyle('backgroundColor','0x33CCCC');
             _selected_square = Square(e.currentTarget);
             _from = new Point(x,y);
@@ -567,7 +575,7 @@ package  {
         } else {
           koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           _selected_square.setStyle('backgroundColor',undefined);
-          if( koma != null && (koma.ownerPlayer == _my_turn || _from.x >= Kyokumen.HAND)){
+          if( koma != null && (koma.ownerPlayer == _position.turn || _from.x >= Kyokumen.HAND)){
           	_from = null;
           	_selected_square = null;
           } else {
@@ -579,7 +587,10 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-              if (!_client_timeout) {
+			  if (post_game && isWinner) {
+				  _move_sent = true;
+				  _playerMoveCallback(_from, _to, false);
+			  } else if (!_client_timeout) {
 				  timers[0].suspend();
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
@@ -603,15 +614,16 @@ package  {
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if(_in_game && _position.turn == _my_turn && !_move_sent){
+      if ((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && isWinner)) {
+		if (e.currentTarget.parent != handBoxes[_my_turn == Kyokumen.SENTE ? _position.turn : (1 - _position.turn)]) return;
         if(_from == null){
 		  if (_last_from_square != null) {
 			  _last_from_square.setStyle('backgroundColor', undefined);
 			  _last_from_square = null;
 		  }
-          e.currentTarget.setStyle('backgroundColor','0x33CCCC');
-          _selected_square = Square(e.currentTarget);
-          _from = new Point(e.currentTarget.coord_x,e.currentTarget.coord_y);
+		  e.currentTarget.setStyle('backgroundColor','0x33CCCC');
+		  _selected_square = Square(e.currentTarget);
+		  _from = new Point(e.currentTarget.coord_x, e.currentTarget.coord_y);
         } else {
             _selected_square.setStyle('backgroundColor',undefined);
             _from = null;
@@ -624,7 +636,8 @@ package  {
 			if (_in_game && _position.turn == _my_turn) _timeoutCallback();
 		}
 		
-	  public function replayMoves(n:int):void{
+	  public function replayMoves(n:int):void {
+		  var mv:Movement;
 		  if (_last_to_square != null){
 		  	_last_to_square.setStyle('backgroundColor',undefined);
 		  	_last_to_square = null;
@@ -639,7 +652,9 @@ package  {
 		  _position.loadFromString(_position.initialPositionStr);
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {
-			      var mv:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
+			      var mvtmp:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
+				  if (!mvtmp) break;
+				  mv = mvtmp;
 			      _position.move(mv);		  	
 			  }
 		      _last_to_square = _cells[mv.to.y][mv.to.x];

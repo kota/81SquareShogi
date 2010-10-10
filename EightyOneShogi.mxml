@@ -28,7 +28,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/05";
+	private const VERSION:String = "ver.2010/10/10";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -73,7 +73,6 @@
 	private var _ur_handicap_selected:int = 0;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
-	private var _post_game:Boolean = true;
 	private var _initPositionStr:String;
     private var _keepAliveTimer:Timer;
 	private var _challengerTicker:Timer;
@@ -146,6 +145,7 @@
 	}
 	
 	private function _logout():void {
+		_sendAutoChat("I've logged out. See you.");
 		_client.logout();
 	}
 	
@@ -201,12 +201,22 @@
     }
 	
     private function _handleGameChat(e:ServerMessageEvent):void {
-		_writeUserMessage(e.message.substr(12), 2);
-		if (_chat_sound2_play){
-			if (e.message.match(_regExpCalled)) {
-				_sound_chat3.play();
-			} else {
-				_sound_chat1.play();
+		var match:Array;
+		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
+			board.studyOrigin = match[1];
+			board.study_list = match[2].split("/");
+			if (!board.isWinner && !(board.post_game && board.onListen)) return;
+			kifuDataGrid.selectedIndex = match[1];
+			board.replayMoves(match[1]);
+			for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+		} else {
+			_writeUserMessage(e.message.substr(12), 2);
+			if (_chat_sound2_play){
+				if (e.message.match(_regExpCalled)) {
+					_sound_chat3.play();
+				} else {
+					_sound_chat1.play();
+				}
 			}
 		}
     }
@@ -323,7 +333,8 @@
         _monitoring = false;
 		board.closeGame();
       }
-	  _post_game = false;
+	  board.post_game = false;
+	  board.isWinner = false;
 	  for (var j:int = 0; j < 2 ; j++) {
 		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
@@ -356,11 +367,15 @@
 	  logoutButton.enabled = false;
       kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
+	  radioKifuListen.selected = true;
+	  radioKifuListen.enabled = false;
+	  radioKifuReplay.enabled = false;
+	  board.onListen = true;
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
-	  _post_game = true;
+	  board.post_game = true;
       kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
         board.timeout();
@@ -393,15 +408,24 @@
 		kifuMove.moveKIF = "千日手";
 		board.kifu_list.push(kifuMove);
       }
-      if(e.message.indexOf("LOSE") >= 0){
+	  radioKifuReplay.enabled = true;
+	  radioKifuReplay.selected = true;
+	  board.onListen = false;
+      if (e.message.indexOf("LOSE") >= 0) {
+		board.isWinner = false;
+		radioKifuListen.enabled = true;
 		_openGameResultWindow(-1);
-        _writeUserMessage("### You Lose ###\n",2);
+        _writeUserMessage("### You Lose ###\n", 2);
         if (_end_sound_play) _sound_lose.play();
-      } else if(e.message.indexOf("WIN") >= 0){
+      } else if (e.message.indexOf("WIN") >= 0) {
+		board.isWinner = true;
+		board.studyOrigin = kifuMove.num;
 		_openGameResultWindow(1);
         _writeUserMessage("### You Win ###\n",2);
         if (_end_sound_play) _sound_win.play();
-      } else if(e.message.indexOf("DRAW") >=0){
+      } else if (e.message.indexOf("DRAW") >= 0) {
+		board.isWinner = false;
+		radioKifuListen.enabled = true;
 		_openGameResultWindow(0);
         _writeUserMessage("### Draw ###\n",2);
         if (_end_sound_play) _sound_win.play();
@@ -711,8 +735,8 @@
 			  _monitoring = false;
 		  } else {
 			  _client.closeGame();
+			  _sendAutoChat("I have left this room.");
 		  }
-          _sendAutoChat("I have left this room.");
           _game_name = null;
 	  }
       board.closeGame();
@@ -791,9 +815,22 @@
 	  }
     }
 
-    private function _playerMove(from:Point,to:Point,promote:Boolean):void{
-      _client.move(board.position.generateMovementFromCoordinates(from, to, promote).toCSA());
+    private function _playerMove(from:Point, to:Point, promote:Boolean):void {
+	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
+	  if (board.post_game && board.isWinner) {
+		  board.study_list.push(str);
+//		  board.makeMove(str + ",T0", false);
+		  str = "[##STUDY]" + board.studyOrigin;
+		  for (var i:int = 0; i < board.study_list.length; i ++) str += "/" + board.study_list[i];
+		  _client.gameChat(_game_name, str);
+		  if (board.study_list.length == 1) _sendAutoChat("Launched study mode from move #" + board.studyOrigin);
+	  } else {
+		  _client.move(str);
+	  }
     }
+	
+	private function _sendStudy():void {
+	}
 
     private function _checkTimeout():void {
 	  board.clientTimeout();
@@ -913,7 +950,11 @@
 		  board.kifu_list.push(kifuMove);
       }
 	  if (end_game) {
-		  _post_game = true;
+			board.post_game = true;
+			radioKifuReplay.enabled = true;
+			radioKifuListen.enabled = true;
+			radioKifuReplay.selected = true;
+			board.onListen = false;
 			_writeUserMessage("### Game End ###\n",2);
 			if (_end_sound_play) _sound_win.play();
 			kifuCopyButton.enabled = true;
@@ -964,7 +1005,8 @@
 			 board.superior = Kyokumen.GOTE;
 		 }
 		_monitoring = true;
-		_post_game = false;
+		board.post_game = false;
+		board.isWinner = false;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
 		
@@ -980,6 +1022,10 @@
 		  forwardAllButton.enabled = false;
 		  kifuDataGrid.selectable = false;
 		  kifuDataGrid.dataProvider = board.kifu_list;
+		  radioKifuListen.selected = true;
+		  radioKifuReplay.enabled = false;
+		  radioKifuListen.enabled = false;
+		  board.onListen = true;
 	  }
     }
 	
@@ -1014,8 +1060,10 @@
   
   private function _sendAutoChat(str:String):void {
     if (_game_name) {
-      _client.chat(_game_name + " [auto-chat] " + str);
-    }
+      _client.gameChat(_game_name, "[auto-chat] " + str);
+    } else {
+	  _client.chat("[auto-chat] " + str);
+	}
   }
  
   private function _mute(v:Boolean):void {
@@ -1052,28 +1100,60 @@
 	  _client.send("%%GHOST " + str);
   }
   
-  private function replay():void {
-    board.replayMoves(int(Math.min(kifuDataGrid.selectedIndex,board.kifu_list.length-2)));
+  private function _toggleListen():void {
+	  if (radioKifuListen.selected) {
+		  board.onListen = true;
+		  if (board.post_game && !board.isWinner) {
+			  kifuDataGrid.selectedIndex = board.studyOrigin;
+			  board.replayMoves(board.studyOrigin);
+			  for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+		  }
+	  } else {
+		  board.onListen = false;
+		  if (board.post_game && !board.isWinner) {
+			board.replayMoves(kifuDataGrid.selectedIndex);
+		  }
+	  }
+	  trace(board.onListen);
+  }
+  
+  private function kifuListSelected():void {
+	if (board.post_game && board.isWinner) {
+		board.studyOrigin = kifuDataGrid.selectedIndex;
+		if (board.study_list.length > 0) _sendAutoChat("Quit study mode.");
+		board.study_list = new Array();
+	}
+	radioKifuReplay.selected = true;
+	board.onListen = false;
+    board.replayMoves(kifuDataGrid.selectedIndex);
   }
     
-  private function replayByButton(i:int):void{
+  private function replayByButton(i:int):void {
+	radioKifuReplay.selected = true;
+	board.onListen = false;
     switch (i) {
       case -2:
-        kifuDataGrid.selectedIndex = 0; replay();
+        kifuDataGrid.selectedIndex = 0;
         break;
       case -1:
         if (kifuDataGrid.selectedIndex > 0) {
-          kifuDataGrid.selectedIndex--; replay();
+          kifuDataGrid.selectedIndex--;
         }
         break;
       case 1:
         if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
-          kifuDataGrid.selectedIndex++; replay();
+          kifuDataGrid.selectedIndex++;
         }
         break;
       case 2:
-        kifuDataGrid.selectedIndex = board.kifu_list.length; replay();
+        kifuDataGrid.selectedIndex = board.kifu_list.length;
     }
+	board.replayMoves(kifuDataGrid.selectedIndex);
+	if (board.post_game && board.isWinner) {
+		board.studyOrigin = kifuDataGrid.selectedIndex;
+		if (board.study_list.length > 0) _sendAutoChat("Quit study mode.");
+		board.study_list = new Array();
+	}
   }
 
     ]]>
@@ -1213,7 +1293,7 @@
             <mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
             <mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
             <mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
-            <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/> 
+            <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
           </mx:HBox>
          <mx:Label text="Chat"/>
          <mx:TextInput id="chatMessage2" width="300"/>
@@ -1226,7 +1306,7 @@
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
-		<mx:HBox>
+		<mx:HBox paddingBottom="-2">
           <mx:Label id="watcherListTitle" text="Watchers (0)" fontWeight="bold" paddingRight="0" />
 		  <mx:Button id="refreshWatchersButton" label="Refresh" fontSize="9" click="_refresh();"/>
 		</mx:HBox>
@@ -1237,16 +1317,20 @@
 		  <mx:DataGridColumn dataField="rating" headerText="Rate" width="40" paddingRight="3" textAlign="right" />
          </mx:columns>
         </mx:DataGrid>
-        <mx:Label text="Kifu" fontWeight="bold"/>
-        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="replay();" selectable="false" fontSize="10" rowHeight="20">
+		<mx:HBox paddingBottom="-2">
+			<mx:Label text="Kifu" fontWeight="bold"/>
+			<mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(_game_name, VERSION);" enabled="false"/>
+		</mx:HBox>
+        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
          <mx:columns>
           <mx:DataGridColumn headerText="No." dataField="num" width="35"/>
           <mx:DataGridColumn dataField="move"/>
          </mx:columns>
         </mx:DataGrid>
-        <mx:HBox>
-             <mx:Button id="kifuCopyButton" label="Copy" click="board.copyKIFtoClipboard(_game_name, VERSION);" enabled="false"/>
-             <!-- <mx:Button id="kifuSaveButton" label="Save" enabled="false"/> -->         
+        <mx:HBox paddingTop="-3">
+			<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
+			<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="Replay" />
+			<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="Listen"/>
         </mx:HBox>
         </mx:Panel>
     </mx:HBox>

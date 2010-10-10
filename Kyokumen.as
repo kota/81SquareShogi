@@ -100,6 +100,43 @@ package  {
         }
       }
     }
+	
+	public function toString():String {
+		var str:String = "";
+		if (_turn == SENTE) {
+			str += "P0+\n";
+		} else {
+			str += "P0-\n";
+		}
+		for (var y:int = 0; y < 9; y++) {
+			var line:String = "P" + (y + 1);
+			for (var x:int = 0; x < 9; x++) {
+				if (_ban[x][y]) {
+					if (_ban[x][y].ownerPlayer == SENTE) {
+						line += "+";
+					} else {
+						line += "-";
+					}
+					line += koma_names[_ban[x][y].type];
+				} else {
+					line += " * ";
+				}
+			}
+			str += line + "\n";
+		}
+		for (y = 0; y < 2; y++) {
+			line = "P" + (y == SENTE ? "+" : "-");
+			for (x = 0; x < 8; x++) {
+				if (_komadai[y].getNumOfKoma(x) > 0) {
+					for (var i:int = 0; i < _komadai[y].getNumOfKoma(x); i++) {
+						line += "00" + koma_names[x];
+					}
+				}
+			}
+			if (line.length > 2) str += line + "\n";
+		}
+		return str;
+	}
 		
 		public function get ban():Array{
 			return this._ban;
@@ -157,7 +194,7 @@ package  {
         koma = new Koma(from.x-HAND,from.x,from.y,_turn);
       } else {
         from = translateHumanCoordinates(from);
-        koma = getKomaAt(from); 
+        koma = getKomaAt(from);
       }
 
 			if(koma.isPromoted() || from.x > HAND){
@@ -250,8 +287,9 @@ package  {
       return new Movement(_turn,from,to,koma,promote,capture);
     }
 
-    public function generateMovementFromString(moveStr:String):Movement{
-      var turn:int = moveStr.charAt(0) == "+" ? 0 : 1;
+    public function generateMovementFromString(moveStr:String):Movement {
+	  if (!moveStr || moveStr.charAt(0) == "%") return null;
+	  var turn:int = moveStr.charAt(0) == "+" ? Kyokumen.SENTE : Kyokumen.GOTE;
       var from:Point = new Point(parseInt(moveStr.charAt(1)),parseInt(moveStr.charAt(2)));
       if(from.x == 0){
         from.x = HAND;
@@ -268,7 +306,6 @@ package  {
 	  if (from.x != HAND){
 	  	var promote:Boolean = getKomaAt(from).type != koma_names.indexOf(moveStr.slice(5,7));
 	  }
-
       return new Movement(turn,from,to,koma,promote,capture,time);
     }
 		
