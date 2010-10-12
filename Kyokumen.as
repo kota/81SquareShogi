@@ -359,7 +359,7 @@ package  {
 			return n;
 		}
 		
-	public function generateWesternNotationFromMovement(mv:Movement):String {
+	public static function generateWesternNotationFromMovement(mv:Movement):String {
 	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
 	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
 	  notationStr += koma_western_names[originalType];
@@ -381,7 +381,7 @@ package  {
 	  return notationStr;	
 	}
 	
-	public function generateKIFTextFromMovement(mv:Movement):String{
+	public static function generateKIFTextFromMovement(mv:Movement):String{
 	  var KIFStr:String = file_japanese_names[8 - mv.to.x];
 	  KIFStr += rank_japanese_names[mv.to.y];
 	  

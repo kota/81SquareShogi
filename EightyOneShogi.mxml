@@ -28,7 +28,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/11";
+	private const VERSION:String = "ver.2010/10/12";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -210,11 +210,13 @@
 				if (board.isWinner || !(board.post_game && board.onListen)) return;
 				kifuDataGrid.selectedIndex = match[1];
 				board.replayMoves(match[1]);
+				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 			} else {
 				board.study_list = match[2].split("/");
 				if (!board.isWinner && !(board.post_game && board.onListen)) return;
 				kifuDataGrid.selectedIndex = match[1];
 				board.replayMoves(match[1]);
+				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
 			}
 		} else {
@@ -553,7 +555,7 @@
       for (i = 0; i < user_list.length; i++) {
         if (_user_list[i].name == _login_name) {
           userListGrid.selectedIndex = i;
-		  userListGrid.scrollToIndex(i + 1);
+		  userListGrid.scrollToIndex(i);
           break;
         }
       }
@@ -977,23 +979,20 @@
 			_writeUserMessage("### Game End ###\n",2);
 			if (_end_sound_play) _sound_win.play();
 			kifuCopyButton.enabled = true;
-			rewindAllButton.enabled = true;
-			rewindOneButton.enabled = true;
-			forwardOneButton.enabled = true;
-			forwardAllButton.enabled = true;
-			kifuDataGrid.dataProvider = board.kifu_list;
-			kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
-			kifuDataGrid.selectable = true;
-			kifuDataGrid.selectedIndex = board.kifu_list.length;
 			board.endGame();
-			return;
+	  } else {
+		  if(_watch_game != null) board.monitor(e.message,_watch_game);
 	  }
-      if(_watch_game != null){
-        board.monitor(e.message,_watch_game);  // _user_list is sent only for refering to the players' ratings and country on the board (Temporarily)
-      }
-      kifuDataGrid.dataProvider = board.kifu_list;
-      kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
+	  var i:int = kifuDataGrid.selectedIndex;
+	  kifuDataGrid.scrollToIndex(0);
+	  kifuDataGrid.dataProvider = board.kifu_list;
+	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
+	  kifuDataGrid.callLater(_scrollDownKifu);
     }
+	
+	private function _scrollDownKifu():void {
+		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+	}
 	
 	private function _watchDialog():void {
 		if (_game_name) return;
@@ -1035,15 +1034,15 @@
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
-		  rewindAllButton.enabled = false;
-		  rewindOneButton.enabled = false;
-		  forwardOneButton.enabled = false;
-		  forwardAllButton.enabled = false;
-		  kifuDataGrid.selectable = false;
+		  rewindAllButton.enabled = true;
+		  rewindOneButton.enabled = true;
+		  forwardOneButton.enabled = true;
+		  forwardAllButton.enabled = true;
+		  kifuDataGrid.selectable = true;
 		  kifuDataGrid.dataProvider = board.kifu_list;
 		  radioKifuListen.selected = true;
-		  radioKifuReplay.enabled = false;
-		  radioKifuListen.enabled = false;
+		  radioKifuReplay.enabled = true;
+		  radioKifuListen.enabled = true;
 		  board.onListen = true;
 	  }
     }
@@ -1129,6 +1128,10 @@
 				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
 			  }
 		  }
+		  if (_monitoring && !board.post_game) {
+			  kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
+			  board.replayMoves(board.kifu_list.length - 1);
+		  }
 	  } else {
 		  board.onListen = false;
 		  if (board.post_game && !board.isWinner) {
@@ -1183,6 +1186,7 @@
         kifuDataGrid.selectedIndex = board.kifu_list.length;
     }
 	board.replayMoves(kifuDataGrid.selectedIndex);
+	kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 	if (board.post_game && board.isWinner) {
 		if (board.study_list.length == 0) {
 			rewindAllButton.setStyle('color', 'undefined');

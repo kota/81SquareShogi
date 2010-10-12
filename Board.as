@@ -93,6 +93,7 @@ package  {
     private var _from:Point;
     private var _to:Point;
     private var _position:Kyokumen;
+	private var _last_pos:Kyokumen;
 
     private var _player_names:Array;
 	private var _player_infos:Array = new Array;
@@ -301,36 +302,41 @@ package  {
       }
     }
 
-    public function makeMove(move:String,withSound:Boolean=true):void{
-		var mv:Movement = _position.generateMovementFromString(move);
-		
-		if (!post_game){
-			var running_timer:int = _my_turn == _position.turn ? 0 : 1;
+    public function makeMove(move:String, withSound:Boolean = true):void {
+		_move_sent = false;
+		if (post_game) {
+			var mv:Movement = _position.generateMovementFromString(move);
+		} else {
+			mv = _last_pos.generateMovementFromString(move);
+			var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
 			var time:int = mv.time;
 			timers[running_timer].accumulateTime(time);
 			timers[running_timer].suspend();
 			timers[1 - running_timer].resume();
-		  var kifuMove:Object = new Object();
-		  kifuMove.num = kifu_list.length;										//No. of the Move
-		  kifuMove.move = _position.generateWesternNotationFromMovement(mv);	//Western Notation
-		  kifuMove.moveStr = move;												//CSA
-		  kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);			//Japanese Notation
-		  kifu_list.push(kifuMove);
+			var kifuMove:Object = new Object();
+			kifuMove.num = kifu_list.length;										//No. of the Move
+			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
+			kifuMove.moveStr = move;												//CSA
+			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
+			kifu_list.push(kifuMove);
 		}
-
-      _position.move(mv);
-	  _move_sent = false;
-      if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
-	  if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
-      setPosition(_position);
-      _last_to_square = _cells[mv.to.y][mv.to.x];
-      _last_to_square.setStyle('backgroundColor', '0xFF5555');
-	  if (mv.from.x < Kyokumen.HAND) {
-		_last_from_square = _cells[mv.from.y][mv.from.x];
-		_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
-	  }
-      if (piece_sound_play && withSound) _sound_piece.play();
-      
+		
+		if (!post_game && !onListen) {
+			_last_pos.move(mv);
+		} else {
+			_position.move(mv);
+			_last_pos.loadFromString(_position.toString());
+		  if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
+		  if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
+		  setPosition(_position);
+		  _last_to_square = _cells[mv.to.y][mv.to.x];
+		  _last_to_square.setStyle('backgroundColor', '0xFF5555');
+		  if (mv.from.x < Kyokumen.HAND) {
+			_last_from_square = _cells[mv.from.y][mv.from.x];
+			_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
+		  }
+		}
+        if (piece_sound_play && withSound) _sound_piece.play();
 	  }
 
     public function setMoveCallback(callback:Function):void{
@@ -348,6 +354,7 @@ package  {
       _my_turn = my_turn;
       reset();
       _position = new Kyokumen(kyokumen_str);
+	  _last_pos = new Kyokumen(kyokumen_str);
       setPosition(_position);
       name_labels[0].text = player_names[_my_turn];
       name_labels[1].text = player_names[1 - _my_turn];
@@ -488,6 +495,7 @@ package  {
       if(kyokumen_str != ""){
         reset();
         _position = new Kyokumen(kyokumen_str);
+		_last_pos = new Kyokumen(kyokumen_str);
 //        _position.loadFromString(kyokumen_str);
         setPosition(_position);
       }
@@ -658,7 +666,7 @@ package  {
 			      var mvtmp:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
 				  if (!mvtmp) break;
 				  mv = mvtmp;
-			      _position.move(mv);		  	
+			      _position.move(mv);
 			  }
 		      _last_to_square = _cells[mv.to.y][mv.to.x];
 		      _last_to_square.setStyle('backgroundColor', '0xCC3333');
