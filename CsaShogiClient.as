@@ -204,13 +204,14 @@ package{
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
 			_buffer = _buffer + response;
+			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
-			if (_buffer.match(/^##\[MONITOR2\]/) || _buffer.match(/^##\[LIST\]/) || _buffer.match(/^##\[WHO\]/)) {
-				if (!_buffer.match(/\+OK$/)) {
-					if (!lines[lines.length - 1].match(/^##\[CHAT\]/) && !lines[lines.length - 1].match(/^##\[GAMECHAT\]/) && !lines[lines.length - 1].match(/^P[0-9\+\-]/)) return;
+			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\])/)) {
+				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|START\:.+$|REJECT\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
+					trace("buffer doesn't deserve dispatching.");
+					return;
 				}
 			}
-      trace("Response:"+_buffer);
       var match:Array;
       for each(var line:String in lines){
         if(_reading_game_summary_flag){
