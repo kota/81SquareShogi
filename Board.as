@@ -370,6 +370,7 @@ package  {
 	  timers[_my_turn == _position.turn ? 0 : 1].start();
       _in_game = true;
 	  _client_timeout = false;
+	  studyOrigin = 0;
     }
 
     public function endGame():void{
@@ -395,6 +396,7 @@ package  {
 //	  _avatar_images[1].source = null;
 	  _player_flags[0].source = null;
 	  _player_flags[1].source = null;
+	  study_list = new Array();
     }
 
 		public function timeout():void{
@@ -540,6 +542,7 @@ package  {
           makeMove(move.move + "," + move.time,false);
         }
       }
+	  studyOrigin = 0;
     }
 
     private function _parsePosition(game_info:String):String{

@@ -28,7 +28,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/10";
+	private const VERSION:String = "ver.2010/10/11";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -141,7 +141,8 @@
 	
 	private function _localLogin():void {
 		_client.setHostToLocal();
-		loginButton.setStyle("color", '#FF0000');
+		loginButton.setStyle('color', '0xFF0000');
+		loginButton.setStyle('textRollOverColor', '0xFF0000');
 	}
 	
 	private function _logout():void {
@@ -204,11 +205,18 @@
 		var match:Array;
 		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			board.studyOrigin = match[1];
-			board.study_list = match[2].split("/");
-			if (!board.isWinner && !(board.post_game && board.onListen)) return;
-			kifuDataGrid.selectedIndex = match[1];
-			board.replayMoves(match[1]);
-			for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+			if (match[2] == "*") {
+				if (board.study_list.length > 0) board.study_list = new Array();
+				if (board.isWinner || !(board.post_game && board.onListen)) return;
+				kifuDataGrid.selectedIndex = match[1];
+				board.replayMoves(match[1]);
+			} else {
+				board.study_list = match[2].split("/");
+				if (!board.isWinner && !(board.post_game && board.onListen)) return;
+				kifuDataGrid.selectedIndex = match[1];
+				board.replayMoves(match[1]);
+				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+			}
 		} else {
 			_writeUserMessage(e.message.substr(12), 2);
 			if (_chat_sound2_play){
@@ -742,8 +750,11 @@
       board.closeGame();
       mainViewStack.selectedIndex = 1;
       challengeButton.enabled = false;
-//      watchButton.enabled = false;
 	  logoutButton.enabled = true;
+	  rewindAllButton.setStyle('color', 'undefined');
+	  rewindAllButton.setStyle('textRollOverColor', 'undefined');
+	  rewindOneButton.setStyle('color', 'undefined');
+	  rewindOneButton.setStyle('textRollOverColor', 'undefined');
       _refresh();
     }
     
@@ -818,18 +829,26 @@
     private function _playerMove(from:Point, to:Point, promote:Boolean):void {
 	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
 	  if (board.post_game && board.isWinner) {
+		  rewindAllButton.setStyle('color', '0xFF0000');
+		  rewindAllButton.setStyle('textRollOverColor', '0xFF0000');
+		  rewindOneButton.setStyle('color', '0xFF0000');
+		  rewindOneButton.setStyle('textRollOverColor', '0xFF0000');
 		  board.study_list.push(str);
-//		  board.makeMove(str + ",T0", false);
-		  str = "[##STUDY]" + board.studyOrigin;
-		  for (var i:int = 0; i < board.study_list.length; i ++) str += "/" + board.study_list[i];
-		  _client.gameChat(_game_name, str);
-		  if (board.study_list.length == 1) _sendAutoChat("Launched study mode from move #" + board.studyOrigin);
+		  _sendStudy();
+		  if (board.study_list.length == 1) _sendAutoChat("Launched study mode at #" + board.studyOrigin);
 	  } else {
 		  _client.move(str);
 	  }
     }
 	
 	private function _sendStudy():void {
+		var str:String = "[##STUDY]" + board.studyOrigin;
+		if (board.study_list.length > 0){
+			for (var i:int = 0; i < board.study_list.length; i ++) str += "/" + board.study_list[i];
+		} else {
+			str += "/*";
+		}
+		_client.gameChat(_game_name, str);
 	}
 
     private function _checkTimeout():void {
@@ -1106,7 +1125,9 @@
 		  if (board.post_game && !board.isWinner) {
 			  kifuDataGrid.selectedIndex = board.studyOrigin;
 			  board.replayMoves(board.studyOrigin);
-			  for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+			  if (board.study_list.length > 0){
+				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+			  }
 		  }
 	  } else {
 		  board.onListen = false;
@@ -1120,8 +1141,13 @@
   private function kifuListSelected():void {
 	if (board.post_game && board.isWinner) {
 		board.studyOrigin = kifuDataGrid.selectedIndex;
-		if (board.study_list.length > 0) _sendAutoChat("Quit study mode.");
+//		if (board.study_list.length > 0) _sendAutoChat("Quit study mode.");
 		board.study_list = new Array();
+		_sendStudy();
+		rewindAllButton.setStyle('color', 'undefined');
+		rewindAllButton.setStyle('textRollOverColor', 'undefined');
+		rewindOneButton.setStyle('color', 'undefined');
+		rewindOneButton.setStyle('textRollOverColor', 'undefined');
 	}
 	radioKifuReplay.selected = true;
 	board.onListen = false;
@@ -1133,26 +1159,39 @@
 	board.onListen = false;
     switch (i) {
       case -2:
-        kifuDataGrid.selectedIndex = 0;
+	    if (board.post_game && board.isWinner && board.study_list.length > 0) {
+			board.study_list = new Array();
+		} else {
+			kifuDataGrid.selectedIndex = 0;
+		}
         break;
       case -1:
-        if (kifuDataGrid.selectedIndex > 0) {
-          kifuDataGrid.selectedIndex--;
+	    if (board.post_game && board.isWinner && board.study_list.length > 0) {
+			board.study_list.pop();
+		} else if (kifuDataGrid.selectedIndex > 0) {
+			kifuDataGrid.selectedIndex--;
         }
         break;
       case 1:
         if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
+		  if (board.post_game && board.isWinner) board.study_list = new Array();
           kifuDataGrid.selectedIndex++;
         }
         break;
       case 2:
+	    if (board.post_game && board.isWinner) board.study_list = new Array();
         kifuDataGrid.selectedIndex = board.kifu_list.length;
     }
 	board.replayMoves(kifuDataGrid.selectedIndex);
 	if (board.post_game && board.isWinner) {
+		if (board.study_list.length == 0) {
+			rewindAllButton.setStyle('color', 'undefined');
+			rewindAllButton.setStyle('textRollOverColor', 'undefined');
+			rewindOneButton.setStyle('color', 'undefined');
+			rewindOneButton.setStyle('textRollOverColor', 'undefined');
+		}
 		board.studyOrigin = kifuDataGrid.selectedIndex;
-		if (board.study_list.length > 0) _sendAutoChat("Quit study mode.");
-		board.study_list = new Array();
+		_sendStudy();
 	}
   }
 
