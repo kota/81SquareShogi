@@ -507,9 +507,9 @@
             if(user.status == "game_waiting"){
               user.status2 += "W";
             } else if (user.status == "post_game") {
-				user.status2 = "P"; // + (user.turn == "+" ? "▲" : "△");
+				user.status2 = "P " + (user.turn == "+" ? "▲" : "△");
 			} else {
-              user.status2 = "G"; // + (user.turn == "+" ? "▲" : "△) " + user.moves;
+              user.status2 = "G " + (user.turn == "+" ? "▲" : "△"); // + user.moves;
             }
           }
           user_list.push(user);
@@ -771,17 +771,27 @@
 			  gameListGrid.selectedIndex = i;
 			  break;
 		  }
+		  if (user.monitor_game != "*" && user.monitor_game.split("+")[0] == _game_list[i].blackName && user.monitor_game.split("+")[1] == _game_list[i].whiteName) {
+			  gameListGrid.selectedIndex = i;
+			  break;
+		  }
 		  gameListGrid.selectedIndex = -1;
 	  }
 	  if (_game_name) return;
 	  for (i = 0; i < _waiter_list.length; i++) {
 		  if (_waiter_list[i].name == user.name) {
 			  waiterListGrid.selectedIndex = i;
+				  if(_waiter_list[i].name != _login_name){
+					challengeButton.enabled = true;
+				  } else {
+					challengeButton.enabled = false;
+				  }
 			  break;
 		  }
 		  waiterListGrid.selectedIndex = -1;
+		  challengeButton.enabled = false;
 	  }
-	  _waiterSelected();
+//	  _waiterSelected();
 //	  _gameSelected();
     }
 	
@@ -804,6 +814,7 @@
 		  }
 		  userListGrid.selectedIndex = -1;
 	  }
+	  gameListGrid.selectedIndex = -1;
     }
 	
     private function _gameSelected():void {
@@ -826,6 +837,8 @@
 		  }
 		  userListGrid.selectedIndex = -1;
 	  }
+	  waiterListGrid.selectedIndex = -1;
+	  challengeButton.enabled = false;
     }
 
     private function _playerMove(from:Point, to:Point, promote:Boolean):void {
@@ -892,7 +905,7 @@
 		  game.whiteCountry = _infoFetcher.country_names3[game.whiteCountryCode];
 		  game.whiteFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
 		  if (tokens[7] == "true") {
-			  game.status = parseInt(tokens[2]);
+			  game.status = "G: " + parseInt(tokens[2]);
 		  } else {
 			  game.status = "P";
 			  if (tokens[8] == "true") game.status += "▲";
@@ -922,7 +935,7 @@
 		  } else {
 			hc = "NR";
 		  }
-		  game.rule = hc + ": " + total + "-" + game_info[4];
+		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
 		  game_list.push(game);
         }
 		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
@@ -1287,8 +1300,8 @@
 				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
 				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="80" paddingLeft="3" />
-				  <mx:DataGridColumn dataField="status" headerText="Stat" width="45"/>
-				  <mx:DataGridColumn dataField="watchers" headerText="Watch"/>
+				  <mx:DataGridColumn dataField="status" headerText="Status" width="50" paddingLeft="2" />
+				  <mx:DataGridColumn dataField="watchers" headerText="Mon."/>
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12"/> <!-- height="185" -->
