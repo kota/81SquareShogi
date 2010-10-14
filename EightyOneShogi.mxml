@@ -146,7 +146,7 @@
 	}
 	
 	private function _logout():void {
-		_sendAutoChat("I've logged out. See you.");
+//		_sendAutoChat("I've logged out. See you.");
 		_client.logout();
 	}
 	
@@ -175,7 +175,8 @@
 	  _refresh();
 	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1);
 	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1);
-	  if (_chat_sound1_play) _sound_chat1.play();
+	  _sendAutoChat("I've logged in. Hello.");
+//	  if (_chat_sound1_play) _sound_chat1.play();
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -328,7 +329,8 @@
         if(match){
           watcher.name = match[1];
 		  watcher.rating = parseInt(match[2]);
-		  watcher.country = _infoFetcher.country_names3[parseInt(match[3])];
+		  watcher.country3 = _infoFetcher.country_names3[parseInt(match[3])];
+		  watcher.country = _infoFetcher.country_names[parseInt(match[3])];
           watcher_list.unshift(watcher);
         }
       }
@@ -534,7 +536,8 @@
 				  'name':user_list[i].name,
 				  'rating':user_list[i].rating,
 				  'game_name': user_list[i].game_name,
-				  'country':_infoFetcher.country_names3[user_list[i].country_code]
+				  'country':_infoFetcher.country_names[user_list[i].country_code],
+				  'country3':_infoFetcher.country_names3[user_list[i].country_code]
 				  }
 		  	  game_info = user.game_name.match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
 			  total = parseInt(game_info[3]) / 60;
@@ -900,9 +903,9 @@
 			  game.whiteLosses = user.losses;
 			  game.whiteStreakBest = user.streak_best;
 		  }
-		  game.blackCountry = _infoFetcher.country_names3[game.blackCountryCode];
+		  game.blackCountry = _infoFetcher.country_names[game.blackCountryCode];
 		  game.blackFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
-		  game.whiteCountry = _infoFetcher.country_names3[game.whiteCountryCode];
+		  game.whiteCountry = _infoFetcher.country_names[game.whiteCountryCode];
 		  game.whiteFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
 		  if (tokens[7] == "true") {
 			  game.status = "G: " + parseInt(tokens[2]);
@@ -930,10 +933,13 @@
 		  var hc:String;
 		  if (game_info[1] == "r") {
 			hc = "R";
+			game.hcTip = "";
 		  } else if (game_info[1].match(/^hc/)) {
 			hc = "HC";
+			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
 		  } else {
 			hc = "NR";
+			game.hcTip = "";
 		  }
 		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
 		  game_list.push(game);
@@ -1255,13 +1261,10 @@
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-        <!-- <mx:Button id="watchButton" label="Watch" click="_watchDialog();" enabled="false"/> -->
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
 		<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
-        <!-- <mx:Button id="playerInfo" label="Player Info" click="_openPlayerInfo(userListGrid.selectedItem);" /> -->
-		<!-- <mx:Label text="{VERSION}"/> -->
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox>
@@ -1278,7 +1281,7 @@
 			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">
 			 <mx:columns>
 			  <mx:DataGridColumn dataField="name" headerText="Waiting Player" width="90" paddingLeft="2" />
-			  <mx:DataGridColumn dataField="country" headerText="Ctry" width="30" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="country3" headerText="Ctry" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" />
 			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="35" paddingRight="3" textAlign="right" />
 			  <mx:DataGridColumn dataField="time" headerText="Time" width="40" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
@@ -1292,14 +1295,12 @@
 				 <mx:columns>
 				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" />
-				  <!-- <mx:DataGridColumn dataField="blackCountry" headerText="" width="30" paddingLeft="0" textAlign="center" /> -->
 				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="100" paddingLeft="4"/>
 				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="100" paddingRight="4" textAlign="right"  />
-				  <!-- <mx:DataGridColumn dataField="whiteCountry" headerText="" width="30" paddingLeft="0" textAlign="center" /> -->
 				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
-				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="80" paddingLeft="3" />
+				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="80" paddingLeft="3" showDataTips="true" dataTipField="hcTip" />
 				  <mx:DataGridColumn dataField="status" headerText="Status" width="50" paddingLeft="2" />
 				  <mx:DataGridColumn dataField="watchers" headerText="Mon."/>
 				 </mx:columns>
@@ -1369,7 +1370,7 @@
 		<mx:DataGrid id="watcherListGrid" width="160" height="234" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="Name" width="80" paddingLeft="2" />
-		  <mx:DataGridColumn dataField="country" headerText="Ctry" width="40" paddingLeft="2" textAlign="center" />
+		  <mx:DataGridColumn dataField="country3" headerText="Ctry" width="40" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
 		  <mx:DataGridColumn dataField="rating" headerText="Rate" width="40" paddingRight="3" textAlign="right" />
          </mx:columns>
         </mx:DataGrid>
