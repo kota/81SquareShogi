@@ -24,8 +24,8 @@
 		public var newestVer:String;
 		public var titleUser:Array = new Array();
 		public var titleName:Array = new Array();
-		private var rank_thresholds:Array = new Array();
-		private var rank_names:Array = new Array();
+		private static var rank_thresholds:Array = new Array();
+		private static var rank_names:Array = new Array();
 		public var country_names:Array = new Array();
 		public var country_names3:Array = new Array();
 		public var initMessage:String
@@ -51,7 +51,8 @@
 	  _httpService.url = SOURCE + "users/userConfig.xml";
 		}
 		
-		private function _parseInfo(e:Event):void { 
+		private function _parseInfo(e:Event):void {
+			trace("dispatched");
 			var response:String = _urlLoader.data
 			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
 			newestVer = match[1];
@@ -74,7 +75,7 @@
 			}
 		}
 		
-	    public function makeRankFromRating(i:int):String {
+	    public static function makeRankFromRating(i:int):String {
 			for (var j:int = 0; j < rank_thresholds.length; j++) {
 				if (i >= rank_thresholds[j]) return rank_names[j];
 			}
@@ -344,6 +345,20 @@
 			return canvas;
 		}
 		
+		public static function ratingDif(you:int, opponent:int, multiply:Number, v:int):int {
+			var winner:int;
+			var loser:int;
+			if (v > 0) {
+				winner = you;
+				loser = opponent;
+			} else if (v < 0) {
+				winner = opponent;
+				loser = you;
+			} else {
+				return 0;
+			}
+			return int(multiply * Math.min(31, Math.max(1, 16 - 0.04 * (winner - loser))));
+		}		
 	}
 	
 }

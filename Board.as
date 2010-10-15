@@ -95,7 +95,6 @@ package  {
     private var _position:Kyokumen;
 	private var _last_pos:Kyokumen;
 
-    private var _player_names:Array;
 	private var _player_infos:Array = new Array;
     private var _my_turn:int;
     private var _in_game:Boolean;
@@ -347,17 +346,16 @@ package  {
       _timeoutCallback = callback;
     }
 
-    public function startGame(kyokumen_str:String, my_turn:int, player_names:Array, player_infos:Array, time_total:int, time_byoyomi:int):void {
+    public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
-      _player_names = player_names;
 	  _player_infos = player_infos;
       _my_turn = my_turn;
       reset();
       _position = new Kyokumen(kyokumen_str);
 	  _last_pos = new Kyokumen(kyokumen_str);
       setPosition(_position);
-      name_labels[0].text = player_names[_my_turn];
-      name_labels[1].text = player_names[1 - _my_turn];
+      name_labels[0].text = player_infos[_my_turn].name;
+      name_labels[1].text = player_infos[1 - _my_turn].name;
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
@@ -394,7 +392,8 @@ package  {
     }
 	
     public function closeGame():void{
-      _player_names = null;
+      _player_infos[0] = null;
+	  _player_infos[1] = null;
       timers[0].stop();
       timers[1].stop();
 	  while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
@@ -419,10 +418,9 @@ package  {
   		return _in_game;
   	}
 
-  	public function get playerNames():Array{
-  		return _player_names;
+	public function get playerInfos():Array{
+  		return _player_infos;
   	}
-
 
   	public function get my_turn():int{
   		return _my_turn;
@@ -499,7 +497,6 @@ package  {
 //        _position.loadFromString(kyokumen_str);
         setPosition(_position);
       }
-      _player_names = names;
 //      watch_game_end = false;
 
 	  var blackInfo:Object = {
@@ -684,8 +681,8 @@ package  {
 		  KIFDataText += "開始日時: " + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
 		  KIFDataText += "場所: 81-Dojo (" + version +")\n";
 		  KIFDataText += InfoFetcher.gameTypeKIF(game_name.split("+")[1].match(/^([0-9a-z]+)_/)[1]);
-		  KIFDataText += "先手:" + playerNames[0] + "\n";
-		  KIFDataText += "後手:" + playerNames[1] + "\n";
+		  KIFDataText += "先手:" + _player_infos[0].name + "\n";
+		  KIFDataText += "後手:" + _player_infos[1].name + "\n";
 		  KIFDataText += "手数----指手---------消費時間--\n";
 		  for (var i:int = 1; i < kifu_list.length ; i++){
 		  	KIFDataText += "   " + String(i) + " ";

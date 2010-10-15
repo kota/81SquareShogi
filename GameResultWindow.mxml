@@ -12,24 +12,67 @@
 		  [Bindable]
 		  private var _main:String;
 		  [Bindable]
-		  private var _black_rate:String;
+		  private var _you_before:String;
 		  [Bindable]
-		  private var _white_rate:String;
+		  private var _you_after:String;
+		  [Bindable]
+		  private var _opponent_before:String;
+		  [Bindable]
+		  private var _opponent_after:String;
+		  [Bindable]
+		  private var _you_rank:String;
+		  [Bindable]
+		  private var _opponent_rank:String;
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
-		  private var _timer:Timer = new Timer(4000, 1);
+		  private var _afterTimer:Timer = new Timer(500, 1);
+		  private var _closeTimer:Timer = new Timer(4000, 1);
 		  
-		  public function initWindow(v:int):void {
+		  public function initWindow(you:Object, opponent:Object, game_name:String, v:int):void {
+			  youAfter.visible = false;
+			  youRank.visible = false;
+			  opponentAfter.visible = false;
+			  opponentRank.visible = false;
+			  var match:Array = game_name.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+			  var multiply:Number = 1 + (Math.pow(parseInt(match[3])/300, 0.8) - 1) / (Math.pow(9, 0.8) -1);
+			  if (match[1] == "r") {
+				  var dif:int = InfoFetcher.ratingDif(you.rating, opponent.rating, multiply, v);
+			  } else {
+				  dif = 0;
+			  }
+			  
+			  _you_before = you.name + ": " + you.rating;
+			  _opponent_before = opponent.name + ": " + opponent.rating;
+			  _you_rank = "";
+			  _opponent_rank = "";
 			  if (v > 0) {
 				  _main = "YOU WIN!";
+				  _you_after = "-> " + (you.rating + dif) + " (+" + dif +")";
+				  _opponent_after = "-> " + (opponent.rating - dif) + " (-" + dif + ")";
+				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + dif)) _you_rank = "Rank Up!";
+				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + dif)) _opponent_rank = "Rank Down";
 			  } else if (v < 0) {
 				  _main = "YOU LOST";
+				  _you_after = "-> " + (you.rating - dif) + " (-" + dif +")";
+				  _opponent_after = "-> " + (opponent.rating + dif) + " (+" + dif + ")";
+				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + dif)) _you_rank = "Rank Down";
+				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + dif)) _opponent_rank = "Rank Up!";
 			  } else {
 				  _main = "DRAW";
+				  _you_after = "-> " + you.rating;
+				  _opponent_after = "-> " + opponent.rating;
 			  }
-			  _black_rate = "Black's rating: **** -> ****";
-			  _white_rate = "White's rating: **** -> ****";
-			  _timer.addEventListener(TimerEvent.TIMER_COMPLETE, _close);
-			  _timer.start();
+			  
+			  _closeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _close);
+			  _afterTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _after);
+			  _closeTimer.start();
+			  _afterTimer.start();
+		  }
+		  
+		  private function _after(e:TimerEvent):void {
+			  youAfter.visible = true;
+			  youRank.visible = true;
+			  opponentAfter.visible = true;
+			  opponentRank.visible = true;
 		  }
 		  
           private function _close(e:TimerEvent):void {
@@ -38,8 +81,19 @@
 
         ]]>
     </mx:Script>
-
+	
+	<mx:Fade id="showEffect" alphaFrom="0" alphaTo="1.0" duration="1000" />
 	<mx:Label text="{_main}" fontSize="19" fontWeight="bold" paddingTop="5" />
-	<mx:Label text="{_black_rate}"/>
-	<mx:Label text="{_white_rate}"/>
+	<mx:VBox horizontalAlign="left">
+		<mx:HBox>
+			<mx:Label text="{_you_before}"/>
+			<mx:Label id="youAfter" text="{_you_after}" fontWeight="bold" showEffect="showEffect" />
+			<mx:Label id="youRank" text="{_you_rank}" fontWeight="bold" color="#FF0000"  showEffect="showEffect"/>
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Label text="{_opponent_before}"/>
+			<mx:Label id="opponentAfter" text="{_opponent_after}" fontWeight="bold" showEffect="showEffect"/>
+			<mx:Label id="opponentRank" text="{_opponent_rank}" fontWeight="bold" color="#FF0000" showEffect="showEffect" />
+		</mx:HBox>
+	</mx:VBox>
 </mx:TitleWindow>
