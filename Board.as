@@ -463,7 +463,6 @@ package  {
     }
 
     private function _startMonitor(game_info:String, watch_game:Object):void{
-      var names:Array = new Array(2);
       var total_time:int;
       var byoyomi:int;
       var current_turn:int;
@@ -483,9 +482,7 @@ package  {
         }
       }
 
-	  names[0] = watch_game.blackName;
-	  names[1] = watch_game.whiteName;
-	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 	  total_time = parseInt(match[3]);
 	  byoyomi = parseInt(match[4]);
 	  
@@ -500,6 +497,7 @@ package  {
 //      watch_game_end = false;
 
 	  var blackInfo:Object = {
+		  'name':watch_game.blackName,
 		  'rating':watch_game.blackRating,
 		  'rank':watch_game.blackRank,
 		  'titleName':watch_game.blackTitle,
@@ -509,6 +507,7 @@ package  {
 		  'streak_best':watch_game.blackStreakBest
 	  }
 	  var whiteInfo:Object = {
+		  'name':watch_game.whiteName,
 		  'rating':watch_game.whiteRating,
 		  'rank':watch_game.whiteRank,
 		  'titleName':watch_game.whiteTitle,
@@ -520,8 +519,8 @@ package  {
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
 	  
-      name_labels[0].text = names[_my_turn];
-      name_labels[1].text = names[1-_my_turn];
+      name_labels[0].text = _player_infos[_my_turn].name;
+      name_labels[1].text = _player_infos[1-_my_turn].name;
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
@@ -680,7 +679,7 @@ package  {
 		  var date:Date = new Date;
 		  KIFDataText += "開始日時: " + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
 		  KIFDataText += "場所: 81-Dojo (" + version +")\n";
-		  KIFDataText += InfoFetcher.gameTypeKIF(game_name.split("+")[1].match(/^([0-9a-z]+)_/)[1]);
+		  KIFDataText += InfoFetcher.gameTypeKIF(game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]);
 		  KIFDataText += "先手:" + _player_infos[0].name + "\n";
 		  KIFDataText += "後手:" + _player_infos[1].name + "\n";
 		  KIFDataText += "手数----指手---------消費時間--\n";

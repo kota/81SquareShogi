@@ -46,7 +46,8 @@ package{
     private var _current_state:int;
     private var _my_turn:int;
     private var _player_names:Array;
-		private var _login_name:String;
+	private var _login_name:String;
+	private var _waiting_gamename:String;
 
     private var _buffer:String;
     private var _buffers:Object;
@@ -100,11 +101,19 @@ package{
     public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void {
       _current_state = STATE_GAME_WAITING;
 	  if (handicap.match(/^hc/)) {
-		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -");
+		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -";
+	  } else if (Math.round(Math.random()) == 1) {
+		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " +";
 	  } else {
-		  send("%%GAME " + handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " *");
+		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -";
 	  }
+	  send("%%GAME " + _waiting_gamename);
     }
+	
+	public function waitAgain():void {
+		_current_state = STATE_GAME_WAITING;
+		send("%%GAME " + _waiting_gamename);
+	}
 	
 	public function stopWaiting():void {
 		if (_current_state == STATE_GAME_WAITING){
@@ -113,15 +122,17 @@ package{
 		}
 	}
 
-		public function challenge(user:Object):void {
+	public function challenge(user:Object):void {
       if(user.game_name){
         _current_state = STATE_GAME_WAITING;
-		if (user.game_name.match(/^hc/)) {
+		if (user.turn == "+") {
+			send("%%GAME " + user.game_name + " -");
+		} else if (user.turn == "-") {
 			send("%%GAME " + user.game_name + " +");
 		} else {
 			send("%%GAME " + user.game_name + " *");
 		}
-      }
+	  }
     }
 
     public function agree():void {
