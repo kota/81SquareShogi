@@ -52,7 +52,6 @@
 		}
 		
 		private function _parseInfo(e:Event):void {
-			trace("dispatched");
 			var response:String = _urlLoader.data
 			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
 			newestVer = match[1];

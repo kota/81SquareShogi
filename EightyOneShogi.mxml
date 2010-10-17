@@ -30,7 +30,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/17b";
+	private const VERSION:String = "ver.2010/10/18";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -62,6 +62,9 @@
     [Embed(source = "/sound/chat_namecall.mp3")]
     private var Sound_chat3:Class;
     private var _sound_chat3:Sound = new Sound_chat3();
+    [Embed(source = "/sound/chat_lobby.mp3")]
+    private var Sound_chat4:Class;
+    private var _sound_chat4:Sound = new Sound_chat4();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     private var _sound_challenger:Sound = new Sound_challenger();
@@ -116,6 +119,7 @@
       _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
       _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
 	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
+	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
@@ -179,7 +183,6 @@
 	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1, "#008800");
 	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1, "#FF0000");
 	  _sendAutoChat("I've logged in. Hello.");
-//	  if (_chat_sound1_play) _sound_chat1.play();
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -188,8 +191,6 @@
     }
 
     private function _handleChat(e:ServerMessageEvent):void{
-//		var mNum:int = _messageAudible(e.message);
-//        _writeUserMessage(_format_message(e.message), mNum);
 		if (e.message.match(/\[auto\-chat\]/)) {
 			_writeUserMessage(e.message.substr(8), 1, "#888888");
 		} else if (e.message.match(_regExpCalled)) {
@@ -200,7 +201,9 @@
 			_writeUserMessage(e.message.substr(8), 1, "#000000");
 		}
 		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
-			if (e.message.match(_regExpCalled)) {
+			if (e.message.match(/\[auto\-chat\]/)) {
+				_sound_chat4.play();
+			} else if (e.message.match(_regExpCalled)) {
 				_sound_chat3.play();
 			} else {
 				_sound_chat1.play();
@@ -247,6 +250,15 @@
 			}
 		}
     }
+	
+	private function _handlePrivateChat(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex == 1) {
+			_writeUserMessage("PM: " + e.message.substr(15), 1, "#FF0000");
+		} else if (mainViewStack.selectedIndex == 2) {
+			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
+		}
+		if (_chat_sound1_play) _sound_chat3.play();
+	}
 
     private function _format_message(message:String):String{
       message = message.substr(8);
@@ -255,25 +267,6 @@
         message = match[1] + " " + match[3] + "\n";
       }
       return message;
-    }
-
-    private function _messageAudible(message:String):int{
-		var sender_name:String = message.match(/\#\#\[CHAT\]\[(.*)\]/)[1];
-        var match:Array = message.match(/\#\#\[CHAT\]\[(.*)\] ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
-        if(match != null){
-          var game_name:String = match[2];
-          if (_game_name && _game_name == game_name) {
-			  if (board.inGame) {
-				  if (_isPlayer(sender_name)) return 2;
-				  else return 0;
-			  } else return 2;
-          } else return 0;
-        } else return 1;
-          //No game id => public chat.
-    }
-
-    private function _isPlayer(user_name:String):Boolean{
-      return board.playerInfos != null && board.playerInfos[0].name == user_name || board.playerInfos[1].name == user_name
     }
 
     private function _handleMove(e:ServerMessageEvent):void {
@@ -1115,26 +1108,76 @@
 	}
 	
 	private function _openPlayerInfo(user:Object):void {
-	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, true));
+	  if (!user) return;
+	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, false));
       PopUpManager.centerPopUp(_playerInfoWindow);
       _playerInfoWindow.title = "Player Info";
 	  _playerInfoWindow.readUser(user);
+	  _playerInfoWindow.directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
+	  if (_isPlayer()) {
+		  _playerInfoWindow.directMessage.enabled = false;
+	  } else {
+		  _playerInfoWindow.directMessage.enabled = true;
+		  _playerInfoWindow.directMessage.setFocus();
+	  }
+	}
+	
+	private function _playerInfoFromText(textArea:TextArea):void {
+		var selectedText:String = textArea.text.substring(textArea.selectionBeginIndex, textArea.selectionEndIndex);
+		var match:Array;
+		if ((match = selectedText.match(/^\[(.+)\]$/))) _openPlayerInfo(_findPlayerFromList(match[1]));
 	}
 	
 	private function _gamePlayerInfo(e:MouseEvent):void {
 	  _openPlayerInfo(_findPlayerFromList(e.target.text));
 	}
 
-    private function _handleSendChat1(e:FlexEvent):void{
-      _client.chat(e.target.text);
+    private function _handleSendChat1(e:FlexEvent):void {
+	  var match:Array;
+	  if ((match = e.target.text.match(/^@(.+?)\s(.+)$/))) {
+		  _sendPrivateChat(match[1], match[2]);
+	  } else {
+		_client.chat(e.target.text);
+	  }
       e.target.text = "";
     }
 	
     private function _handleSendChat2(e:FlexEvent):void {
-//      if(_game_name) _client.chat(_game_name + " " + e.target.text);
-	  if (_game_name) _client.gameChat(_game_name, e.target.text);
+	  var match:Array;
+	  if ((match = e.target.text.match(/^@(.+?)\s(.+)$/))) {
+		  _sendPrivateChat(match[1], match[2]);
+	  } else {
+		if (_game_name) _client.gameChat(_game_name, e.target.text);
+	  }
       e.target.text = "";
     }
+	
+	private function _handleSendPrivateChat(e:FlexEvent):void {
+		_sendPrivateChat(e.target.parent.parent.nameLabel.text, e.target.text);
+		e.target.text = "";
+	}
+	
+	private function _sendPrivateChat(sendTo:String, message:String):void {
+		if (!_isPlayer()) {
+			_client.privateChat(sendTo, message);
+			if (mainViewStack.selectedIndex == 1) {
+				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
+				if (_chat_sound1_play) _sound_chat1.play();
+			} else {
+				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
+				if (_chat_sound2_play) _sound_chat2.play();
+			}
+			if  (_game_name && !board.post_game) {
+				if (sendTo == board.playerInfos[0].name) {
+					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
+					_client.gameChat(_game_name, "[auto-chat] Sent private message to Black.");
+				} else if (sendTo == board.playerInfos[1].name) {
+					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
+					_client.gameChat(_game_name, "[auto-chat] Sent private message to White.");
+				}
+			}
+		}
+	}
   
   private function _sendAutoChat(str:String):void {
     if (_game_name) {
@@ -1142,6 +1185,13 @@
     } else {
 	  _client.chat("[auto-chat] " + str);
 	}
+  }
+  
+  private function _isPlayer():Boolean {
+	  if (_game_name && !board.post_game) {
+		  if (board.playerInfos[0].name == _login_name || board.playerInfos[1].name == _login_name) return true;
+	  }
+	  return false;
   }
  
   private function _mute(v:Boolean):void {
@@ -1266,10 +1316,11 @@
 	    if (board.post_game && board.isWinner) board.study_list = new Array();
         kifuDataGrid.selectedIndex = board.kifu_list.length;
     }
-	board.replayMoves(kifuDataGrid.selectedIndex);
-	kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+
 	if (board.post_game && board.isWinner) {
 		if (board.study_list.length == 0) {
+			board.replayMoves(kifuDataGrid.selectedIndex);
+			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 			rewindAllButton.setStyle('color', 'undefined');
 			rewindAllButton.setStyle('textRollOverColor', 'undefined');
 			rewindOneButton.setStyle('color', 'undefined');
@@ -1277,13 +1328,16 @@
 		}
 		board.studyOrigin = kifuDataGrid.selectedIndex;
 		_sendStudy();
+	} else {
+		board.replayMoves(kifuDataGrid.selectedIndex);
+		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 	}
   }
 
     ]]>
   </mx:Script>
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
-  <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
+  <mx:ViewStack id="mainViewStack" creationPolicy="all" width="1000" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image id="titleBanner" source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
@@ -1316,7 +1370,7 @@
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
     </mx:VBox>
     
-    <mx:VBox paddingTop="10" horizontalAlign="center" fontSize="11">
+    <mx:VBox paddingTop="10" paddingLeft="10" fontSize="11">
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}">
       <mx:HBox>
         <mx:Button id="refreshButton" label="Refresh" click="_refresh();"/>
@@ -1367,7 +1421,7 @@
 				  <mx:DataGridColumn dataField="watchers" headerText="Mon."/>
 				 </mx:columns>
 				</mx:DataGrid>
-				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12"/> <!-- height="185" -->
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" /> <!-- height="185" -->
 			</mx:VDividedBox>
 			<mx:HBox>
 				<mx:Label text="Chat"/>
@@ -1377,7 +1431,7 @@
 		</mx:VBox>
 	  </mx:HBox>
       </mx:Panel>
-	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold">
+	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold" width="975" horizontalAlign="center">
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Los Angeles"/>
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-blue.swf?TimeZone=USA_LosAngeles" width="300" height="25"/>
@@ -1394,12 +1448,12 @@
 	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/> -->
     </mx:VBox>
     
-    <mx:HBox horizontalAlign="center" verticalAlign="middle">
+    <mx:HBox paddingLeft="5" paddingTop="5">
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
         <mx:Panel id="messagePanel" title="Message Panel" width="435" height="200" headerHeight="22">
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" />
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
         <mx:Panel id="controlPanel" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22">
           <mx:HBox>

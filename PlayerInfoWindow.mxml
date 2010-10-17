@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="430" height="210" fontSize="12" horizontalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
@@ -75,7 +76,7 @@
 			<mx:HBox verticalAlign="middle">
 				<mx:VBox>
 					<mx:HBox>
-						<mx:Label text="{_name}" fontSize="15" fontWeight="bold" />
+						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
 						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
 					<mx:Label paddingRight="10" text="Country:  {_country}"/>
@@ -94,6 +95,10 @@
 				<mx:Label text="(Current: {_streak})"/>
 			</mx:HBox>
 		</mx:VBox>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Label text="PM:"/>
+		<mx:TextInput id="directMessage" width="360"/>
 	</mx:HBox>
 	<mx:VBox width="100%" horizontalAlign="center" paddingTop="0">
 		<!-- <mx:Label text="{_status}" color="#FF0000" /> -->

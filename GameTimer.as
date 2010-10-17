@@ -195,7 +195,7 @@ package {
 					_time_left = _byoyomi;
 					if (soundType == 1) {
 						_sound_timer.play();
-					} else if (soundType == 2) {
+					} else if (soundType == 2 && _byoyomi > 10) {
 						_voiceByoyomi.play();
 					}
 				} else {
@@ -206,7 +206,7 @@ package {
 					//_timer.stop();
 				}
 			} else if (_byoyomi_flag) {
-				if (_time_left % 10 == 0) {
+				if (_time_left % 10 == 0 && _time_left <= 30) {
 					if (soundType == 2) {
 						_voices[9 + int((_byoyomi - _time_left)/10)].play();
 					}

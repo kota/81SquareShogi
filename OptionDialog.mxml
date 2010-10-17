@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="450">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="8">
 	<mx:Script>
         <![CDATA[
         	import mx.controls.*;

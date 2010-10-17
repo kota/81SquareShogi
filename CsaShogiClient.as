@@ -19,6 +19,7 @@ package{
     public static var MOVE:String = 'move';
     public static var CHAT:String = 'chat';
 	public static var GAMECHAT:String = 'gamechat';
+	public static var PRIVATECHAT:String = 'privatechat';
     public static var WHO:String = 'who';
     public static var MONITOR:String = 'monitor';
     public static var START_WATCH:String = 'start_watch';
@@ -218,7 +219,7 @@ package{
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
 			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\])/)) {
-				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|START\:.+$|REJECT\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
+				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|REJECT\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
 					trace("buffer doesn't deserve dispatching.");
 					return;
 				}
@@ -247,8 +248,10 @@ package{
         }
         if(line.match(/^##\[GAMECHAT\]/)){
           dispatchEvent(new ServerMessageEvent(GAMECHAT, line + "\n"));
+		} else if (line.match(/^##\[PRIVATECHAT\]/)) {
+		  dispatchEvent(new ServerMessageEvent(PRIVATECHAT, line + "\n"));
 		} else if(line.match(/^##\[CHAT\]/)){
-          dispatchEvent(new ServerMessageEvent(CHAT,line+"\n"));
+          dispatchEvent(new ServerMessageEvent(CHAT,line + "\n"));
         } else if(line.match(/^[-+][0-9]{4}[A-Z]{2},T/)){
           dispatchEvent(new ServerMessageEvent(MOVE,line));
         } else if(line.match(/^##\[WHO\]/) != null){
