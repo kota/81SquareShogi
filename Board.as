@@ -114,6 +114,7 @@ package  {
 	public var onListen:Boolean = false;
 	public var studyOrigin:int;
 	public var study_list:Array;
+	public var study_list_hold:Array;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -265,6 +266,7 @@ package  {
       kifuMove.move = "Start";
       kifu_list.push(kifuMove);
 	  study_list = new Array();
+	  study_list_hold = new Array();
     }
 
     public function setPosition(pos:Kyokumen):void{
@@ -404,6 +406,7 @@ package  {
 	  _player_flags[0].source = null;
 	  _player_flags[1].source = null;
 	  study_list = new Array();
+	  study_list_hold = new Array();
     }
 
 		public function timeout():void{
