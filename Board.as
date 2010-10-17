@@ -110,6 +110,7 @@ package  {
     public var piece_sound_play:Boolean = true;
 	public var post_game:Boolean = false;
 	public var isWinner:Boolean = false;
+	public var isLoser:Boolean = false;
 	public var onListen:Boolean = false;
 	public var studyOrigin:int;
 	public var study_list:Array;
@@ -433,6 +434,11 @@ package  {
     public function get position():Kyokumen{
       return _position;
     }
+	
+	public function get last_pos():Kyokumen {
+		return _last_pos;
+	}
+	
     public function setPieceType(i:int):void{
     	piece_type = i;
     	if (_position != null) setPosition(_position);
@@ -453,7 +459,7 @@ package  {
 		  time = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
 		  var kifuMove:Object = new Object();
 		  kifuMove.num = kifu_list.length;										//No. of the Move
-		  kifuMove.move = (_position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + time.substr(1) + ")";	//Western Notation
+		  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + time.substr(1) + ")";	//Western Notation
 		  kifuMove.moveStr = "%TORYO";												//CSA
 		  kifuMove.moveKIF = "投了";			//Japanese Notation
 		  kifu_list.push(kifuMove);
@@ -565,7 +571,7 @@ package  {
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && isWinner)){
+      if((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
@@ -594,7 +600,7 @@ package  {
             } else if(_position.canPromote(_from,_to)){
               Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
             } else {
-			  if (post_game && isWinner) {
+			  if (post_game && (isWinner || isLoser)) {
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
 			  } else if (!_client_timeout) {
@@ -621,7 +627,7 @@ package  {
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if ((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && isWinner)) {
+      if ((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
 		if (e.currentTarget.parent != handBoxes[_my_turn == Kyokumen.SENTE ? _position.turn : (1 - _position.turn)]) return;
         if(_from == null){
 		  if (_last_from_square != null) {

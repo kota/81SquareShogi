@@ -28,7 +28,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/16b";
+	private const VERSION:String = "ver.2010/10/17";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -366,6 +366,7 @@
       }
 	  board.post_game = false;
 	  board.isWinner = false;
+	  board.isLoser = false;
 	  for (var j:int = 0; j < 2 ; j++) {
 		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
@@ -445,18 +446,21 @@
 	  board.onListen = false;
       if (e.message.indexOf("LOSE") >= 0) {
 		board.isWinner = false;
+		board.isLoser = true;
 		radioKifuListen.enabled = true;
 		_openGameResultWindow(-1);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088");
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isWinner = true;
+		board.isLoser = false;
 		board.studyOrigin = kifuMove.num;
 		_openGameResultWindow(1);
         _writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_win.play();
       } else if (e.message.indexOf("DRAW") >= 0) {
 		board.isWinner = false;
+		board.isLoser = false;
 		radioKifuListen.enabled = true;
 		_openGameResultWindow(0);
         _writeUserMessage("### Draw ###\n", 2, "#DD0088");
@@ -882,6 +886,9 @@
 		  board.study_list.push(str);
 		  _sendStudy();
 		  if (board.study_list.length == 1) _sendAutoChat("Launched study mode at #" + board.studyOrigin);
+	  } else if (board.post_game && board.isLoser) {
+		  board.study_list.push(str);
+		  _sendStudy();
 	  } else {
 		  _client.move(str);
 	  }
@@ -984,9 +991,9 @@
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
-        _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
+        _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
 		kifuMove.num = board.kifu_list.length;
-        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+        kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
 	  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
@@ -1001,7 +1008,7 @@
 		board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
 		  end_game = true;
-		  _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
+		  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 		  end_game = true;
           _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
@@ -1072,6 +1079,7 @@
 		_monitoring = true;
 		board.post_game = false;
 		board.isWinner = false;
+		board.isLoser = false;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
 		
@@ -1186,7 +1194,6 @@
 			board.replayMoves(kifuDataGrid.selectedIndex);
 		  }
 	  }
-	  trace(board.onListen);
   }
   
   private function kifuListSelected():void {
