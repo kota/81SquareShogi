@@ -679,22 +679,6 @@ package  {
 		  }
       setPosition(_position);
 	  }
-	
-    public function copyKIFtoClipboard(game_name:String, version:String):void{
-		  var KIFDataText:String = "";
-		  var date:Date = new Date;
-		  KIFDataText += "開始日時: " + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
-		  KIFDataText += "場所: 81-Dojo (" + version +")\n";
-		  KIFDataText += InfoFetcher.gameTypeKIF(game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]);
-		  KIFDataText += "先手:" + _player_infos[0].name + "\n";
-		  KIFDataText += "後手:" + _player_infos[1].name + "\n";
-		  KIFDataText += "手数----指手---------消費時間--\n";
-		  for (var i:int = 1; i < kifu_list.length ; i++){
-		  	KIFDataText += "   " + String(i) + " ";
-		  	KIFDataText += kifu_list[i].moveKIF + "\n";
-		  }
-		  System.setClipboard(KIFDataText);
-    }
 
   }
 }
