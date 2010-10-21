@@ -30,7 +30,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/18";
+	private const VERSION:String = "ver.2010/10/19";
 
     private var _client:CsaShogiClient;
     [Bindable]
@@ -1392,7 +1392,7 @@
       </mx:Form>
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
       <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
-      <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81square-shogi.homeip.net:2195'), 'quote')" />
+      <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:2195'), 'quote')" />
       <mx:Label paddingTop="15" text="Chief Programmer: Kota" fontSize="13" />
 	  <mx:HBox>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_localLogin();"/>
