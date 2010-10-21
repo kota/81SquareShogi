@@ -601,7 +601,7 @@
 				break;
 			case 1:
 				var nowDate:Date = new Date(); 
-				_lastChatTime = "Last chat receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
+				_lastChatTime = "Last message receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
 				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
 				userMessage1.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
 				userMessage1.callLater(_scrollDown1);
@@ -1168,21 +1168,31 @@
 	
 	private function _sendPrivateChat(sendTo:String, message:String):void {
 		if (!_isPlayer()) {
-			_client.privateChat(sendTo, message);
-			if (mainViewStack.selectedIndex == 1) {
-				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
-				if (_chat_sound1_play) _sound_chat1.play();
-			} else {
-				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
-				if (_chat_sound2_play) _sound_chat2.play();
-			}
-			if  (_game_name && !board.post_game) {
-				if (sendTo == board.playerInfos[0].name) {
+			var user:Object = _findPlayerFromList(sendTo);
+			if (!user) {
+				Alert.show("User not found online");
+				return;
+			} else if (user.status == "game") {
+				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
+					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
-					_client.gameChat(_game_name, "[auto-chat] Sent private message to Black.");
-				} else if (sendTo == board.playerInfos[1].name) {
+					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
+				} else if (_game_name && _monitoring && sendTo == board.playerInfos[1].name) {
+					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
-					_client.gameChat(_game_name, "[auto-chat] Sent private message to White.");
+					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to White.");
+				} else {
+					Alert.show("User is now playing.");
+					return;
+				}
+			} else {
+				_client.privateChat(sendTo, message);
+				if (mainViewStack.selectedIndex == 1) {
+					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
+					if (_chat_sound1_play) _sound_chat1.play();
+				} else {
+					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
+					if (_chat_sound2_play) _sound_chat2.play();
 				}
 			}
 		}
