@@ -53,7 +53,13 @@ package{
 				return;
 			} else {
 				bufferData = e.result.kifus.kifu as ArrayCollection;
+				if (!bufferData) {
+					var kifus:Array = new Array();
+					kifus.push(e.result.kifus.kifu);
+					bufferData = new ArrayCollection(kifus);
+				}
 				dispatchEvent(new Event(KIFU_SEARCH));
+				trace("dispatch api response");
 			}
 		}
 		
@@ -71,11 +77,31 @@ package{
 			} else {
 				kifuContents = e.result.kifu.contents;
 				dispatchEvent(new Event(KIFU_DETAIL));
+				trace("dispatch api response");
 			}
 		}
 		
+		public function playerSearch(name:String):void {
+			_playerSearchService.url = "http://" + _host + ":" + _port + "/api/players/search/" + name;
+			trace("send: " + _playerSearchService.url);
+			_playerSearchService.send();
+		}
+		
 		private function _handlePlayerSearch(e:ResultEvent):void {
-			trace(e.result);
+			bufferData = new ArrayCollection();
+			if (!e.result.players) {
+				Alert.show("Data not found.");
+				return;
+			} else {
+				bufferData = e.result.players.player as ArrayCollection;
+				if (!bufferData) {
+					var players:Array = new Array();
+					players.push(e.result.players.player);
+					bufferData = new ArrayCollection(players);
+				}
+				dispatchEvent(new Event(PLAYER_SEARCH));
+				trace("dispatch api response");
+			}
 		}
 
 		private function _handleRanking(e:ResultEvent):void {

@@ -140,6 +140,7 @@
       _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
+	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -1376,6 +1377,31 @@
 		kifuDataGrid.selectedIndex = 0;
 		board.replayMoves(0);
 	}
+	
+	private function _sendPlayerSearch():void {
+		if (playerSearchNameText.text) {
+			_api.playerSearch(playerSearchNameText.text.toLowerCase());
+		}
+	}
+	
+	private function _handlePlayerSearch(e:Event):void {
+		_player_search_list = new Array();
+		for each (var player:Object in e.target.bufferData) {
+			player.country = _infoFetcher.country_names[player.country_id];
+			player.total = parseInt(player.wins) + parseInt(player.losses);
+			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
+			player.flag = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(player.country_id + 1000).substring(1) + ".gif";
+			player.rank = InfoFetcher.makeRankFromRating(player.rate);
+			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
+				  if (player.login == _infoFetcher.titleUser[i]) {
+					  player.title = _infoFetcher.titleName[i];
+					  break;
+				  }
+			}
+			_player_search_list.push(player);
+		}
+		playerSearchGrid.dataProvider = _player_search_list;
+	}
 
   private function kifuListSelected():void {
 	if (board.post_game && board.isWinner) {
@@ -1677,22 +1703,22 @@
 				<mx:HBox>
 					<mx:Label text="Name"/>
 					<mx:TextInput id="playerSearchNameText"/>
-					<mx:Button id="searchPlayerButton" label="Search"/>
+					<mx:Button id="searchPlayerButton" label="Search" click="_sendPlayerSearch();" />
 					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
 				</mx:HBox>
-				<mx:DataGrid id="playerSearchGrid" width="610" height="400">
+				<mx:DataGrid id="playerSearchGrid" width="630" height="440">
 					<mx:columns>
 					<mx:DataGridColumn dataField="title" headerText="Title" width="50" />
 					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" />
-					<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-					<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+					<mx:DataGridColumn dataField="login" headerText="Name" width="110" />
+					<mx:DataGridColumn dataField="flag" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" />
-					<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-					<mx:DataGridColumn dataField="total" headerText="Total" width="45" />
-					<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
-					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" />
+					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" />
+					<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" />
+					<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" />
+					<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" />
+					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" textAlign="right" />
+					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" textAlign="right" />
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
