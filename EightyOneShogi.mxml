@@ -798,6 +798,7 @@
       board.closeGame();
 	  if (board.viewing) {
 		  mainViewStack.selectedIndex = 3;
+		  chatMessage2.enabled = true;
 		  board.viewing = false;
 	  } else {
 		  mainViewStack.selectedIndex = 1;
@@ -1369,6 +1370,7 @@
 		radioKifuListen.enabled = false;
 		kifuCopyButton.enabled = true;
 		kifuSaveButton.enabled = true;
+		chatMessage2.enabled = false;
 		mainViewStack.selectedIndex = 2;
 		kifuDataGrid.dataProvider = board.kifu_list;
 		kifuDataGrid.selectedIndex = 0;
