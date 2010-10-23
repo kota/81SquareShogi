@@ -23,6 +23,7 @@
     import mx.core.IFlexDisplayObject;
 	import com.web2memo.text.Jcode;
     import CsaShogiClient;
+	import ApiClient;
 	import InfoFetcher;
     import Board;
 	import GameTimer;
@@ -30,14 +31,22 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/19";
+	private const VERSION:String = "ver.2010/10/24";
 
     private var _client:CsaShogiClient;
+	private var _api:ApiClient;
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array;
 	private var _waiter_list:Array;
 	private var _game_list:Array;
+	private var _kifu_search_list:Array;
+	private var _player_search_list:Array;
+	private var _ranking_rate_list:Array;
+	private var _ranking_wins_list:Array;
+	private var _ranking_total_list:Array;
+	private var _ranking_percentage:Array;
+	private var _ranking_streak:Array;
     private var _login_name:String;
 	private var _player_infos:Array = new Array;
 	private var _watch_game:Object;
@@ -93,7 +102,9 @@
     private function initApp():void
     {
       trace("application initialized..");
+	  Security.loadPolicyFile("./flashpolicy.xml");
       _client = new CsaShogiClient();
+	  _api = new ApiClient();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat1);
@@ -127,6 +138,8 @@
       _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
       _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
+	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
+	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -148,6 +161,7 @@
 	
 	private function _localLogin():void {
 		_client.setHostToLocal();
+		_api.setHostToLocal();
 		loginButton.setStyle('color', '0xFF0000');
 		loginButton.setStyle('textRollOverColor', '0xFF0000');
 	}
@@ -774,6 +788,7 @@
 		  if (_monitoring) {
 			  _client.monitorOff(_game_name);
 			  _monitoring = false;
+		  } else if (board.viewing) {
 		  } else {
 			  _client.closeGame();
 			  _sendAutoChat("I have left this room.");
@@ -781,7 +796,12 @@
           _game_name = null;
 	  }
       board.closeGame();
-      mainViewStack.selectedIndex = 1;
+	  if (board.viewing) {
+		  mainViewStack.selectedIndex = 3;
+		  board.viewing = false;
+	  } else {
+		  mainViewStack.selectedIndex = 1;
+	  }
       challengeButton.enabled = false;
 	  logoutButton.enabled = true;
 	  rewindAllButton.setStyle('color', 'undefined');
@@ -1236,11 +1256,13 @@
   private function _checkLobby():void {
 	  mainViewStack.selectedIndex = 1;
 	  backToGameButton.visible = true;
+	  searchViewButton.enabled = false;
   }
 
   private function _backToGame():void {
 	  mainViewStack.selectedIndex = 2;
 	  backToGameButton.visible = false;
+	  searchViewButton.enabled = true;
   }
   
   private function _killGhost(str:String):void {
@@ -1270,15 +1292,14 @@
   }
   
   private function _saveKIF():void {
-	  var date:Date = new Date;
+	  var date_time:String = _game_name.split("+")[4];
 	  var fileReference:FileReference = new FileReference();
-	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date.fullYear + "-" + (date.month+1) + "-" + date.date + "-" + date.hours + "-" + date.minutes + ".kif");
+	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
   }
  
 	private function _formatKIF():String{
 		  var KIFDataText:String = "";
-		  var date:Date = new Date;
-		  KIFDataText += "開始日時：" + date.fullYear + "/" + (date.month+1) + "/" + date.date + "\n";
+		  KIFDataText += "開始日時：" + _game_name.split("+")[4].substr(0,4) + "/" + _game_name.split("+")[4].substr(4,2) + "/" + _game_name.split("+")[4].substr(6,2) + "\n";
 		  KIFDataText += "場所：81-Dojo (" + VERSION +")\n";
 		  KIFDataText += InfoFetcher.gameTypeKIF(_game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]);
 		  KIFDataText += "先手：" + board.playerInfos[0].name + "\n";
@@ -1289,6 +1310,69 @@
 			KIFDataText += board.kifu_list[i].moveKIF + "\n";
 		  }
 		  return KIFDataText;
+	}
+	
+	private function _sendKifuSearch():void {
+		if (kifuSearchPlayerText.text && kifuSearchFromChooser.selectedDate && kifuSearchToChooser.selectedDate) {
+			_api.kifuSearch(kifuSearchPlayerText.text, kifuSearchFromChooser.selectedDate, kifuSearchToChooser.selectedDate);
+		}
+	}
+	
+	private function _handleKifuSearch(e:Event):void {
+		_kifu_search_list = new Array();
+		var hc:String;
+		var match:Array;
+		for each (var kifu:Object in e.target.bufferData) {
+			match = kifu.game_id.split("+")[1].match(/^([0-9a-z]+?)_.+\-(\d+)\-(\d+)$/);
+			if (match[1] == "r") {
+				hc = "R";
+			} else if (match[1] == "nr") {
+				hc = "NR";
+			} else {
+				hc = "HC";
+			}
+			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
+			kifu.black = kifu.game_id.split("+")[2];
+			kifu.white = kifu.game_id.split("+")[3];
+			kifu.date = kifu.game_id.split("+")[4].substr(0, 4) + "-" + kifu.game_id.split("+")[4].substr(4, 2) + "-" + kifu.game_id.split("+")[4].substr(6, 2);
+			if (kifu.result.split(":")[2].match(/win$/)) {
+				kifu.winner = "▲";
+			} else if (kifu.result.split(":")[3].match(/win$/)) {
+				kifu.winner = "△";
+			} else {
+				kifu.winner = "DRAW";
+			}
+			_kifu_search_list.push(kifu);
+		}
+		kifuSearchGrid.dataProvider = _kifu_search_list;
+	}
+	
+	private function _kifuSearchSelected():void {
+		if (kifuSearchGrid.selectedItem) {
+			_api.kifuDetail(kifuSearchGrid.selectedItem.id);
+		}
+	}
+	
+	private function _handleKifuDetail(e:Event):void {
+		board.viewing = true;
+		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
+		board.startView(e.target.kifuContents);
+		resignButton.enabled = false;
+		closeButton.enabled = true;
+		kifuDataGrid.selectable = true;
+		rewindAllButton.enabled = true;
+		rewindOneButton.enabled = true;
+		forwardAllButton.enabled = true;
+		forwardOneButton.enabled = true;
+		radioKifuReplay.enabled = true;
+		radioKifuReplay.selected = true;
+		radioKifuListen.enabled = false;
+		kifuCopyButton.enabled = true;
+		kifuSaveButton.enabled = true;
+		mainViewStack.selectedIndex = 2;
+		kifuDataGrid.dataProvider = board.kifu_list;
+		kifuDataGrid.selectedIndex = 0;
+		board.replayMoves(0);
 	}
 
   private function kifuListSelected():void {
@@ -1426,6 +1510,7 @@
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
+		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;"/>
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
 		<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
       </mx:HBox>
@@ -1555,6 +1640,152 @@
         </mx:HBox>
         </mx:Panel>
     </mx:HBox>
+	
+	<mx:VBox paddingLeft="10" paddingTop="10">
+    <mx:Panel id="searchPanel" title="Search Panel" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+	  <mx:HBox>
+		<mx:Accordion id="searchAccordion" width="680" height="560">
+			<mx:HBox label="Kifu Search" paddingTop="8" paddingLeft="8" width="700" height="530">
+				<mx:VBox>
+					<mx:HBox>
+						<mx:Button id="searchKifuButton" label="Search" click="_sendKifuSearch();" />
+						<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
+					</mx:HBox>
+					<mx:HBox>
+						<mx:Label text="Player Name"/>
+						<mx:TextInput id="kifuSearchPlayerText" width="90" />
+					</mx:HBox>
+					<mx:Label text="From"/>
+					<mx:DateChooser id="kifuSearchFromChooser" />
+					<mx:Label text="To"/>
+					<mx:DateChooser id="kifuSearchToChooser" />
+				</mx:VBox>
+				<mx:DataGrid id="kifuSearchGrid" width="470" height="470" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
+					<mx:columns>
+					<mx:DataGridColumn dataField="black" headerText="Black" width="110" />
+					<mx:DataGridColumn dataField="white" headerText="White" width="110" />
+					<mx:DataGridColumn dataField="winner" headerText="Winner" width="50" />
+					<!-- <mx:DataGridColumn dataField="moves" headerText="Moves" width="45" /> -->
+					<mx:DataGridColumn dataField="rule" headerText="Rules" width="110" />
+					<mx:DataGridColumn dataField="date" headerText="Date"/>
+					</mx:columns>
+				</mx:DataGrid>
+			</mx:HBox>
+			<mx:VBox label="Player Search" paddingTop="10" paddingLeft="10" width="700" height="530">
+				<mx:HBox>
+					<mx:Label text="Name"/>
+					<mx:TextInput id="playerSearchNameText"/>
+					<mx:Button id="searchPlayerButton" label="Search"/>
+					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
+				</mx:HBox>
+				<mx:DataGrid id="playerSearchGrid" width="610" height="400">
+					<mx:columns>
+					<mx:DataGridColumn dataField="title" headerText="Title" width="50" />
+					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" />
+					<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+					<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" />
+					<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+					<mx:DataGridColumn dataField="total" headerText="Total" width="45" />
+					<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
+					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" />
+					</mx:columns>
+				</mx:DataGrid>
+			</mx:VBox>
+			<mx:HBox label="View Rankings" paddingTop="10" paddingLeft="10" width="700" height="530">
+				<mx:VBox>
+					<mx:Button id="searchRankingButton" label="Search"/>
+					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
+				</mx:VBox>
+				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480">
+					<mx:VBox label="Rating">
+						<mx:DataGrid id="rateRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
+							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="rating" headerText="Rating" width="45" />
+							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" />
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Wins">
+						<mx:DataGrid id="winRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
+							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
+							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Winning Percentage">
+						<mx:DataGrid id="percentageRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
+							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
+							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Best Streak">
+						<mx:DataGrid id="streakRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
+							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" width="45" />
+							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Total Games">
+						<mx:DataGrid id="totalRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
+							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
+							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="total" headerText="Total" width="45" />
+							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
+							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
+							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+				</mx:TabNavigator>
+			</mx:HBox>
+		</mx:Accordion>
+	  </mx:HBox>
+    </mx:Panel>
+    </mx:VBox>
   </mx:ViewStack>
 
 </mx:Application>

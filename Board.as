@@ -112,6 +112,7 @@ package  {
 	public var isWinner:Boolean = false;
 	public var isLoser:Boolean = false;
 	public var onListen:Boolean = false;
+	public var viewing:Boolean = false;
 	public var studyOrigin:int;
 	public var study_list:Array;
 	public var study_list_hold:Array;
@@ -309,12 +310,16 @@ package  {
 		if (post_game) {
 			var mv:Movement = _position.generateMovementFromString(move);
 		} else {
-			mv = _last_pos.generateMovementFromString(move);
-			var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
-			var time:int = mv.time;
-			timers[running_timer].accumulateTime(time);
-			timers[running_timer].suspend();
-			timers[1 - running_timer].resume();
+			if (viewing) {
+				mv = _position.generateMovementFromString(move);
+			} else {
+				mv = _last_pos.generateMovementFromString(move);
+				var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
+				var time:int = mv.time;
+				timers[running_timer].accumulateTime(time);
+				timers[running_timer].suspend();
+				timers[1 - running_timer].resume();				
+			}
 			var kifuMove:Object = new Object();
 			kifuMove.num = kifu_list.length;										//No. of the Move
 			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
@@ -323,7 +328,7 @@ package  {
 			kifu_list.push(kifuMove);
 		}
 		
-		if (!post_game && !onListen) {
+		if (!post_game && !onListen && !viewing) {
 			_last_pos.move(mv);
 		} else {
 			_position.move(mv);
@@ -556,6 +561,83 @@ package  {
         }
       }
 	  studyOrigin = 0;
+    }
+	
+    public function startView(kifu_contents:String):void{
+ //     var total_time:int;
+//      var byoyomi:int;
+//      var current_turn:int;
+//      var last_move:Point;
+      var moves:Array = new Array();
+	  var kyokumen_str:String = "";
+	  kifu_list = new Array();
+      for each(var line:String in kifu_contents.split("\n")) {
+		  if (line.match(/^To_Move/)) {
+			  kyokumen_str += "P0" + line.substring(8) + "\n";
+		  } else if (line.match(/^P[0-9\+\-]/)) {
+			  kyokumen_str += line + "\n";
+		  } else if (line.match(/^N\+.+$/)) {
+			  _player_infos[0] = new Object();
+			  _player_infos[0].name = line.substring(2);
+		  } else if (line.match(/^N\-.+$/)) {
+			  _player_infos[1] = new Object();
+			  _player_infos[1].name = line.substring(2);
+		  } else if(line.match(/([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
+            var move_and_time:Object = new Object();
+            move_and_time.move = line;
+            moves.push(move_and_time);
+          } else if (line.match(/(T.*)$/)){
+            Object(moves[moves.length - 1]).time = line;
+          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) {
+			  break;
+		  }
+      }
+
+//	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+//	  total_time = parseInt(match[3]);
+//	  byoyomi = parseInt(match[4]);
+	  
+      if(kyokumen_str != ""){
+        reset();
+        _position = new Kyokumen(kyokumen_str);
+		_last_pos = new Kyokumen(kyokumen_str);
+//        _position.loadFromString(kyokumen_str);
+        setPosition(_position);
+      }
+
+	  _my_turn = Kyokumen.SENTE;
+      name_labels[0].text = _player_infos[_my_turn].name;
+      name_labels[1].text = _player_infos[1-_my_turn].name;
+      _info_labels[0].text = "";
+      _info_labels[1].text = "";
+//	  var avatar:Image = new Image();
+//	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+//	  _avatar_images[0].addChild(avatar);
+//	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
+//	  avatar = new Image();
+//	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+//	  _avatar_images[1].addChild(avatar);
+//	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
+//	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
+//	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
+      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
+      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+//      timers[0].reset(total_time,byoyomi);
+//      timers[1].reset(total_time,byoyomi);
+
+      if (moves.length > 0) {
+        for each(var move:Object in moves) {
+		  if (move.move != "%TORYO") {
+			  makeMove(move.move + "," + move.time, false);
+		  } else {
+			  var kifuMove:Object = new Object();
+			  kifuMove.num = kifu_list.length
+			  kifuMove.move = (_position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
+			  kifuMove.moveKIF = "投了";
+			  kifu_list.push(kifuMove);
+		  }
+        }
+      }
     }
 
     private function _parsePosition(game_info:String):String{
