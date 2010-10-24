@@ -1309,7 +1309,7 @@
   private function _saveKIF():void {
 	  var date_time:String = _game_name.split("+")[4];
 	  var fileReference:FileReference = new FileReference();
-	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
+	  //fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
   }
  
 	private function _formatKIF():String{
@@ -1611,7 +1611,7 @@
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
-		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;" enabled="false" />
+		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;" />
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
 		<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
       </mx:HBox>
