@@ -11,14 +11,11 @@ package{
 		public static var KIFU_SEARCH:String = 'kifu_search';
 		public static var KIFU_DETAIL:String = 'kifu_detail';
 		public static var PLAYER_SEARCH:String = 'player_search';
-		public static var RANKING_RATE:String = 'ranking_rate';
-		public static var RANKING_WINS:String = 'ranking_wins';
-		public static var RANKING_TOTAL:String = 'ranking_total';
-		public static var RANKING_STREAK:String = 'ranking_streak';
-		public static var RANKING_PERCENTAGE:String = 'ranking_percentage';
+		public static var RANKING_SEARCH:String = 'ranking_search';
 		
 		public var bufferData:ArrayCollection;
 		public var kifuContents:String;
+		public var bufferXML:XML;
     
 		private var _kifuSearchService:HTTPService = new HTTPService();
 		private var _kifuDetailService:HTTPService = new HTTPService();
@@ -103,9 +100,41 @@ package{
 				trace("dispatch api response");
 			}
 		}
+		
+		public function rankingSearch(v:int):void {
+			var type:String;
+			switch (v) {
+				case 0:
+					type = "rate"; break;
+				case 1:
+					type = "wins"; break;
+				case 2:
+					type = "percentage"; break;
+				case 3:
+					type = "streak"; break;
+				case 4:
+					type = "total"; break;
+			}
+			_rankingService.url = "http://" + _host + ":" + _port + "/api/players/ranking/" + type;
+			_rankingService.resultFormat = "e4x";
+			trace("send: " + _rankingService.url);
+			_rankingService.send();
+		}
 
 		private function _handleRanking(e:ResultEvent):void {
-			trace(e.result);
+			bufferData = new ArrayCollection();
+			if (!e.result.ranking) {
+				Alert.show("Data not found.");
+				return;
+			} else {
+				//bufferData = e.result.ranking.player as ArrayCollection;
+				bufferXML = new XML(e.result);
+//				bufferData = bufferXML.player as ArrayCollection;
+//				trace(bufferXML.@item);
+//				trace(bufferData);
+				dispatchEvent(new Event(RANKING_SEARCH));
+				trace("dispatch api response");
+			}
 		}
 	
 	public function setHostToLocal():void {

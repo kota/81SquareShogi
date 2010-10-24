@@ -45,8 +45,8 @@
 	private var _ranking_rate_list:Array;
 	private var _ranking_wins_list:Array;
 	private var _ranking_total_list:Array;
-	private var _ranking_percentage:Array;
-	private var _ranking_streak:Array;
+	private var _ranking_percentage_list:Array;
+	private var _ranking_streak_list:Array;
     private var _login_name:String;
 	private var _player_infos:Array = new Array;
 	private var _watch_game:Object;
@@ -141,6 +141,7 @@
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
+	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -1390,7 +1391,7 @@
 			player.country = _infoFetcher.country_names[player.country_id];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
-			player.flag = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(player.country_id + 1000).substring(1) + ".gif";
+			player.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(player.country_id + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
@@ -1401,6 +1402,66 @@
 			_player_search_list.push(player);
 		}
 		playerSearchGrid.dataProvider = _player_search_list;
+	}
+	
+	private function _sendRankingSearch():void {
+		_api.rankingSearch(rankingTabNavigator.selectedIndex);
+	}
+	
+	private function _handleRankingSearch(e:Event):void {
+		switch (String(e.target.bufferXML.@item)) {
+			case "wins":
+				trace("hit");
+				_ranking_wins_list = new Array(); break;
+			case "rate":
+				_ranking_rate_list = new Array(); break;
+			case "total":
+				_ranking_total_list = new Array(); break;
+			case "streak":
+				_ranking_streak_list = new Array(); break;
+			case "percentage":
+				_ranking_percentage_list = new Array(); break;
+		}
+		var num:int = 0;
+		for each (var playerXML:XML in e.target.bufferXML.player) {
+			num += 1;
+			var player:Object = {
+				'number':num,
+				'login':String(playerXML.login),
+				'country':_infoFetcher.country_names[parseInt(playerXML.country_id)],
+				'flagURL':"http://www.81squareuniverse.com/dojo/images/flags_s/" + String(parseInt(playerXML.country_id) + 1000).substring(1) + ".gif",
+				'wins':parseInt(playerXML.wins),
+				'losses':parseInt(playerXML.losses),
+				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),
+				'percentage':(100 * parseInt(playerXML.wins) / Math.max(1, parseInt(playerXML.wins) + parseInt(playerXML.losses))).toFixed(1),
+				'streak_best':parseInt(playerXML.streak_best),
+				'rate':parseInt(playerXML.rate),
+				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
+			}
+			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
+				  if (player.login == _infoFetcher.titleUser[i]) {
+					  player.title = _infoFetcher.titleName[i];
+					  break;
+				  }
+			}
+			switch (String(e.target.bufferXML.@item)) {
+				case "wins":
+					_ranking_wins_list.push(player); break;
+				case "rate":
+					_ranking_rate_list.push(player); break;
+				case "total":
+					_ranking_total_list.push(player); break;
+				case "streak":
+					_ranking_streak_list.push(player); break;
+				case "percentage":
+					_ranking_percentage_list.push(player); break;
+			}
+		}
+		winRankingGrid.dataProvider = _ranking_wins_list;
+		totalRankingGrid.dataProvider = _ranking_total_list;
+		streakRankingGrid.dataProvider = _ranking_streak_list;
+		percentageRankingGrid.dataProvider = _ranking_percentage_list;
+		rateRankingGrid.dataProvider = _ranking_rate_list;
 	}
 
   private function kifuListSelected():void {
@@ -1688,7 +1749,7 @@
 					<mx:Label text="To"/>
 					<mx:DateChooser id="kifuSearchToChooser" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="470" height="470" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
+				<mx:DataGrid id="kifuSearchGrid" width="470" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
 					<mx:columns>
 					<mx:DataGridColumn dataField="black" headerText="Black" width="110" />
 					<mx:DataGridColumn dataField="white" headerText="White" width="110" />
@@ -1706,12 +1767,12 @@
 					<mx:Button id="searchPlayerButton" label="Search" click="_sendPlayerSearch();" />
 					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
 				</mx:HBox>
-				<mx:DataGrid id="playerSearchGrid" width="630" height="440">
+				<mx:DataGrid id="playerSearchGrid" width="630" height="440" rowHeight="21">
 					<mx:columns>
 					<mx:DataGridColumn dataField="title" headerText="Title" width="50" />
 					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" />
 					<mx:DataGridColumn dataField="login" headerText="Name" width="110" />
-					<mx:DataGridColumn dataField="flag" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
+					<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" />
 					<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" />
@@ -1724,87 +1785,87 @@
 			</mx:VBox>
 			<mx:HBox label="View Rankings" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox>
-					<mx:Button id="searchRankingButton" label="Search"/>
+					<mx:Button id="searchRankingButton" label="Search" click="_sendRankingSearch();" />
 					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480">
 					<mx:VBox label="Rating">
-						<mx:DataGrid id="rateRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" >
 							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
-							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="rating" headerText="Rating" width="45" />
-							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" />
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" textAlign="right" paddingRight="5" />
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Wins">
-						<mx:DataGrid id="winRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+						<mx:DataGrid id="winRankingGrid" width="550" height="440" rowHeight="21">
 							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
-							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
-							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" paddingRight="5" textAlign="right" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Winning Percentage">
-						<mx:DataGrid id="percentageRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21">
 							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
-							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" />
-							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Best Streak">
-						<mx:DataGrid id="streakRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21">
 							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
-							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" width="45" />
-							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Total Games">
-						<mx:DataGrid id="totalRankingGrid" paddingTop="10" paddingLeft="10" width="530" height="430">
+						<mx:DataGrid id="totalRankingGrid" width="550" height="440" rowHeight="21">
 							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" />
-							<mx:DataGridColumn dataField="name" headerText="Name" width="110" />
-							<mx:DataGridColumn dataField="flag" headerText="" width="27" />
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="total" headerText="Total" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="total" headerText="Total" width="45" />
-							<mx:DataGridColumn dataField="win" headerText="Win" width="45" />
-							<mx:DataGridColumn dataField="loss" headerText="Loss" width="45" />
-							<mx:DataGridColumn dataField="rating" headerText="Rating"/>
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5" />
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
