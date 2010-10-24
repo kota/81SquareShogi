@@ -5,6 +5,7 @@ package{
 	import mx.rpc.http.HTTPService;
 	import mx.controls.Alert;
 	import flash.events.Event;
+  import flash.system.Security;
 
 	public class ApiClient extends EventDispatcher {
 		
@@ -29,6 +30,7 @@ package{
 		private var _port:int = 2195;
 
 		public function ApiClient() {
+      Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
 			_kifuSearchService.addEventListener(ResultEvent.RESULT, _handleKifuSearch);
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);
