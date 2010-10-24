@@ -14,6 +14,7 @@
 	import flash.media.SoundTransform;
 	import flash.net.FileReference;
 	import flash.net.URLVariables;
+	import flash.ui.Mouse;
 	import flash.utils.Timer;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
@@ -31,7 +32,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/24";
+	private const VERSION:String = "ver.2010/10/25";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -102,7 +103,8 @@
     private function initApp():void
     {
       trace("application initialized..");
-	  Security.loadPolicyFile("./flashpolicy.xml");
+	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
+	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
       _client = new CsaShogiClient();
 	  _api = new ApiClient();
       board.setMoveCallback(_playerMove);
@@ -145,7 +147,15 @@
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
-    } 
+    }
+	
+	private function _rollOver(e:MouseEvent):void {
+//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]");
+	}
+	
+	private function _rollOut(e:MouseEvent):void {
+//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]");
+	}
 
     private function _handleKeepAlive(e:Event):void {
 	  _refresh();
@@ -245,6 +255,8 @@
 				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
 			}
+		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\]$/))) {
+			trace(match[1] + "-" + match[2]);
 		} else {
 			if (e.message.match(_regExpCalled)) {
 				_writeUserMessage(e.message.substr(12), 2, "#FF0000");
@@ -1557,7 +1569,7 @@
     ]]>
   </mx:Script>
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
-  <mx:ViewStack id="mainViewStack" creationPolicy="all" width="1000" height="100%">
+  <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image id="titleBanner" source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
@@ -1599,7 +1611,7 @@
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
 		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
-		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;"/>
+		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;" enabled="false" />
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
 		<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
       </mx:HBox>
@@ -1668,8 +1680,10 @@
 	  </mx:HBox>
 	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/> -->
     </mx:VBox>
-    
-    <mx:HBox paddingLeft="5" paddingTop="5">
+
+    <mx:HBox id="boardBox">
+	<mx:Panel width="100%" height="100%" headerHeight="0" backgroundColor="#FFcccc" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" paddingLeft="0" paddingRight="0" backgroundAlpha="0">
+	<mx:HBox paddingLeft="5" paddingTop="5">
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
@@ -1728,8 +1742,10 @@
 			<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="Listen"/>
         </mx:HBox>
         </mx:Panel>
+	</mx:HBox>
+	</mx:Panel>
     </mx:HBox>
-	
+
 	<mx:VBox paddingLeft="10" paddingTop="10">
     <mx:Panel id="searchPanel" title="Search Panel" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 	  <mx:HBox>
