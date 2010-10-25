@@ -26,6 +26,7 @@
 		public var titleName:Array = new Array();
 		private static var rank_thresholds:Array = new Array();
 		private static var rank_names:Array = new Array();
+		public var country_codes:Array = new Array();
 		public var country_names:Array = new Array();
 		public var country_names3:Array = new Array();
 		public var initMessage:String
@@ -69,6 +70,7 @@
 			}
 			lines = match[6].split("\n");
 			for each(line in lines) {
+				country_codes.push(parseInt(line.split("\t")[0]));
 				country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
 				country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
 			}

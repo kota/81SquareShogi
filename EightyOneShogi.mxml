@@ -32,7 +32,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/25";
+	private const VERSION:String = "ver.2010/10/26";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -113,6 +113,7 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
+	  playerSearchNameText.addEventListener(FlexEvent.ENTER, _handlePlayerSearchEnter);
 	  board.name_labels[0].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  board.name_labels[1].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  _challengerTicker = new Timer(1000);
@@ -144,6 +145,7 @@
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
 	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
+	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -1309,7 +1311,7 @@
   private function _saveKIF():void {
 	  var date_time:String = _game_name.split("+")[4];
 	  var fileReference:FileReference = new FileReference();
-	  //fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
+	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
   }
  
 	private function _formatKIF():String{
@@ -1329,11 +1331,20 @@
 	
 	private function _sendKifuSearch():void {
 		if (kifuSearchPlayerText.text && kifuSearchFromChooser.selectedDate && kifuSearchToChooser.selectedDate) {
-			_api.kifuSearch(kifuSearchPlayerText.text, kifuSearchFromChooser.selectedDate, kifuSearchToChooser.selectedDate);
+			kifuSearchGrid.dataProvider = null;
+			var fromDate:Date = new Date("2010/9/20");
+			if (kifuSearchFromChooser.selectedDate > fromDate) fromDate = kifuSearchFromChooser.selectedDate;
+			_api.kifuSearch(kifuSearchPlayerText.text.toLowerCase(), fromDate, kifuSearchToChooser.selectedDate);
+			searchAccordion.enabled = false;
 		}
 	}
 	
+	private function _handleSearchNotFound(e:Event):void {
+		searchAccordion.enabled = true;
+	}
+	
 	private function _handleKifuSearch(e:Event):void {
+		searchAccordion.enabled = true;
 		_kifu_search_list = new Array();
 		var hc:String;
 		var match:Array;
@@ -1350,25 +1361,29 @@
 			kifu.black = kifu.game_id.split("+")[2];
 			kifu.white = kifu.game_id.split("+")[3];
 			kifu.date = kifu.game_id.split("+")[4].substr(0, 4) + "-" + kifu.game_id.split("+")[4].substr(4, 2) + "-" + kifu.game_id.split("+")[4].substr(6, 2);
-			if (kifu.result.split(":")[2].match(/win$/)) {
-				kifu.winner = "▲";
-			} else if (kifu.result.split(":")[3].match(/win$/)) {
-				kifu.winner = "△";
-			} else {
-				kifu.winner = "DRAW";
+			if (kifu.result.match(/summary/)) {
+				if (kifu.result.split(":")[2].match(/win$/)) {
+					kifu.winner = "▲";
+				} else if (kifu.result.split(":")[3].match(/win$/)) {
+					kifu.winner = "△";
+				} else {
+					kifu.winner = "DRAW";
+				}
+				_kifu_search_list.push(kifu);
 			}
-			_kifu_search_list.push(kifu);
 		}
 		kifuSearchGrid.dataProvider = _kifu_search_list;
 	}
 	
 	private function _kifuSearchSelected():void {
 		if (kifuSearchGrid.selectedItem) {
+			searchAccordion.enabled = false;
 			_api.kifuDetail(kifuSearchGrid.selectedItem.id);
 		}
 	}
 	
 	private function _handleKifuDetail(e:Event):void {
+		searchAccordion.enabled = true;
 		board.viewing = true;
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
 		board.startView(e.target.kifuContents);
@@ -1391,19 +1406,26 @@
 		board.replayMoves(0);
 	}
 	
+	private function _handlePlayerSearchEnter(e:FlexEvent):void {
+		_sendPlayerSearch();
+	}
+	
 	private function _sendPlayerSearch():void {
 		if (playerSearchNameText.text) {
+			playerSearchGrid.dataProvider = null;
+			searchAccordion.enabled = false;
 			_api.playerSearch(playerSearchNameText.text.toLowerCase());
 		}
 	}
 	
 	private function _handlePlayerSearch(e:Event):void {
+		searchAccordion.enabled = true;
 		_player_search_list = new Array();
 		for each (var player:Object in e.target.bufferData) {
-			player.country = _infoFetcher.country_names[player.country_id];
+			player.country = _infoFetcher.country_names[_infoFetcher.country_codes[player.country_id - 1]];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
-			player.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(player.country_id + 1000).substring(1) + ".gif";
+			player.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
@@ -1417,10 +1439,12 @@
 	}
 	
 	private function _sendRankingSearch():void {
+		searchAccordion.enabled = false;
 		_api.rankingSearch(rankingTabNavigator.selectedIndex);
 	}
 	
 	private function _handleRankingSearch(e:Event):void {
+		searchAccordion.enabled = true;
 		switch (String(e.target.bufferXML.@item)) {
 			case "wins":
 				trace("hit");
@@ -1440,8 +1464,8 @@
 			var player:Object = {
 				'number':num,
 				'login':String(playerXML.login),
-				'country':_infoFetcher.country_names[parseInt(playerXML.country_id)],
-				'flagURL':"http://www.81squareuniverse.com/dojo/images/flags_s/" + String(parseInt(playerXML.country_id) + 1000).substring(1) + ".gif",
+				'country':_infoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
+				'flagURL':"http://www.81squareuniverse.com/dojo/images/flags_s/" + String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1) + ".gif",
 				'wins':parseInt(playerXML.wins),
 				'losses':parseInt(playerXML.losses),
 				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),
@@ -1790,12 +1814,12 @@
 					<mx:DataGridColumn dataField="login" headerText="Name" width="110" />
 					<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" />
-					<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" />
-					<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" />
-					<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" />
-					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" textAlign="right" />
-					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" textAlign="right" />
+					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" textAlign="right" paddingRight="5" />
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
@@ -1812,8 +1836,8 @@
 							<mx:DataGridColumn dataField="rate" headerText="Rating" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
@@ -1828,8 +1852,8 @@
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
 							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" paddingRight="5" textAlign="right" />
@@ -1844,8 +1868,8 @@
 							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
@@ -1860,8 +1884,8 @@
 							<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
@@ -1876,8 +1900,8 @@
 							<mx:DataGridColumn dataField="total" headerText="Total" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="45" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />

@@ -1,6 +1,7 @@
 package{
 	import flash.events.EventDispatcher;
 	import mx.collections.ArrayCollection;
+	import mx.events.CloseEvent;
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	import mx.controls.Alert;
@@ -13,6 +14,7 @@ package{
 		public static var KIFU_DETAIL:String = 'kifu_detail';
 		public static var PLAYER_SEARCH:String = 'player_search';
 		public static var RANKING_SEARCH:String = 'ranking_search';
+		public static var NOT_FOUND:String = 'not_found';
 		
 		public var bufferData:ArrayCollection;
 		public var kifuContents:String;
@@ -30,7 +32,7 @@ package{
 		private var _port:int = 2195;
 
 		public function ApiClient() {
-      Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
+			Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
 			_kifuSearchService.addEventListener(ResultEvent.RESULT, _handleKifuSearch);
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);
@@ -49,6 +51,7 @@ package{
 			bufferData = new ArrayCollection();
 			if (!e.result.kifus) {
 				Alert.show("Data not found.");
+				dispatchEvent(new Event(NOT_FOUND));
 				return;
 			} else {
 				bufferData = e.result.kifus.kifu as ArrayCollection;
@@ -72,6 +75,7 @@ package{
 			bufferData = new ArrayCollection();
 			if (!e.result.kifu) {
 				Alert.show("Data not found.");
+				dispatchEvent(new Event(NOT_FOUND));
 				return;
 			} else {
 				kifuContents = e.result.kifu.contents;
@@ -90,6 +94,7 @@ package{
 			bufferData = new ArrayCollection();
 			if (!e.result.players) {
 				Alert.show("Data not found.");
+				dispatchEvent(new Event(NOT_FOUND));
 				return;
 			} else {
 				bufferData = e.result.players.player as ArrayCollection;
@@ -127,13 +132,10 @@ package{
 			bufferData = new ArrayCollection();
 			if (!e.result.ranking) {
 				Alert.show("Data not found.");
+				dispatchEvent(new Event(NOT_FOUND));
 				return;
 			} else {
-				//bufferData = e.result.ranking.player as ArrayCollection;
 				bufferXML = new XML(e.result);
-//				bufferData = bufferXML.player as ArrayCollection;
-//				trace(bufferXML.@item);
-//				trace(bufferData);
 				dispatchEvent(new Event(RANKING_SEARCH));
 				trace("dispatch api response");
 			}
