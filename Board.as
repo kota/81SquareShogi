@@ -390,6 +390,8 @@ package  {
       trace("game end");
 			timers[0].stop();
 			timers[1].stop();
+			name_labels[0].setStyle("color", 0x000000);
+			name_labels[1].setStyle("color", 0x000000);
 	    if(_selected_square != null){
         _selected_square.setStyle('backgroundColor',undefined);
         _from = null;
@@ -406,8 +408,6 @@ package  {
       timers[1].stop();
 	  while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
 	  while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
-//	  _avatar_images[0].source = null;
-//	  _avatar_images[1].source = null;
 	  _player_flags[0].source = null;
 	  _player_flags[1].source = null;
 	  study_list = new Array();
@@ -505,7 +505,6 @@ package  {
         reset();
         _position = new Kyokumen(kyokumen_str);
 		_last_pos = new Kyokumen(kyokumen_str);
-//        _position.loadFromString(kyokumen_str);
         setPosition(_position);
       }
 //      watch_game_end = false;
@@ -564,10 +563,6 @@ package  {
     }
 	
     public function startView(kifu_contents:String):void{
- //     var total_time:int;
-//      var byoyomi:int;
-//      var current_turn:int;
-//      var last_move:Point;
       var moves:Array = new Array();
 	  var kyokumen_str:String = "";
 	  kifu_list = new Array();
@@ -592,16 +587,11 @@ package  {
 			  break;
 		  }
       }
-
-//	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-//	  total_time = parseInt(match[3]);
-//	  byoyomi = parseInt(match[4]);
 	  
       if(kyokumen_str != ""){
         reset();
         _position = new Kyokumen(kyokumen_str);
 		_last_pos = new Kyokumen(kyokumen_str);
-//        _position.loadFromString(kyokumen_str);
         setPosition(_position);
       }
 
@@ -610,20 +600,8 @@ package  {
       name_labels[1].text = _player_infos[1-_my_turn].name;
       _info_labels[0].text = "";
       _info_labels[1].text = "";
-//	  var avatar:Image = new Image();
-//	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
-//	  _avatar_images[0].addChild(avatar);
-//	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
-//	  avatar = new Image();
-//	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
-//	  _avatar_images[1].addChild(avatar);
-//	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
-//	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
-//	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-//      timers[0].reset(total_time,byoyomi);
-//      timers[1].reset(total_time,byoyomi);
 
       if (moves.length > 0) {
         for each(var move:Object in moves) {

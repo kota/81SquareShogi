@@ -152,11 +152,11 @@
     }
 	
 	private function _rollOver(e:MouseEvent):void {
-//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]");
+//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
 	}
 	
 	private function _rollOut(e:MouseEvent):void {
-//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]");
+//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]0,0");
 	}
 
     private function _handleKeepAlive(e:Event):void {
@@ -257,8 +257,23 @@
 				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
 			}
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\]$/))) {
-			trace(match[1] + "-" + match[2]);
+		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
+			if (match[1] != _login_name) {
+				if (match[1] == board.name_labels[0].text) {
+					if (match[2] == "OUT") {
+						board.name_labels[0].setStyle("color", 0x444444);
+					} else {
+						board.name_labels[0].setStyle("color", 0x000000);
+					}
+				} else if (match[1] == board.name_labels[1].text) {
+					if (match[2] == "OUT") {
+						board.name_labels[1].setStyle("color", 0x444444);
+					} else {
+						board.name_labels[1].setStyle("color", 0x000000);
+					}
+				}
+			}
+			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
 		} else {
 			if (e.message.match(_regExpCalled)) {
 				_writeUserMessage(e.message.substr(12), 2, "#FF0000");
