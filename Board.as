@@ -412,6 +412,7 @@ package  {
 	  _player_flags[1].source = null;
 	  study_list = new Array();
 	  study_list_hold = new Array();
+	  post_game = false;
     }
 
 		public function timeout():void{
@@ -588,7 +589,8 @@ package  {
 		  }
       }
 	  
-      if(kyokumen_str != ""){
+      if (kyokumen_str != "") {
+		trace(kyokumen_str);
         reset();
         _position = new Kyokumen(kyokumen_str);
 		_last_pos = new Kyokumen(kyokumen_str);
@@ -602,11 +604,14 @@ package  {
       _info_labels[1].text = "";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+	  timers[0].reset(0, 0);
+	  timers[1].reset(0, 0);
 
       if (moves.length > 0) {
         for each(var move:Object in moves) {
 		  if (move.move != "%TORYO") {
 			  makeMove(move.move + "," + move.time, false);
+			  trace(move.move + "," + move.time);
 		  } else {
 			  var kifuMove:Object = new Object();
 			  kifuMove.num = kifu_list.length

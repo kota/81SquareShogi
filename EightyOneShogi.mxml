@@ -509,8 +509,6 @@
       }
       closeButton.enabled = true;
       resignButton.enabled = false;
-      kifuCopyButton.enabled = true;
-	  kifuSaveButton.enabled = true;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
@@ -1093,8 +1091,6 @@
 			board.onListen = false;
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
-			kifuCopyButton.enabled = true;
-			kifuSaveButton.enabled = true;
 			board.endGame();
 	  } else {
 		  if(_watch_game != null) board.monitor(e.message,_watch_game);
@@ -1404,6 +1400,7 @@
 	private function _handleKifuDetail(e:Event):void {
 		searchAccordion.enabled = true;
 		board.viewing = true;
+		board.my_turn = Kyokumen.SENTE;
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
@@ -1416,8 +1413,6 @@
 		radioKifuReplay.enabled = true;
 		radioKifuReplay.selected = true;
 		radioKifuListen.enabled = false;
-		kifuCopyButton.enabled = true;
-		kifuSaveButton.enabled = true;
 		chatMessage2.enabled = false;
 		mainViewStack.selectedIndex = 2;
 		kifuDataGrid.dataProvider = board.kifu_list;
@@ -1797,8 +1792,8 @@
         </mx:DataGrid>
 		<mx:HBox paddingBottom="-2">
 			<mx:Label text="Kifu" fontWeight="bold"/>
-			<mx:Button id="kifuCopyButton" label="Copy" click="System.setClipboard(_formatKIF());" enabled="false"/>
-			<mx:Button id="kifuSaveButton" label="Save" click="_saveKIF();" enabled="false" />
+			<mx:Button id="kifuCopyButton" label="Copy" click="System.setClipboard(_formatKIF());"/>
+			<mx:Button id="kifuSaveButton" label="Save" click="_saveKIF();" />
 		</mx:HBox>
         <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
          <mx:columns>
