@@ -24,11 +24,13 @@
 		public var newestVer:String;
 		public var titleUser:Array = new Array();
 		public var titleName:Array = new Array();
+		public var titleRate:Array = new Array();
 		private static var rank_thresholds:Array = new Array();
 		private static var rank_names:Array = new Array();
 		public var country_codes:Array = new Array();
 		public var country_names:Array = new Array();
 		public var country_names3:Array = new Array();
+		public var cheaters:Array = new Array();
 		public var initMessage:String
 		public var gameMessage:String
 		private var _urlRequest:URLRequest = new URLRequest();
@@ -54,7 +56,7 @@
 		
 		private function _parseInfo(e:Event):void {
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###/s);
+			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###/s);
 			newestVer = match[1];
 			initMessage = match[2];
 			gameMessage = match[3];
@@ -62,6 +64,7 @@
 			for each(var line:String in lines) {
 				titleUser.push(line.split("\t")[0]);
 				titleName.push(line.split("\t")[1]);
+				titleRate.push(line.split("\t")[2]);
 			}
 			lines = match[5].split("\n");
 			for each(line in lines) {
@@ -73,6 +76,10 @@
 				country_codes.push(parseInt(line.split("\t")[0]));
 				country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
 				country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
+			}
+			lines = match[7].split("\n");
+			for each(line in lines) {
+				cheaters.push(line);
 			}
 		}
 		

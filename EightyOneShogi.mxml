@@ -13,6 +13,7 @@
 	import flash.events.TimerEvent;
 	import flash.media.SoundTransform;
 	import flash.net.FileReference;
+	import flash.net.URLLoader;
 	import flash.net.URLVariables;
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
@@ -32,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/26";
+	private const VERSION:String = "ver.2010/10/27";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -152,11 +153,11 @@
     }
 	
 	private function _rollOver(e:MouseEvent):void {
-//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
+		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
 	}
 	
 	private function _rollOut(e:MouseEvent):void {
-//		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]0,0");
+		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]0,0");
 	}
 
     private function _handleKeepAlive(e:Event):void {
@@ -580,6 +581,9 @@
             }
           }
           user_list.push(user);
+		  for each (var cheat:String in _infoFetcher.cheaters) {
+			  if (user.name.toLowerCase() == cheat) user_list.pop();
+		  }
         }
       }
 
@@ -587,8 +591,8 @@
 		  for (var i:int = 0; i < user_list.length; i++) {
 			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
-				  if (_infoFetcher.titleName[j] == "livebot") {
-					  user_list[i].rating = 3000;
+				  if (_infoFetcher.titleRate[j] != "*") {
+					  user_list[i].rating = _infoFetcher.titleRate[j];
 				  }
 				  break;
 			  }
@@ -1009,11 +1013,11 @@
 		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
 				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
 					game.blackTitle = _infoFetcher.titleName[i];
-					if (game.blackTitle == "livebot") game.blackRating = 3000;
+					if (_infoFetcher.titleRate[i] != "*") game.blackRating = _infoFetcher.titleRate[i];
 				}
 				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
 					game.whiteTitle = _infoFetcher.titleName[i];
-					if (game.whiteTitle == "livebot") game.whiteRating = 3000;
+					if (_infoFetcher.titleRate[i] != "*") game.whiteRating = _infoFetcher.titleRate[i];
 				}
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
@@ -1455,11 +1459,25 @@
 	
 	private function _sendRankingSearch():void {
 		searchAccordion.enabled = false;
-		_api.rankingSearch(rankingTabNavigator.selectedIndex);
+		var type:String;
+		switch (rankingTabNavigator.selectedIndex) {
+			case 0:
+				type = "rate"; break;
+			case 1:
+				type = "streak"; break;
+			case 2:
+				type = "percentage"; break;
+			case 3:
+				type = "wins"; break;
+			case 4:
+				type = "total"; break;
+		}
+		_api.rankingSearch(type);
 	}
 	
 	private function _handleRankingSearch(e:Event):void {
 		searchAccordion.enabled = true;
+		var listed:Boolean = true;
 		switch (String(e.target.bufferXML.@item)) {
 			case "wins":
 				trace("hit");
@@ -1492,21 +1510,34 @@
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
 					  player.title = _infoFetcher.titleName[i];
+					  if (player.title == "AI-bot") { // Temporarily
+						  listed = false;
+						  num -= 1;
+					  }
 					  break;
 				  }
 			}
-			switch (String(e.target.bufferXML.@item)) {
-				case "wins":
-					_ranking_wins_list.push(player); break;
-				case "rate":
-					_ranking_rate_list.push(player); break;
-				case "total":
-					_ranking_total_list.push(player); break;
-				case "streak":
-					_ranking_streak_list.push(player); break;
-				case "percentage":
-					_ranking_percentage_list.push(player); break;
+			for each (var cheat:String in _infoFetcher.cheaters) { // Temporarily
+				if (player.login == cheat) {
+					listed = false;
+					num -= 1;
+				}
 			}
+			if (listed) {
+				switch (String(e.target.bufferXML.@item)) {
+					case "wins":
+						_ranking_wins_list.push(player); break;
+					case "rate":
+						_ranking_rate_list.push(player); break;
+					case "total":
+						_ranking_total_list.push(player); break;
+					case "streak":
+						_ranking_streak_list.push(player); break;
+					case "percentage":
+						_ranking_percentage_list.push(player); break;
+				}
+			}
+			listed = true;
 		}
 		winRankingGrid.dataProvider = _ranking_wins_list;
 		totalRankingGrid.dataProvider = _ranking_total_list;
@@ -1852,11 +1883,43 @@
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
-							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="%-win" textAlign="right" paddingRight="5" />
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Best Streak">
+						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="streak_best" headerText="Streak" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					<mx:VBox label="Winning Percentage">
+						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21">
+							<mx:columns>
+							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
+							<mx:DataGridColumn dataField="percentage" headerText="%-win" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
+							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
+							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
@@ -1868,42 +1931,10 @@
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
-							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" paddingRight="5" textAlign="right" />
-							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
-							</mx:columns>
-						</mx:DataGrid>
-					</mx:VBox>
-					<mx:VBox label="Winning Percentage">
-						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21">
-							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
-							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
-							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
-							</mx:columns>
-						</mx:DataGrid>
-					</mx:VBox>
-					<mx:VBox label="Best Streak">
-						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21">
-							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
-							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
-							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
-							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="%-win" width="45" paddingRight="5" textAlign="right" />
 							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
@@ -1916,8 +1947,8 @@
 							<mx:DataGridColumn dataField="login" headerText="Name" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="Title" width="55" />
-							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" />
+							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5" />
@@ -1931,5 +1962,4 @@
     </mx:Panel>
     </mx:VBox>
   </mx:ViewStack>
-
 </mx:Application>

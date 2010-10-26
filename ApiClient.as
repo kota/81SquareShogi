@@ -108,20 +108,7 @@ package{
 			}
 		}
 		
-		public function rankingSearch(v:int):void {
-			var type:String;
-			switch (v) {
-				case 0:
-					type = "rate"; break;
-				case 1:
-					type = "wins"; break;
-				case 2:
-					type = "percentage"; break;
-				case 3:
-					type = "streak"; break;
-				case 4:
-					type = "total"; break;
-			}
+		public function rankingSearch(type:String):void {
 			_rankingService.url = "http://" + _host + ":" + _port + "/api/players/ranking/" + type;
 			_rankingService.resultFormat = "e4x";
 			trace("send: " + _rankingService.url);
