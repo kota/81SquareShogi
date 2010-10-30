@@ -487,13 +487,14 @@ package  {
         var match:Array = line.match(/^##\[MONITOR2\]\[.*\] (.*)$/);
         if (match != null && match[1]) {
           var token:String = match[1];
-          if(token.match(/([-+][0-9]{4}.{2}$)/)) {
+          if(token.match(/^([-+][0-9]{4}.{2}$)/)) {
             var move_and_time:Object = new Object();
             move_and_time.move = token
             moves.push(move_and_time);
-          } else if (token.match(/(T.*)$/)){
+          } else if (token.match(/^(T.*)$/)){
             Object(moves[moves.length - 1]).time = token;
-          }
+          } else if (token.match(/SINCE_LAST_MOVE/)) {
+		  }
         }
       }
 

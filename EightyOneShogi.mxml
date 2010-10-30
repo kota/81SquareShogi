@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/27";
+	private const VERSION:String = "ver.2010/10/31";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -123,77 +123,12 @@
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
     }
+	
+	//=========================================================
+	//                   EVENT HANDLERS for Client.as
+	//=========================================================
 
-    private function _connectAndLogin():void{
-      trace("connecting.");
-      _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
-      _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
-      _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
-	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
-      _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
-      _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
-      _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
-	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
-	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
-      _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
-      _client.addEventListener(CsaShogiClient.WHO,_handleWho);
-      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
-      _client.addEventListener(CsaShogiClient.LIST, _handleList);
-      _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
-      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
-      _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
-	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
-	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
-	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
-	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
-	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
-      loginMessage.text = "Connecting...";
-      errorMessage.text = "";
-      _client.connect();
-    }
-	
-	private function _rollOver(e:MouseEvent):void {
-		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
-	}
-	
-	private function _rollOut(e:MouseEvent):void {
-		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]0,0");
-	}
-
-    private function _handleKeepAlive(e:Event):void {
-	  _refresh();
-    }
-
-    private function _handleLogin(e:Event):void{
-      _connectAndLogin();
-    }
-	
-	private function _testLogin(i:int):void {
-		loginname.text = "test" + i;
-		password.text = "81dojo" + i;
-		_connectAndLogin();
-	}
-	
-	private function _localLogin():void {
-		_client.setHostToLocal();
-		_api.setHostToLocal();
-		loginButton.setStyle('color', '0xFF0000');
-		loginButton.setStyle('textRollOverColor', '0xFF0000');
-	}
-	
-	private function _logout():void {
-//		_sendAutoChat("I've logged out. See you.");
-		_client.logout();
-	}
-	
-	private function _handleLogout(e:ServerMessageEvent):void {
-		_keepAliveTimer.stop();
-		loginMessage.text = "logged out successfully";
-		titleBanner.source = "http://www.81squareuniverse.com/dojo/images/81Dojo_bye.jpg";
-		loginButton.enabled = false;
-		mainViewStack.selectedIndex = 0;
-	}
-    
+	//----------------------------------------------------------------------------------------------------------------------------- CONNECTION
     private function _handleConnected(e:Event):void{
       loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
@@ -219,152 +154,206 @@
       errorMessage.text = e.message;
     }
 
-    private function _handleChat(e:ServerMessageEvent):void{
-		if (e.message.match(/\[auto\-chat\]/)) {
-			_writeUserMessage(e.message.substr(8), 1, "#888888");
-		} else if (e.message.match(_regExpCalled)) {
-			_writeUserMessage(e.message.substr(8), 1, "#FF0000");
-		} else if (e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1] == _login_name) {
-			_writeUserMessage(e.message.substr(8), 1, "#0033DD");
-		} else {
-			_writeUserMessage(e.message.substr(8), 1, "#000000");
-		}
-		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
-			if (e.message.match(/\[auto\-chat\]/)) {
-				_sound_chat4.play();
-			} else if (e.message.match(_regExpCalled)) {
-				_sound_chat3.play();
-			} else {
-				_sound_chat1.play();
-			}
-		}
-	}
-	
-    private function _handleGameChat(e:ServerMessageEvent):void {
-		var match:Array;
-		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
-			board.studyOrigin = match[1];
-			if (match[2] == "*") {
-				if (board.study_list.length > 0) board.study_list = new Array();
-				if (!board.isWinner && !(board.post_game && board.onListen)) return;
-				kifuDataGrid.selectedIndex = match[1];
-				board.replayMoves(match[1]);
-				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
-			} else {
-				board.study_list = match[2].split("/");
-				if (!board.isWinner && !(board.post_game && board.onListen)) return;
-				kifuDataGrid.selectedIndex = match[1];
-				board.replayMoves(match[1]);
-				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
-				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
-			}
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
-			if (match[1] != _login_name) {
-				if (match[1] == board.name_labels[0].text) {
-					if (match[2] == "OUT") {
-						board.name_labels[0].setStyle("color", 0x444444);
-					} else {
-						board.name_labels[0].setStyle("color", 0x000000);
-					}
-				} else if (match[1] == board.name_labels[1].text) {
-					if (match[2] == "OUT") {
-						board.name_labels[1].setStyle("color", 0x444444);
-					} else {
-						board.name_labels[1].setStyle("color", 0x000000);
-					}
-				}
-			}
-			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
-		} else {
-			if (e.message.match(_regExpCalled)) {
-				_writeUserMessage(e.message.substr(12), 2, "#FF0000");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#000000");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[1].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#666666");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == _login_name) {
-				_writeUserMessage(e.message.substr(12), 2, "#0033DD");
-			} else {
-				_writeUserMessage(e.message.substr(12), 2, "#660000");
-			}
-			if (_chat_sound2_play){
-				if (e.message.match(_regExpCalled)) {
-					_sound_chat3.play();
-				} else {
-					_sound_chat1.play();
-				}
-			}
-		}
-    }
-	
-	private function _handlePrivateChat(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex == 1) {
-			_writeUserMessage("PM: " + e.message.substr(15), 1, "#FF0000");
-		} else if (mainViewStack.selectedIndex == 2) {
-			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
-		}
-		if (_chat_sound1_play) _sound_chat3.play();
+		private function _handleLogout(e:ServerMessageEvent):void {
+		_keepAliveTimer.stop();
+		loginMessage.text = "logged out successfully";
+		titleBanner.source = "http://www.81squareuniverse.com/dojo/images/81Dojo_bye.jpg";
+		loginButton.enabled = false;
+		mainViewStack.selectedIndex = 0;
 	}
 
-    private function _format_message(message:String):String{
-      message = message.substr(8);
-      var match:Array = message.match(/(\[.+?\]) ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
-      if(match != null){
-        message = match[1] + " " + match[3] + "\n";
+	//----------------------------------------------------------------------------------------------------------------------------- INFO
+
+    private function _handleWho(e:ServerMessageEvent):void{                               //<<<<<< Handle WHO response
+      var users:Array = e.message.split("\n");
+      var user_list:Array = new Array();
+	  var waiter_list:Array = new Array();
+      for each(var user_data:String in users){
+        if(user_data.match("##[WHO] +OK") != null){
+          break;
+        }
+        trace("user_data:" + user_data);
+        var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
+        if(match != null){
+          var user:Object = {
+			  'name':match[1],
+			  'status':StringUtil.trim(match[2].split(" ")[0]),
+			  'status2':"",
+			  'opponent':"",
+			  'game_name':match[2].split(" ")[1],
+			  'turn':match[2].split(" ")[2],
+			  'rating':parseInt(match[2].split(" ")[3]),
+			  'country_code':parseInt(match[2].split(" ")[4]),
+			  'titleName':"",
+			  'monitor_game':match[2].split(" ")[6],
+			  'moves':parseInt(match[2].split(" ")[7]),
+			  'wins':parseInt(match[2].split(" ")[8]),
+			  'losses':parseInt(match[2].split(" ")[9]), 
+			  'streak':parseInt(match[2].split(" ")[10]), 
+			  'streak_best':parseInt(match[2].split(" ")[11])
+			  }
+		  user.country = _infoFetcher.country_names[user.country_code];
+		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
+		  if (user.monitor_game != "*") user.status2 = "M ";
+          if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
+            var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+            var total:int = parseInt(game_info[3]) / 60;
+			var hc:String;
+			if (game_info[1] == "r") {
+				hc = "R";
+			} else if (game_info[1].match(/^hc/)) {
+				hc = "HC";
+			} else {
+				hc = "NR";
+			}
+            user.rule = hc + ": " + total + "-" + game_info[4];
+            if(user.status == "game_waiting"){
+              user.status2 += "W";
+            } else if (user.status == "post_game") {
+				user.status2 = "P " + (user.turn == "+" ? "▲" : "△");
+			} else {
+              user.status2 = "G " + (user.turn == "+" ? "▲" : "△"); // + user.moves;
+            }
+          }
+          user_list.push(user);
+		  for each (var cheat:String in _infoFetcher.cheaters) {
+			  if (user.name.toLowerCase() == cheat) user_list.pop();
+		  }
+        }
       }
-      return message;
-    }
-
-    private function _handleMove(e:ServerMessageEvent):void {
-      board.makeMove(e.message);
-      kifuDataGrid.dataProvider = board.kifu_list;
-      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
-    }
-  
-  private function _handleGameSummary(e:ServerMessageEvent):void {
-	  _initPositionStr = "";
-	  for each(var line:String in e.message.split("\n")) {
-		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
+	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
+		  for (var i:int = 0; i < user_list.length; i++) {
+			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
+				  user_list[i].titleName = _infoFetcher.titleName[j];
+				  if (_infoFetcher.titleRate[j] != "*") {
+					  user_list[i].rating = _infoFetcher.titleRate[j];
+				  }
+				  break;
+			  }
+		  }
 	  }
-    if (_challenging) {
-      _client.agree();
-    } else {
-	  _refresh();
-	  var challengerName:String = _login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
-      _sound_challenger.play();
-	  _challengerTicker.reset();
-	  _challengerTicker.start();
-      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
-      PopUpManager.centerPopUp(_challengerAlertWindow);
-      with(_challengerAlertWindow){
-        title = "Here comes a new challenger!!";
-		remainTime = 20;
-		user = _findPlayerFromList(challengerName);
-        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
-		rejectButton.addEventListener("click", _handleChallengerRejectButton);
+	  for (i = 0; i < user_list.length; i++) {
+		  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
+		  if (user_list[i].status2.match(/W/)) {
+			  user = {
+				  'name':user_list[i].name,
+				  'turn':user_list[i].turn,
+				  'rating':user_list[i].rating,
+				  'game_name': user_list[i].game_name,
+				  'country':_infoFetcher.country_names[user_list[i].country_code],
+				  'country3':_infoFetcher.country_names3[user_list[i].country_code]
+				  }
+		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+			  total = parseInt(game_info[3]) / 60;
+			  if (game_info[1] == "r") {
+				  user.rated = "R"
+			  } else {
+				  user.rated = "NR"
+			  }
+			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
+			  user.time = total + "-" + game_info[4] ;
+			  waiter_list.push(user);
+			  if (user.name == _login_name && game_info[2] != _login_name) {
+				  _challenging = false;
+				  _client.stopWaiting();
+				  if (_waiting) _client.waitAgain();
+			  }
+		  }
+	  }
+      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+	  _user_list = user_list;
+      userListGrid.dataProvider = _user_list;
+      for (i = 0; i < user_list.length; i++) {
+        if (_user_list[i].name == _login_name) {
+          userListGrid.selectedIndex = i;
+		  userListGrid.scrollToIndex(i);
+          break;
+        }
       }
+	  userListPanel.title = "Main Lobby (" + _user_list.length + " players)";
+	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+	  _waiter_list = waiter_list;
+	  waiterListGrid.dataProvider = _waiter_list;
     }
-  }
-  
-  private function _handleChallengerAcceptButton(e:MouseEvent):void {
-	  _challengerTicker.reset();
-	  _client.agree();
-  }
-  
-  private function _handleChallengerRejectButton(e:MouseEvent):void {
-	  _challengerTicker.reset();
-	  _client.reject();
-  }
+
+    private function _handleList(e:ServerMessageEvent):void{                                 //<<<<<< Handle LIST response
+	  var game_list:Array = new Array();
+	  var lines:Array = e.message.split("\n");
+        for each(var line:String in lines) {
+		  if (line.match(/^##\[LIST\] \+OK$/)) break;
+          var tokens:Array = line.split(" ");
+          var game:Object = {
+			  'id':tokens[1], //line.substr(9),
+			  'blackName':tokens[1].split("+")[2],
+			  'whiteName':tokens[1].split("+")[3],
+			  'blackRating':parseInt(tokens[3]),
+			  'whiteRating':parseInt(tokens[4]),
+			  'blackCountryCode':parseInt(tokens[5]),
+			  'whiteCountryCode':parseInt(tokens[6]),
+			  'watchers':parseInt(tokens[10]),
+			  'blackTitle':"",
+			  'whiteTitle':""
+			  }
+		  if (tokens[7] == "created") {
+			  break;
+		  } else if (tokens[7] == "true" || tokens[7] == "game") {
+			  game.status = "G: " + parseInt(tokens[2]);
+		  } else {
+			  game.status = "P";
+			  if (tokens[8] == "true") game.status += "▲";
+			  if (tokens[9] == "true") game.status += "△";
+		  }
+		  var user:Object;
+		  if ((user = _findPlayerFromList(game.blackName))) {
+			  game.blackWins = user.wins;
+			  game.blackLosses = user.losses;
+			  game.blackStreakBest = user.streak_best;
+		  }
+		  if ((user = _findPlayerFromList(game.whiteName))) {
+			  game.whiteWins = user.wins;
+			  game.whiteLosses = user.losses;
+			  game.whiteStreakBest = user.streak_best;
+		  }
+		  game.blackCountry = _infoFetcher.country_names[game.blackCountryCode];
+		  game.blackFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
+		  game.whiteCountry = _infoFetcher.country_names[game.whiteCountryCode];
+		  game.whiteFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
+		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
+				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
+					game.blackTitle = _infoFetcher.titleName[i];
+					if (_infoFetcher.titleRate[i] != "*") game.blackRating = _infoFetcher.titleRate[i];
+				}
+				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
+					game.whiteTitle = _infoFetcher.titleName[i];
+					if (_infoFetcher.titleRate[i] != "*") game.whiteRating = _infoFetcher.titleRate[i];
+				}
+		  }
+		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
+		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") game.maxRating -= 3000;
+		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
+		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
+		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+		  var total:int = parseInt(game_info[3]) / 60;
+		  var hc:String;
+		  if (game_info[1] == "r") {
+			hc = "R";
+			game.hcTip = "";
+		  } else if (game_info[1].match(/^hc/)) {
+			hc = "HC";
+			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
+		  } else {
+			hc = "NR";
+			game.hcTip = "";
+		  }
+		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
+		  game_list.push(game);
+        }
+		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
+		for (i = 0; i < game_list.length; i++) game_list[i].gameNo = i + 1;
+		_game_list = game_list;
+		gameListGrid.dataProvider = _game_list;
+    }
 	
-	private function _challengerTickHandler(e:TimerEvent):void {
-		_challengerAlertWindow.remainTime -= 1
-		if (_challengerAlertWindow.remainTime <= 0) {
-			_challengerTicker.reset();
-			_client.reject();
-			PopUpManager.removePopUp(_challengerAlertWindow);
-		}
-	}
-  
   private function _handleReject(e:ServerMessageEvent):void {
 	if (_challenging) {
 		_writeUserMessage("Rejected by the opponent.\n", 1, "#008800");
@@ -520,528 +509,139 @@
       kifuDataGrid.selectedIndex = board.kifu_list.length;
       board.endGame();
     }
-	
+
 	private function _openGameResultWindow(v:int):void {
 	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(this, GameResultWindow, false));
       PopUpManager.centerPopUp(_gameResultWindow);
 	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn], board.playerInfos[1 - board.my_turn], _game_name, v);
 	}
 
-    private function _handleWho(e:ServerMessageEvent):void{
-      var users:Array = e.message.split("\n");
-      var user_list:Array = new Array();
-	  var waiter_list:Array = new Array();
-      for each(var user_data:String in users){
-        if(user_data.match("##[WHO] +OK") != null){
-          break;
-        }
-        trace("user_data:" + user_data);
-        var match:Array = user_data.match(/\#\#\[WHO\] (.*) x1 (.*)/);
-        if(match != null){
-          var user:Object = {
-			  'name':match[1],
-			  'status':StringUtil.trim(match[2].split(" ")[0]),
-			  'status2':"",
-			  'opponent':"",
-			  'game_name':match[2].split(" ")[1],
-			  'turn':match[2].split(" ")[2],
-			  'rating':parseInt(match[2].split(" ")[3]),
-			  'country_code':parseInt(match[2].split(" ")[4]),
-			  'titleName':"",
-			  'monitor_game':match[2].split(" ")[6],
-			  'moves':parseInt(match[2].split(" ")[7]),
-			  'wins':parseInt(match[2].split(" ")[8]),
-			  'losses':parseInt(match[2].split(" ")[9]), 
-			  'streak':parseInt(match[2].split(" ")[10]), 
-			  'streak_best':parseInt(match[2].split(" ")[11])
-			  }
-		  user.country = _infoFetcher.country_names[user.country_code];
-		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
-		  if (user.monitor_game != "*") user.status2 = "M ";
-          if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
-            var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-            var total:int = parseInt(game_info[3]) / 60;
-			var hc:String;
-			if (game_info[1] == "r") {
-				hc = "R";
-			} else if (game_info[1].match(/^hc/)) {
-				hc = "HC";
-			} else {
-				hc = "NR";
-			}
-            user.rule = hc + ": " + total + "-" + game_info[4];
-            if(user.status == "game_waiting"){
-              user.status2 += "W";
-            } else if (user.status == "post_game") {
-				user.status2 = "P " + (user.turn == "+" ? "▲" : "△");
-			} else {
-              user.status2 = "G " + (user.turn == "+" ? "▲" : "△"); // + user.moves;
-            }
-          }
-          user_list.push(user);
-		  for each (var cheat:String in _infoFetcher.cheaters) {
-			  if (user.name.toLowerCase() == cheat) user_list.pop();
-		  }
-        }
-      }
-
-	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
-		  for (var i:int = 0; i < user_list.length; i++) {
-			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
-				  user_list[i].titleName = _infoFetcher.titleName[j];
-				  if (_infoFetcher.titleRate[j] != "*") {
-					  user_list[i].rating = _infoFetcher.titleRate[j];
-				  }
-				  break;
-			  }
-		  }
-	  }
-	  for (i = 0; i < user_list.length; i++) {
-		  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
-		  if (user_list[i].status2.match(/W/)) {
-			  user = {
-				  'name':user_list[i].name,
-				  'turn':user_list[i].turn,
-				  'rating':user_list[i].rating,
-				  'game_name': user_list[i].game_name,
-				  'country':_infoFetcher.country_names[user_list[i].country_code],
-				  'country3':_infoFetcher.country_names3[user_list[i].country_code]
-				  }
-		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-			  total = parseInt(game_info[3]) / 60;
-			  if (game_info[1] == "r") {
-				  user.rated = "R"
-			  } else {
-				  user.rated = "NR"
-			  }
-			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
-			  user.time = total + "-" + game_info[4] ;
-			  waiter_list.push(user);
-			  if (user.name == _login_name && game_info[2] != _login_name) {
-				  _challenging = false;
-				  _client.stopWaiting();
-				  if (_waiting) _client.waitAgain();
-			  }
-		  }
-	  }
-
-      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
-	  _user_list = user_list;
-      userListGrid.dataProvider = _user_list;
-      for (i = 0; i < user_list.length; i++) {
-        if (_user_list[i].name == _login_name) {
-          userListGrid.selectedIndex = i;
-		  userListGrid.scrollToIndex(i);
-          break;
-        }
-      }
-	  userListPanel.title = "Main Lobby (" + _user_list.length + " players)";
-	  
-	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
-	  _waiter_list = waiter_list;
-	  waiterListGrid.dataProvider = _waiter_list;
-    }
-
-    private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
-		switch (n) {
-			case 0:
-				break;
-			case 1:
-				var nowDate:Date = new Date(); 
-				_lastChatTime = "Last message receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
-				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
-				userMessage1.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
-				userMessage1.callLater(_scrollDown1);
-				break;
-			case 2:
-				_userMessageScrollPos2 = userMessage2.verticalScrollPosition
-				userMessage2.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
-				userMessage2.callLater(_scrollDown2);
-				break;		
-		}
-    }
-
-    private function _scrollDown1():void{
-      if (_chat_auto_scroll1) userMessage1.verticalScrollPosition = userMessage1.maxVerticalScrollPosition;
-	  else userMessage1.verticalScrollPosition = _userMessageScrollPos1;
-    }
-
-	private function _scrollDown2():void{
-      if (_chat_auto_scroll2) userMessage2.verticalScrollPosition = userMessage2.maxVerticalScrollPosition;
-	  else userMessage2.verticalScrollPosition = _userMessageScrollPos2;
-    }
-    
-    private function _waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void{
-      _client.waitForGame(total,byoyomi,handicap);
-      _refresh();
-      stopButton.enabled = true;
-    }
-    
-    private function _showOptions():void{
-      _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
-      PopUpManager.centerPopUp(_optionWindow);
-      with(_optionWindow){
-        title = "Options";
-		RadioGroup1.selectedValue = GameTimer.soundType;
-        RadioGroup2.selectedValue = board.piece_type;
-        pieceSoundCheckBox.selected = board.piece_sound_play;
-        gameEndSoundCheckBox.selected = _end_sound_play;
-        chatSound1CheckBox.selected = _chat_sound1_play;
-        chatSound2CheckBox.selected = _chat_sound2_play;
-        OkButton.addEventListener("click", _handleOption);
-		saveSettingsButton.addEventListener("click", _handleSaveSettings);
-      }
-    }
-    
-    private function _handleOption(e:Event):void {
-	  GameTimer.soundType = int(_optionWindow.RadioGroup1.selectedValue);
-      board.setPieceType(int(_optionWindow.RadioGroup2.selectedValue));
-      board.piece_sound_play = _optionWindow.pieceSoundCheckBox.selected;
-      _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
-      _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
-      _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
-    }
-	
-	private function _handleSaveSettings(e:Event):void {
-		var urlVariables:URLVariables = new URLVariables();
-		_handleOption(e);
-		urlVariables.name = _login_name.toLowerCase();
-		urlVariables.pieceSound = board.piece_sound_play;
-		urlVariables.endSound = _end_sound_play;
-		urlVariables.chatSound1 = _chat_sound1_play;
-		urlVariables.chatSound2 = _chat_sound2_play;
-		urlVariables.byoyomi = GameTimer.soundType;
-		urlVariables.pieceType = board.piece_type;
-		_infoFetcher.writeSettings(urlVariables);
-	}
-	
-	private function _handleLoadOption(e:Event):void {
-		board.piece_sound_play = _infoFetcher.userSettings.pieceSound;
-		_end_sound_play = _infoFetcher.userSettings.endSound;
-		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
-		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
-		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
-		board.setPieceType(_infoFetcher.userSettings.pieceType);
-	}
-
-    private function _challengeForm():void{
-      var user:Object = waiterListGrid.selectedItem;
-      if (user != null) {
-        var match:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-        var total:int = parseInt(match[3]) / 60 ;
-        var rule:String = total + "min - " + match[4] + "sec";
-		var hc:String = InfoFetcher.gameType(match[1]);
-        Alert.yesLabel = "Challenge";
-        Alert.noLabel = "Offer your setting";
-        Alert.buttonWidth = 140;
-        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
-        //set properties back to default.
-        Alert.yesLabel = "Yes";
-        Alert.noLabel = "No";
-        Alert.buttonWidth = 60;
-      }    
-    }
-
-    private function _handleChallengeAlert(e:CloseEvent):void{
-      var user:Object = waiterListGrid.selectedItem;
-      if (e.detail == Alert.YES) {
-      _challenging = true;
-      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
-      _client.challenge(user);
-    } else if (e.detail == Alert.CANCEL) {
-      } else {
-        var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
-        PopUpManager.centerPopUp(challengeWindow);
-        challengeWindow.title = "Challenge to " + user.name;
-        challengeWindow.challengeButton.addEventListener("click",_challenge);
-      }
-      challengeButton.enabled = false;
-    }
-
-    private function _newGameForm():void{
-      _newGameWindow = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
-      PopUpManager.centerPopUp(_newGameWindow);
-      with(_newGameWindow){
-        title = "Create new game";
-		nonrated_total.selectedIndex = _ur_total_selected;
-		nonrated_byoyomi.selectedIndex = _ur_byoyomi_selected;
-		nonrated_handicap.selectedIndex = _ur_handicap_selected;
-		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
-      }
+    private function _handleMove(e:ServerMessageEvent):void {
+      board.makeMove(e.message);
+      kifuDataGrid.dataProvider = board.kifu_list;
+      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
   
-    private function _stopWaiting():void {
-	  _waiting = false;
-      _client.stopWaiting();
-      _refresh();
-      stopButton.enabled = false;
-    }
-
-    private function _handleRuleSelected(e:GameRuleEvent):void {
-	  _ur_total_selected = _newGameWindow.nonrated_total.selectedIndex;
-	  _ur_byoyomi_selected = _newGameWindow.nonrated_byoyomi.selectedIndex;
-	  _ur_handicap_selected = _newGameWindow.nonrated_handicap.selectedIndex;
-      _waitForGame(e.total, e.byoyomi, e.handicap);
-	  _waiting = true;
-    }
-
-    private function _challenge(e:Event):void{
-      var user:Object = userListGrid.selectedItem;
-      if(user != null){
-        _client.challenge(user);
+  private function _handleGameSummary(e:ServerMessageEvent):void {
+	  _initPositionStr = "";
+	  for each(var line:String in e.message.split("\n")) {
+		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
+	  }
+    if (_challenging) {
+      _client.agree();
+    } else {
+	  _refresh();
+	  var challengerName:String = _login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
+      _sound_challenger.play();
+	  _challengerTicker.reset();
+	  _challengerTicker.start();
+      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
+      PopUpManager.centerPopUp(_challengerAlertWindow);
+      with(_challengerAlertWindow){
+        title = "Here comes a new challenger!!";
+		remainTime = 20;
+		user = _findPlayerFromList(challengerName);
+        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
+		rejectButton.addEventListener("click", _handleChallengerRejectButton);
       }
-	  challengeButton.enabled = false;
     }
-
-    private function _refresh():void {
-	  _keepAliveTimer.reset();
-	  _keepAliveTimer.start();
-      _client.who();
-	  _client.list();
-	  if (_game_name) _client.watchers(_game_name);
-	  challengeButton.enabled = false;
-//	  watchButton.enabled = false;
-    }
-
-	private function _resignAlert():void {
-		if (board.my_turn == board.position.turn)
-        Alert.show("","Resign?",Alert.YES|Alert.NO,this,_resign);
-	}
-	
-    private function _resign(e:CloseEvent):void {
-		if (e.detail == Alert.YES) _client.resign();
-    }
-
-    private function _who():void{
-      _client.who();
-    }
-
-    private function _closeGame():void {
-	  if (_game_name) {
-		  if (_monitoring) {
-			  _client.monitorOff(_game_name);
-			  _monitoring = false;
-		  } else if (board.viewing) {
-		  } else {
-			  _client.closeGame();
-			  _sendAutoChat("I have left this room.");
-		  }
-          _game_name = null;
-	  }
-      board.closeGame();
-	  if (board.viewing) {
-		  mainViewStack.selectedIndex = 3;
-		  chatMessage2.enabled = true;
-		  board.viewing = false;
-	  } else {
-		  mainViewStack.selectedIndex = 1;
-	  }
-      challengeButton.enabled = false;
-	  logoutButton.enabled = true;
-	  rewindAllButton.setStyle('color', 'undefined');
-	  rewindAllButton.setStyle('textRollOverColor', 'undefined');
-	  rewindOneButton.setStyle('color', 'undefined');
-	  rewindOneButton.setStyle('textRollOverColor', 'undefined');
-	  forwardOneButton.setStyle('color', 'undefined');
-	  forwardOneButton.setStyle('textRollOverColor', 'undefined');
-	  forwardAllButton.setStyle('color', 'undefined');
-	  forwardAllButton.setStyle('textRollOverColor', 'undefined');
-      _refresh();
-    }
-    
-    private function _showImpasse():void {
-      Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
-    }
-
-    private function _userSelected():void {
-      var user:Object = userListGrid.selectedItem;
-	  for (var i:int = 0; i < _game_list.length; i++) {
-		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
-			  gameListGrid.selectedIndex = i;
-			  break;
-		  }
-		  if (user.monitor_game != "*" && user.monitor_game.split("+")[0] == _game_list[i].blackName && user.monitor_game.split("+")[1] == _game_list[i].whiteName) {
-			  gameListGrid.selectedIndex = i;
-			  break;
-		  }
-		  gameListGrid.selectedIndex = -1;
-	  }
-	  if (_game_name) return;
-	  for (i = 0; i < _waiter_list.length; i++) {
-		  if (_waiter_list[i].name == user.name) {
-			  waiterListGrid.selectedIndex = i;
-				  if(_waiter_list[i].name != _login_name && _waiter_list[i].game_name.indexOf(_waiter_list[i].name) >= 0){
-					challengeButton.enabled = true;
-				  } else {
-					challengeButton.enabled = false;
-				  }
-			  break;
-		  }
-		  waiterListGrid.selectedIndex = -1;
-		  challengeButton.enabled = false;
-	  }
-//	  _waiterSelected();
-//	  _gameSelected();
-    }
-	
-    private function _waiterSelected():void {
-	  if (_game_name) return;
-      var user:Object = waiterListGrid.selectedItem;
-	  if (!user) {
-		  challengeButton.enabled = false;
-		  return;
-	  }
-      if(user != null && user.name != _login_name && user.game_name.indexOf(user.name) >= 0){
-        challengeButton.enabled = true;
-      } else {
-		challengeButton.enabled = false;
-	  }
-	  for (var i:int = 0; i < _user_list.length; i++) {
-		  if (_user_list[i].name == user.name) {
-			  userListGrid.selectedIndex = i;
-			  break;
-		  }
-		  userListGrid.selectedIndex = -1;
-	  }
-	  gameListGrid.selectedIndex = -1;
-    }
-	
-    private function _gameSelected():void {
-//	  if (_game_name) return;
-      var game:Object = gameListGrid.selectedItem;
-//	  if (!game) {
-//		  watchButton.enabled = false;
-//		  return;
-//	  }
-//      if(game != null){
-//        watchButton.enabled = true;
-//      } else {
-//		watchButton.enabled = false;
-//	  }
-//	  if (userListGrid.selectedItem.name == game.blackName || userListGrid.selectedItem.name == game.whiteName) return;
-	  for (var i:int = 0; i < _user_list.length; i++) {
-		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
-			  userListGrid.selectedIndex = i;
-			  break;
-		  }
-		  userListGrid.selectedIndex = -1;
-	  }
-	  waiterListGrid.selectedIndex = -1;
-	  challengeButton.enabled = false;
-    }
-
-    private function _playerMove(from:Point, to:Point, promote:Boolean):void {
-	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
-	  if (board.post_game && board.isWinner) {
-		  rewindAllButton.setStyle('color', '0xFF0000');
-		  rewindAllButton.setStyle('textRollOverColor', '0xFF0000');
-		  rewindOneButton.setStyle('color', '0xFF0000');
-		  rewindOneButton.setStyle('textRollOverColor', '0xFF0000');
-		  forwardOneButton.setStyle('color', '0xFF0000');
-		  forwardOneButton.setStyle('textRollOverColor', '0xFF0000');
-		  forwardAllButton.setStyle('color', '0xFF0000');
-		  forwardAllButton.setStyle('textRollOverColor', '0xFF0000');
-		  board.study_list.push(str);
-		  if (board.study_list_hold.length == 0) _sendAutoChat("Launched study mode at #" + board.studyOrigin);
-		  board.study_list_hold = board.study_list;
-		  _sendStudy();
-	  } else if (board.post_game && board.isLoser) {
-		  board.study_list.push(str);
-		  _sendStudy();
-	  } else {
-		  _client.move(str);
-	  }
-    }
-	
-	private function _sendStudy():void {
-		var str:String = "[##STUDY]" + board.studyOrigin;
-		if (board.study_list.length > 0){
-			for (var i:int = 0; i < board.study_list.length; i ++) str += "/" + board.study_list[i];
+  }
+  
+//--------------------------------------------------------------------------------------------------------------------------------- CHAT 
+    private function _handleChat(e:ServerMessageEvent):void{
+		if (e.message.match(/\[auto\-chat\]/)) {
+			_writeUserMessage(e.message.substr(8), 1, "#888888");
+		} else if (e.message.match(_regExpCalled)) {
+			_writeUserMessage(e.message.substr(8), 1, "#FF0000");
+		} else if (e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1] == _login_name) {
+			_writeUserMessage(e.message.substr(8), 1, "#0033DD");
 		} else {
-			str += "/*";
+			_writeUserMessage(e.message.substr(8), 1, "#000000");
 		}
-		_client.gameChat(_game_name, str);
+		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
+			if (e.message.match(/\[auto\-chat\]/)) {
+				_sound_chat4.play();
+			} else if (e.message.match(_regExpCalled)) {
+				_sound_chat3.play();
+			} else {
+				_sound_chat1.play();
+			}
+		}
+	}
+	
+    private function _handleGameChat(e:ServerMessageEvent):void {
+		var match:Array;
+		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
+			board.studyOrigin = match[1];
+			if (match[2] == "*") {
+				if (board.study_list.length > 0) board.study_list = new Array();
+				if (!board.isWinner && !(board.post_game && board.onListen)) return;
+				kifuDataGrid.selectedIndex = match[1];
+				board.replayMoves(match[1]);
+				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+			} else {
+				board.study_list = match[2].split("/");
+				if (!board.isWinner && !(board.post_game && board.onListen)) return;
+				kifuDataGrid.selectedIndex = match[1];
+				board.replayMoves(match[1]);
+				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+				for (var i:int = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false);
+			}
+		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
+			if (match[1] != _login_name) {
+				if (match[1] == board.name_labels[0].text) {
+					if (match[2] == "OUT") {
+						board.name_labels[0].setStyle("color", 0x555555);
+					} else {
+						board.name_labels[0].setStyle("color", 0x000000);
+					}
+				} else if (match[1] == board.name_labels[1].text) {
+					if (match[2] == "OUT") {
+						board.name_labels[1].setStyle("color", 0x555555);
+					} else {
+						board.name_labels[1].setStyle("color", 0x000000);
+					}
+				}
+			}
+			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
+		} else {
+			if (e.message.match(_regExpCalled)) {
+				_writeUserMessage(e.message.substr(12), 2, "#FF0000");
+			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
+				_writeUserMessage(e.message.substr(12), 2, "#000000");
+			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[1].name) {
+				_writeUserMessage(e.message.substr(12), 2, "#666666");
+			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == _login_name) {
+				_writeUserMessage(e.message.substr(12), 2, "#0033DD");
+			} else {
+				_writeUserMessage(e.message.substr(12), 2, "#660000");
+			}
+			if (_chat_sound2_play){
+				if (e.message.match(_regExpCalled)) {
+					_sound_chat3.play();
+				} else {
+					_sound_chat1.play();
+				}
+			}
+		}
+    }
+	
+	private function _handlePrivateChat(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex == 1 || mainViewStack.selectedIndex == 3) {
+			_writeUserMessage("PM: " + e.message.substr(15), 1, "#FF0000");
+		} else if (mainViewStack.selectedIndex == 2) {
+			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
+		}
+		if (_chat_sound1_play) _sound_chat3.play();
 	}
 
-    private function _checkTimeout():void {
-	  board.clientTimeout();
-      _client.checkTimeout();
-    }
-
-    private function _handleList(e:ServerMessageEvent):void{
-	  var game_list:Array = new Array();
-	  var lines:Array = e.message.split("\n");
-        for each(var line:String in lines) {
-		  if (line.match(/^##\[LIST\] \+OK$/)) break;
-          var tokens:Array = line.split(" ");
-          var game:Object = {
-			  'id':tokens[1], //line.substr(9),
-			  'blackName':tokens[1].split("+")[2],
-			  'whiteName':tokens[1].split("+")[3],
-			  'blackRating':parseInt(tokens[3]),
-			  'whiteRating':parseInt(tokens[4]),
-			  'blackCountryCode':parseInt(tokens[5]),
-			  'whiteCountryCode':parseInt(tokens[6]),
-			  'watchers':parseInt(tokens[10]),
-			  'blackTitle':"",
-			  'whiteTitle':""
-			  }
-		  var user:Object;
-		  if ((user = _findPlayerFromList(game.blackName))) {
-			  game.blackWins = user.wins;
-			  game.blackLosses = user.losses;
-			  game.blackStreakBest = user.streak_best;
-		  }
-		  if ((user = _findPlayerFromList(game.whiteName))) {
-			  game.whiteWins = user.wins;
-			  game.whiteLosses = user.losses;
-			  game.whiteStreakBest = user.streak_best;
-		  }
-		  game.blackCountry = _infoFetcher.country_names[game.blackCountryCode];
-		  game.blackFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
-		  game.whiteCountry = _infoFetcher.country_names[game.whiteCountryCode];
-		  game.whiteFlagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
-		  if (tokens[7] == "true") {
-			  game.status = "G: " + parseInt(tokens[2]);
-		  } else {
-			  game.status = "P";
-			  if (tokens[8] == "true") game.status += "▲";
-			  if (tokens[9] == "true") game.status += "△";
-		  }
-		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
-				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
-					game.blackTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleRate[i] != "*") game.blackRating = _infoFetcher.titleRate[i];
-				}
-				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
-					game.whiteTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleRate[i] != "*") game.whiteRating = _infoFetcher.titleRate[i];
-				}
-		  }
-		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
-		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") game.maxRating -= 3000;
-		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
-		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
-		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
-		  var total:int = parseInt(game_info[3]) / 60;
-		  var hc:String;
-		  if (game_info[1] == "r") {
-			hc = "R";
-			game.hcTip = "";
-		  } else if (game_info[1].match(/^hc/)) {
-			hc = "HC";
-			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
-		  } else {
-			hc = "NR";
-			game.hcTip = "";
-		  }
-		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
-		  game_list.push(game);
-        }
-		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
-		for (i = 0; i < game_list.length; i++) game_list[i].gameNo = i + 1;
-		_game_list = game_list;
-		gameListGrid.dataProvider = _game_list;
+    private function _format_message(message:String):String{
+      message = message.substr(8);
+      var match:Array = message.match(/(\[.+?\]) ([^ ]+?\+[^ ]+?\-[0-9]+?\-[0-9]+?\+[^ ]+?\+[^ ]+?\+[0-9]*) (.*)/);
+      if(match != null){
+        message = match[1] + " " + match[3] + "\n";
+      }
+      return message;
     }
 
     private function _handleMonitor(e:ServerMessageEvent):void {
@@ -1101,11 +701,255 @@
 	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
 	  kifuDataGrid.callLater(_scrollDownKifu);
     }
+
+	//=========================================================
+	//                   CONTROLS for VIEWSTACK INDEX = 0
+	//=========================================================
+    private function _connectAndLogin():void{
+      trace("connecting.");
+      _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
+      _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
+      _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
+	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
+      _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
+      _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
+      _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
+	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
+	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
+      _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
+      _client.addEventListener(CsaShogiClient.WHO,_handleWho);
+      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
+      _client.addEventListener(CsaShogiClient.LIST, _handleList);
+      _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
+      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
+      _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
+	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
+	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
+	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
+	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
+	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
+      loginMessage.text = "Connecting...";
+      errorMessage.text = "";
+      _client.connect();
+    }
 	
-	private function _scrollDownKifu():void {
-		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+    private function _handleLogin(e:Event):void{
+      _connectAndLogin();
+    }
+	
+	private function _testLogin(i:int):void {
+		loginname.text = "test" + i;
+		password.text = "81dojo" + i;
+		_connectAndLogin();
 	}
 	
+	private function _localLogin():void {
+		_client.setHostToLocal();
+		_api.setHostToLocal();
+		loginButton.setStyle('color', '0xFF0000');
+		loginButton.setStyle('textRollOverColor', '0xFF0000');
+	}
+	
+	//=========================================================
+	//                   CONTROLS for VIEWSTACK INDEX = 1
+	//=========================================================
+    private function _refresh():void {
+	  _keepAliveTimer.reset();
+	  _keepAliveTimer.start();
+      _client.who();
+	  _client.list();
+	  if (_game_name) _client.watchers(_game_name);
+	  challengeButton.enabled = false;
+//	  watchButton.enabled = false;
+    }
+	
+    private function _newGameForm():void{
+      _newGameWindow = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
+      PopUpManager.centerPopUp(_newGameWindow);
+      with(_newGameWindow){
+        title = "Create new game";
+		nonrated_total.selectedIndex = _ur_total_selected;
+		nonrated_byoyomi.selectedIndex = _ur_byoyomi_selected;
+		nonrated_handicap.selectedIndex = _ur_handicap_selected;
+		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
+      }
+    }
+  
+    private function _stopWaiting():void {
+	  _waiting = false;
+      _client.stopWaiting();
+      _refresh();
+      stopButton.enabled = false;
+    }
+
+	private function _showOptions():void{
+      _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, false));
+      PopUpManager.centerPopUp(_optionWindow);
+      with(_optionWindow){
+        title = "Options";
+		RadioGroup1.selectedValue = GameTimer.soundType;
+        RadioGroup2.selectedValue = board.piece_type;
+        pieceSoundCheckBox.selected = board.piece_sound_play;
+        gameEndSoundCheckBox.selected = _end_sound_play;
+        chatSound1CheckBox.selected = _chat_sound1_play;
+        chatSound2CheckBox.selected = _chat_sound2_play;
+        OkButton.addEventListener("click", _handleOption);
+		saveSettingsButton.addEventListener("click", _handleSaveSettings);
+      }
+    }
+
+     private function _waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void{
+      _client.waitForGame(total,byoyomi,handicap);
+      _refresh();
+      stopButton.enabled = true;
+    }
+
+    private function _challengeForm():void{
+      var user:Object = waiterListGrid.selectedItem;
+      if (user != null) {
+        var match:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+        var total:int = parseInt(match[3]) / 60 ;
+        var rule:String = total + "min - " + match[4] + "sec";
+		var hc:String = InfoFetcher.gameType(match[1]);
+        Alert.yesLabel = "Challenge";
+        Alert.noLabel = "Offer your setting";
+        Alert.buttonWidth = 140;
+        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
+        //set properties back to default.
+        Alert.yesLabel = "Yes";
+        Alert.noLabel = "No";
+        Alert.buttonWidth = 60;
+      }    
+    }
+
+    private function _handleChallengeAlert(e:CloseEvent):void{
+      var user:Object = waiterListGrid.selectedItem;
+      if (e.detail == Alert.YES) {
+      _challenging = true;
+      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
+      _client.challenge(user);
+      } else if (e.detail == Alert.CANCEL) {
+      } else {
+//        var challengeWindow:ChallengeForm = ChallengeForm(PopUpManager.createPopUp(this, ChallengeForm, true));
+//        PopUpManager.centerPopUp(challengeWindow);
+//        challengeWindow.title = "Challenge to " + user.name;
+//        challengeWindow.challengeButton.addEventListener("click",_challenge);
+      }
+      challengeButton.enabled = false;
+    }
+
+   private function _challenge(e:Event):void{
+//     var user:Object = userListGrid.selectedItem;
+//     if(user != null){
+//       _client.challenge(user);
+//     }
+//	  challengeButton.enabled = false;
+    }
+
+	private function _logout():void {
+//		_sendAutoChat("I've logged out. See you.");
+		_client.logout();
+	}
+
+  private function _checkLobby():void {
+	  mainViewStack.selectedIndex = 1;
+	  backToGameButton.visible = true;
+	  searchViewButton.enabled = false;
+  }
+
+  private function _backToGame():void {
+	  mainViewStack.selectedIndex = 2;
+	  backToGameButton.visible = false;
+	  searchViewButton.enabled = true;
+  }
+  
+  private function _killGhost(str:String):void {
+	  _client.send("%%GHOST " + str);
+  }
+	
+  private function _change_auto_scroll1():void {
+	  _chat_auto_scroll1 = autoScrollCheck1.selected;
+  }
+ 
+  private function _mute(v:Boolean):void {
+	  var trans:SoundTransform = new SoundTransform;
+	  if (v) {
+		  trans.volume = 0;
+	  } else {
+		  trans.volume = 1;
+	  }
+	  SoundMixer.soundTransform = trans;
+	  muteCheck1.selected = v;
+	  muteCheck2.selected = v;
+  }
+	//------------------------------------------------------------------------------------------------------------------------ LIST SELECTED
+    private function _userSelected():void {
+      var user:Object = userListGrid.selectedItem;
+	  for (var i:int = 0; i < _game_list.length; i++) {
+		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
+			  gameListGrid.selectedIndex = i;
+			  break;
+		  }
+		  if (user.monitor_game != "*" && user.monitor_game.split("+")[0] == _game_list[i].blackName && user.monitor_game.split("+")[1] == _game_list[i].whiteName) {
+			  gameListGrid.selectedIndex = i;
+			  break;
+		  }
+		  gameListGrid.selectedIndex = -1;
+	  }
+	  if (_game_name) return;
+	  for (i = 0; i < _waiter_list.length; i++) {
+		  if (_waiter_list[i].name == user.name) {
+			  waiterListGrid.selectedIndex = i;
+				  if(_waiter_list[i].name != _login_name && _waiter_list[i].game_name.indexOf(_waiter_list[i].name) >= 0){
+					challengeButton.enabled = true;
+				  } else {
+					challengeButton.enabled = false;
+				  }
+			  break;
+		  }
+		  waiterListGrid.selectedIndex = -1;
+		  challengeButton.enabled = false;
+	  }
+//	  _waiterSelected();
+//	  _gameSelected();
+    }
+	
+    private function _waiterSelected():void {
+	  if (_game_name) return;
+      var user:Object = waiterListGrid.selectedItem;
+	  if (!user) {
+		  challengeButton.enabled = false;
+		  return;
+	  }
+      if(user != null && user.name != _login_name && user.game_name.indexOf(user.name) >= 0){
+        challengeButton.enabled = true;
+      } else {
+		challengeButton.enabled = false;
+	  }
+	  for (var i:int = 0; i < _user_list.length; i++) {
+		  if (_user_list[i].name == user.name) {
+			  userListGrid.selectedIndex = i;
+			  break;
+		  }
+		  userListGrid.selectedIndex = -1;
+	  }
+	  gameListGrid.selectedIndex = -1;
+    }
+	
+    private function _gameSelected():void {
+      var game:Object = gameListGrid.selectedItem;
+	  for (var i:int = 0; i < _user_list.length; i++) {
+		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
+			  userListGrid.selectedIndex = i;
+			  break;
+		  }
+		  userListGrid.selectedIndex = -1;
+	  }
+	  waiterListGrid.selectedIndex = -1;
+	  challengeButton.enabled = false;
+    }
+
+
 	private function _watchDialog():void {
 		if (_game_name) return;
 		Alert.yesLabel = "Black";
@@ -1140,7 +984,6 @@
 		board.isLoser = false;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
-		
 //		  watchButton.enabled = false;
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
@@ -1160,14 +1003,7 @@
 		  board.onListen = true;
 	  }
     }
-	
-	private function _findPlayerFromList(str:String):Object {
-		for (var i:int = 0; i < _user_list.length; i++) {
-			if (_user_list[i].name == str) return _user_list[i];
-		}
-		return null;
-	}
-	
+
 	private function _openPlayerInfo(user:Object):void {
 	  if (!user) return;
 	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, false));
@@ -1182,16 +1018,6 @@
 		  _playerInfoWindow.directMessage.setFocus();
 	  }
 	}
-	
-	private function _playerInfoFromText(textArea:TextArea):void {
-		var selectedText:String = textArea.text.substring(textArea.selectionBeginIndex, textArea.selectionEndIndex);
-		var match:Array;
-		if ((match = selectedText.match(/^\[(.+)\]$/))) _openPlayerInfo(_findPlayerFromList(match[1]));
-	}
-	
-	private function _gamePlayerInfo(e:MouseEvent):void {
-	  _openPlayerInfo(_findPlayerFromList(e.target.text));
-	}
 
     private function _handleSendChat1(e:FlexEvent):void {
 	  var match:Array;
@@ -1203,6 +1029,57 @@
       e.target.text = "";
     }
 	
+	//=========================================================
+	//                       CONTROLS for VIEWSTACK INDEX = 2
+	//=========================================================
+	
+	//------------------------------------------------------------------------------------------------------------------------ BUTTONS
+	private function _resignAlert():void {
+		if (board.my_turn == board.position.turn)
+        Alert.show("","Resign?",Alert.YES|Alert.NO,this,_resign);
+	}
+	
+    private function _resign(e:CloseEvent):void {
+		if (e.detail == Alert.YES) _client.resign();
+    }
+	
+    private function _showImpasse():void {
+      Alert.show("Black: " + board.position.calcImpasse(Kyokumen.SENTE) + " points\nWhite: " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
+    }
+	
+    private function _closeGame():void {
+	  if (_game_name) {
+		  if (_monitoring) {
+			  _client.monitorOff(_game_name);
+			  _monitoring = false;
+		  } else if (board.viewing) {
+		  } else {
+			  _client.closeGame();
+			  _sendAutoChat("I have left this room.");
+		  }
+          _game_name = null;
+	  }
+      board.closeGame();
+	  if (board.viewing) {
+		  mainViewStack.selectedIndex = 3;
+		  chatMessage2.enabled = true;
+		  board.viewing = false;
+	  } else {
+		  mainViewStack.selectedIndex = 1;
+	  }
+      challengeButton.enabled = false;
+	  logoutButton.enabled = true;
+	  rewindAllButton.setStyle('color', 'undefined');
+	  rewindAllButton.setStyle('textRollOverColor', 'undefined');
+	  rewindOneButton.setStyle('color', 'undefined');
+	  rewindOneButton.setStyle('textRollOverColor', 'undefined');
+	  forwardOneButton.setStyle('color', 'undefined');
+	  forwardOneButton.setStyle('textRollOverColor', 'undefined');
+	  forwardAllButton.setStyle('color', 'undefined');
+	  forwardAllButton.setStyle('textRollOverColor', 'undefined');
+      _refresh();
+    }
+
     private function _handleSendChat2(e:FlexEvent):void {
 	  var match:Array;
 	  if ((match = e.target.text.match(/^@(.+?)\s(.+)$/))) {
@@ -1212,95 +1089,16 @@
 	  }
       e.target.text = "";
     }
-	
-	private function _handleSendPrivateChat(e:FlexEvent):void {
-		_sendPrivateChat(e.target.parent.parent.nameLabel.text, e.target.text);
-		e.target.text = "";
-	}
-	
-	private function _sendPrivateChat(sendTo:String, message:String):void {
-		if (!_isPlayer()) {
-			var user:Object = _findPlayerFromList(sendTo);
-			if (!user) {
-				Alert.show("User not found online");
-				return;
-			} else if (user.status == "game") {
-				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
-					_client.privateChat(sendTo, message);
-					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
-					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
-				} else if (_game_name && _monitoring && sendTo == board.playerInfos[1].name) {
-					_client.privateChat(sendTo, message);
-					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
-					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to White.");
-				} else {
-					Alert.show("User is now playing.");
-					return;
-				}
-			} else {
-				_client.privateChat(sendTo, message);
-				if (mainViewStack.selectedIndex == 1) {
-					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
-					if (_chat_sound1_play) _sound_chat1.play();
-				} else {
-					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
-					if (_chat_sound2_play) _sound_chat2.play();
-				}
-			}
-		}
-	}
-  
-  private function _sendAutoChat(str:String):void {
-    if (_game_name) {
-      _client.gameChat(_game_name, "[auto-chat] " + str);
-    } else {
-	  _client.chat("[auto-chat] " + str);
-	}
-  }
-  
-  private function _isPlayer():Boolean {
-	  if (_game_name && !board.post_game) {
-		  if (board.playerInfos[0].name == _login_name || board.playerInfos[1].name == _login_name) return true;
-	  }
-	  return false;
-  }
- 
-  private function _mute(v:Boolean):void {
-	  var trans:SoundTransform = new SoundTransform;
-	  if (v) {
-		  trans.volume = 0;
-	  } else {
-		  trans.volume = 1;
-	  }
-	  SoundMixer.soundTransform = trans;
-	  muteCheck1.selected = v;
-	  muteCheck2.selected = v;
-  }
-  
-  private function _change_auto_scroll1():void {
-	  _chat_auto_scroll1 = autoScrollCheck1.selected;
-  }
-   
+
   private function _change_auto_scroll2():void {
 	  _chat_auto_scroll2 = autoScrollCheck2.selected;
   }
-  
-  private function _checkLobby():void {
-	  mainViewStack.selectedIndex = 1;
-	  backToGameButton.visible = true;
-	  searchViewButton.enabled = false;
-  }
 
-  private function _backToGame():void {
-	  mainViewStack.selectedIndex = 2;
-	  backToGameButton.visible = false;
-	  searchViewButton.enabled = true;
-  }
-  
-  private function _killGhost(str:String):void {
-	  _client.send("%%GHOST " + str);
-  }
-  
+	private function _gamePlayerInfo(e:MouseEvent):void {
+	  _openPlayerInfo(_findPlayerFromList(e.target.text));
+	}
+	
+  //------------------------------------------------------------------------------------------------------------------------ KIFU
   private function _toggleListen():void {
 	  if (radioKifuListen.selected) {
 		  board.onListen = true;
@@ -1344,6 +1142,140 @@
 		  return KIFDataText;
 	}
 	
+  private function kifuListSelected():void {
+	if (board.post_game && board.isWinner) {
+		board.studyOrigin = kifuDataGrid.selectedIndex;
+		if (board.study_list_hold.length > 0) {
+			_sendAutoChat("Quit study mode.");
+			board.study_list = new Array();
+			board.study_list_hold = new Array();
+			rewindAllButton.setStyle('color', 'undefined');
+			rewindAllButton.setStyle('textRollOverColor', 'undefined');
+			rewindOneButton.setStyle('color', 'undefined');
+			rewindOneButton.setStyle('textRollOverColor', 'undefined');
+			forwardOneButton.setStyle('color', 'undefined');
+			forwardOneButton.setStyle('textRollOverColor', 'undefined');
+			forwardAllButton.setStyle('color', 'undefined');
+			forwardAllButton.setStyle('textRollOverColor', 'undefined');
+		}
+		_sendStudy();
+	}
+	radioKifuReplay.selected = true;
+	board.onListen = false;
+    board.replayMoves(kifuDataGrid.selectedIndex);
+  }
+    
+  private function replayByButton(i:int):void {
+	radioKifuReplay.selected = true;
+	board.onListen = false;
+    switch (i) {
+      case -2:
+	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
+			if (board.study_list.length == 0) {
+				board.study_list_hold = new Array();
+				_sendAutoChat("Quit study mode.");
+				kifuDataGrid.selectedIndex = 0;
+			} else {
+				board.study_list = new Array();
+			}
+		} else {
+			kifuDataGrid.selectedIndex = 0;
+		}
+        break;
+      case -1:
+	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
+			if (board.study_list.length == 0) {
+				board.study_list_hold = new Array();
+				_sendAutoChat("Quit study mode.");
+				if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
+			} else {
+				board.study_list.pop();
+			}
+		} else if (kifuDataGrid.selectedIndex > 0) {
+			kifuDataGrid.selectedIndex--;
+        }
+        break;
+      case 1:
+	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
+			if (board.study_list_hold.length > board.study_list.length) board.study_list.push(board.study_list_hold[board.study_list.length]);
+		} else if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
+//		  if (board.post_game && board.isWinner) board.study_list = new Array();
+          kifuDataGrid.selectedIndex++;
+        }
+        break;
+      case 2:
+	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
+			board.study_list = board.study_list_hold;
+		} else {
+//	    if (board.post_game && board.isWinner) board.study_list = new Array();
+			kifuDataGrid.selectedIndex = board.kifu_list.length;
+		}
+    }
+	if (board.post_game && board.isWinner) {
+		if (board.study_list_hold.length == 0) {
+//			board.replayMoves(kifuDataGrid.selectedIndex);
+//			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+			rewindAllButton.setStyle('color', 'undefined');
+			rewindAllButton.setStyle('textRollOverColor', 'undefined');
+			rewindOneButton.setStyle('color', 'undefined');
+			rewindOneButton.setStyle('textRollOverColor', 'undefined');
+			forwardOneButton.setStyle('color', 'undefined');
+			forwardOneButton.setStyle('textRollOverColor', 'undefined');
+			forwardAllButton.setStyle('color', 'undefined');
+			forwardAllButton.setStyle('textRollOverColor', 'undefined');
+		}
+		board.studyOrigin = kifuDataGrid.selectedIndex;
+		_sendStudy();
+	} else {
+		board.replayMoves(kifuDataGrid.selectedIndex);
+		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+	}
+  }
+	
+	private function _scrollDownKifu():void {
+		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+	}
+	
+ 	//------------------------------------------------------------------------------------------------------------------------ MOUSE DETECTION
+	private function _rollOver(e:MouseEvent):void {
+		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
+	}
+	
+	private function _rollOut(e:MouseEvent):void {
+		if (_isPlayer() && !board.viewing && _game_name.split("+")[1].match(/^r_/)) _client.gameChat(_game_name, "[##M_OUT]0,0");
+	}
+
+	private function _playerInfoFromText(textArea:TextArea):void {
+		var selectedText:String = textArea.text.substring(textArea.selectionBeginIndex, textArea.selectionEndIndex);
+		var match:Array;
+		if ((match = selectedText.match(/^\[(.+)\]$/))) _openPlayerInfo(_findPlayerFromList(match[1]));
+	}
+	
+	//=========================================================
+	//                       CONTROLS for VIEWSTACK INDEX = 3
+	//=========================================================
+
+	private function _rankingTabChange():void {
+		var country_code:String = "";
+		switch (rankingTabNavigator.selectedIndex) {
+			case 0:
+				if (_ranking_rate_list) {country_code = _ranking_rate_list[0].country_code;} break;
+			case 1:
+				if (_ranking_streak_list) {country_code = _ranking_streak_list[0].country_code;} break;
+			case 2:
+				if (_ranking_percentage_list) {country_code = _ranking_percentage_list[0].country_code;} break;
+			case 3:
+				if (_ranking_wins_list) {country_code = _ranking_wins_list[0].country_code;} break;
+			case 4:
+				if (_ranking_total_list) {country_code = _ranking_total_list[0].country_code;} break;
+		}
+		if (country_code == "") {
+			rankingFlagLoader.source = "";
+		} else {
+			rankingFlagLoader.source = "http://www.81squareuniverse.com/dojo/images/flags_m/" + country_code + ".swf";
+		}
+	}
+	
 	private function _sendKifuSearch():void {
 		if (kifuSearchPlayerText.text && kifuSearchFromChooser.selectedDate && kifuSearchToChooser.selectedDate) {
 			kifuSearchGrid.dataProvider = null;
@@ -1369,18 +1301,19 @@
 				hc = "R";
 			} else if (match[1] == "nr") {
 				hc = "NR";
-			} else {
-				hc = "HC";
+			} else if (match[1].match(/^hc/)) {
+				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
 			}
 			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
 			kifu.black = kifu.game_id.split("+")[2];
 			kifu.white = kifu.game_id.split("+")[3];
 			kifu.date = kifu.game_id.split("+")[4].substr(0, 4) + "-" + kifu.game_id.split("+")[4].substr(4, 2) + "-" + kifu.game_id.split("+")[4].substr(6, 2);
+			trace(kifu.game_id + " " + kifu.result);
 			if (kifu.result.match(/summary/)) {
-				if (kifu.result.split(":")[2].match(/win$/)) {
-					kifu.winner = "▲";
-				} else if (kifu.result.split(":")[3].match(/win$/)) {
-					kifu.winner = "△";
+				if (kifu.result.match(new RegExp(kifuSearchPlayerText.text + " win", "i"))) {
+					kifu.winner = "WIN";
+				} else if (kifu.result.match(new RegExp(kifuSearchPlayerText.text + " lose", "i"))) {
+					kifu.winner = "LOSE";
 				} else {
 					kifu.winner = "DRAW";
 				}
@@ -1492,8 +1425,8 @@
 			var player:Object = {
 				'number':num,
 				'login':String(playerXML.login),
+				'country_code':String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
 				'country':_infoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
-				'flagURL':"http://www.81squareuniverse.com/dojo/images/flags_s/" + String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1) + ".gif",
 				'wins':parseInt(playerXML.wins),
 				'losses':parseInt(playerXML.losses),
 				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),
@@ -1502,13 +1435,10 @@
 				'rate':parseInt(playerXML.rate),
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
+			player.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
 					  player.title = _infoFetcher.titleName[i];
-					  if (player.title == "AI-bot") { // Temporarily
-						  listed = false;
-						  num -= 1;
-					  }
 					  break;
 				  }
 			}
@@ -1539,102 +1469,227 @@
 		streakRankingGrid.dataProvider = _ranking_streak_list;
 		percentageRankingGrid.dataProvider = _ranking_percentage_list;
 		rateRankingGrid.dataProvider = _ranking_rate_list;
+		_rankingTabChange();
 	}
 
-  private function kifuListSelected():void {
-	if (board.post_game && board.isWinner) {
-		board.studyOrigin = kifuDataGrid.selectedIndex;
-		if (board.study_list_hold.length > 0) {
-			_sendAutoChat("Quit study mode.");
-			board.study_list = new Array();
-			board.study_list_hold = new Array();
-			rewindAllButton.setStyle('color', 'undefined');
-			rewindAllButton.setStyle('textRollOverColor', 'undefined');
-			rewindOneButton.setStyle('color', 'undefined');
-			rewindOneButton.setStyle('textRollOverColor', 'undefined');
-			forwardOneButton.setStyle('color', 'undefined');
-			forwardOneButton.setStyle('textRollOverColor', 'undefined');
-			forwardAllButton.setStyle('color', 'undefined');
-			forwardAllButton.setStyle('textRollOverColor', 'undefined');
-		}
-		_sendStudy();
-	}
-	radioKifuReplay.selected = true;
-	board.onListen = false;
-    board.replayMoves(kifuDataGrid.selectedIndex);
+	//=========================================================
+	//                   OTHER EVENT HANDLERS for SMALL WINDOWS
+	//=========================================================
+	
+	//--------------------------------------------------------------------------------------------------------------------------------- CREATE GAME
+    private function _handleRuleSelected(e:GameRuleEvent):void {
+	  _ur_total_selected = _newGameWindow.nonrated_total.selectedIndex;
+	  _ur_byoyomi_selected = _newGameWindow.nonrated_byoyomi.selectedIndex;
+	  _ur_handicap_selected = _newGameWindow.nonrated_handicap.selectedIndex;
+      _waitForGame(e.total, e.byoyomi, e.handicap);
+	  _waiting = true;
+    }
+	//--------------------------------------------------------------------------------------------------------------------------------- CHALLENGE ALERT 
+  private function _handleChallengerAcceptButton(e:MouseEvent):void {
+	  _challengerTicker.reset();
+	  _client.agree();
   }
-    
-  private function replayByButton(i:int):void {
-	radioKifuReplay.selected = true;
-	board.onListen = false;
-    switch (i) {
-      case -2:
-	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
-			if (board.study_list.length == 0) {
-				board.study_list_hold = new Array();
-				_sendAutoChat("Quit study mode.");
-				kifuDataGrid.selectedIndex = 0;
-			} else {
-				board.study_list = new Array();
-			}
-		} else {
-			kifuDataGrid.selectedIndex = 0;
+  
+  private function _handleChallengerRejectButton(e:MouseEvent):void {
+	  _challengerTicker.reset();
+	  _client.reject();
+  }
+	
+	private function _challengerTickHandler(e:TimerEvent):void {
+		_challengerAlertWindow.remainTime -= 1
+		if (_challengerAlertWindow.remainTime <= 0) {
+			_challengerTicker.reset();
+			_client.reject();
+			PopUpManager.removePopUp(_challengerAlertWindow);
 		}
-        break;
-      case -1:
-	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
-			if (board.study_list.length == 0) {
-				board.study_list_hold = new Array();
-				_sendAutoChat("Quit study mode.");
-				if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
-			} else {
-				board.study_list.pop();
-			}
-		} else if (kifuDataGrid.selectedIndex > 0) {
-			kifuDataGrid.selectedIndex--;
-        }
-        break;
-      case 1:
-	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
-			if (board.study_list_hold.length > board.study_list.length) board.study_list.push(board.study_list_hold[board.study_list.length]);
-		} else if (kifuDataGrid.selectedIndex < board.kifu_list.length) {
-//		  if (board.post_game && board.isWinner) board.study_list = new Array();
-          kifuDataGrid.selectedIndex++;
-        }
-        break;
-      case 2:
-	    if (board.post_game && board.isWinner && board.study_list_hold.length > 0) {
-			board.study_list = board.study_list_hold;
-		} else {
-//	    if (board.post_game && board.isWinner) board.study_list = new Array();
-			kifuDataGrid.selectedIndex = board.kifu_list.length;
+	}
+
+	//--------------------------------------------------------------------------------------------------------------------------------- OPTION WINDOW
+    private function _handleOption(e:Event):void {
+	  GameTimer.soundType = int(_optionWindow.RadioGroup1.selectedValue);
+      board.setPieceType(int(_optionWindow.RadioGroup2.selectedValue));
+      board.piece_sound_play = _optionWindow.pieceSoundCheckBox.selected;
+      _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
+      _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
+      _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
+    }
+	
+	private function _handleSaveSettings(e:Event):void {
+		var urlVariables:URLVariables = new URLVariables();
+		_handleOption(e);
+		urlVariables.name = _login_name.toLowerCase();
+		urlVariables.pieceSound = board.piece_sound_play;
+		urlVariables.endSound = _end_sound_play;
+		urlVariables.chatSound1 = _chat_sound1_play;
+		urlVariables.chatSound2 = _chat_sound2_play;
+		urlVariables.byoyomi = GameTimer.soundType;
+		urlVariables.pieceType = board.piece_type;
+		_infoFetcher.writeSettings(urlVariables);
+	}
+	
+	private function _handleLoadOption(e:Event):void {
+		board.piece_sound_play = _infoFetcher.userSettings.pieceSound;
+		_end_sound_play = _infoFetcher.userSettings.endSound;
+		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
+		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
+		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
+		board.setPieceType(_infoFetcher.userSettings.pieceType);
+	}
+	
+	//--------------------------------------------------------------------------------------------------------------------------------- PLAYER INFO WINDOW
+	private function _handleSendPrivateChat(e:FlexEvent):void {
+		_sendPrivateChat(e.target.parent.parent.nameLabel.text, e.target.text);
+		e.target.text = "";
+	}
+	
+	//=========================================================
+	//                       OTHERS
+	//=========================================================
+	
+    private function _handleKeepAlive(e:Event):void {
+	  _refresh();
+    }
+
+    private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
+		switch (n) {
+			case 0:
+				break;
+			case 1:
+				var nowDate:Date = new Date(); 
+				_lastChatTime = "Last message receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
+				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
+				userMessage1.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
+				userMessage1.callLater(_scrollDown1);
+				break;
+			case 2:
+				_userMessageScrollPos2 = userMessage2.verticalScrollPosition
+				userMessage2.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
+				userMessage2.callLater(_scrollDown2);
+				break;		
 		}
     }
-	if (board.post_game && board.isWinner) {
-		if (board.study_list_hold.length == 0) {
-//			board.replayMoves(kifuDataGrid.selectedIndex);
-//			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
-			rewindAllButton.setStyle('color', 'undefined');
-			rewindAllButton.setStyle('textRollOverColor', 'undefined');
-			rewindOneButton.setStyle('color', 'undefined');
-			rewindOneButton.setStyle('textRollOverColor', 'undefined');
-			forwardOneButton.setStyle('color', 'undefined');
-			forwardOneButton.setStyle('textRollOverColor', 'undefined');
-			forwardAllButton.setStyle('color', 'undefined');
-			forwardAllButton.setStyle('textRollOverColor', 'undefined');
+
+    private function _scrollDown1():void{
+      if (_chat_auto_scroll1) userMessage1.verticalScrollPosition = userMessage1.maxVerticalScrollPosition;
+	  else userMessage1.verticalScrollPosition = _userMessageScrollPos1;
+    }
+
+	private function _scrollDown2():void{
+      if (_chat_auto_scroll2) userMessage2.verticalScrollPosition = userMessage2.maxVerticalScrollPosition;
+	  else userMessage2.verticalScrollPosition = _userMessageScrollPos2;
+    }
+
+//    private function _who():void{
+//      _client.who();
+//    }
+
+    private function _playerMove(from:Point, to:Point, promote:Boolean):void {
+	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
+	  if (board.post_game && board.isWinner) {
+		  rewindAllButton.setStyle('color', '0xFF0000');
+		  rewindAllButton.setStyle('textRollOverColor', '0xFF0000');
+		  rewindOneButton.setStyle('color', '0xFF0000');
+		  rewindOneButton.setStyle('textRollOverColor', '0xFF0000');
+		  forwardOneButton.setStyle('color', '0xFF0000');
+		  forwardOneButton.setStyle('textRollOverColor', '0xFF0000');
+		  forwardAllButton.setStyle('color', '0xFF0000');
+		  forwardAllButton.setStyle('textRollOverColor', '0xFF0000');
+		  board.study_list.push(str);
+		  if (board.study_list_hold.length == 0) _sendAutoChat("Launched study mode at #" + board.studyOrigin);
+		  board.study_list_hold = board.study_list;
+		  _sendStudy();
+	  } else if (board.post_game && board.isLoser) {
+		  board.study_list.push(str);
+		  _sendStudy();
+	  } else {
+		  _client.move(str);
+	  }
+    }
+	
+	private function _sendStudy():void {
+		var str:String = "[##STUDY]" + board.studyOrigin;
+		if (board.study_list.length > 0){
+			for (var i:int = 0; i < board.study_list.length; i ++) str += "/" + board.study_list[i];
+		} else {
+			str += "/*";
 		}
-		board.studyOrigin = kifuDataGrid.selectedIndex;
-		_sendStudy();
-	} else {
-		board.replayMoves(kifuDataGrid.selectedIndex);
-		kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+		_client.gameChat(_game_name, str);
+	}
+
+    private function _checkTimeout():void {
+	  board.clientTimeout();
+      _client.checkTimeout();
+    }
+	
+	private function _findPlayerFromList(str:String):Object {
+		for (var i:int = 0; i < _user_list.length; i++) {
+			if (_user_list[i].name == str) return _user_list[i];
+		}
+		return null;
+	}
+	
+	private function _sendPrivateChat(sendTo:String, message:String):void {
+		if (!_isPlayer()) {
+			var user:Object = _findPlayerFromList(sendTo);
+			if (!user) {
+				Alert.show("User not found online");
+				return;
+			} else if (user.status == "game") {
+				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
+					_client.privateChat(sendTo, message);
+					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
+					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
+				} else if (_game_name && _monitoring && sendTo == board.playerInfos[1].name) {
+					_client.privateChat(sendTo, message);
+					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
+					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to White.");
+				} else {
+					Alert.show("User is now playing.");
+					return;
+				}
+			} else {
+				_client.privateChat(sendTo, message);
+				if (mainViewStack.selectedIndex == 1) {
+					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
+					if (_chat_sound1_play) _sound_chat1.play();
+				} else {
+					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
+					if (_chat_sound2_play) _sound_chat2.play();
+				}
+			}
+		}
+	}
+  
+  private function _sendAutoChat(str:String):void {
+    if (_game_name) {
+      _client.gameChat(_game_name, "[auto-chat] " + str);
+    } else {
+	  _client.chat("[auto-chat] " + str);
 	}
   }
-
+  
+  private function _isPlayer():Boolean {
+	  if (_game_name && !board.post_game) {
+		  if (board.playerInfos[0].name == _login_name || board.playerInfos[1].name == _login_name) return true;
+	  }
+	  return false;
+  }
+	
+  private function _scratch():void {
+	  _client.send("%%SCRATCH");
+  }
+  
+	//=========================================================
+	//                       MXML PART
+	//=========================================================
+  
     ]]>
   </mx:Script>
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
+<!-- =============================================================
+                  VIEWSTACK INDEX = 0
+================================================================== -->
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image id="titleBanner" source="http://www.81squareuniverse.com/dojo/images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
@@ -1666,7 +1721,9 @@
       <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="www.otosozai.com - ONGAKUSITU" click="navigateToURL(new URLRequest('http://www.otosozai.com/'), 'quote')"/>
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
     </mx:VBox>
-    
+<!-- =============================================================
+                  VIEWSTACK INDEX = 1
+================================================================== -->
     <mx:VBox paddingTop="10" paddingLeft="10" fontSize="11">
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}">
       <mx:HBox>
@@ -1743,9 +1800,12 @@
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
 	  </mx:HBox>
-	  <!-- <mx:Label text=" " doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/> -->
+	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/>
+	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_scratch();"/>
     </mx:VBox>
-
+<!-- =============================================================
+                  VIEWSTACK INDEX = 2
+================================================================== -->
     <mx:HBox id="boardBox">
 	<mx:Panel width="100%" height="100%" headerHeight="0" backgroundColor="#FFcccc" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" paddingLeft="0" paddingRight="0" backgroundAlpha="0">
 	<mx:HBox paddingLeft="5" paddingTop="5">
@@ -1810,11 +1870,13 @@
 	</mx:HBox>
 	</mx:Panel>
     </mx:HBox>
-
+<!-- =============================================================
+                  VIEWSTACK INDEX = 3
+================================================================== -->
 	<mx:VBox paddingLeft="10" paddingTop="10">
     <mx:Panel id="searchPanel" title="Search Panel" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 	  <mx:HBox>
-		<mx:Accordion id="searchAccordion" width="680" height="560">
+		<mx:Accordion id="searchAccordion" width="680" height="560" selectedIndex="2">
 			<mx:HBox label="Kifu Search" paddingTop="8" paddingLeft="8" width="700" height="530">
 				<mx:VBox>
 					<mx:HBox>
@@ -1826,17 +1888,17 @@
 						<mx:TextInput id="kifuSearchPlayerText" width="90" />
 					</mx:HBox>
 					<mx:Label text="From"/>
-					<mx:DateChooser id="kifuSearchFromChooser" />
+					<mx:DateChooser id="kifuSearchFromChooser" showToday="false" />
 					<mx:Label text="To"/>
-					<mx:DateChooser id="kifuSearchToChooser" />
+					<mx:DateChooser id="kifuSearchToChooser" showToday="false" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="470" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
+				<mx:DataGrid id="kifuSearchGrid" width="475" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
 					<mx:columns>
-					<mx:DataGridColumn dataField="black" headerText="Black" width="110" />
-					<mx:DataGridColumn dataField="white" headerText="White" width="110" />
-					<mx:DataGridColumn dataField="winner" headerText="Winner" width="50" />
-					<!-- <mx:DataGridColumn dataField="moves" headerText="Moves" width="45" /> -->
-					<mx:DataGridColumn dataField="rule" headerText="Rules" width="110" />
+					<mx:DataGridColumn dataField="winner" headerText="Result" width="45" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="black" headerText="Black" width="90" />
+					<mx:DataGridColumn dataField="white" headerText="White" width="90" />
+					<mx:DataGridColumn dataField="rule" headerText="Rules" width="125" />
+					<mx:DataGridColumn dataField="moves" headerText="Moves" width="45" textAlign="center" paddingLeft="0" />
 					<mx:DataGridColumn dataField="date" headerText="Date"/>
 					</mx:columns>
 				</mx:DataGrid>
@@ -1850,26 +1912,27 @@
 				</mx:HBox>
 				<mx:DataGrid id="playerSearchGrid" width="630" height="440" rowHeight="21">
 					<mx:columns>
-					<mx:DataGridColumn dataField="title" headerText="Title" width="50" />
-					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" />
+					<mx:DataGridColumn dataField="title" headerText="Title" width="50" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" textAlign="center" paddingLeft="0" />
 					<mx:DataGridColumn dataField="login" headerText="Name" width="110" />
 					<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
 					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="percentage" headerText="Percentage" width="45" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="streak_best" headerText="Best Streak" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="wins" headerText="Win" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="losses" headerText="Loss" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="total" headerText="Total" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="percentage" headerText="%-win" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="streak_best" headerText="Streak" textAlign="right" paddingRight="5" />
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
 			<mx:HBox label="View Rankings" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox>
+					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
 					<mx:Button id="searchRankingButton" label="Search" click="_sendRankingSearch();" />
 					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
 				</mx:VBox>
-				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480">
+				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
 					<mx:VBox label="Rating">
 						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" >
 							<mx:columns>

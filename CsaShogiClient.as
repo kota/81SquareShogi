@@ -210,7 +210,8 @@ package{
 			_socket.removeEventListener(Event.CLOSE,_handleClose);
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
 		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
-		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,_handleSecurityError);
+		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _handleSecurityError);
+		  Alert.show("You lost connection!");
 		}
 
 		private function _handleSocketData(e:ProgressEvent):void{

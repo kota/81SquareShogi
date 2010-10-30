@@ -374,7 +374,7 @@ package  {
 	  notationStr += rank_western_names[mv.to.y];
 	  if (mv.promote) {
 	  	notationStr += "+";
-	  } else if (mv.from.x != HAND && !mv.koma.isPromoted()){
+	  } else if (mv.from.x != HAND && !mv.koma.isPromoted() && mv.koma.type != Koma.OU && mv.koma.type != Koma.KI){
 	  	if ( (1-mv.turn)*mv.from.y + mv.turn*(8-mv.from.y) <= 2 || (1-mv.turn)*mv.to.y + mv.turn*(8-mv.to.y) <=2 ) notationStr += "=";
 	  } 
 	  notationStr += " (" + mv.time + ")";
