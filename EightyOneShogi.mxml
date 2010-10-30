@@ -1800,8 +1800,6 @@
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
 	  </mx:HBox>
-	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_killGhost(chatMessage1.text);"/>
-	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_scratch();"/>
     </mx:VBox>
 <!-- =============================================================
                   VIEWSTACK INDEX = 2
@@ -1934,7 +1932,7 @@
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
 					<mx:VBox label="Rating">
-						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" >
+						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
 							<mx:DataGridColumn dataField="rate" headerText="Rating" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
@@ -1950,7 +1948,7 @@
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Best Streak">
-						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21">
+						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
 							<mx:DataGridColumn dataField="streak_best" headerText="Streak" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
@@ -1966,7 +1964,7 @@
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Winning Percentage">
-						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21">
+						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
 							<mx:DataGridColumn dataField="percentage" headerText="%-win" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
@@ -1976,13 +1974,13 @@
 							<mx:DataGridColumn dataField="title" headerText="Title" width="55" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="total" headerText="Total" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="Loss" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="rate" headerText="Rating" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Wins">
-						<mx:DataGrid id="winRankingGrid" width="550" height="440" rowHeight="21">
+						<mx:DataGrid id="winRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
 							<mx:DataGridColumn dataField="wins" headerText="Win" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
@@ -1998,7 +1996,7 @@
 						</mx:DataGrid>
 					</mx:VBox>
 					<mx:VBox label="Total Games">
-						<mx:DataGrid id="totalRankingGrid" width="550" height="440" rowHeight="21">
+						<mx:DataGrid id="totalRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
 							<mx:DataGridColumn dataField="total" headerText="Total" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
