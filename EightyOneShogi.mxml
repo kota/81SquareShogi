@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/10/31";
+	private const VERSION:String = "ver.2010/11/01";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -215,10 +215,13 @@
               user.status2 = "G " + (user.turn == "+" ? "▲" : "△"); // + user.moves;
             }
           }
-          user_list.push(user);
 		  for each (var cheat:String in _infoFetcher.cheaters) {
-			  if (user.name.toLowerCase() == cheat) user_list.pop();
+			  if (user.name.toLowerCase() == cheat && user.name != _login_name ) {
+				  user.titleName = "!!!";
+				  break;
+			  }
 		  }
+          user_list.push(user);
         }
       }
 	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {

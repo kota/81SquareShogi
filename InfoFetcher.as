@@ -278,7 +278,7 @@
 			canvas.y = 96;
 			var i:int = 1;
 			var medal:Image;
-			if (user.titleName != "") {
+			if (user.titleName != "" && user.titleName != "!!!") {
 				medal = new Image();
 				medal.source = gold_medal;
 				medal.toolTip = "Title Holder";
@@ -290,18 +290,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.rating >= 1090) {
+			if (user.rating >= 1150) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "1/2-Dan Holder";
+				medal.toolTip = "Dan Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.rating >= 1210) {
+				if (user.rating >= 1300) {
 					medal.source = gold_medal;
-					medal.toolTip = "5/6-Dan Holder";
-				} else if (user.rating >= 1150) {
+					medal.toolTip = "Over 6-Dan";
+				} else if (user.rating >= 1240) {
 					medal.source = silver_medal;
-					medal.toolTip = "3/4-Dan Holder";
+					medal.toolTip = "4/5-Dan Holder";
 				}
 				canvas.addChild(medal);
 			}

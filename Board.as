@@ -406,6 +406,8 @@ package  {
 	  _player_infos[1] = null;
       timers[0].stop();
       timers[1].stop();
+	  name_labels[0].setStyle("color", 0x000000);
+	  name_labels[1].setStyle("color", 0x000000);
 	  while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
 	  while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
 	  _player_flags[0].source = null;
