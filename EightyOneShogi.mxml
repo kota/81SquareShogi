@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/01";
+	private const VERSION:String = "ver.2010/11/03";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -1554,19 +1554,20 @@
     }
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
+		var match:Array;
+		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
+		if ((match = message.match(/\s(http\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttp\:\/\/[^\"]+?\s/, " <a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a> ");
 		switch (n) {
-			case 0:
-				break;
 			case 1:
 				var nowDate:Date = new Date(); 
 				_lastChatTime = "Last message receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
 				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
-				userMessage1.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
+				userMessage1.htmlText += message;
 				userMessage1.callLater(_scrollDown1);
 				break;
 			case 2:
 				_userMessageScrollPos2 = userMessage2.verticalScrollPosition
-				userMessage2.htmlText += "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
+				userMessage2.htmlText += message;
 				userMessage2.callLater(_scrollDown2);
 				break;		
 		}
