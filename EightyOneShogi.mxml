@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/03";
+	private const VERSION:String = "ver.2010/11/04";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -396,7 +396,11 @@
         _client.monitorOff(_game_name);
         _monitoring = false;
 		board.closeGame();
-      }
+      } else if (board.viewing) {
+		  board.closeGame();
+		  chatMessage2.enabled = true;
+		  board.viewing = false;
+	  }
 	  board.post_game = false;
 	  board.isWinner = false;
 	  board.isLoser = false;
