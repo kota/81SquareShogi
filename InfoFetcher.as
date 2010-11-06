@@ -385,10 +385,10 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.wins >= 20) {
+			if (user.wins >= 30) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "20 wins";
+				medal.toolTip = "30 wins";
 				medal.x = 24 * (i - 1);
 				i += 1;
 				if (user.wins >= 100) {
@@ -415,18 +415,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.65)) {
+			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.6)) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "65% winning percentage";
+				medal.toolTip = "60% winning percentage";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if ((user.wins/(user.wins + user.losses)) >= 0.85) {
+				if ((user.wins/(user.wins + user.losses)) >= 0.8) {
 					medal.source = gold_medal;
-					medal.toolTip = "85% winning percentage";
-				} else if ((user.wins/(user.wins + user.losses)) >= 0.75) {
+					medal.toolTip = "80% winning percentage";
+				} else if ((user.wins/(user.wins + user.losses)) >= 0.7) {
 					medal.source = silver_medal;
-					medal.toolTip = "75% winning percentage";
+					medal.toolTip = "70% winning percentage";
 				}
 				canvas.addChild(medal);
 			}	

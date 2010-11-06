@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/06";
+	private const VERSION:String = "ver.2010/11/07";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -899,10 +899,12 @@
 	  for (var i:int = 0; i < _game_list.length; i++) {
 		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
 			  gameListGrid.selectedIndex = i;
+			  gameListGrid.scrollToIndex(i);
 			  break;
 		  }
 		  if (user.monitor_game != "*" && user.monitor_game.split("+")[0] == _game_list[i].blackName && user.monitor_game.split("+")[1] == _game_list[i].whiteName) {
 			  gameListGrid.selectedIndex = i;
+			  gameListGrid.scrollToIndex(i);
 			  break;
 		  }
 		  gameListGrid.selectedIndex = -1;
@@ -911,6 +913,7 @@
 	  for (i = 0; i < _waiter_list.length; i++) {
 		  if (_waiter_list[i].name == user.name) {
 			  waiterListGrid.selectedIndex = i;
+			  waiterListGrid.scrollToIndex(i);
 				  if(_waiter_list[i].name != _login_name && _waiter_list[i].game_name.indexOf(_waiter_list[i].name) >= 0){
 					challengeButton.enabled = true;
 				  } else {
@@ -940,6 +943,7 @@
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == user.name) {
 			  userListGrid.selectedIndex = i;
+			  userListGrid.scrollToIndex(i);
 			  break;
 		  }
 		  userListGrid.selectedIndex = -1;
@@ -952,6 +956,7 @@
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
 			  userListGrid.selectedIndex = i;
+			  userListGrid.scrollToIndex(i);
 			  break;
 		  }
 		  userListGrid.selectedIndex = -1;
