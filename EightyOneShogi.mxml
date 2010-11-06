@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/04";
+	private const VERSION:String = "ver.2010/11/06";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -305,6 +305,10 @@
 			  game.status = "P";
 			  if (tokens[8] == "true") game.status += "▲";
 			  if (tokens[9] == "true") game.status += "△";
+		  }
+		  if (tokens[11]) {
+			  game.opening = InfoFetcher.openingNameJp(tokens[11]);
+			  game.opening_en = InfoFetcher.openingNameEn(tokens[11]);
 		  }
 		  var user:Object;
 		  if ((user = _findPlayerFromList(game.blackName))) {
@@ -1770,18 +1774,19 @@
 		</mx:VDividedBox>
 		<mx:VBox>
 			<mx:VDividedBox>
-				<mx:DataGrid id="gameListGrid" width="570" height="220" change="_gameSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_watchDialog();">
+				<mx:DataGrid id="gameListGrid" width="570" height="220" headerHeight="23" change="_gameSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_watchDialog();">
 				 <mx:columns>
-				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" />
+				  <!-- <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" /> -->
 				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" />
 				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="100" paddingLeft="4"/>
-				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="100" paddingRight="4" textAlign="right"  />
+				  <mx:DataGridColumn dataField="blackName" headerText="Black" width="95" paddingLeft="4"/>
+				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="95" paddingRight="4" textAlign="right"  />
 				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
-				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="80" paddingLeft="3" showDataTips="true" dataTipField="hcTip" />
-				  <mx:DataGridColumn dataField="status" headerText="Status" width="50" paddingLeft="2" />
-				  <mx:DataGridColumn dataField="watchers" headerText="Mon."/>
+				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="78" paddingLeft="3" showDataTips="true" dataTipField="hcTip" />
+				  <mx:DataGridColumn dataField="status" headerText="Status" width="48" paddingLeft="2" />
+				  <mx:DataGridColumn dataField="watchers" headerText="Mon" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="opening" headerText="Opng" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" /> <!-- height="185" -->

@@ -242,6 +242,86 @@
 			}
 			return type_str;
 		}
+
+		public static function openingNameJp(str:String):String {
+			var match:Array;
+			var ranging_sg:String = "▲";
+			var ranging_file:String;
+			if ((match = str.match(/opposition_(black|white)(\d)/))) {
+				if (match[1] == "white") ranging_sg = "△"
+				switch (parseInt(match[2])) {
+					case 2:
+						ranging_file = "向"; break;
+					case 3:
+						ranging_file = "三"; break;
+					case 4:
+						ranging_file = "四"; break;
+					case 5:
+						ranging_file = "中"; break;
+					default:
+						return "";
+				}
+				return "対抗" + ranging_sg + ranging_file;
+			} else {
+				switch (str) {
+				case "*":
+					return "";
+				case "unknown":
+					return "力戦";
+				case "side_pawn":
+					return "横歩取り";
+				case "double_wing":
+					return "相掛かり";
+				case "bishop_exchange":
+					return "角換り";
+				case "yagura":
+					return "矢倉";
+				case "double_ranging":
+					return "相振り";
+				}
+			}
+			return "";
+		}
+
+		public static function openingNameEn(str:String):String {
+			var match:Array;
+			var ranging_sg:String = "Black's";
+			var ranging_file:String;
+			if ((match = str.match(/opposition_(black|white)(\d)/))) {
+				if (match[1] == "white") ranging_sg = "White's"
+				switch (parseInt(match[2])) {
+					case 2:
+						ranging_file = "Opposing"; break;
+					case 3:
+						ranging_file = "3rd-file"; break;
+					case 4:
+						ranging_file = "4th-file"; break;
+					case 5:
+						ranging_file = "Central"; break;
+					default:
+						return "";
+				}
+				return "Opposition, " + ranging_sg + " " + ranging_file + " Rook";
+			} else {
+				switch (str) {
+				case "*":
+					return "";
+				case "unknown":
+					return "Free-style";
+				case "side_pawn":
+					return "Side Pawn Picker";
+				case "double_wing":
+					return "Double Wing Attack";
+				case "bishop_exchange":
+					return "Bishop Exchange";
+				case "yagura":
+					return "Yagura";
+				case "double_ranging":
+					return "Double Ranging Rook";
+				}
+			}
+			return "";
+		}
 		
 		public function writeSettings(v:URLVariables):void {
 			_urlRequest.data = v;

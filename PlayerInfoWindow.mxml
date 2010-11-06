@@ -59,7 +59,7 @@
 		  }
 		  
 		  private function _swfError():void {
-			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
+//			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
 		  }
 
           private function _closeButton():void {
