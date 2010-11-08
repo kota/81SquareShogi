@@ -361,10 +361,13 @@
 			if (user.titleName != "" && user.titleName != "!!!") {
 				medal = new Image();
 				medal.source = gold_medal;
-				medal.toolTip = "Title Holder";
+				medal.toolTip = "Major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "admin" || user.titleName.match(/bot/)) {
+				if (user.titleName == "R-ou") {
+					medal.source = silver_medal;
+					medal.toolTip = "Non-major Title Holder";
+				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {
 					medal.source = bronze_medal;
 					medal.toolTip = "admin status";
 				}

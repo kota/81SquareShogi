@@ -273,9 +273,9 @@ package{
         } else {
           switch(_current_state) {
             case STATE_NOT_CONNECTED:
-              if(line.match(/LOGIN:.* OK/)){
+              if((match = line.match(/LOGIN:(.*) OK/))){
                 _current_state = STATE_CONNECTED;
-			          dispatchEvent(new Event(LOGIN));
+			          dispatchEvent(new ServerMessageEvent(LOGIN, match[1]));
               } else if (line.match(/LOGIN:incorrect login/)){
                 dispatchEvent(new ServerMessageEvent(LOGIN_FAILED,"Loginname not Found."));
               } else if (line.match(/LOGIN:incorrect password/)){

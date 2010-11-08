@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/07";
+	private const VERSION:String = "ver.2010/11/08";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -136,7 +136,7 @@
 	  _regExpCalled = new RegExp("@" + _login_name.toLowerCase(), "i");
     } 
 
-    private function _handleLoggedIn(e:Event):void{
+    private function _handleLoggedIn(e:ServerMessageEvent):void{
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
@@ -146,7 +146,14 @@
 	  _refresh();
 	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1, "#008800");
 	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1, "#FF0000");
-	  _sendAutoChat("I've logged in. Hello.");
+	  var rank:String = "a " + InfoFetcher.makeRankFromRating(e.message.split(":")[1]);
+	  for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
+		  if (_infoFetcher.titleUser[i] == _login_name.toLowerCase()) {
+			  rank = "the " + _infoFetcher.titleName[i];
+			  break;
+		  }
+	  }
+	  _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + _infoFetcher.country_names[e.message.split(":")[2]] + ".");
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -658,6 +665,7 @@
     private function _handleMonitor(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
 	  var end_game:Boolean = false;
+	  if(_watch_game != null) board.monitor(e.message,_watch_game);
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
@@ -694,6 +702,7 @@
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
       }
+
 	  if (end_game) {
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
@@ -703,9 +712,9 @@
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 			board.endGame();
-	  } else {
-		  if(_watch_game != null) board.monitor(e.message,_watch_game);
-	  }
+	  }// else {
+		//  if(_watch_game != null) board.monitor(e.message,_watch_game);
+	  //}
 	  var i:int = kifuDataGrid.selectedIndex;
 	  kifuDataGrid.scrollToIndex(0);
 	  kifuDataGrid.dataProvider = board.kifu_list;
@@ -1333,6 +1342,8 @@
 				} else {
 					kifu.winner = "DRAW";
 				}
+				kifu.moves = kifu.result.split(":")[4] ? kifu.result.split(":")[4] : "-";
+				kifu.opening = kifu.result.split(":")[5] ? InfoFetcher.openingNameEn(kifu.result.split(":")[5]) : "-";
 				_kifu_search_list.push(kifu);
 			}
 		}
@@ -1390,6 +1401,8 @@
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
 			player.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
+			player.created_at = player.created_at.split(" ")[0];
+			player.updated_at = player.updated_at.split(" ")[0];
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
 					  player.title = _infoFetcher.titleName[i];
@@ -1569,7 +1582,7 @@
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
 		var match:Array;
 		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
-		if ((match = message.match(/\s(http\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttp\:\/\/[^\"]+?\s/, " <a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a> ");
+		if ((match = message.match(/\s(https?\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttps?\:\/\/[^\"]+?\s/, " <a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a> ");
 		switch (n) {
 			case 1:
 				var nowDate:Date = new Date(); 
@@ -1892,8 +1905,8 @@
 	<mx:VBox paddingLeft="10" paddingTop="10">
     <mx:Panel id="searchPanel" title="Search Panel" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 	  <mx:HBox>
-		<mx:Accordion id="searchAccordion" width="680" height="560" selectedIndex="2">
-			<mx:HBox label="Kifu Search" paddingTop="8" paddingLeft="8" width="700" height="530">
+		<mx:Accordion id="searchAccordion" width="780" height="560" selectedIndex="2">
+			<mx:HBox label="Kifu Search" paddingTop="8" paddingLeft="8" width="800" height="530">
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Button id="searchKifuButton" label="Search" click="_sendKifuSearch();" />
@@ -1908,41 +1921,44 @@
 					<mx:Label text="To"/>
 					<mx:DateChooser id="kifuSearchToChooser" showToday="false" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="475" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
+				<mx:DataGrid id="kifuSearchGrid" width="575" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
 					<mx:columns>
 					<mx:DataGridColumn dataField="winner" headerText="Result" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="black" headerText="Black" width="90" />
-					<mx:DataGridColumn dataField="white" headerText="White" width="90" />
-					<mx:DataGridColumn dataField="rule" headerText="Rules" width="125" />
+					<mx:DataGridColumn dataField="black" headerText="Black" width="80" paddingLeft="2" />
+					<mx:DataGridColumn dataField="white" headerText="White" width="80" paddingLeft="2" />
+					<mx:DataGridColumn dataField="rule" headerText="Rules" width="110" paddingLeft="2" />
+					<mx:DataGridColumn dataField="opening" headerText="Opening" width="120" paddingLeft="2" />
 					<mx:DataGridColumn dataField="moves" headerText="Moves" width="45" textAlign="center" paddingLeft="0" />
 					<mx:DataGridColumn dataField="date" headerText="Date"/>
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:HBox>
-			<mx:VBox label="Player Search" paddingTop="10" paddingLeft="10" width="700" height="530">
+			<mx:VBox label="Player Search" paddingTop="10" paddingLeft="10" width="800" height="530">
 				<mx:HBox>
 					<mx:Label text="Name"/>
 					<mx:TextInput id="playerSearchNameText"/>
 					<mx:Button id="searchPlayerButton" label="Search" click="_sendPlayerSearch();" />
 					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
 				</mx:HBox>
-				<mx:DataGrid id="playerSearchGrid" width="630" height="440" rowHeight="21">
+				<mx:DataGrid id="playerSearchGrid" width="755" height="440" rowHeight="21">
 					<mx:columns>
 					<mx:DataGridColumn dataField="title" headerText="Title" width="50" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="rank" headerText="Rank" width="50" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="login" headerText="Name" width="110" />
+					<mx:DataGridColumn dataField="rank" headerText="Rank" width="45" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="login" headerText="Name" width="95" />
 					<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-					<mx:DataGridColumn dataField="country" headerText="Country" width="90" />
+					<mx:DataGridColumn dataField="country" headerText="Country" width="80" />
 					<mx:DataGridColumn dataField="rate" headerText="Rating" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="wins" headerText="Win" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="losses" headerText="Loss" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="total" headerText="Total" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="wins" headerText="Win" width="43" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="losses" headerText="Loss" width="43" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="total" headerText="Total" width="43" textAlign="right" paddingRight="5" />
 					<mx:DataGridColumn dataField="percentage" headerText="%-win" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="streak_best" headerText="Streak" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="streak_best" headerText="Streak" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="created_at" headerText="Signed up" width="90" />
+					<mx:DataGridColumn dataField="updated_at" headerText="Last updated"/>
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
-			<mx:HBox label="View Rankings" paddingTop="10" paddingLeft="10" width="700" height="530">
+			<mx:HBox label="View Rankings" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox>
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
 					<mx:Button id="searchRankingButton" label="Search" click="_sendRankingSearch();" />
