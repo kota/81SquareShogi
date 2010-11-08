@@ -246,18 +246,42 @@ package  {
 				case Koma.HI+Koma.PROMOTE:
 					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        	case Koma.HI:
-	        		if (dx == 0 || dy == 0) return false;
+					if (dx == 0) {
+						if (Math.abs(dy) == 1) return false;
+						for (var i:int = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					} else if (dy == 0) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
+							if (getKomaAt(new Point(i, from.y))) return true;
+						}
+						return false;
+					}
 	        		break;
 				case Koma.KA + Koma.PROMOTE:
 					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        	case Koma.KA:
-	        		if (Math.abs(dx) == Math.abs(dy)) return false;
+	        		if (Math.abs(dx) == Math.abs(dy)) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
+							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
+						}
+						return false;
+					}
 	        		break;
 	        	case Koma.FU:
 	        		if (dx == 0 && dy == -1) return false;
 	        		break;
 	        	case Koma.KY:
-	        		if (dx == 0 && dy < 0) return false;
+	        		if (dx == 0 && dy < 0) {
+						if (dy == -1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
 	        		break;
 	        	case Koma.KE:
 	        		if (Math.abs(dx) == 1 && dy == -2) return false;
