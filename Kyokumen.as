@@ -186,25 +186,14 @@ package  {
 //		}
 		
 		public function canPromote(from:Point,to:Point):Boolean {
-      to = translateHumanCoordinates(to);
-
+			to = translateHumanCoordinates(to);
 			var koma:Koma; 
-      trace(from.x.toString());
-      if(from.x > HAND){
-        koma = new Koma(from.x-HAND,from.x,from.y,_turn);
-      } else {
-        from = translateHumanCoordinates(from);
-        koma = getKomaAt(from);
-      }
-
-			if(koma.isPromoted() || from.x > HAND){
-				return false;
-			}
-			
-			if (koma.type == Koma.OU || koma.type == Koma.KI) {
-				return false;
-			}
-
+			trace(from.x.toString());
+			if (from.x > HAND) return false;
+			from = translateHumanCoordinates(from);
+			koma = getKomaAt(from);
+			if(koma.isPromoted()) return false;
+			if (koma.type == Koma.OU || koma.type == Koma.KI) return false;
 			if(koma.ownerPlayer == SENTE){
 				if(from.y <= 2 || to.y <= 2){
 					return true;
@@ -213,6 +202,20 @@ package  {
 				if(from.y >= 6 || to.y >= 6){
 					return true;
 				}
+			}
+			return false;
+		}
+		
+		public function mustPromote(from:Point, to:Point):Boolean {
+			from = translateHumanCoordinates(from);
+			to = translateHumanCoordinates(to);
+			var koma:Koma = getKomaAt(from);
+			if (koma.type == Koma.FU || koma.type == Koma.KY) {
+				if (koma.ownerPlayer == SENTE && to.y == 0) return true;
+				if (koma.ownerPlayer == GOTE && to.y == 8) return true;
+			} else if (koma.type == Koma.KE) {
+				if (koma.ownerPlayer == SENTE && to.y <= 1) return true;
+				if (koma.ownerPlayer == GOTE && to.y >= 7) return true;
 			}
 			return false;
 		}
@@ -302,9 +305,6 @@ package  {
         from = translateHumanCoordinates(from);
         koma = getKomaAt(from);
       }
-//      if(promote){
-//        koma.promote();
-//      }
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
 

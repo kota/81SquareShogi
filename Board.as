@@ -664,37 +664,44 @@ package  {
           	_selected_square = null;
           } else {
             _to = new Point(x,y);
-            if(_position.cantMove(_from,_to)){
-            	_from = null;
-            	_to = null;
+            if (_position.cantMove(_from, _to)) {
+			    _from = null;
+			    _to = null;
             	_selected_square = null;
-            } else if(_position.canPromote(_from,_to)){
-              Alert.show("Promote?","",Alert.YES | Alert.NO,Canvas(e.currentTarget),_promotionHandler);
+            } else if (_position.canPromote(_from, _to)) {
+				if (_position.mustPromote(_from, _to)) {
+					if (!_client_timeout) {
+						timers[0].suspend();
+						_move_sent = true;
+						_playerMoveCallback(_from, _to, true);
+					}
+					_from = null;
+					_to = null;
+				} else {
+					Alert.show("Promote?", "", Alert.YES | Alert.NO, Canvas(e.currentTarget), _promotionHandler);
+				}
             } else {
-			  if (post_game && (isWinner || isLoser)) {
-				  _move_sent = true;
-				  _playerMoveCallback(_from, _to, false);
-			  } else if (!_client_timeout) {
+			  if (!_client_timeout){
 				  timers[0].suspend();
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
 			  }
-              _from = null;
-              _to = null;
+			  _from = null;
+			  _to = null;
             }
           }
         }
       }
     }
 
-    private function _promotionHandler(e:CloseEvent):void{
+    private function _promotionHandler(e:CloseEvent):void {
       if (! _client_timeout) {
 		  timers[0].suspend();
 		  _move_sent = true;
 		  _playerMoveCallback(_from, _to, e.detail == Alert.YES);
 	  }
-      _from = null;
-      _to = null;
+	  _from = null;
+	  _to = null;
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
