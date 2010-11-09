@@ -166,6 +166,36 @@
 			return "";
 		}
 		
+		public static function gameTypeJp(str:String):String {
+			switch (str) {
+			case "hclance":
+				return "香落ち";
+			case "hcbishop":
+				return "角落ち";
+			case "hcrook":
+				return "飛車落ち";
+			case "hcrooklance":
+				return "一丁半";
+			case "hc2p":
+				return "二枚落ち";
+			case "hc4p":
+				return "四枚落ち";
+			case "hc6p":
+				return "六枚落ち";
+			case "hc8p":
+				return "八枚落ち";
+			case "hctombo":
+				return "トンボ";
+			case "hc10p":
+				return "十枚落ち";
+			case "hcfu3":
+				return "歩三兵";
+			case "hcnaked":
+				return "裸玉";
+			}
+			return "";
+		}
+		
 		public static function gameTypeKIF(str:String):String {
 			var type_str:String = "手合割："
 			switch (str) {

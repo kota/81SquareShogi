@@ -351,13 +351,15 @@
 		  var hc:String;
 		  if (game_info[1] == "r") {
 			hc = "R";
-			game.hcTip = "";
+//			game.hcTip = "";
 		  } else if (game_info[1].match(/^hc/)) {
 			hc = "HC";
-			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
+			game.opening = InfoFetcher.gameTypeJp(game_info[1]);
+			game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
+//			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
 		  } else {
 			hc = "NR";
-			game.hcTip = "";
+//			game.hcTip = "";
 		  }
 		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
 		  game_list.push(game);
@@ -1801,7 +1803,7 @@
 				  <mx:DataGridColumn dataField="whiteName" headerText="White" width="95" paddingRight="4" textAlign="right"  />
 				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
-				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="78" paddingLeft="3" showDataTips="true" dataTipField="hcTip" />
+				  <mx:DataGridColumn dataField="rule" headerText="Rule" width="78" paddingLeft="3" />
 				  <mx:DataGridColumn dataField="status" headerText="Status" width="48" paddingLeft="2" />
 				  <mx:DataGridColumn dataField="watchers" headerText="Mon" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn dataField="opening" headerText="Opng" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
