@@ -220,6 +220,21 @@ package  {
 			return false;
 		}
 		
+		public function isNifu(from:Point, to:Point):Boolean {
+			if (from.x == HAND_FU) {
+				to = translateHumanCoordinates(to);
+				for (var i:int = 0; i < 9; i++) {
+					var koma:Koma;
+					if ((koma = getKomaAt(new Point(to.x, i)))) {
+						if (koma.type == Koma.FU && koma.ownerPlayer == _turn) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+		
 		public function cantMove(from:Point,to:Point):Boolean {
 			if(from.x > HAND) return false;
 			from = translateHumanCoordinates(from);

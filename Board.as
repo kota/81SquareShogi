@@ -680,7 +680,11 @@ package  {
 				} else {
 					Alert.show("Promote?", "", Alert.YES | Alert.NO, Canvas(e.currentTarget), _promotionHandler);
 				}
-            } else {
+            } else if ((_player_infos[_my_turn].game_name.match(/^nr_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
+					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
+					_from = null;
+					_to = null;
+			} else {
 			  if (!_client_timeout){
 				  timers[0].suspend();
 				  _move_sent = true;

@@ -33,7 +33,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/08";
+	private const VERSION:String = "ver.2010/11/09";
 
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -541,6 +541,7 @@
     }
   
   private function _handleGameSummary(e:ServerMessageEvent):void {
+	  _refresh();
 	  _initPositionStr = "";
 	  for each(var line:String in e.message.split("\n")) {
 		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
@@ -548,7 +549,6 @@
     if (_challenging) {
       _client.agree();
     } else {
-	  _refresh();
 	  var challengerName:String = _login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
       _sound_challenger.play();
 	  _challengerTicker.reset();
