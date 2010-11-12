@@ -13,6 +13,7 @@
 	import flash.events.TimerEvent;
 	import flash.media.SoundTransform;
 	import flash.net.FileReference;
+	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLVariables;
 	import flash.ui.Mouse;
@@ -35,6 +36,7 @@
 	
 	private const VERSION:String = "ver.2010/11/09";
 
+	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
     [Bindable]
@@ -104,6 +106,8 @@
     private function initApp():void
     {
       trace("application initialized..");
+	  if (_so.data.login) loginname.text = _so.data.login;
+	  if (_so.data.pass) password.text = _so.data.pass;
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
       _client = new CsaShogiClient();
@@ -136,7 +140,10 @@
 	  _regExpCalled = new RegExp("@" + _login_name.toLowerCase(), "i");
     } 
 
-    private function _handleLoggedIn(e:ServerMessageEvent):void{
+    private function _handleLoggedIn(e:ServerMessageEvent):void {
+	  _so.data.login = loginname.text;
+	  _so.data.pass = password.text;
+	  _so.flush();
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
@@ -755,7 +762,7 @@
       _client.connect();
     }
 	
-    private function _handleLogin(e:Event):void{
+    private function _handleLogin(e:Event):void {
       _connectAndLogin();
     }
 	
