@@ -34,7 +34,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/09";
+	private const VERSION:String = "ver.2010/11/13";
 
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
@@ -106,8 +106,11 @@
     private function initApp():void
     {
       trace("application initialized..");
-	  if (_so.data.login) loginname.text = _so.data.login;
-	  if (_so.data.pass) password.text = _so.data.pass;
+	  if (_so.data.savelogin) {
+		  savelogin.selected = true;
+		  if (_so.data.login) loginname.text = _so.data.login;
+		  if (_so.data.pass) password.text = _so.data.pass;
+	  }
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
       _client = new CsaShogiClient();
@@ -141,9 +144,12 @@
     } 
 
     private function _handleLoggedIn(e:ServerMessageEvent):void {
-	  _so.data.login = loginname.text;
-	  _so.data.pass = password.text;
-	  _so.flush();
+	  if (savelogin.selected) {
+		  _so.data.savelogin = true;
+		  _so.data.login = loginname.text;
+		  _so.data.pass = password.text;
+		  _so.flush();
+	  }
       loginMessage.text = "Logged in Successfully";
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
@@ -721,10 +727,8 @@
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 			board.endGame();
-	  }// else {
-		//  if(_watch_game != null) board.monitor(e.message,_watch_game);
-	  //}
-	  var i:int = kifuDataGrid.selectedIndex;
+	  }
+	  var i:int = kifuDataGrid.selectedIndex ? kifuDataGrid.selectedIndex : 0;
 	  kifuDataGrid.scrollToIndex(0);
 	  kifuDataGrid.dataProvider = board.kifu_list;
 	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
@@ -1740,13 +1744,16 @@
         <mx:FormItem label="password">
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
         </mx:FormItem>
+		<mx:FormItem label="">
+			<mx:CheckBox label="save login info" id="savelogin" selected="false" />
+		</mx:FormItem>
         <mx:FormItem>
             <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
         </mx:FormItem>
       </mx:Form>
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
       <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
-      <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:2195'), 'quote')" />
+      <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:2195'), 'quote')" /> -->
       <mx:Label paddingTop="15" text="Chief Programmer: Kota" fontSize="13" />
 	  <mx:HBox>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_localLogin();"/>
