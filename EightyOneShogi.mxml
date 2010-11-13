@@ -489,10 +489,6 @@
           board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("RESIGN") >= 0) {
         _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
-//		if (board.position.turn == board.my_turn) _sendAutoChat("I resign.");
-        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign";
-        kifuMove.moveKIF = "投了";
-        board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("OUTE_SENNICHITE") >= 0) {
         _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
 		kifuMove.move = "Perpetual Check";
@@ -512,7 +508,7 @@
 		board.isLoser = true;
 		radioKifuListen.enabled = true;
 		_openGameResultWindow(-1);
-        _writeUserMessage("### You Lose ###\n", 2, "#DD0088");
+        _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isWinner = true;
@@ -526,7 +522,7 @@
 		board.isLoser = false;
 		radioKifuListen.enabled = true;
 		_openGameResultWindow(0);
-        _writeUserMessage("### Draw ###\n", 2, "#DD0088");
+        _writeUserMessage("### Draw ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_win.play();
       }
       closeButton.enabled = true;
@@ -550,7 +546,16 @@
 	}
 
     private function _handleMove(e:ServerMessageEvent):void {
-      board.makeMove(e.message);
+	  if (e.message.match(/%TORYO/)) {
+		  var kifuMove:Object = new Object;
+//		        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
+			kifuMove.num = board.kifu_list.length;
+			kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + e.message.split(",T")[1] + ")";
+			kifuMove.moveKIF = "投了";
+			board.kifu_list.push(kifuMove);
+	  } else {
+		board.makeMove(e.message);
+	  }
       kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
     }
@@ -717,7 +722,6 @@
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
       }
-
 	  if (end_game) {
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
@@ -727,8 +731,14 @@
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 			board.endGame();
+	  } else {
+		  var match:Array;
+		  if ((match = e.message.match(/SINCE_LAST_MOVE:(\d+)/))) {
+			board.since_last_move = parseInt(match[1]);
+			board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(board.since_last_move);
+		  }
 	  }
-	  var i:int = kifuDataGrid.selectedIndex ? kifuDataGrid.selectedIndex : 0;
+	  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
 	  kifuDataGrid.scrollToIndex(0);
 	  kifuDataGrid.dataProvider = board.kifu_list;
 	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;

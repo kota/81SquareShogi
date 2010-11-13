@@ -172,8 +172,8 @@ package {
 				_byoyomi_flag = true;
 				_box.setStyle('backgroundColor',0xFFFF00);
 				_time_left = _byoyomi;
-				_display();
 			}
+			_display();
 		}
 
 		public function timeout():void{

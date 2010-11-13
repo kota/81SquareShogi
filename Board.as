@@ -116,6 +116,7 @@ package  {
 	public var studyOrigin:int;
 	public var study_list:Array;
 	public var study_list_hold:Array;
+	public var since_last_move:int = 0;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -415,6 +416,7 @@ package  {
 	  study_list = new Array();
 	  study_list_hold = new Array();
 	  post_game = false;
+	  since_last_move = 0;
     }
 
 		public function timeout():void{
@@ -461,6 +463,10 @@ package  {
         _startMonitor(game_info, watch_game);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
+		if (since_last_move > 0) {
+			time = "T" + String(parseInt(time.substr(1)) - since_last_move);
+			since_last_move = 0;
+		}
         makeMove(match[1] + ',' + time);
       } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) { //||
 //               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
@@ -566,7 +572,8 @@ package  {
 				kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
 				kifuMove.moveStr = "%TORYO";												//CSA
 				kifuMove.moveKIF = "投了";			//Japanese Notation
-				kifu_list.push(kifuMove);	
+				kifu_list.push(kifuMove);
+				timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
 			} else {
 				makeMove(move.move + "," + move.time, false);
 			}
