@@ -489,7 +489,7 @@ package  {
         var match:Array = line.match(/^##\[MONITOR2\]\[.*\] (.*)$/);
         if (match != null && match[1]) {
           var token:String = match[1];
-          if(token.match(/^([-+][0-9]{4}.{2}$)/)) {
+          if(token.match(/^([-+][0-9]{4}.{2}|%TORYO)$/)) {
             var move_and_time:Object = new Object();
             move_and_time.move = token
             moves.push(move_and_time);
@@ -560,7 +560,16 @@ package  {
       timers[1-running_timer].stop();
       if (moves.length > 0) {
         for each(var move:Object in moves) {
-          makeMove(move.move + "," + move.time,false);
+			if (move.move == "%TORYO") {
+				var kifuMove:Object = new Object();
+				kifuMove.num = kifu_list.length;										//No. of the Move
+				kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
+				kifuMove.moveStr = "%TORYO";												//CSA
+				kifuMove.moveKIF = "投了";			//Japanese Notation
+				kifu_list.push(kifuMove);	
+			} else {
+				makeMove(move.move + "," + move.time, false);
+			}
         }
       }
 	  studyOrigin = 0;
