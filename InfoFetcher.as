@@ -31,6 +31,7 @@
 		public var country_names:Array = new Array();
 		public var country_names3:Array = new Array();
 		public var cheaters:Array = new Array();
+		public var banned:Array = new Array();
 		public var initMessage:String
 		public var gameMessage:String
 		private var _urlRequest:URLRequest = new URLRequest();
@@ -56,7 +57,7 @@
 		
 		private function _parseInfo(e:Event):void {
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###/s);
+			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###BANNED\n(.+)\n###/s);
 			newestVer = match[1];
 			initMessage = match[2];
 			gameMessage = match[3];
@@ -80,6 +81,10 @@
 			lines = match[7].split("\n");
 			for each(line in lines) {
 				cheaters.push(line);
+			}
+			lines = match[8].split("\n");
+			for each(line in lines) {
+				banned.push(line);
 			}
 		}
 		
@@ -478,8 +483,9 @@
 			} else {
 				return 0;
 			}
-			return int(multiply * Math.min(31, Math.max(1, 16 - 0.04 * (winner - loser))));
-		}		
+			var dif:Number = winner - loser;
+			return Math.round(multiply * Math.min(31, Math.max(1, 32*(0.5 - 1.4217e-3*dif + 2.4336e-7*dif*Math.abs(dif) + 2.514e-9*dif*dif*dif - 1.991e-12*dif*dif*dif*Math.abs(dif)))));
+		}
 	}
-	
+
 }

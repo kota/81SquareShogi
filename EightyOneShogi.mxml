@@ -34,7 +34,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/13";
+	private const VERSION:String = "ver.2010/11/15";
 
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
@@ -121,6 +121,7 @@
       chatMessage2.addEventListener(FlexEvent.ENTER,_handleSendChat2);
       loginname.addEventListener(FlexEvent.ENTER,_handleLogin);
       password.addEventListener(FlexEvent.ENTER, _handleLogin);
+	  loginButton.addEventListener(MouseEvent.CLICK, _handleLogin);
 	  playerSearchNameText.addEventListener(FlexEvent.ENTER, _handlePlayerSearchEnter);
 	  board.name_labels[0].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  board.name_labels[1].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
@@ -167,6 +168,7 @@
 		  }
 	  }
 	  _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + _infoFetcher.country_names[e.message.split(":")[2]] + ".");
+	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -256,7 +258,11 @@
 		  }
 	  }
 	  for (i = 0; i < user_list.length; i++) {
-		  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
+		  if (user_list[i].wins + user_list[i].losses >= 10 || user_list[i].titleName != "") {
+			  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
+		  } else {
+			  user_list[i].rank = "-";
+		  }
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
 				  'name':user_list[i].name,
@@ -284,6 +290,9 @@
 		  }
 	  }
       user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+	  for (i = 0; i < user_list.length; i++) {
+		  if (user_list[i].wins + user_list[i].losses < 10 && user_list[i].titleName == "") user_list[i].rating = "*" + String(user_list[i].rating);
+	  }
 	  _user_list = user_list;
       userListGrid.dataProvider = _user_list;
       for (i = 0; i < user_list.length; i++) {
@@ -777,6 +786,9 @@
     }
 	
     private function _handleLogin(e:Event):void {
+	  for each (var name:String in _infoFetcher.banned) {
+		  if (loginname.text.toLowerCase() == name) return;
+	  }
       _connectAndLogin();
     }
 	
@@ -1726,11 +1738,7 @@
 		  if (board.playerInfos[0].name == _login_name || board.playerInfos[1].name == _login_name) return true;
 	  }
 	  return false;
-  }
-	
-  private function _scratch():void {
-	  _client.send("%%SCRATCH");
-  }
+  } 
   
 	//=========================================================
 	//                       MXML PART
@@ -1758,7 +1766,7 @@
 			<mx:CheckBox label="save login info" id="savelogin" selected="false" />
 		</mx:FormItem>
         <mx:FormItem>
-            <mx:Button id="loginButton" label="Login" y="400" click="_connectAndLogin();"/>
+            <mx:Button id="loginButton" label="Login" y="400" />
         </mx:FormItem>
       </mx:Form>
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
@@ -1802,7 +1810,7 @@
 			  <mx:DataGridColumn dataField="rank" headerText="Rank" width="52" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="name" headerText="Name" width="100" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="country" headerText="Country" width="90" paddingLeft="2" />
-			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="45" paddingRight="3" textAlign="right" />
+			  <mx:DataGridColumn dataField="rating" headerText="Rate" width="45" paddingRight="3" paddingLeft="0" textAlign="right" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">

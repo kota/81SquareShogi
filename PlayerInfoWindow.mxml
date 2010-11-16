@@ -36,7 +36,11 @@
 			  _name = user.name;
 			  _country = user.country;
 			  _country_code = String(user.country_code + 1000).substring(1);
-			  _rating = user.rating;
+			  if (String(user.rating).match(/^\*/)) {
+				  _rating = user.rating.substr(1);
+			  } else {
+				_rating = user.rating;
+			  }
 			  _rank = user.rank;
 			  _title = user.titleName;
 			  _wins = user.wins;
