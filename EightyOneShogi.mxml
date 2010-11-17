@@ -327,7 +327,7 @@
 			  'whiteTitle':""
 			  }
 		  if (tokens[7] == "created") {
-			  break;
+			  continue;
 		  } else if (tokens[7] == "true" || tokens[7] == "game") {
 			  game.status = "G: " + parseInt(tokens[2]);
 		  } else {
