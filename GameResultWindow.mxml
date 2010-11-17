@@ -32,7 +32,9 @@
 			  youRank.visible = false;
 			  opponentAfter.visible = false;
 			  opponentRank.visible = false;
-			  var match:Array = game_name.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+			  if (String(you.rating).match(/^\*/)) you.rating = parseInt(you.rating.substr(1));
+			  if (String(opponent.rating).match(/^\*/)) opponent.rating = parseInt(opponent.rating.substr(1));
+			  var match:Array = game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			  var multiply:Number = 1 + (Math.pow(parseInt(match[3])/300, 0.8) - 1) / (Math.pow(9, 0.8) -1);
 			  if (match[1] == "r") {
 				  var dif:int = InfoFetcher.ratingDif(you.rating, opponent.rating, multiply, v);
