@@ -1618,6 +1618,7 @@
 		var match:Array;
 		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
 		if ((match = message.match(/\s(https?\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttps?\:\/\/[^\"]+?\s/, " <a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a> ");
+		message = message.replace(/\\n/g, "\n");
 		switch (n) {
 			case 1:
 				var nowDate:Date = new Date(); 
