@@ -444,8 +444,10 @@
 	  }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       _game_name = e.message.substr(6);
-	  if (_game_name.split("+")[1].match(/^hc/)) {
+	  if (_game_name.split("+")[1].match(/^hc/) || String(_player_infos[0].rating).match(/^\*/)) {
 		  board.superior = Kyokumen.GOTE;
+	  } else if (String(_player_infos[1].rating).match(/^\*/)) {
+		  board.superior = Kyokumen.SENTE;
 	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
 		  board.superior = Kyokumen.SENTE;
 	  } else {
