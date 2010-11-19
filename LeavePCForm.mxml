@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+          import mx.collections.ArrayCollection;
+          
+          [Bindable]
+          public var hours:ArrayCollection = new ArrayCollection(
+            [ {label:"0", data:0},
+             {label:"1", data:1},
+             {label:"2", data:2},
+             {label:"3", data:3},
+			 {label:"4", data:4},
+             {label:"5", data:5},
+             {label:"6", data:6},
+			 {label:"7", data:7},
+			 {label:"8", data:8}]
+          );
+
+          [Bindable]
+          public var minutes:ArrayCollection = new ArrayCollection(
+            [{label:"0", data:0 },
+             {label:"5", data:5},
+             {label:"10", data:10},
+			 {label:"15", data:15 },
+			 {label:"20", data:20 },
+			 {label:"30", data:30 },
+			 {label:"45", data:45}]
+          );
+		  
+		  private function _handleLeave():void {
+			  leaveButton.enabled = false;
+			  hoursCombo.enabled = false;
+			  minutesCombo.enabled = false;
+			  messageText.enabled = false;
+			  leavingLabel.text = "Leaving...";
+		  }
+
+        ]]>
+    </mx:Script>
+
+	<mx:HBox>
+		<mx:Label text="Will be back in:"/>
+		<mx:ComboBox id="hoursCombo" dataProvider="{hours}" />
+		<mx:Label text="hours"/>
+		<mx:ComboBox id="minutesCombo" dataProvider="{minutes}" />
+		<mx:Label text="minutes"/>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Label text="message:"/>
+		<mx:TextInput id="messageText" width="250" enter="_handleLeave();" />
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Button id="leaveButton" label="Leave" click="_handleLeave();" />
+		<mx:Button id="cancelButton" label="Cancel" click="PopUpManager.removePopUp(this);"/>
+		<mx:Label id="leavingLabel" text=""/>
+	</mx:HBox>
+</mx:TitleWindow>

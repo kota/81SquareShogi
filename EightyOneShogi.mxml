@@ -34,7 +34,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	private const VERSION:String = "ver.2010/11/15";
+	private const VERSION:String = "ver.2010/11/19";
 
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
@@ -57,6 +57,7 @@
     private var _monitoring:Boolean;
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
+	private var _leaving:Boolean = false;
 	[Bindable]
 	private var _lastChatTime:String;
 
@@ -95,6 +96,9 @@
 	private var _initPositionStr:String;
     private var _keepAliveTimer:Timer;
 	private var _challengerTicker:Timer;
+	private var _leaveTimer:Timer;
+	private var _leaveMinutes:int;
+	private var _leaveMessage:String;
 	private var _infoFetcher:InfoFetcher;
 	
     private var _optionWindow:OptionDialog;
@@ -102,6 +106,7 @@
     private var _playerInfoWindow:PlayerInfoWindow;
 	private var _challengerAlertWindow:ChallengerAlertWindow;
 	private var _gameResultWindow:GameResultWindow;
+	private var _leavePCWindow:LeavePCForm;
 
     private function initApp():void
     {
@@ -682,6 +687,15 @@
 			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
 		}
 		if (_chat_sound1_play) _sound_chat3.play();
+		if (_leaving) {
+			var match:Array;
+			match = e.message.substr(15).match(/^\[(.+?)\]/);
+			if (_findPlayerFromList(match[1])) {
+				var hour:int = (_leaveMinutes - _leaveTimer.currentCount) / 60;
+				var minute:int = (_leaveMinutes - _leaveTimer.currentCount) % 60;
+				_sendPrivateChat(match[1], "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
+			}
+		}
 	}
 
     private function _format_message(message:String):String{
@@ -939,6 +953,29 @@
 	  muteCheck1.selected = v;
 	  muteCheck2.selected = v;
   }
+	 private function _leavePC():void{
+		_leavePCWindow = LeavePCForm(PopUpManager.createPopUp(this, LeavePCForm, true));
+		PopUpManager.centerPopUp(_leavePCWindow);
+		_leavePCWindow.title = "Set auto-reply message";
+		_leavePCWindow.hoursCombo.selectedIndex = 1;
+		_leavePCWindow.messageText.addEventListener(FlexEvent.ENTER, _leaveStart);
+		_leavePCWindow.leaveButton.addEventListener(MouseEvent.CLICK, _leaveStart);
+		_leavePCWindow.cancelButton.addEventListener(MouseEvent.CLICK, _leaveEnd);
+	}
+	
+	private function _leaveStart(e:Event):void {
+		_leaving = true;
+		_leaveMinutes = 60 * e.target.parent.parent.hoursCombo.selectedItem.data + e.target.parent.parent.minutesCombo.selectedItem.data;
+		_leaveTimer = new Timer(60000, _leaveMinutes);
+		_leaveTimer.start();
+		_leaveMessage = e.target.parent.parent.messageText.text;
+	}
+	
+	private function _leaveEnd(e:Event):void {
+		_leaving = false;
+		if (_leaveTimer) _leaveTimer.stop();
+	}
+  
 	//------------------------------------------------------------------------------------------------------------------------ LIST SELECTED
     private function _userSelected():void {
       var user:Object = userListGrid.selectedItem;
@@ -1798,10 +1835,11 @@
         <mx:Button id="startButton" label="Wait for Game" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="Stop Waiting" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="Challenge" click="_challengeForm();" enabled="false"/>
-		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="optionButton1" label="Options" click="_showOptions();" enabled="true"/>
 		<mx:Button id="searchViewButton" label="Search" click="mainViewStack.selectedIndex=3;" />
 		<mx:CheckBox id="muteCheck1" label="Mute" click="_mute(muteCheck1.selected)"/>
+		<mx:Button id="leaveButton" label="Leave PC" click="_leavePC();"/>
+		<mx:Button id="logoutButton" label="Log Out" click="_logout()"/>
 		<mx:Button id="backToGameButton" label="Back to Game" click="_backToGame();" visible="false" color="#FF0000" />
       </mx:HBox>
 	  <mx:HBox>
