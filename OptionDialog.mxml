@@ -5,9 +5,11 @@
         <![CDATA[
         	import mx.controls.*;
             import mx.managers.PopUpManager;
+			[Bindable]
+			public var language:int = 0;
         ]]>
     </mx:Script>
-    <mx:Label text="Sound" fontWeight="bold"/>
+    <mx:Label text="{Language.ac.getItemAt(language).sound}" fontWeight="bold"/>
     <mx:VBox paddingLeft="30">
 		<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
 		<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
@@ -51,14 +53,14 @@
 		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
 	</mx:HBox>
 	<mx:HBox paddingLeft="30">
-		<mx:Label text="Blind Piece"/>
+		<mx:Label text="{Language.ac.getItemAt(language).blind_piece}"/>
 		<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
 		<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
 		<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
 	</mx:HBox>
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 
-        <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
-		<mx:Button id="saveSettingsButton" label="Save settings to server"/>
+        <mx:Button label="{Language.ac.getItemAt(language).cancel}" click="PopUpManager.removePopUp(this);"/> 
+		<mx:Button id="saveSettingsButton" label="{Language.ac.getItemAt(language).save_settings}"/>
     </mx:HBox> 
 </mx:TitleWindow>

@@ -6,6 +6,8 @@
           import mx.controls.*;
           import mx.managers.PopUpManager;
           import mx.collections.ArrayCollection;
+		  [Bindable]
+		  public var language:int = 0;
           
           [Bindable]
           public var hours:ArrayCollection = new ArrayCollection(
@@ -43,19 +45,19 @@
     </mx:Script>
 
 	<mx:HBox>
-		<mx:Label text="Will be back in:"/>
+		<mx:Label text="{Language.ac.getItemAt(language).will_be_back_in}:"/>
 		<mx:ComboBox id="hoursCombo" dataProvider="{hours}" />
-		<mx:Label text="hours"/>
+		<mx:Label text="{Language.ac.getItemAt(language).hours}"/>
 		<mx:ComboBox id="minutesCombo" dataProvider="{minutes}" />
-		<mx:Label text="minutes"/>
+		<mx:Label text="{Language.ac.getItemAt(language).minutes}"/>
 	</mx:HBox>
 	<mx:HBox>
-		<mx:Label text="message:"/>
+		<mx:Label text="{Language.ac.getItemAt(language).message}:"/>
 		<mx:TextInput id="messageText" width="250" enter="_handleLeave();" />
 	</mx:HBox>
 	<mx:HBox>
-		<mx:Button id="leaveButton" label="Leave" click="_handleLeave();" />
-		<mx:Button id="cancelButton" label="Cancel" click="PopUpManager.removePopUp(this);"/>
+		<mx:Button id="leaveButton" label="{Language.ac.getItemAt(language).leave}" click="_handleLeave();" />
+		<mx:Button id="cancelButton" label="{Language.ac.getItemAt(language).cancel}" click="PopUpManager.removePopUp(this);"/>
 		<mx:Label id="leavingLabel" text=""/>
 	</mx:HBox>
 </mx:TitleWindow>

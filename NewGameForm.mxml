@@ -6,6 +6,8 @@
           import mx.controls.*;
           import mx.managers.PopUpManager;
           import mx.collections.ArrayCollection;
+		  [Bindable]
+		  public var language:int = 0;
           
           [Bindable]
           public var totals:ArrayCollection = new ArrayCollection(
@@ -94,11 +96,11 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
-	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , Rated (x2.0)" value="0" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , Rated (x1.3)" value="1" fontSize="11" selected="true" />
-	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , Rated (x1.0)" value="2" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , Rated (x0.8)" value="3" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="Non-rated" value="4" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , {Language.ac.getItemAt(language).rated} (x2.0)" value="0" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , {Language.ac.getItemAt(language).rated} (x1.3)" value="1" fontSize="11" selected="true" />
+	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , {Language.ac.getItemAt(language).rated} (x1.0)" value="2" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , {Language.ac.getItemAt(language).rated} (x0.8)" value="3" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="{Language.ac.getItemAt(language).nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false"/>
 		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false"/>
@@ -106,8 +108,8 @@
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
   </mx:HBox>
-  <mx:HBox paddingTop="20"> 
-      <mx:Button id="Submit" click="submit();" label="Create Game"/> 
-      <mx:Button label="Cancel" click="PopUpManager.removePopUp(this);"/> 
+  <mx:HBox paddingTop="20">
+      <mx:Button id="Submit" click="submit();" label="{Language.ac.getItemAt(language).wait}"/> 
+      <mx:Button label="{Language.ac.getItemAt(language).cancel}" click="PopUpManager.removePopUp(this);"/> 
   </mx:HBox> 
 </mx:TitleWindow>

@@ -5,6 +5,8 @@
         <![CDATA[
           import mx.controls.*;
           import mx.managers.PopUpManager;
+		  [Bindable]
+		  public var language:int = 0;
 
 		  [Bindable]
 		  private var _name:String;
@@ -83,20 +85,20 @@
 						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
 						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
-					<mx:Label paddingRight="10" text="Country:  {_country}"/>
+					<mx:Label paddingRight="10" text="{Language.ac.getItemAt(language).country}:  {_country}"/>
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:Label text="Rating:  {_rating}  ({_rank})"/>
+			<mx:Label text="{Language.ac.getItemAt(language).rate}:  {_rating}  ({_rank})"/>
 			<mx:HBox>
-				<mx:Label text="{_wins} win"/>
-				<mx:Label text="{_losses} loss"/>
+				<mx:Label text="{_wins} {Language.ac.getItemAt(language).win_small}"/>
+				<mx:Label text="{_losses} {Language.ac.getItemAt(language).loss_small}"/>
 				<mx:Label text="({_percentage.toFixed(1)}%)"/>
-				<mx:Label text="Total: {_wins + _losses}"/>
+				<mx:Label text="{Language.ac.getItemAt(language).total}: {_wins + _losses}"/>
 			</mx:HBox>
 			<mx:HBox>
-				<mx:Label text="Best Streak: {_streak_best}"/>
-				<mx:Label text="(Current: {_streak})"/>
+				<mx:Label text="{Language.ac.getItemAt(language).streak}: {_streak_best}"/>
+				<mx:Label text="({Language.ac.getItemAt(language).current}: {_streak})"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:HBox>
