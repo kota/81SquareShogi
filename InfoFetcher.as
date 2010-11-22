@@ -395,13 +395,13 @@
 			var medal:Image;
 			if (user.titleName != "" && user.titleName != "!!!") {
 				medal = new Image();
-				medal.source = gold_medal;
-				medal.toolTip = "Major Title Holder";
+				medal.source = silver_medal;
+				medal.toolTip = "Non-major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "R-ou") {
-					medal.source = silver_medal;
-					medal.toolTip = "Non-major Title Holder";
+				if (user.titleName == "81Ou" || user.titleName == "CosmOu") {
+					medal.source = gold_medal;
+					medal.toolTip = "Major Title Holder";
 				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {
 					medal.source = bronze_medal;
 					medal.toolTip = "admin status";

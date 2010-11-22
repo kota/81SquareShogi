@@ -35,7 +35,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/20";
+	private const VERSION:String = "ver.2010/11/22";
 	[Bindable]
 	private var _language:int = 0;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
@@ -431,7 +431,7 @@
         }
       }
       watcherListGrid.dataProvider = watcher_list;
-	  watcherListTitle.text = "Watchers (" + watcher_list.length +")";
+	  watcherListTitle.text = Language.ac.getItemAt(_language).watchers + " (" + watcher_list.length +")";
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
@@ -955,7 +955,7 @@
 		_leavePCWindow = LeavePCForm(PopUpManager.createPopUp(this, LeavePCForm, true));
 		PopUpManager.centerPopUp(_leavePCWindow);
 		_leavePCWindow.language = _language;
-		_leavePCWindow.title = "Set auto-reply message";
+		_leavePCWindow.title = Language.ac.getItemAt(_language).set_autoreply;
 		_leavePCWindow.hoursCombo.selectedIndex = 1;
 		_leavePCWindow.messageText.addEventListener(FlexEvent.ENTER, _leaveStart);
 		_leavePCWindow.leaveButton.addEventListener(MouseEvent.CLICK, _leaveStart);
@@ -1803,10 +1803,32 @@
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
         </mx:FormItem>
 		<mx:FormItem label="{Language.ac.getItemAt(_language).language}" paddingTop="-2">
-			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;"><mx:dataProvider><mx:Array>
-				<mx:String>{Language.ac.getItemAt(0).LANGUAGE}</mx:String>
-				<mx:String>{Language.ac.getItemAt(1).LANGUAGE}</mx:String>
-			</mx:Array></mx:dataProvider></mx:ComboBox>
+			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170">
+				<mx:dataProvider><mx:Array>
+					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/826.gif" />
+					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/392.gif" />
+					<mx:Object label="(reserved)" image="" />
+					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/156.gif" />
+					<mx:Object label="(reserved)" image="" />
+					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/250.gif" />
+					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/276.gif" />
+					<mx:Object label="{Language.ac.getItemAt(7).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/616.gif" />
+					<mx:Object label="{Language.ac.getItemAt(8).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/752.gif" />
+					<mx:Object label="{Language.ac.getItemAt(9).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/300.gif" />
+					<mx:Object label="{Language.ac.getItemAt(10).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/380.gif" />
+					<mx:Object label="{Language.ac.getItemAt(11).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/620.gif" />
+					<mx:Object label="{Language.ac.getItemAt(12).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/112.gif" />
+					<mx:Object label="{Language.ac.getItemAt(13).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/643.gif" />
+				</mx:Array></mx:dataProvider>
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:HBox>
+                            <mx:Image source="{data.image}" width="27" height="17"/>
+                            <mx:Text text="{data.label}"/>
+                        </mx:HBox>
+                    </mx:Component>
+                </mx:itemRenderer>
+			</mx:ComboBox>
 		</mx:FormItem>
 		<mx:FormItem label="" paddingTop="-2">
 			<mx:CheckBox label="{Language.ac.getItemAt(_language).save_login_info}" id="savelogin" selected="false" />
@@ -1837,13 +1859,14 @@
     <mx:VBox paddingTop="10" paddingLeft="10" fontSize="11">
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off">
       <mx:HBox>
-        <mx:Button id="refreshButton" label="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
+        <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
         <mx:Button id="startButton" label="{Language.ac.getItemAt(_language).wait}" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="{Language.ac.getItemAt(_language).stop}" click="_stopWaiting()" enabled="false" />
         <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" click="_challengeForm();" enabled="false"/>
-		<mx:Button id="optionButton1" label="{Language.ac.getItemAt(_language).options}" click="_showOptions();" enabled="true"/>
 		<mx:Button id="searchViewButton" label="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
-		<mx:CheckBox id="muteCheck1" label="{Language.ac.getItemAt(_language).mute}" click="_mute(muteCheck1.selected)"/>
+		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();" enabled="true"/>
+		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
+		<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
 		<mx:Button id="leaveButton" label="{Language.ac.getItemAt(_language).leave}" click="_leavePC();"/>
 		<mx:Button id="logoutButton" label="{Language.ac.getItemAt(_language).logout}" click="_logout()"/>
 		<mx:Button id="backToGameButton" label="{Language.ac.getItemAt(_language).back_to_game}" click="_backToGame();" visible="false" color="#FF0000" />
@@ -1922,13 +1945,12 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-        <mx:Panel id="messagePanel" title="Message Panel" width="435" height="200" headerHeight="22">
+        <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="435" height="200" headerHeight="22">
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
-        <mx:Panel id="controlPanel" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22">
+        <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off">
           <mx:HBox>
             <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
-            <mx:Button id="optionButton2" label="{Language.ac.getItemAt(_language).options}" click="_showOptions();"/>
             <mx:Button id="impasseButton" label="{Language.ac.getItemAt(_language).impasse}" click="_showImpasse();"/>
             <mx:Button id="closeButton" label="{Language.ac.getItemAt(_language).close_game}" click="_closeGame();" enabled="false"/>           
           </mx:HBox>
@@ -1942,16 +1964,18 @@
          <mx:TextInput id="chatMessage2" width="300"/>
 		 <mx:HBox>
 			<mx:CheckBox id="autoScrollCheck2" label="{Language.ac.getItemAt(_language).auto_scroll}" selected="true" click="_change_auto_scroll2();" />
+			<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();"/>
+			<mx:CheckBox id="muteCheck2" paddingRight="-8" toolTip="{Language.ac.getItemAt(_language).mute}" click="_mute(muteCheck2.selected)"/>
+			<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck2.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
 			<mx:Button id="checkLobbyButton" label="{Language.ac.getItemAt(_language).check_lobby}" enabled="true" click="_checkLobby();" />
-			<mx:CheckBox id="muteCheck2" label="{Language.ac.getItemAt(_language).mute}" click="_mute(muteCheck2.selected)"/>
 		</mx:HBox>
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22">
+        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22" horizontalScrollPolicy="off">
 		<mx:HBox paddingBottom="-2">
           <mx:Label id="watcherListTitle" text="{Language.ac.getItemAt(_language).watchers}" fontWeight="bold" paddingRight="0" />
-		  <mx:Button id="refreshWatchersButton" label="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>
+		  <mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>
 		</mx:HBox>
 		<mx:DataGrid id="watcherListGrid" width="160" height="234" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
          <mx:columns>
@@ -2042,8 +2066,8 @@
 			<mx:HBox label="{Language.ac.getItemAt(_language).view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox>
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
-					<mx:Button id="searchRankingButton" label="Search" click="_sendRankingSearch();" />
-					<mx:Button label="Close" click="mainViewStack.selectedIndex=1;" />
+					<mx:Button id="searchRankingButton" label="{Language.ac.getItemAt(_language).search}" click="_sendRankingSearch();" />
+					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
 					<mx:VBox label="{Language.ac.getItemAt(_language).rate}">

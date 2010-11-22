@@ -582,7 +582,7 @@ package  {
 	  studyOrigin = 0;
     }
 	
-    public function startView(kifu_contents:String):void{
+    public function startView(kifu_contents:String):void {
       var moves:Array = new Array();
 	  var kyokumen_str:String = "";
 	  kifu_list = new Array();
@@ -601,7 +601,7 @@ package  {
             var move_and_time:Object = new Object();
             move_and_time.move = line;
             moves.push(move_and_time);
-          } else if (line.match(/(T.*)$/)){
+          } else if (line.match(/^(T.*)$/)) {
             Object(moves[moves.length - 1]).time = line;
           } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) {
 			  break;
