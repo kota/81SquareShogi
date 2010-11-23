@@ -225,7 +225,7 @@
 			  'streak_best':parseInt(match[2].split(" ")[11])
 			  }
 		  user.country = _infoFetcher.country_names[user.country_code];
-		  user.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(user.country_code + 1000).substring(1) + ".gif";
+		  user.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
@@ -290,7 +290,7 @@
 				  'game_name': user_list[i].game_name,
 				  'country': user_list[i].country,
 				  'country3':_infoFetcher.country_names3[user_list[i].country_code],
-				  'flagURL': user_list[i].flagURL
+				  'flagURL': "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif"
 				  }
 		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			  total = parseInt(game_info[3]) / 60;
@@ -1816,8 +1816,8 @@
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
-	  <mx:HBox paddingLeft="0" paddingRight="0">
-		<mx:Image source="{data.flagURL}" width="27" height="17" />
+	  <mx:HBox paddingLeft="2" paddingRight="0" verticalAlign="middle">
+		<mx:Image source="{data.flagURL}" width="16" height="11" />
 		<mx:Label text="{data.country}" paddingLeft="-9" paddingRight="-7" fontSize="10" />
 	  </mx:HBox>
   </mx:Component>
@@ -1901,7 +1901,7 @@
                   VIEWSTACK INDEX = 1
 ================================================================== -->
     <mx:VBox paddingTop="10" paddingLeft="10" fontSize="11">
-      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFF3">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
         <mx:Button id="startButton" label="{Language.ac.getItemAt(_language).wait}" click="_newGameForm();"/>
@@ -1922,7 +1922,7 @@
 			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="56" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{Language.ac.getItemAt(_language).rank}" width="49" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn fontWeight="bold" dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" />
+			  <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" />
 			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{Language.ac.getItemAt(_language).country}" width="90" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" />
 			 </mx:columns>
