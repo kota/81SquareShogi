@@ -35,7 +35,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/22";
+	private const VERSION:String = "ver.2010/11/23";
 	[Bindable]
 	private var _language:int = 0;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
@@ -225,6 +225,7 @@
 			  'streak_best':parseInt(match[2].split(" ")[11])
 			  }
 		  user.country = _infoFetcher.country_names[user.country_code];
+		  user.flagURL = "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(user.country_code + 1000).substring(1) + ".gif";
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
@@ -270,8 +271,16 @@
 	  for (i = 0; i < user_list.length; i++) {
 		  if (user_list[i].wins + user_list[i].losses >= 10 || user_list[i].titleName != "") {
 			  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
+			  if (user_list[i].rating >= 1150) {
+				  user_list[i].rankColor = 0xFF5500;
+			  } else if (user_list[i].rating >= 1000) {
+				  user_list[i].rankColor = 0x008800;
+			  } else {
+				  user_list[i].rankColor = 0x0055FF;
+			  }
 		  } else {
 			  user_list[i].rank = "-";
+			  user_list[i].rankColor = 0x000000;
 		  }
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
@@ -279,8 +288,9 @@
 				  'turn':user_list[i].turn,
 				  'rating':user_list[i].rating,
 				  'game_name': user_list[i].game_name,
-				  'country':_infoFetcher.country_names[user_list[i].country_code],
-				  'country3':_infoFetcher.country_names3[user_list[i].country_code]
+				  'country': user_list[i].country,
+				  'country3':_infoFetcher.country_names3[user_list[i].country_code],
+				  'flagURL': user_list[i].flagURL
 				  }
 		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			  total = parseInt(game_info[3]) / 60;
@@ -375,7 +385,12 @@
 				}
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
-		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") game.maxRating -= 3000;
+		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") {
+			  game.maxRating -= 3000;
+			  game.color = 0x888888;
+		  } else {
+			  game.color = 0x000000;
+		  }
 		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
 		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -1786,6 +1801,35 @@
   
     ]]>
   </mx:Script>
+  <mx:Component id="gameListBlackRenderer">
+	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0">
+		<mx:Label text="{data.blackRank}" textAlign="right" width="43" paddingLeft="-7" paddingRight="-7" color="{data.color}" />
+		<mx:Image source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}" />
+		<mx:Label paddingLeft="-5" paddingRight="-5" text="{data.blackName}" color="{data.color}"/>
+	  </mx:HBox>
+  </mx:Component>
+  <mx:Component id="gameListWhiteRenderer">
+	  <mx:HBox horizontalAlign="right" paddingLeft="0" paddingRight="0">
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.color}"/>
+		<mx:Image source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
+		<mx:Label text="{data.whiteRank}" textAlign="left" width="43" paddingLeft="-7" paddingRight="-7" color="{data.color}" />
+	  </mx:HBox>
+  </mx:Component>
+  <mx:Component id="playerListCountryRenderer">
+	  <mx:HBox paddingLeft="0" paddingRight="0">
+		<mx:Image source="{data.flagURL}" width="27" height="17" />
+		<mx:Label text="{data.country}" paddingLeft="-9" paddingRight="-7" fontSize="10" />
+	  </mx:HBox>
+  </mx:Component>
+  <mx:Component id="waiterListNameRenderer">
+	  <mx:HBox paddingLeft="0" paddingRight="0">
+		<mx:Image source="{data.flagURL}" width="27" height="17" toolTip="{data.country}" />
+		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" />
+	  </mx:HBox>
+  </mx:Component>
+  <mx:Component id="rankRenderer">
+		<mx:Label text="{data.rank}" color="{data.rankColor}" paddingLeft="-8" paddingRight="-7" />
+  </mx:Component>
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
 <!-- =============================================================
@@ -1803,7 +1847,7 @@
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
         </mx:FormItem>
 		<mx:FormItem label="{Language.ac.getItemAt(_language).language}" paddingTop="-2">
-			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170">
+			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170" rowCount="10">
 				<mx:dataProvider><mx:Array>
 					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/826.gif" />
 					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/392.gif" />
@@ -1875,18 +1919,18 @@
 		<mx:VDividedBox>
 			<mx:DataGrid id="userListGrid" width="360" height="360" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="33" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="58" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="52" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="100" paddingLeft="2" />
-			  <mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="90" paddingLeft="2" />
+			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="56" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{Language.ac.getItemAt(_language).rank}" width="49" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn fontWeight="bold" dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{Language.ac.getItemAt(_language).country}" width="90" paddingLeft="2" />
 			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).waiter}" width="90" paddingLeft="2" />
-			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" />
+			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{Language.ac.getItemAt(_language).waiter}" width="120" paddingLeft="2" />
+<!--			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
 			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="35" paddingRight="3" textAlign="right" />
 			  <mx:DataGridColumn dataField="time" headerText="{Language.ac.getItemAt(_language).thinking_time}" width="40" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
@@ -1899,12 +1943,12 @@
 				<mx:DataGrid id="gameListGrid" width="570" height="220" headerHeight="23" change="_gameSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_watchDialog();">
 				 <mx:columns>
 				  <!-- <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" /> -->
-				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" />
-				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-				  <mx:DataGridColumn dataField="blackName" headerText="{Language.ac.getItemAt(_language).black}(▲)" width="95" paddingLeft="4"/>
-				  <mx:DataGridColumn dataField="whiteName" headerText="{Language.ac.getItemAt(_language).white}(△)" width="95" paddingRight="4" textAlign="right"  />
-				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" />
+<!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
+<!--				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
+				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}(▲)" width="177" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}(△)" width="177" paddingRight="0" textAlign="center"  />
+<!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
+<!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
 				  <mx:DataGridColumn dataField="rule" headerText="{Language.ac.getItemAt(_language).rule}" width="78" paddingLeft="3" />
 				  <mx:DataGridColumn dataField="status" headerText="{Language.ac.getItemAt(_language).status}" width="48" paddingLeft="2" />
 				  <mx:DataGridColumn dataField="watchers" headerText="{Language.ac.getItemAt(_language).monitor}" paddingLeft="0" textAlign="center" />

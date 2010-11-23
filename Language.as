@@ -9,7 +9,7 @@
 	public class Language 
 	{
 		public static const ac:ArrayCollection = new ArrayCollection([
-			{
+			{	//ENGLISH
 				LANGUAGE: "English",
 				loginname: "login name",
 				password: "password",
@@ -93,7 +93,7 @@
 				rated: "Rated",
 				nonrated: "Non-rated"
 			},
-			{
+			{	//JAPANESE
 				LANGUAGE: "日本語",
 				loginname: "ログインID",
 				password: "パスワード",
@@ -178,7 +178,7 @@
 				nonrated: "非レート対局"
 			},
 			{ LANGUAGE: "Chinese(Simplified) - unavailable" },
-			{
+			{	//CHINESE(T)
 				LANGUAGE: "繁體中文",
 				loginname: "登入名稱",
 				password: "密碼",
@@ -263,7 +263,7 @@
 				nonrated: "不計分對局"	
 			},
 			{ LANGUAGE: "Spanish - unavailable"},
-			{
+			{	//FRENCH
 				LANGUAGE: "Français",
 				loginname: "pseudonyme",
 				password: "mot de passe ",
@@ -347,7 +347,7 @@
 				rated: "Classée",
 				nonrated: "Non classée"
 			},
-			{
+			{	//GERMAN
 				LANGUAGE: "Deutsch",
 				loginname: "Login Name",
 				password: "Passwort",
@@ -431,7 +431,7 @@
 				rated: "Gewertet",
 				nonrated: "Ungewertet"
 			},
-			{
+			{	//POLISH
 				LANGUAGE: "Polski",
 				loginname: "Nazwa użytkownika",
 				password: "Hasło",
@@ -515,7 +515,7 @@
 				rated: "Rankingowa",
 				nonrated: "Towarzyska"
 			},
-			{
+			{	//SWEDISH
 				LANGUAGE: "Svenska",
 				loginname: "Användarnamn",
 				password: "Lösenord",
@@ -529,16 +529,16 @@
 				challenge: "Utmana",
 				options: "Alternativ",
 				search: "Sök",
-				mute: "Tysta",
+				mute: "Ljudlös",
 				leave: "Lämna datorn",
 				logout: "Logga ut",
 				back_to_game: "Åter till parti",
-				status_short: "Start",
+				status_short: "Stat.",
 				title: "Titel",
 				rank: "Rank",
 				name: "Namn",
 				country: "Land",
-				rate: "Ranking",
+				rate: "Rating",
 				waiter: "Väntande spelare",
 				country_short: "Land",
 				thinking_time: "Tid",
@@ -551,7 +551,7 @@
 				opening_short: "Öpng",
 				chat: "Chat",
 				auto_scroll: "Autoscroll",
-				resign: "Resignera",
+				resign: "Ge upp",
 				impasse: "Remi?",
 				close_game: "Stäng",
 				check_lobby: "Kolla lobby",
@@ -584,7 +584,7 @@
 				total_games: "Totalt antal partier",
 				accept: "Acceptera",
 				reject: "Avslå",
-				set_autoreply: "Ställ in autosvarmeddelande",
+				set_autoreply: "Ställ in meddelande för autosvar",
 				will_be_back_in: "Tillbaka om",
 				hours: "timmar",
 				minutes: "minuter",
@@ -599,12 +599,12 @@
 				rated: "Rankat",
 				nonrated: "Orankat"
 			},
-			{
+			{	//GREEK
 				LANGUAGE: "Ελληνικά",
 				loginname: "όνομα χρήστη",
 				password: "κωδικός",
 				language: "γλώσσα",
-				save_login_info: "αποθήκευση στοιχείων",
+				save_login_info: "αποθήκευση στοιχείων εισόδου",
 				login: "Είσοδος",
 				lobby: "Αίθουσα αναμονής",
 				refresh: "Ανανέωση",
@@ -683,7 +683,7 @@
 				rated: "Βαθμολογούμενο",
 				nonrated: "Φιλικό"
 			},
-			{
+			{	//ITALIAN
 				LANGUAGE: "Italiano",
 				loginname: "nome utente",
 				password: "password",
@@ -767,7 +767,7 @@
 				rated: "Valutata",
 				nonrated: "Non valutata"
 			},
-			{
+			{	//PORTUGESE
 				LANGUAGE: "Português",
 				loginname: "Nome de usuário",
 				password: "Senha",
@@ -851,7 +851,7 @@
 				rated: "Avaliada",
 				nonrated: "Não avaliada"
 			},
-			{
+			{	//BELORUSSIAN
 				LANGUAGE: "Беларуская",
 				loginname: "лагін",
 				password: "пароль",
@@ -935,7 +935,7 @@
 				rated: "рэйтынгавая",
 				nonrated: "таварыская"
 			},
-			{
+			{	//RUSSIAN
 				LANGUAGE: "Русский",
 				loginname: "логин",
 				password: "пароль",
