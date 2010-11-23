@@ -1067,8 +1067,8 @@
 		if (_game_name) return;
 		Alert.yesLabel = Language.ac.getItemAt(_language).black;
         Alert.noLabel = Language.ac.getItemAt(_language).white;
-		Alert.buttonWidth = 80;
-        Alert.show("View as:","Choose Side",Alert.YES|Alert.NO,this,_watch);
+		Alert.buttonWidth = 120;
+        Alert.show(Language.ac.getItemAt(_language).view_as,Language.ac.getItemAt(_language).watch,Alert.YES|Alert.NO,this,_watch);
         //set properties back to default.
         Alert.yesLabel = "Yes";
         Alert.noLabel = "No";
@@ -1805,12 +1805,12 @@
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0">
 		<mx:Label text="{data.blackRank}" textAlign="right" width="43" paddingLeft="-7" paddingRight="-7" color="{data.color}" />
 		<mx:Image source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}" />
-		<mx:Label paddingLeft="-5" paddingRight="-5" text="{data.blackName}" color="{data.color}"/>
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.color}" width="90" textAlign="left" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="gameListWhiteRenderer">
 	  <mx:HBox horizontalAlign="right" paddingLeft="0" paddingRight="0">
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.color}"/>
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.color}" width="90" textAlign="right" />
 		<mx:Image source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
 		<mx:Label text="{data.whiteRank}" textAlign="left" width="43" paddingLeft="-7" paddingRight="-7" color="{data.color}" />
 	  </mx:HBox>
@@ -1818,13 +1818,13 @@
   <mx:Component id="playerListCountryRenderer">
 	  <mx:HBox paddingLeft="2" paddingRight="0" verticalAlign="middle">
 		<mx:Image source="{data.flagURL}" width="16" height="11" />
-		<mx:Label text="{data.country}" paddingLeft="-9" paddingRight="-7" fontSize="10" />
+		<mx:Label text="{data.country}" paddingLeft="-9" paddingRight="-7" fontSize="10" width="100" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="waiterListNameRenderer">
 	  <mx:HBox paddingLeft="0" paddingRight="0">
 		<mx:Image source="{data.flagURL}" width="27" height="17" toolTip="{data.country}" />
-		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" />
+		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" width="100" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="rankRenderer">
@@ -1945,8 +1945,8 @@
 				  <!-- <mx:DataGridColumn dataField="gameNo" headerText="No." width="30" paddingLeft="0" textAlign="center" /> -->
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
 <!--				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
-				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}(▲)" width="177" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}(△)" width="177" paddingRight="0" textAlign="center"  />
+				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}(▲)" width="177" paddingLeft="0" paddingRight="0" textAlign="center" />
+				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}(△)" width="177" paddingLeft="0" paddingRight="0" textAlign="center" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
 				  <mx:DataGridColumn dataField="rule" headerText="{Language.ac.getItemAt(_language).rule}" width="78" paddingLeft="3" />
@@ -2030,8 +2030,8 @@
         </mx:DataGrid>
 		<mx:HBox paddingBottom="-2">
 			<mx:Label text="{Language.ac.getItemAt(_language).kifu}" fontWeight="bold"/>
-			<mx:Button id="kifuCopyButton" label="{Language.ac.getItemAt(_language).copy}" click="System.setClipboard(_formatKIF());"/>
-			<mx:Button id="kifuSaveButton" label="{Language.ac.getItemAt(_language).save}" click="_saveKIF();" />
+			<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{Language.ac.getItemAt(_language).copy}" click="System.setClipboard(_formatKIF());"/>
+			<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{Language.ac.getItemAt(_language).save}" click="_saveKIF();" />
 		</mx:HBox>
         <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
          <mx:columns>
