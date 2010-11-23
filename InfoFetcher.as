@@ -25,8 +25,8 @@
 		public var titleUser:Array = new Array();
 		public var titleName:Array = new Array();
 		public var titleRate:Array = new Array();
-		private static var rank_thresholds:Array = new Array();
-		private static var rank_names:Array = new Array();
+		public static var rank_thresholds:Array = new Array();
+		public static var rank_names:Array = new Array();
 		public var country_codes:Array = new Array();
 		public var country_names:Array = new Array();
 		public var country_names3:Array = new Array();
