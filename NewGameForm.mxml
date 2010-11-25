@@ -102,8 +102,8 @@
 	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , {Language.ac.getItemAt(language).rated} (x0.8)" value="3" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="{Language.ac.getItemAt(language).nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false"/>
-		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false"/>
+		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false" selectedIndex="3" />
+		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false" selectedIndex="4" />
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>

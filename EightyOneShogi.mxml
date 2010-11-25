@@ -35,7 +35,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/23";
+	private const VERSION:String = "ver.2010/11/25";
 	[Bindable]
 	private var _language:int = 0;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
@@ -90,9 +90,6 @@
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
 	private var _regExpCalled:RegExp;
-	private var _ur_total_selected:int = 3;
-	private var _ur_byoyomi_selected:int = 4;
-	private var _ur_handicap_selected:int = 0;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _initPositionStr:String;
@@ -146,7 +143,8 @@
 	//=========================================================
 
 	//----------------------------------------------------------------------------------------------------------------------------- CONNECTION
-    private function _handleConnected(e:Event):void{
+    private function _handleConnected(e:Event):void {
+	  loginButton.enabled = false;
       loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
       _login_name = loginname.text;
@@ -184,13 +182,13 @@
     private function _handleLoginFailed(e:ServerMessageEvent):void{
       loginMessage.text = "";
       errorMessage.text = e.message;
+	  loginButton.enabled = true;
     }
 
 		private function _handleLogout(e:ServerMessageEvent):void {
 		_keepAliveTimer.stop();
 		loginMessage.text = "logged out successfully";
 		titleBanner.source = "http://www.81squareuniverse.com/dojo/images/81Dojo_bye.jpg";
-		loginButton.enabled = false;
 		mainViewStack.selectedIndex = 0;
 	}
 
@@ -278,17 +276,17 @@
 			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[7]) {
 				  user_list[i].rankColor = 0xEE8800;
 			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[10]) {
-				  user_list[i].rankColor = 0x008800;
+				  user_list[i].rankColor = 0x009300;
 			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[13]) {
-				  user_list[i].rankColor = 0x0055FF;
+				  user_list[i].rankColor = 0x1166FF;
 			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[16]) {
-				  user_list[i].rankColor = 0xcc33FF;
+				  user_list[i].rankColor = 0xAA55FF;
 			  } else {
 				  user_list[i].rankColor = 0x777777;
 			  }
 		  } else {
 			  user_list[i].rank = "-";
-			  user_list[i].rankColor = 0x000000;
+			  user_list[i].rankColor = 0xCCCCCC;
 		  }
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
@@ -298,7 +296,8 @@
 				  'game_name': user_list[i].game_name,
 				  'country': user_list[i].country,
 				  'country3':_infoFetcher.country_names3[user_list[i].country_code],
-				  'flagURL': "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif"
+				  'flagURL': "http://www.81squareuniverse.com/dojo/images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
+				  'rankColor': user_list[i].rankColor
 				  }
 		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			  total = parseInt(game_info[3]) / 60;
@@ -393,12 +392,7 @@
 				}
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
-		  if (game.status == "P" || game.status == "P▲" || game.status == "P△") {
-			  game.maxRating -= 3000;
-			  game.color = 0x888888;
-		  } else {
-			  game.color = 0x000000;
-		  }
+		  if (game.blackColor == 0x999999 || game.whiteColor == 0x999999) game.maxRating -= 3000;
 		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
 		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
@@ -447,7 +441,7 @@
         var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*) (\d+) (\d+)$/);
         if(match){
           watcher.name = match[1];
-		  watcher.rating = parseInt(match[2]);
+		  watcher.rate = parseInt(match[2]);
 		  watcher.country3 = _infoFetcher.country_names3[parseInt(match[3])];
 		  watcher.country = _infoFetcher.country_names[parseInt(match[3])];
           watcher_list.unshift(watcher);
@@ -869,9 +863,10 @@
       with (_newGameWindow) {
 		language = _language;
         title = "Create new game";
-		nonrated_total.selectedIndex = _ur_total_selected;
-		nonrated_byoyomi.selectedIndex = _ur_byoyomi_selected;
-		nonrated_handicap.selectedIndex = _ur_handicap_selected;
+		if (_so.data.rule_base) timeSetting.selectedValue = _so.data.rule_base;
+		if (_so.data.rule_total) nonrated_total.selectedIndex = _so.data.rule_total;
+		if (_so.data.rule_byoyomi) nonrated_byoyomi.selectedIndex = _so.data.rule_byoyomi;
+		if (_so.data.rule_handicap) nonrated_handicap.selectedIndex = _so.data.rule_handicap;
 		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
       }
     }
@@ -975,13 +970,18 @@
 		PopUpManager.centerPopUp(_leavePCWindow);
 		_leavePCWindow.language = _language;
 		_leavePCWindow.title = Language.ac.getItemAt(_language).set_autoreply;
-		_leavePCWindow.hoursCombo.selectedIndex = 1;
+		if (_so.data.leave_hours) _leavePCWindow.hoursCombo.selectedIndex = _so.data.leave_hours;
+		if (_so.data.leave_minutes) _leavePCWindow.minutesCombo.selectedIndex = _so.data.leave_minutes;
+		if (_so.data.leave_message) _leavePCWindow.messageText.text = _so.data.leave_message;
 		_leavePCWindow.messageText.addEventListener(FlexEvent.ENTER, _leaveStart);
 		_leavePCWindow.leaveButton.addEventListener(MouseEvent.CLICK, _leaveStart);
 		_leavePCWindow.cancelButton.addEventListener(MouseEvent.CLICK, _leaveEnd);
 	}
 	
 	private function _leaveStart(e:Event):void {
+		_so.data.leave_hours = _leavePCWindow.hoursCombo.selectedIndex;
+		_so.data.leave_minutes = _leavePCWindow.minutesCombo.selectedIndex;
+		_so.data.leave_message = _leavePCWindow.messageText.text;
 		_leaving = true;
 		_leaveMinutes = 60 * e.target.parent.parent.hoursCombo.selectedItem.data + e.target.parent.parent.minutesCombo.selectedItem.data;
 		_leaveTimer = new Timer(60000, _leaveMinutes);
@@ -1630,9 +1630,10 @@
 	
 	//--------------------------------------------------------------------------------------------------------------------------------- CREATE GAME
     private function _handleRuleSelected(e:GameRuleEvent):void {
-	  _ur_total_selected = _newGameWindow.nonrated_total.selectedIndex;
-	  _ur_byoyomi_selected = _newGameWindow.nonrated_byoyomi.selectedIndex;
-	  _ur_handicap_selected = _newGameWindow.nonrated_handicap.selectedIndex;
+	  _so.data.rule_base = _newGameWindow.timeSetting.selectedValue;
+	  _so.data.rule_total = _newGameWindow.nonrated_total.selectedIndex;
+	  _so.data.rule_byoyomi = _newGameWindow.nonrated_byoyomi.selectedIndex;
+	  _so.data.rule_handicap = _newGameWindow.nonrated_handicap.selectedIndex;
       _waitForGame(e.total, e.byoyomi, e.handicap);
 	  _waiting = true;
     }
@@ -1858,6 +1859,7 @@
   <mx:Component id="waiterListNameRenderer">
 	  <mx:HBox paddingLeft="0" paddingRight="0">
 		<mx:Image source="{data.flagURL}" width="27" height="17" toolTip="{data.country}" />
+		<mx:Label text="■" paddingLeft="-6" paddingRight="-9" width="5" color="{data.rankColor}" />
 		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" width="100" />
 	  </mx:HBox>
   </mx:Component>
@@ -1885,8 +1887,8 @@
 				<mx:dataProvider><mx:Array>
 					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/826.gif" />
 					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/392.gif" />
-					<mx:Object label="(reserved)" image="" />
-					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/156.gif" />
+					<mx:Object label="{Language.ac.getItemAt(2).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/156.gif" />
+					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/hongkong.gif" />
 					<mx:Object label="(reserved)" image="" />
 					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/250.gif" />
 					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="http://www.81squareuniverse.com/dojo/images/flags_s/276.gif" />
@@ -2059,7 +2061,7 @@
          <mx:columns>
           <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="80" paddingLeft="2" sortCompareFunction="_sortName" />
 		  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="40" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
-		  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" />
+		  <mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
          </mx:columns>
         </mx:DataGrid>
 		<mx:HBox paddingBottom="-2">
