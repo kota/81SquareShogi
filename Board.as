@@ -64,6 +64,9 @@ package  {
 	[Embed(source = "/sound/piece.mp3")]
 	private var sound_piece:Class;
 	private var _sound_piece:Sound = new sound_piece();
+	[Embed(source = "/sound/piece_double.mp3")]
+	private var sound_piece_double:Class;
+	private var _sound_piece_double:Sound = new sound_piece_double();
 	private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
 
     public var handBoxes:Array;
@@ -307,6 +310,7 @@ package  {
     }
 
     public function makeMove(move:String, withSound:Boolean = true):void {
+		var isSoundDouble:Boolean;
 		_move_sent = false;
 		if (post_game) {
 			var mv:Movement = _position.generateMovementFromString(move);
@@ -328,11 +332,12 @@ package  {
 			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list.push(kifuMove);
 		}
-		
 		if (!post_game && !onListen && !viewing) {
 			_last_pos.move(mv);
+			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
 		} else {
 			_position.move(mv);
+			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
 			_last_pos.loadFromString(_position.toString());
 		  if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
 		  if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
@@ -344,7 +349,13 @@ package  {
 			_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
 		  }
 		}
-        if (piece_sound_play && withSound) _sound_piece.play();
+        if (piece_sound_play && withSound) {
+			if (isSoundDouble) {
+				_sound_piece_double.play();
+			} else {
+				_sound_piece.play();
+			}
+		}
 	  }
 
     public function setMoveCallback(callback:Function):void{

@@ -307,6 +307,20 @@ package  {
 	        }
 	        return true;
 		}
+		
+		public function isSoundDouble(to:Point):Boolean {
+			var koma:Koma;
+			if (getKomaAt(to).ownerPlayer == SENTE && to.y <= 7) {
+				if ((koma = getKomaAt(new Point(to.x, to.y + 1)))) {
+					if (koma.ownerPlayer == SENTE) return true;
+				}
+			} else if (getKomaAt(to).ownerPlayer == GOTE && to.y >= 1) {
+				if ((koma = getKomaAt(new Point(to.x, to.y - 1)))) {
+					if (koma.ownerPlayer == GOTE) return true;
+				}
+			}
+			return false;
+		}
 
     public static function translateHumanCoordinates(p:Point):Point{
       return new Point(9-p.x,p.y-1);
