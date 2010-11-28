@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" headerHeight="25">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
@@ -106,8 +106,9 @@
 		<mx:Label text="PM:"/>
 		<mx:TextInput id="directMessage" width="360"/>
 	</mx:HBox>
-	<mx:VBox width="100%" horizontalAlign="center" paddingTop="0">
-		<!-- <mx:Label text="{_status}" color="#FF0000" /> -->
-		<mx:Button id="close" click="_closeButton();" label="Close"/>	
-	</mx:VBox>
+	<mx:HBox width="100%" horizontalAlign="center" paddingTop="0">
+		<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
+		<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
+		<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
+	</mx:HBox>
 </mx:TitleWindow>

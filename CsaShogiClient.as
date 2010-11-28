@@ -364,6 +364,10 @@ package{
       return _player_names;
     }
 	
+    public function get waitingGamename():String{
+      return _waiting_gamename;
+    }
+	
 	public function setHostToLocal():void {
 		_host = '127.0.0.1';
 	}

@@ -80,6 +80,7 @@
 				total_games: "Total Games",
 				accept: "Accept",
 				reject: "Reject",
+				invitation: "Invitation",
 				set_autoreply: "Set auto-reply message",
 				will_be_back_in: "Will be back in",
 				hours: "hours",
@@ -92,8 +93,11 @@
 				win_small: "win",
 				loss_small: "loss",
 				current: "Current",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Rated",
-				nonrated: "Non-rated"
+				nonrated: "Non-rated",
+				error: "Error"
 			},
 			{	//JAPANESE
 				LANGUAGE: "日本語",
@@ -166,6 +170,7 @@
 				total_games: "総対局数",
 				accept: "承諾",
 				reject: "拒否",
+				invitation: "招待",
 				set_autoreply: "自動返信の設定",
 				will_be_back_in: "離席予定時間",
 				hours: "時間",
@@ -178,8 +183,11 @@
 				win_small: "勝",
 				loss_small: "敗",
 				current: "現在",
+				invite: "招待",
+				ignore: "無視",
 				rated: "レート対局",
-				nonrated: "非レート対局"
+				nonrated: "非レート対局",
+				error: "エラー"
 			},
 			{	//CHINESE(S)
 				LANGUAGE: "简体中文",
@@ -252,6 +260,7 @@
 				total_games: "对局数",
 				accept: "接受",
 				reject: "拒绝",
+				invitation: "Invitation",
 				set_autoreply: "设定自动讯息",
 				will_be_back_in: "离开时间",
 				hours: "小时",
@@ -264,8 +273,11 @@
 				win_small: "胜",
 				loss_small: "负",
 				current: "现在",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "计分对局",
-				nonrated: "不计分对局"	
+				nonrated: "不计分对局",
+				error: "Error"
 			},
 			{	//CHINESE(T)
 				LANGUAGE: "繁體中文",
@@ -338,6 +350,7 @@
 				total_games: "對局數",
 				accept: "接受",
 				reject: "拒絕",
+				invitation: "Invitation",
 				set_autoreply: "設定自動訊息",
 				will_be_back_in: "離開時間",
 				hours: "小時",
@@ -350,8 +363,11 @@
 				win_small: "勝",
 				loss_small: "負",
 				current: "現在",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "計分對局",
-				nonrated: "不計分對局"	
+				nonrated: "不計分對局",
+				error: "Error"
 			},
 			{ LANGUAGE: "Spanish - unavailable"},
 			{	//FRENCH
@@ -425,6 +441,7 @@
 				total_games: "Nombre de parties",
 				accept: "Accepter",
 				reject: "Rejeter",
+				invitation: "Invitation",
 				set_autoreply: "Message de réponse automatique",
 				will_be_back_in: "De retour dans",
 				hours: "heures",
@@ -437,8 +454,11 @@
 				win_small: "victoires",
 				loss_small: "défaites",
 				current: "Actuelle",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Classée",
-				nonrated: "Non classée"
+				nonrated: "Non classée",
+				error: "Error"
 			},
 			{	//GERMAN
 				LANGUAGE: "Deutsch",
@@ -511,6 +531,7 @@
 				total_games: "Partien gesamt",
 				accept: "Annehmen",
 				reject: "Ablehnen",
+				invitation: "Invitation",
 				set_autoreply: "Automatische Nachricht",
 				will_be_back_in: "Bin zurück in",
 				hours: "Stunden",
@@ -523,8 +544,11 @@
 				win_small: "Siege",
 				loss_small: "Niederlagen",
 				current: "Aktuell",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Gewertet",
-				nonrated: "Ungewertet"
+				nonrated: "Ungewertet",
+				error: "Error"
 			},
 			{	//POLISH
 				LANGUAGE: "Polski",
@@ -597,6 +621,7 @@
 				total_games: "Ilość gier",
 				accept: "Zagraj",
 				reject: "Odrzuć",
+				invitation: "Invitation",
 				set_autoreply: "Ustaw automatyczną odpowiedź",
 				will_be_back_in: "Wrócę za",
 				hours: "h",
@@ -609,8 +634,11 @@
 				win_small: "Zwycięstw",
 				loss_small: "Porażek",
 				current: "Aktualna",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Rankingowa",
-				nonrated: "Towarzyska"
+				nonrated: "Towarzyska",
+				error: "Error"
 			},
 			{	//SWEDISH
 				LANGUAGE: "Svenska",
@@ -683,6 +711,7 @@
 				total_games: "Totalt antal partier",
 				accept: "Acceptera",
 				reject: "Avslå",
+				invitation: "Invitation",
 				set_autoreply: "Ställ in meddelande för autosvar",
 				will_be_back_in: "Tillbaka om",
 				hours: "timmar",
@@ -695,8 +724,11 @@
 				win_small: "vinster",
 				loss_small: "förluster",
 				current: "Nuvarande",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Rankat",
-				nonrated: "Orankat"
+				nonrated: "Orankat",
+				error: "Error"
 			},
 			{	//GREEK
 				LANGUAGE: "Ελληνικά",
@@ -769,6 +801,7 @@
 				total_games: "Συνολικά Παιχνίδια",
 				accept: "Αποδοχή",
 				reject: "Απόρριψη",
+				invitation: "Invitation",
 				set_autoreply: "Άφησε σημείωμα (αυτόματη απάντηση)",
 				will_be_back_in: "Επιστρέφω σε",
 				hours: "ώρες",
@@ -781,8 +814,11 @@
 				win_small: "νίκες",
 				loss_small: "ήττες",
 				current: "Τρέχων",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Βαθμολογούμενο",
-				nonrated: "Φιλικό"
+				nonrated: "Φιλικό",
+				error: "Error"
 			},
 			{	//ITALIAN
 				LANGUAGE: "Italiano",
@@ -855,6 +891,7 @@
 				total_games: "Tot. partite",
 				accept: "Accetta",
 				reject: "Rifiuta",
+				invitation: "Invitation",
 				set_autoreply: "Risposta automatica",
 				will_be_back_in: "Torno tra",
 				hours: "ore",
@@ -867,6 +904,8 @@
 				win_small: "vinte",
 				loss_small: "perse",
 				current: "Corrente",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Valutata",
 				nonrated: "Non valutata"
 			},
@@ -941,6 +980,7 @@
 				total_games: "Total de jogos",
 				accept: "Aceitar",
 				reject: "Recusar",
+				invitation: "Invitation",
 				set_autoreply: "Mensagem de resposta automática",
 				will_be_back_in: "Volto em",
 				hours: "horas",
@@ -953,8 +993,11 @@
 				win_small: "vitórias",
 				loss_small: "derrotas",
 				current: "Autal",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "Avaliada",
-				nonrated: "Não avaliada"
+				nonrated: "Não avaliada",
+				error: "Error"
 			},
 			{	//BELORUSSIAN
 				LANGUAGE: "Беларуская",
@@ -1027,6 +1070,7 @@
 				total_games: "Усяго гульняў",
 				accept: "Гуляць",
 				reject: "Адмовіцца",
+				invitation: "Invitation",
 				set_autoreply: "Налада аўтапаведамлення",
 				will_be_back_in: "Вярнуся праз",
 				hours: "гадзін(у)",
@@ -1039,8 +1083,11 @@
 				win_small: "перам.",
 				loss_small: "параж.",
 				current: "Бягучая серыя",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "рэйтынгавая",
-				nonrated: "таварыская"
+				nonrated: "таварыская",
+				error: "Error"
 			},
 			{	//RUSSIAN
 				LANGUAGE: "Русский",
@@ -1113,6 +1160,7 @@
 				total_games: "Всего игр",
 				accept: "Играть",
 				reject: "Отказаться",
+				invitation: "Invitation",
 				set_autoreply: "Настройка автосообщения",
 				will_be_back_in: "Вернусь через",
 				hours: "час(ов)",
@@ -1125,8 +1173,11 @@
 				win_small: "поб.",
 				loss_small: "пораж.",
 				current: "Текущая серия",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "рейтинговая",
-				nonrated: "нерейтинговая"
+				nonrated: "нерейтинговая",
+				error: "Error"
 			},
 			{
 				LANGUAGE: "ไทย",
@@ -1199,6 +1250,7 @@
 				total_games: "ทั้ั้งหมด",
 				accept: "ตกลง",
 				reject: "ปฏิเสธ",
+				invitation: "Invitation",
 				set_autoreply: "ตั้งค่าข้อความอัตโนมัติ",
 				will_be_back_in: "จะกลับมาภายใน...",
 				hours: "ชั่วโมง",
@@ -1211,8 +1263,11 @@
 				win_small: "ชนะ",
 				loss_small: "แพ้",
 				current: "ครั้งล่าสุด",
+				invite: "Invite",
+				ignore: "Ignore",
 				rated: "เกมคิดคะแนน",
-				nonrated: "เกมไม่คิดคะแนน"
+				nonrated: "เกมไม่คิดคะแนน",
+				error: "Error"
 			}
 		]);	
 	}

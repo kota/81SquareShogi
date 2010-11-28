@@ -35,7 +35,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/26";
+	private const VERSION:String = "ver.2010/11/28";
 	private const IMAGE_URL:String = "http://www.81squareuniverse.com/dojo/images/";
 	[Bindable]
 	private var _language:int = 0;
@@ -57,6 +57,7 @@
     private var _login_name:String;
 	private var _player_infos:Array = new Array;
 	private var _watch_game:Object;
+	private var _challengeUser:Object;
     private var _monitoring:Boolean;
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
@@ -869,8 +870,6 @@
       _client.who();
 	  _client.list();
 	  if (_game_name) _client.watchers(_game_name);
-	  challengeButton.enabled = false;
-//	  watchButton.enabled = false;
     }
 	
     private function _newGameForm():void{
@@ -918,40 +917,7 @@
       stopButton.enabled = true;
     }
 
-    private function _challengeForm():void{
-      var user:Object = waiterListGrid.selectedItem;
-      if (user != null) {
-        var match:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-        var total:int = parseInt(match[3]) / 60 ;
-        var rule:String = total + "min - " + match[4] + "sec";
-		var hc:String = InfoFetcher.gameType(match[1]);
-        Alert.yesLabel = Language.ac.getItemAt(_language).challenge;
-		Alert.cancelLabel = Language.ac.getItemAt(_language).cancel;
-        Alert.buttonWidth = 140;
-        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
-        //set properties back to default.
-        Alert.yesLabel = "Yes";
-		Alert.cancelLabel = "Cancel";
-        Alert.buttonWidth = 60;
-      }    
-    }
-
-    private function _handleChallengeAlert(e:CloseEvent):void{
-      var user:Object = waiterListGrid.selectedItem;
-      if (e.detail == Alert.YES) {
-      _challenging = true;
-      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
-      _client.challenge(user);
-      } else if (e.detail == Alert.CANCEL) {
-      }
-      challengeButton.enabled = false;
-    }
-
-//   private function _challenge(e:Event):void{
-//    }
-
 	private function _logout():void {
-//		_sendAutoChat("I've logged out. See you.");
 		_client.logout();
 	}
 
@@ -1032,32 +998,14 @@
 		  if (_waiter_list[i].name == user.name) {
 			  waiterListGrid.selectedIndex = i;
 			  waiterListGrid.scrollToIndex(i);
-				  if(_waiter_list[i].name != _login_name && _waiter_list[i].game_name.indexOf(_waiter_list[i].name) >= 0){
-					challengeButton.enabled = true;
-				  } else {
-					challengeButton.enabled = false;
-				  }
 			  break;
 		  }
 		  waiterListGrid.selectedIndex = -1;
-		  challengeButton.enabled = false;
 	  }
-//	  _waiterSelected();
-//	  _gameSelected();
     }
 	
     private function _waiterSelected():void {
-	  if (_game_name) return;
       var user:Object = waiterListGrid.selectedItem;
-	  if (!user) {
-		  challengeButton.enabled = false;
-		  return;
-	  }
-      if(user != null && user.name != _login_name && user.game_name.indexOf(user.name) >= 0){
-        challengeButton.enabled = true;
-      } else {
-		challengeButton.enabled = false;
-	  }
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == user.name) {
 			  userListGrid.selectedIndex = i;
@@ -1080,7 +1028,6 @@
 		  userListGrid.selectedIndex = -1;
 	  }
 	  waiterListGrid.selectedIndex = -1;
-	  challengeButton.enabled = false;
     }
 
 	//------------------------------------------------------------------------------------------------------------------------ LIST SORT FUNCTIONS
@@ -1175,12 +1122,20 @@
 	  _playerInfoWindow.language = _language;
       _playerInfoWindow.title = "Player Info";
 	  _playerInfoWindow.readUser(user);
-	  _playerInfoWindow.directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
 	  if (_isPlayer()) {
+		  _playerInfoWindow.invite.enabled = false;
 		  _playerInfoWindow.directMessage.enabled = false;
 	  } else {
-		  _playerInfoWindow.directMessage.enabled = true;
+		  _playerInfoWindow.directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
 		  _playerInfoWindow.directMessage.setFocus();
+	  }
+	  if (user.status == "game_waiting" && user.name != _login_name && user.game_name.indexOf(user.name) >= 0) {
+		  _playerInfoWindow.challenge.addEventListener(MouseEvent.CLICK, _handleChallenge);
+		  _playerInfoWindow.challenge.enabled = true;
+	  }
+	  if (user.status != "game" && user.name != _login_name) {
+		  _playerInfoWindow.invite.addEventListener(MouseEvent.CLICK, _handleInvite);
+		  _playerInfoWindow.invite.enabled = true;
 	  }
 	}
 
@@ -1193,6 +1148,46 @@
 	  }
       e.target.text = "";
     }
+	
+	private function _handleChallenge(e:MouseEvent):void {
+      _challengeUser = _findPlayerFromList(e.target.parent.parent.nameLabel.text);
+	  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
+		  Alert.show("The opponent is not waiting for a game.", Language.ac.getItemAt(_language).error);
+	  } else {
+        var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+        var total:int = parseInt(match[3]) / 60 ;
+        var rule:String = total + "min - " + match[4] + "sec";
+		var hc:String = InfoFetcher.gameType(match[1]);
+        Alert.yesLabel = Language.ac.getItemAt(_language).challenge;
+		Alert.cancelLabel = Language.ac.getItemAt(_language).cancel;
+        Alert.buttonWidth = 140;
+        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
+        //set properties back to default.
+        Alert.yesLabel = "Yes";
+		Alert.cancelLabel = "Cancel";
+        Alert.buttonWidth = 60;
+      }    
+	}
+
+    private function _handleChallengeAlert(e:CloseEvent):void{
+      if (e.detail == Alert.YES) {
+      _challenging = true;
+      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
+      _client.challenge(_challengeUser);
+      } else if (e.detail == Alert.CANCEL) {
+      }
+    }
+	
+	private function _handleInvite(e:MouseEvent):void {
+		if (!_waiting) {
+			Alert.show("Create a game first.", Language.ac.getItemAt(_language).error);
+		} else {
+			var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+			var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
+			var hc:String = InfoFetcher.gameType(match[1]);
+			_sendPrivateChat(e.target.parent.parent.nameLabel.text, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
+		}
+	}
 	
 	//=========================================================
 	//                       CONTROLS for VIEWSTACK INDEX = 2
@@ -1232,7 +1227,6 @@
 	  } else {
 		  mainViewStack.selectedIndex = 1;
 	  }
-      challengeButton.enabled = false;
 	  logoutButton.enabled = true;
 	  rewindAllButton.setStyle('color', 'undefined');
 	  rewindAllButton.setStyle('textRollOverColor', 'undefined');
@@ -1960,7 +1954,7 @@
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
         <mx:Button id="startButton" label="{Language.ac.getItemAt(_language).wait}" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="{Language.ac.getItemAt(_language).stop}" click="_stopWaiting()" enabled="false" />
-        <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" click="_challengeForm();" enabled="false"/>
+        <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" />
 		<mx:Button id="searchViewButton" label="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
 		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();" enabled="true"/>
 		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
