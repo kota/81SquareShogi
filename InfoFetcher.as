@@ -408,18 +408,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.rating >= 1150) {
+			if (user.rating >= rank_thresholds[7]) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "Dan Holder";
+				medal.toolTip = "Low-Dan Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.rating >= 1300) {
+				if (user.rating >= rank_thresholds[3]) {
 					medal.source = gold_medal;
-					medal.toolTip = "Over 6-Dan";
-				} else if (user.rating >= 1240) {
+					medal.toolTip = "High-Dan Holder";
+				} else if (user.rating >= rank_thresholds[5]) {
 					medal.source = silver_medal;
-					medal.toolTip = "4/5-Dan Holder";
+					medal.toolTip = "Mid-Dan Holder";
 				}
 				canvas.addChild(medal);
 			}
