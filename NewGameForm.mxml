@@ -87,7 +87,7 @@
             PopUpManager.removePopUp(this);
           }
 
-          private function _toggleTimeSelection(e:Event):void{
+          public function toggleTimeSelection():void{
             nonrated_total.enabled = timeSetting.selectedValue == 4;
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
             nonrated_handicap.enabled = timeSetting.selectedValue == 4;
@@ -95,7 +95,7 @@
 
         ]]>
     </mx:Script>
-	<mx:RadioButtonGroup id="timeSetting" change="_toggleTimeSelection(event);"/>
+	<mx:RadioButtonGroup id="timeSetting" change="toggleTimeSelection();"/>
 	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , {Language.ac.getItemAt(language).rated} (x2.0)" value="0" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , {Language.ac.getItemAt(language).rated} (x1.3)" value="1" fontSize="11" selected="true" />
 	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , {Language.ac.getItemAt(language).rated} (x1.0)" value="2" fontSize="11"/>
