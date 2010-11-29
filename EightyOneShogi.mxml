@@ -35,7 +35,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/28";
+	private const VERSION:String = "ver.2010/11/29";
 	private const IMAGE_URL:String = "http://www.81squareuniverse.com/dojo/images/";
 	[Bindable]
 	private var _language:int = 0;
@@ -1712,6 +1712,7 @@
 	
     private function _handleKeepAlive(e:Event):void {
 	  _refresh();
+  	  if (mainViewStack.selectedIndex == 1) bulletin.flip();
     }
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
@@ -1900,7 +1901,7 @@
 					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="{IMAGE_URL}flags_s/392.gif" />
 					<mx:Object label="{Language.ac.getItemAt(2).LANGUAGE}" image="{IMAGE_URL}flags_s/156.gif" />
 					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="{IMAGE_URL}flags_s/hongkong.gif" />
-					<mx:Object label="(reserved)" image="" />
+					<mx:Object label="{Language.ac.getItemAt(4).LANGUAGE}" image="{IMAGE_URL}flags_s/724.gif" />
 					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="{IMAGE_URL}flags_s/250.gif" />
 					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="{IMAGE_URL}flags_s/276.gif" />
 					<mx:Object label="{Language.ac.getItemAt(7).LANGUAGE}" image="{IMAGE_URL}flags_s/616.gif" />
@@ -1948,7 +1949,8 @@
 <!-- =============================================================
                   VIEWSTACK INDEX = 1
 ================================================================== -->
-    <mx:VBox paddingTop="10" paddingLeft="10" fontSize="11">
+	<mx:HBox paddingTop="10" paddingLeft="10">
+    <mx:VBox fontSize="11">
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFF3">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
@@ -2028,6 +2030,8 @@
 		  </mx:VBox>
 	  </mx:HBox>
     </mx:VBox>
+	<eightyOneSquare:BulletinGadget id="bulletin" paddingLeft="8" />
+	</mx:HBox>
 <!-- =============================================================
                   VIEWSTACK INDEX = 2
 ================================================================== -->
