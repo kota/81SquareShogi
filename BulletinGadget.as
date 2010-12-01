@@ -70,17 +70,14 @@ package  {
 				y += 20;
 				label.y = y;
 				page.addChild(label);
-			} else if (line.match(/^PLAYER:/)) {
-				tokens = line.substr(7).split(",");
+			} else if (line.match(/^CHAMPION:/)) {
+				tokens = line.substr(9).split(",");
 				var row:Canvas = new Canvas();
-				if (type == "round_robin") {
-					n += 1;
-					label = new Label();
-					label.text = String(n);
-					label.setStyle('textAlign', 'right');
-					label.width = 20;
-					row.addChild(label);
-				}
+				label = new Label();
+				label.text = "C";
+				label.setStyle('textAlign', 'right');
+				label.width = 20;
+				row.addChild(label);
 				var image:Image = new Image();
 				image.width = 16;
 				image.height = 11;
@@ -93,7 +90,34 @@ package  {
 				label.text = tokens[0];
 				label.x = 37;
 				label.width = 120;
-				if (type == "elimination" && tokens[2] == "false") label.setStyle('color', '#888888');
+				row.addChild(label);
+				row.y = y;
+				page.addChild(row);
+				y += 10;
+			} else if (line.match(/^PLAYER:/)) {
+				tokens = line.substr(7).split(",");
+				row = new Canvas();
+				if (type == "round_robin") {
+					n += 1;
+					label = new Label();
+					label.text = String(n);
+					label.setStyle('textAlign', 'right');
+					label.width = 20;
+					row.addChild(label);
+				}
+				image = new Image();
+				image.width = 16;
+				image.height = 11;
+				image.source = SOURCE + "images/flags_ss/" + tokens[1] + ".png";
+				image.x = 20;
+				image.y = 3;
+				row.addChild(image);
+				label = new Label();
+				trace(parseInt(tokens[1]));
+				label.text = tokens[0];
+				label.x = 37;
+				label.width = 120;
+				if (type == "elimination" && tokens[2] == "false") label.setStyle('color', '#999999');
 				row.addChild(label);
 				if (type == "round_robin") {
 					label = new Label();
