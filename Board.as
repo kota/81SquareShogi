@@ -22,7 +22,7 @@ package  {
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
     public static const BAN_LEFT_MARGIN:int = 185;
-		public static const BAN_TOP_MARGIN:int = 10
+	public static const BAN_TOP_MARGIN:int = 10
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
@@ -92,6 +92,7 @@ package  {
 
     [Bindable]
     public var kifu_list:Array;
+	public var kifu_list_self:Array;
 
     private var _from:Point;
     private var _to:Point;
@@ -112,6 +113,7 @@ package  {
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
 	public var post_game:Boolean = false;
+	public var isPlayer:Boolean = false;
 	public var isWinner:Boolean = false;
 	public var isLoser:Boolean = false;
 	public var onListen:Boolean = false;
@@ -266,6 +268,7 @@ package  {
         }
       }
       kifu_list = new Array();
+	  kifu_list_self = new Array();
       var kifuMove:Object = new Object();
       kifuMove.num = "0";
       kifuMove.move = "Start";
@@ -309,11 +312,17 @@ package  {
       }
     }
 
-    public function makeMove(move:String, withSound:Boolean = true):void {
+    public function makeMove(move:String, actual:Boolean, withSound:Boolean):void {
 		var isSoundDouble:Boolean;
 		_move_sent = false;
-		if (post_game) {
+		if (!actual) {
 			var mv:Movement = _position.generateMovementFromString(move);
+			var kifuMove:Object = new Object();
+			kifuMove.num = "*" + kifu_list_self.length;										//No. of the Move
+			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
+			kifuMove.moveStr = move;												//CSA
+			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
+			kifu_list_self.push(kifuMove);
 		} else {
 			if (viewing) {
 				mv = _position.generateMovementFromString(move);
@@ -325,29 +334,29 @@ package  {
 				timers[running_timer].suspend();
 				timers[1 - running_timer].resume();				
 			}
-			var kifuMove:Object = new Object();
+			kifuMove = new Object();
 			kifuMove.num = kifu_list.length;										//No. of the Move
 			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
 			kifuMove.moveStr = move;												//CSA
 			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list.push(kifuMove);
 		}
-		if (!post_game && !onListen && !viewing) {
+		if (actual && !onListen && !viewing) {
 			_last_pos.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
 		} else {
 			_position.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
-			_last_pos.loadFromString(_position.toString());
-		  if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
-		  if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
-		  setPosition(_position);
-		  _last_to_square = _cells[mv.to.y][mv.to.x];
-		  _last_to_square.setStyle('backgroundColor', '0xFF5555');
-		  if (mv.from.x < Kyokumen.HAND) {
-			_last_from_square = _cells[mv.from.y][mv.from.x];
-			_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
-		  }
+			if (actual) _last_pos.loadFromString(_position.toString());
+			if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
+			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
+			setPosition(_position);
+			_last_to_square = _cells[mv.to.y][mv.to.x];
+			_last_to_square.setStyle('backgroundColor', '0xFF5555');
+			if (mv.from.x < Kyokumen.HAND) {
+				_last_from_square = _cells[mv.from.y][mv.from.x];
+				_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
+			}
 		}
         if (piece_sound_play && withSound) {
 			if (isSoundDouble) {
@@ -368,6 +377,7 @@ package  {
 
     public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
+	  isPlayer = true;
 	  _player_infos = player_infos;
       _my_turn = my_turn;
       reset();
@@ -413,7 +423,8 @@ package  {
 	  _client_timeout = false;
     }
 	
-    public function closeGame():void{
+    public function closeGame():void {
+	  isPlayer = false;
       _player_infos[0] = null;
 	  _player_infos[1] = null;
       timers[0].stop();
@@ -478,7 +489,7 @@ package  {
 			time = "T" + String(parseInt(time.substr(1)) - since_last_move);
 			since_last_move = 0;
 		}
-        makeMove(match[1] + ',' + time);
+        makeMove(match[1] + ',' + time, true, true);
       } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) { //||
 //               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
 //    	  watch_game_end = true;
@@ -586,7 +597,7 @@ package  {
 				kifu_list.push(kifuMove);
 				timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
 			} else {
-				makeMove(move.move + "," + move.time, false);
+				makeMove(move.move + "," + move.time, true, false);
 			}
         }
       }
@@ -597,6 +608,7 @@ package  {
       var moves:Array = new Array();
 	  var kyokumen_str:String = "";
 	  kifu_list = new Array();
+	  kifu_list_self = new Array();
       for each(var line:String in kifu_contents.split("\n")) {
 		  if (line.match(/^To_Move/)) {
 			  kyokumen_str += "P0" + line.substring(8) + "\n";
@@ -640,7 +652,7 @@ package  {
       if (moves.length > 0) {
         for each(var move:Object in moves) {
 		  if (move.move != "%TORYO") {
-			  makeMove(move.move + "," + move.time, false);
+			  makeMove(move.move + "," + move.time, true, false);
 			  trace(move.move + "," + move.time);
 		  } else {
 			  var kifuMove:Object = new Object();
@@ -669,7 +681,7 @@ package  {
     }
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
+      if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
@@ -707,7 +719,7 @@ package  {
 				} else {
 					Alert.show("Promote?", "", Alert.YES | Alert.NO, Canvas(e.currentTarget), _promotionHandler);
 				}
-            } else if ((_player_infos[_my_turn].game_name.match(/^nr_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
+            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^nr_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
 					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
 					_from = null;
 					_to = null;
@@ -736,7 +748,7 @@ package  {
     }
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if ((_in_game && _position.turn == _my_turn && !_move_sent) || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
+      if ((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
 		if (e.currentTarget.parent != handBoxes[_my_turn == Kyokumen.SENTE ? _position.turn : (1 - _position.turn)]) return;
         if(_from == null){
 		  if (_last_from_square != null) {
@@ -758,7 +770,7 @@ package  {
 			if (_in_game && _position.turn == _my_turn) _timeoutCallback();
 		}
 		
-	  public function replayMoves(n:int):void {
+	  public function replayMoves(n:int, actual:Boolean):void {
 		  var mv:Movement;
 		  if (_last_to_square != null){
 		  	_last_to_square.setStyle('backgroundColor',undefined);
@@ -774,7 +786,8 @@ package  {
 		  _position.loadFromString(_position.initialPositionStr);
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {
-			      var mvtmp:Movement = _position.generateMovementFromString(kifu_list[i].moveStr);
+			      var mvtmp:Movement;
+				  mvtmp = actual ? _position.generateMovementFromString(kifu_list[i].moveStr) : _position.generateMovementFromString(kifu_list_self[i].moveStr);
 				  if (!mvtmp) break;
 				  mv = mvtmp;
 			      _position.move(mv);
@@ -788,6 +801,5 @@ package  {
 		  }
       setPosition(_position);
 	  }
-
   }
 }
