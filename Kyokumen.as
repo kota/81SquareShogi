@@ -446,7 +446,7 @@ package  {
 	  	if (mv.promote) KIFStr += "成";
 	  	KIFStr += "(" + String(9 - mv.from.x) + String(mv.from.y + 1) + ")";
 	  }
-	  KIFStr += "   ( " + int(mv.time/60) + ":" + mv.time % 60 + ")";
+	  KIFStr += "   ( " + int(mv.time/60) + ":" + mv.time % 60 + "/)";
 	  return KIFStr;	
 	}
 

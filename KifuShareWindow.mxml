@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" title="Share Kifu" width="300" height="170"
+		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="20" horizontalAlign="center">
+	<mx:Script>
+        <![CDATA[
+			import flash.net.URLRequest;
+        	import mx.controls.*;
+            import mx.managers.PopUpManager;
+			private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
+			public var kifu:Object;
+
+			private function _copyURL():void {
+				var str:String = DIRECTORY + "kifuviewer.html?kid=" + kifu.id;
+				System.setClipboard(str);
+				Alert.show("Kifuview-URL is set to clipboard.");
+			}
+			
+			private function _sendTwitter():void {
+				var str:String = "http://twitter.com/share?text=81Dojo Kifu: ";
+				str += "[" + kifu.black + " vs " + kifu.white + "]";
+				if (kifu.opening != "") str += ", " + kifu.opening;
+				str += ". %2381dojo";
+				str += "&url=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id;
+				navigateToURL(new URLRequest(str),"_blank");
+			}
+			
+			private function _sendFacebook():void {
+				var str:String = "http://www.facebook.com/sharer.php?u=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id + "&t=";
+				str += "81Dojo Kifu | ▲" + kifu.black + " - △" + kifu.white;
+				if (kifu.opening != "") str += ", " + kifu.opening + "(" + kifu.opening_jp + ")";
+				navigateToURL(new URLRequest(str),"_blank");
+			}
+        ]]>
+    </mx:Script>
+	<mx:HBox horizontalAlign="center" paddingBottom="15">
+		<mx:Button label="URL" fontSize="20" height="44" click="_copyURL();" />
+		<mx:Button icon="@Embed('images/icon_twitter.png')" toolTip="Twitter" click="_sendTwitter();" />
+		<mx:Button icon="@Embed('images/icon_facebook.png')" toolTip="Facebook" />
+	</mx:HBox>
+	<mx:Button label="Close" click="PopUpManager.removePopUp(this);" fontSize="12" />
+</mx:TitleWindow>

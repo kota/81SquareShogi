@@ -489,7 +489,7 @@ package  {
 		  kifuMove.num = kifu_list.length;										//No. of the Move
 		  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + time.substr(1) + ")";	//Western Notation
 		  kifuMove.moveStr = "%TORYO";												//CSA
-		  kifuMove.moveKIF = "投了";			//Japanese Notation
+		  kifuMove.moveKIF = "投了   ( " + int(parseInt(time.substr(1))/60) + ":" + parseInt(time.substr(1)) % 60 + "/)";			//Japanese Notation
 		  kifu_list.push(kifuMove);
       } else {
         return;
@@ -582,7 +582,7 @@ package  {
 				kifuMove.num = kifu_list.length;										//No. of the Move
 				kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
 				kifuMove.moveStr = "%TORYO";												//CSA
-				kifuMove.moveKIF = "投了";			//Japanese Notation
+				kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";			//Japanese Notation
 				kifu_list.push(kifuMove);
 				timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
 			} else {
@@ -646,7 +646,7 @@ package  {
 			  var kifuMove:Object = new Object();
 			  kifuMove.num = kifu_list.length
 			  kifuMove.move = (_position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
-			  kifuMove.moveKIF = "投了";
+			  kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";
 			  kifu_list.push(kifuMove);
 		  }
         }

@@ -35,13 +35,14 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	private const VERSION:String = "ver.2010/11/29";
-	private const IMAGE_URL:String = "http://www.81squareuniverse.com/dojo/images/";
+	private const VERSION:String = "ver.2010/12/02";
+	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
+	private var _viewerAlone:Boolean;
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array;
@@ -108,10 +109,21 @@
 	private var _challengerAlertWindow:ChallengerAlertWindow;
 	private var _gameResultWindow:GameResultWindow;
 	private var _leavePCWindow:LeavePCForm;
+	private var _kifuShareWindow:KifuShareWindow;
 
     private function initApp():void
     {
       trace("application initialized..");
+	  _infoFetcher = new InfoFetcher();
+	  _api = new ApiClient();
+	  if (this.parameters["kid"]) {
+		mainViewStack.selectedIndex = 2;
+		_viewerAlone = true;
+		_api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
+		_api.kifuDetail(this.parameters["kid"]);
+		return;
+	  }
+      _client = new CsaShogiClient();
 	  if (_so.data.savelogin) {
 		  savelogin.selected = true;
 		  if (_so.data.login) loginname.text = _so.data.login;
@@ -121,8 +133,6 @@
 	  _language = languageCombo.selectedIndex;
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
-      _client = new CsaShogiClient();
-	  _api = new ApiClient();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
       chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat1);
@@ -135,7 +145,6 @@
 	  board.name_labels[1].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  _challengerTicker = new Timer(1000);
 	  _challengerTicker.addEventListener(TimerEvent.TIMER, _challengerTickHandler);
-	  _infoFetcher = new InfoFetcher();
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
     }
@@ -168,8 +177,12 @@
       _keepAliveTimer = new Timer(30000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
 	  _refresh();
-	  _writeUserMessage(_infoFetcher.initMessage + "\n\n", 1, "#008800");
-	  if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1, "#FF0000");
+	  if (_infoFetcher.initMessage != null) {
+		_writeUserMessage(_infoFetcher.initMessage + "\n\n", 1, "#008800");
+		if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1, "#FF0000");
+	  } else {
+		  _writeUserMessage("Couldn't load initial condition file. Please refresh.\n", 1, "#008800");
+	  }
 	  var rank:String = "a " + InfoFetcher.makeRankFromRating(e.message.split(":")[1]);
 	  for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 		  if (_infoFetcher.titleUser[i] == _login_name.toLowerCase()) {
@@ -190,7 +203,7 @@
 		private function _handleLogout(e:ServerMessageEvent):void {
 		_keepAliveTimer.stop();
 		loginMessage.text = "logged out successfully";
-		titleBanner.source = IMAGE_URL + "81Dojo_bye.jpg";
+		titleBanner.source = DIRECTORY + "images/81Dojo_bye.jpg";
 		mainViewStack.selectedIndex = 0;
 	}
 
@@ -225,7 +238,7 @@
 			  'streak_best':parseInt(match[2].split(" ")[11])
 			  }
 		  user.country = _infoFetcher.country_names[user.country_code];
-		  user.flagURL = IMAGE_URL + "flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
+		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
@@ -298,7 +311,7 @@
 				  'game_name': user_list[i].game_name,
 				  'country': user_list[i].country,
 				  'country3':_infoFetcher.country_names3[user_list[i].country_code],
-				  'flagURL': IMAGE_URL + "flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
+				  'flagURL': DIRECTORY + "images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
 				  'rankColor': user_list[i].rankColor
 				  }
 		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
@@ -385,9 +398,9 @@
 			  game.whiteStreakBest = user.streak_best;
 		  }
 		  game.blackCountry = _infoFetcher.country_names[game.blackCountryCode];
-		  game.blackFlagURL = IMAGE_URL + "flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
+		  game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		  game.whiteCountry = _infoFetcher.country_names[game.whiteCountryCode];
-		  game.whiteFlagURL = IMAGE_URL + "flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
+		  game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
 		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
 				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
 					game.blackTitle = _infoFetcher.titleName[i];
@@ -606,7 +619,7 @@
 //		        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
 			kifuMove.num = board.kifu_list.length;
 			kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + e.message.split(",T")[1] + ")";
-			kifuMove.moveKIF = "投了";
+			kifuMove.moveKIF = "投了   ( " + int(e.message.split(",T")[1]/60) + ":" + e.message.split(",T")[1] % 60 + "/)";
 			board.kifu_list.push(kifuMove);
 	  } else {
 		board.makeMove(e.message);
@@ -1288,15 +1301,16 @@
  
 	private function _formatKIF():String{
 		  var KIFDataText:String = "";
-		  KIFDataText += "開始日時：" + _game_name.split("+")[4].substr(0,4) + "/" + _game_name.split("+")[4].substr(4,2) + "/" + _game_name.split("+")[4].substr(6,2) + "\n";
-		  KIFDataText += "場所：81-Dojo (" + VERSION +")\n";
-		  KIFDataText += InfoFetcher.gameTypeKIF(_game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]);
-		  KIFDataText += "先手：" + board.playerInfos[0].name + "\n";
-		  KIFDataText += "後手：" + board.playerInfos[1].name + "\n";
-		  KIFDataText += "手数----指手---------消費時間--\n";
-		  for (var i:int = 1; i < board.kifu_list.length ; i++){
-			KIFDataText += "   " + String(i) + " ";
-			KIFDataText += board.kifu_list[i].moveKIF + "\n";
+		  KIFDataText += "開始日時：" + _game_name.split("+")[4].substr(0,4) + "/" + _game_name.split("+")[4].substr(4,2) + "/" + _game_name.split("+")[4].substr(6,2) + "\r\n";
+		  KIFDataText += "場所：81-Dojo (" + VERSION +")\r\n";
+		  KIFDataText += InfoFetcher.gameTypeKIF(_game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]) + "\r\n";
+		  KIFDataText += "先手：" + board.playerInfos[0].name + "\r\n";
+		  KIFDataText += "後手：" + board.playerInfos[1].name + "\r\n";
+		  KIFDataText += "手数----指手---------消費時間--\r\n";
+		  for (var i:int = 1; i < board.kifu_list.length ; i++) {
+			for (var j:int = 1; j <= 4 - String(i).length; j++) KIFDataText += " ";
+			KIFDataText += String(i) + " ";
+			KIFDataText += board.kifu_list[i].moveKIF + "\r\n";
 		  }
 		  return KIFDataText;
 	}
@@ -1431,7 +1445,7 @@
 		if (country_code == "") {
 			rankingFlagLoader.source = "";
 		} else {
-			rankingFlagLoader.source = IMAGE_URL + "flags_m/" + country_code + ".swf";
+			rankingFlagLoader.source = DIRECTORY + "images/flags_m/" + country_code + ".swf";
 		}
 	}
 	
@@ -1477,7 +1491,8 @@
 					kifu.winner = "DRAW";
 				}
 				kifu.moves = kifu.result.split(":")[4] ? kifu.result.split(":")[4] : "-";
-				kifu.opening = kifu.result.split(":")[5] ? InfoFetcher.openingNameEn(kifu.result.split(":")[5]) : "-";
+				kifu.opening = kifu.result.split(":")[5] ? InfoFetcher.openingNameEn(kifu.result.split(":")[5]) : "";
+				kifu.opening_jp = kifu.result.split(":")[5] ? InfoFetcher.openingNameJp(kifu.result.split(":")[5]) : "";
 				_kifu_search_list.push(kifu);
 			}
 		}
@@ -1491,6 +1506,17 @@
 		}
 	}
 	
+	private function _shareKifu():void {
+		var kifu:Object = kifuSearchGrid.selectedItem;
+		if (kifu) {
+			  _kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(this, KifuShareWindow, true));
+			  PopUpManager.centerPopUp(_kifuShareWindow);
+			  _kifuShareWindow.kifu = kifu;
+		} else {
+			Alert.show("Highlight the kifu first.", Language.ac.getItemAt(_language).error);
+		}
+	}
+	
 	private function _handleKifuDetail(e:Event):void {
 		searchAccordion.enabled = true;
 		board.viewing = true;
@@ -1498,7 +1524,12 @@
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
-		closeButton.enabled = true;
+		if (_viewerAlone) {
+			closeButton.enabled = false;
+			checkLobbyButton.enabled = false;
+		} else {
+			closeButton.enabled = true;
+		}
 		kifuDataGrid.selectable = true;
 		rewindAllButton.enabled = true;
 		rewindOneButton.enabled = true;
@@ -1533,7 +1564,7 @@
 			player.country = _infoFetcher.country_names[_infoFetcher.country_codes[player.country_id - 1]];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
-			player.flagURL = IMAGE_URL + "flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
+			player.flagURL = DIRECTORY + "images/flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			player.created_at = player.created_at.split(" ")[0];
 			player.updated_at = player.updated_at.split(" ")[0];
@@ -1598,7 +1629,7 @@
 				'rate':parseInt(playerXML.rate),
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
-			player.flagURL = IMAGE_URL + "flags_s/" + player.country_code + ".gif";
+			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
 				  if (player.login == _infoFetcher.titleUser[i]) {
 					  player.title = _infoFetcher.titleName[i];
@@ -1850,16 +1881,16 @@
   </mx:Script>
   <mx:Component id="gameListBlackRenderer">
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0">
-		<mx:Label text="{data.blackRank}" textAlign="right" width="43" paddingLeft="-7" paddingRight="-7" color="{data.blackColor}" />
+		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-7" paddingRight="-7" color="{data.blackColor}" />
 		<mx:Image source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}" />
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.blackColor}" width="85" textAlign="left" />
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.blackColor}" width="83" textAlign="left" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="gameListWhiteRenderer">
 	  <mx:HBox horizontalAlign="right" paddingLeft="0" paddingRight="0">
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.whiteColor}" width="85" textAlign="right" />
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.whiteColor}" width="83" textAlign="right" />
 		<mx:Image source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
-		<mx:Label text="{data.whiteRank}" textAlign="left" width="43" paddingLeft="-7" paddingRight="-7" color="{data.whiteColor}" />
+		<mx:Label text="{data.whiteRank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-7" color="{data.whiteColor}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
@@ -1884,7 +1915,7 @@
                   VIEWSTACK INDEX = 0
 ================================================================== -->
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
-    <mx:Image id="titleBanner" source="{IMAGE_URL}81Dojo.jpg"/>
+    <mx:Image id="titleBanner" source="{DIRECTORY}images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
       <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
       <mx:Form paddingBottom="0">
@@ -1897,21 +1928,21 @@
 		<mx:FormItem label="{Language.ac.getItemAt(_language).language}" paddingTop="-2">
 			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170" rowCount="10">
 				<mx:dataProvider><mx:Array>
-					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="{IMAGE_URL}flags_s/826.gif" />
-					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="{IMAGE_URL}flags_s/392.gif" />
-					<mx:Object label="{Language.ac.getItemAt(2).LANGUAGE}" image="{IMAGE_URL}flags_s/156.gif" />
-					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="{IMAGE_URL}flags_s/hongkong.gif" />
-					<mx:Object label="{Language.ac.getItemAt(4).LANGUAGE}" image="{IMAGE_URL}flags_s/724.gif" />
-					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="{IMAGE_URL}flags_s/250.gif" />
-					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="{IMAGE_URL}flags_s/276.gif" />
-					<mx:Object label="{Language.ac.getItemAt(7).LANGUAGE}" image="{IMAGE_URL}flags_s/616.gif" />
-					<mx:Object label="{Language.ac.getItemAt(8).LANGUAGE}" image="{IMAGE_URL}flags_s/752.gif" />
-					<mx:Object label="{Language.ac.getItemAt(9).LANGUAGE}" image="{IMAGE_URL}flags_s/300.gif" />
-					<mx:Object label="{Language.ac.getItemAt(10).LANGUAGE}" image="{IMAGE_URL}flags_s/380.gif" />
-					<mx:Object label="{Language.ac.getItemAt(11).LANGUAGE}" image="{IMAGE_URL}flags_s/620.gif" />
-					<mx:Object label="{Language.ac.getItemAt(12).LANGUAGE}" image="{IMAGE_URL}flags_s/112.gif" />
-					<mx:Object label="{Language.ac.getItemAt(13).LANGUAGE}" image="{IMAGE_URL}flags_s/643.gif" />
-					<mx:Object label="{Language.ac.getItemAt(14).LANGUAGE}" image="{IMAGE_URL}flags_s/764.gif" />
+					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="{DIRECTORY}images/flags_s/826.gif" />
+					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="{DIRECTORY}images/flags_s/392.gif" />
+					<mx:Object label="{Language.ac.getItemAt(2).LANGUAGE}" image="{DIRECTORY}images/flags_s/156.gif" />
+					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="{DIRECTORY}images/flags_s/hongkong.gif" />
+					<mx:Object label="{Language.ac.getItemAt(4).LANGUAGE}" image="{DIRECTORY}images/flags_s/724.gif" />
+					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="{DIRECTORY}images/flags_s/250.gif" />
+					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="{DIRECTORY}images/flags_s/276.gif" />
+					<mx:Object label="{Language.ac.getItemAt(7).LANGUAGE}" image="{DIRECTORY}images/flags_s/616.gif" />
+					<mx:Object label="{Language.ac.getItemAt(8).LANGUAGE}" image="{DIRECTORY}images/flags_s/752.gif" />
+					<mx:Object label="{Language.ac.getItemAt(9).LANGUAGE}" image="{DIRECTORY}images/flags_s/300.gif" />
+					<mx:Object label="{Language.ac.getItemAt(10).LANGUAGE}" image="{DIRECTORY}images/flags_s/380.gif" />
+					<mx:Object label="{Language.ac.getItemAt(11).LANGUAGE}" image="{DIRECTORY}images/flags_s/620.gif" />
+					<mx:Object label="{Language.ac.getItemAt(12).LANGUAGE}" image="{DIRECTORY}images/flags_s/112.gif" />
+					<mx:Object label="{Language.ac.getItemAt(13).LANGUAGE}" image="{DIRECTORY}images/flags_s/643.gif" />
+					<mx:Object label="{Language.ac.getItemAt(14).LANGUAGE}" image="{DIRECTORY}images/flags_s/764.gif" />
 				</mx:Array></mx:dataProvider>
                 <mx:itemRenderer>
                     <mx:Component>
@@ -1954,10 +1985,10 @@
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFF3">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
+		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
         <mx:Button id="startButton" label="{Language.ac.getItemAt(_language).wait}" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="{Language.ac.getItemAt(_language).stop}" click="_stopWaiting()" enabled="false" />
-        <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" />
-		<mx:Button id="searchViewButton" label="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
+<!--        <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" /> -->
 		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();" enabled="true"/>
 		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
 		<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
@@ -2110,8 +2141,9 @@
 			<mx:HBox label="{Language.ac.getItemAt(_language).kifu_search}" paddingTop="8" paddingLeft="8" width="800" height="530">
 				<mx:VBox>
 					<mx:HBox>
-						<mx:Button id="searchKifuButton" label="{Language.ac.getItemAt(_language).search}" click="_sendKifuSearch();" />
-						<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" />
+						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendKifuSearch();" />
+						<mx:Button id="shareKifuButton" label="Share" click="_shareKifu();" fontSize="11" />
+						<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 					</mx:HBox>
 					<mx:HBox>
 						<mx:Label text="{Language.ac.getItemAt(_language).name}"/>
@@ -2138,8 +2170,8 @@
 				<mx:HBox>
 					<mx:Label text="{Language.ac.getItemAt(_language).name}"/>
 					<mx:TextInput id="playerSearchNameText"/>
-					<mx:Button id="searchPlayerButton" label="{Language.ac.getItemAt(_language).search}" click="_sendPlayerSearch();" />
-					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" />
+					<mx:Button id="searchPlayerButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendPlayerSearch();" />
+					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:HBox>
 				<mx:DataGrid id="playerSearchGrid" width="755" height="440" rowHeight="21">
 					<mx:columns>
@@ -2160,10 +2192,10 @@
 				</mx:DataGrid>
 			</mx:VBox>
 			<mx:HBox label="{Language.ac.getItemAt(_language).view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
-				<mx:VBox>
+				<mx:VBox horizontalAlign="center" paddingRight="20">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
-					<mx:Button id="searchRankingButton" label="{Language.ac.getItemAt(_language).search}" click="_sendRankingSearch();" />
-					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" />
+					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendRankingSearch();" />
+					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
 					<mx:VBox label="{Language.ac.getItemAt(_language).rate}">

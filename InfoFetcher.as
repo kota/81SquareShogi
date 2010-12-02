@@ -205,75 +205,75 @@
 			var type_str:String = "手合割："
 			switch (str) {
 			case "r":
-				type_str += "平手\n"; break;
+				type_str += "平手"; break;
 			case "nr":
-				type_str += "平手\n"; break;
+				type_str += "平手"; break;
 			case "hclance":
-				type_str += "香落ち\n"; break;
+				type_str += "香落ち"; break;
 			case "hcbishop":
-				type_str += "角落ち\n"; break;
+				type_str += "角落ち"; break;
 			case "hcrook":
-				type_str += "飛車落ち\n"; break;
+				type_str += "飛車落ち"; break;
 			case "hcrooklance":
-				type_str += "飛香落ち\n"; break;
+				type_str += "飛香落ち"; break;
 			case "hc2p":
-				type_str += "二枚落ち\n"; break;
+				type_str += "二枚落ち"; break;
 			case "hc4p":
-				type_str += "四枚落ち\n"; break;
+				type_str += "四枚落ち"; break;
 			case "hc6p":
-				type_str += "六枚落ち\n"; break;
+				type_str += "六枚落ち"; break;
 			case "hc8p":
-				type_str += "八枚落ち\n"; break;
+				type_str += "八枚落ち"; break;
 			case "hctombo":
-				type_str += "その他\n";
-				type_str += "上手の持駒：なし\n";
-				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
-				type_str += "+---------------------------+\n";
-				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
-				type_str += "| ・v飛 ・ ・ ・ ・ ・v角 ・|二\n";
-				type_str += "|v歩v歩v歩v歩v歩v歩v歩v歩v歩|三\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
-				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
-				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
-				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
-				type_str += "+---------------------------+\n";
-				type_str += "上手番\n"; break;
+				type_str += "その他\r\n";
+				type_str += "上手の持駒：なし\r\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\r\n";
+				type_str += "| ・v飛 ・ ・ ・ ・ ・v角 ・|二\r\n";
+				type_str += "|v歩v歩v歩v歩v歩v歩v歩v歩v歩|三\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\r\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\r\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\r\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "上手番"; break;
 			case "hc10p":
 				type_str += "十枚落ち"; break;
 			case "hcfu3":
-				type_str += "その他\n";
-				type_str += "上手の持駒：歩三\n";
-				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
-				type_str += "+---------------------------+\n";
-				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
-				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
-				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
-				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
-				type_str += "+---------------------------+\n";
-				type_str += "上手番\n"; break;
+				type_str += "その他\r\n";
+				type_str += "上手の持駒：歩三\r\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\r\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\r\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\r\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "上手番"; break;
 			case "hcnaked":
-				type_str += "その他\n";
-				type_str += "上手の持駒：なし\n";
-				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\n";
-				type_str += "+---------------------------+\n";
-				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\n";
-				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\n";
-				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\n";
-				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\n";
-				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\n";
-				type_str += "+---------------------------+\n";
-				type_str += "上手番\n"; break;
+				type_str += "その他\r\n";
+				type_str += "上手の持駒：なし\r\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "| ・ ・ ・ ・v玉 ・ ・ ・ ・|一\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|二\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|三\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\r\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\r\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\r\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "上手番"; break;
 			}
 			return type_str;
 		}
