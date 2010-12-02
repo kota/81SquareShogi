@@ -13,18 +13,24 @@ package  {
 	import mx.controls.Label;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import mx.effects.Effect;
+	import mx.effects.WipeDown;
+	import mx.effects.WipeUp;
 
   public class BulletinGadget extends ViewStack {
     
 	private var _urlLoader:URLLoader = new URLLoader();
 	private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
+	private var _hideEffect:Effect = new WipeUp();
+	private var _showEffect:Effect = new WipeDown();
     
     public function BulletinGadget() {
       super();
-
 	  _urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
 	  var nowDate:Date = new Date(); 
 	  _urlLoader.load(new URLRequest(SOURCE + "tournaments/official/bulletin.txt?" + nowDate.getTime().toString()));
+	  _hideEffect.duration = 800;
+	  _showEffect.duration = 800;
       }
     
 
@@ -39,6 +45,8 @@ package  {
 				page.height = 625;
 				page.horizontalScrollPolicy = "off";
 				page.setStyle('backgroundColor', '#EEFFCC');
+				page.setStyle('showEffect', _showEffect);
+				page.setStyle('hideEffect', _hideEffect);
 				var y:int = 0;
 				var n:int = 0;
 				var label:Label = new Label();
@@ -86,7 +94,6 @@ package  {
 				image.y = 3;
 				row.addChild(image);
 				label = new Label();
-				trace(parseInt(tokens[1]));
 				label.text = tokens[0];
 				label.x = 37;
 				label.width = 120;
@@ -113,7 +120,6 @@ package  {
 				image.y = 3;
 				row.addChild(image);
 				label = new Label();
-				trace(parseInt(tokens[1]));
 				label.text = tokens[0];
 				label.x = 37;
 				label.width = 120;
