@@ -324,15 +324,13 @@ package  {
 			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list_self.push(kifuMove);
 		} else {
-			if (viewing) {
-				mv = _position.generateMovementFromString(move);
-			} else {
-				mv = _last_pos.generateMovementFromString(move);
+			mv = _last_pos.generateMovementFromString(move);
+			if (!viewing) {
 				var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
 				var time:int = mv.time;
 				timers[running_timer].accumulateTime(time);
 				timers[running_timer].suspend();
-				timers[1 - running_timer].resume();				
+				timers[1 - running_timer].resume();
 			}
 			kifuMove = new Object();
 			kifuMove.num = kifu_list.length;										//No. of the Move
@@ -341,13 +339,15 @@ package  {
 			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list.push(kifuMove);
 		}
-		if (actual && !onListen && !viewing) {
+		if (actual) {
 			_last_pos.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
+			if (onListen) _position.loadFromString(_last_pos.toString());
 		} else {
 			_position.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
-			if (actual) _last_pos.loadFromString(_position.toString());
+		}
+		if (!actual || onListen){
 			if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
 			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
 			setPosition(_position);

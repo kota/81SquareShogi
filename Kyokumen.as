@@ -85,6 +85,8 @@ package  {
           }
         }
       }
+	  _komadai[0].clearKoma();
+	  _komadai[1].clearKoma();
       if(lines.length > 10){
         for(var i:int = 9; i< lines.length; i++){
           var match:Array = lines[i].match(/P([+-])00(.*)/);

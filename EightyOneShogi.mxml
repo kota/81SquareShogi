@@ -800,6 +800,14 @@
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
       }
+	  if (!board.onListen) {
+		  if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) return;
+	  }
+	  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
+	  kifuDataGrid.scrollToIndex(0);
+	  kifuDataGrid.dataProvider = board.kifu_list;
+	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
+	  kifuDataGrid.callLater(_scrollDownKifu);
 	  if (end_game) {
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
@@ -816,14 +824,6 @@
 			board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(board.since_last_move);
 		  }
 	  }
-	  if (!board.onListen) {
-		  if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) return;
-	  }
-	  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
-	  kifuDataGrid.scrollToIndex(0);
-	  kifuDataGrid.dataProvider = board.kifu_list;
-	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
-	  kifuDataGrid.callLater(_scrollDownKifu);
     }
 
 	//=========================================================
@@ -1109,9 +1109,9 @@
 		board.post_game = false;
 		board.isWinner = false;
 		board.isLoser = false;
+		board.onListen = true;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
-//		  watchButton.enabled = false;
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
 		  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
@@ -1127,7 +1127,6 @@
 		  radioKifuListen.selected = true;
 		  radioKifuReplay.enabled = true;
 		  radioKifuListen.enabled = true;
-		  board.onListen = true;
 	  }
     }
 
