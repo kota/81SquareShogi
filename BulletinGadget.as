@@ -6,6 +6,7 @@
 
 package  {
 	import flash.events.Event;
+	import flash.events.MouseEvent;
 	import mx.containers.Canvas;
 	import mx.containers.VBox;
 	import mx.containers.ViewStack;
@@ -13,6 +14,7 @@ package  {
 	import mx.controls.Label;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
 	import mx.effects.Effect;
 	import mx.effects.WipeDown;
 	import mx.effects.WipeUp;
@@ -136,6 +138,7 @@ package  {
 				row.y = y;
 				page.addChild(row);
 			} else if (line.match(/^RESULT:/)) {
+				tokens = line.substr(7).split(",");
 				if (!player_end) {
 					player_end = true;
 					label = new Label();
@@ -147,7 +150,12 @@ package  {
 					y += 15;
 				}
 				label = new Label();
-				label.text = line.substr(7);
+				label.text = tokens[0];
+				if (tokens[1] != "") {
+					label.setStyle('textDecoration', 'underline');
+					label.id = tokens[1];
+					label.addEventListener(MouseEvent.CLICK, _jumpURL);
+				}
 				label.y = y;
 				label.x = 10;
 				page.addChild(label);
@@ -158,6 +166,10 @@ package  {
 		}
 		this.selectedIndex = 0;
     }
+	
+	private function _jumpURL(e:MouseEvent):void {
+		navigateToURL(new URLRequest(e.target.parent.id), "_blank");
+	}
 	
 	public function flip():void {
 		if (this.selectedIndex == this.numChildren - 1) {

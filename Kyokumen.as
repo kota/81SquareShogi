@@ -190,7 +190,6 @@ package  {
 		public function canPromote(from:Point,to:Point):Boolean {
 			to = translateHumanCoordinates(to);
 			var koma:Koma; 
-			trace(from.x.toString());
 			if (from.x > HAND) return false;
 			from = translateHumanCoordinates(from);
 			koma = getKomaAt(from);

@@ -5,11 +5,14 @@
 */
 
 package  {
+	import flash.display.Sprite;
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
 	import flash.media.Sound;
 	import flash.system.System;
 	import mx.controls.SWFLoader;
+	import mx.core.UIComponent
+	import BoardArrow;
 	
 	import mx.containers.Canvas;
 	import mx.controls.Alert;
@@ -22,12 +25,17 @@ package  {
     public static const BAN_WIDTH:int = 410;
     public static const BAN_HEIGHT:int = 454;
     public static const BAN_LEFT_MARGIN:int = 185;
-	public static const BAN_TOP_MARGIN:int = 10
-
+	public static const BAN_TOP_MARGIN:int = 10;
+	public static const BAN_EDGE_PADDING:int = 10;
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
     public static const KOMADAI_WIDTH:int = 170;
-    public static const KOMADAI_HEIGHT:int = 200;    
+    public static const KOMADAI_HEIGHT:int = 200;
+	public static const MY_HAND_X:int = BAN_LEFT_MARGIN + BAN_WIDTH + 5;
+	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT;
+	public static const HIS_HAND_X:int = 10;
+	public static const HIS_HAND_Y:int = 10;
+	public static const MAX_ARROWS:int = 10;
     
     [Bindable]
     [Embed(source = "/images/ban_kaya_a.png")]
@@ -89,11 +97,12 @@ package  {
 
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
+	private var _addMyArrowCallback:Function;
 
     [Bindable]
     public var kifu_list:Array;
 	public var kifu_list_self:Array;
-
+	private var _arrows:Array = new Array();
     private var _from:Point;
     private var _to:Point;
     private var _position:Kyokumen;
@@ -109,6 +118,9 @@ package  {
     private var _selected_square:Square;
     private var _last_to_square:Square;
 	private var _last_from_square:Square;
+	private var _arrow_from_type:int;
+	private var _arrow_from:Point = new Point();
+	private var _arrow_to:Point = new Point();
     public var piece_type:int = 0;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -120,7 +132,6 @@ package  {
 	public var viewing:Boolean = false;
 	public var studyOrigin:int;
 	public var study_list:Array;
-	public var study_list_hold:Array;
 	public var since_last_move:int = 0;
 
 		private var _time_sente:int;
@@ -180,8 +191,8 @@ package  {
         
         hand.width = KOMADAI_WIDTH;
         hand.height = KOMADAI_HEIGHT;
-        hand.x = i == 0 ? BAN_LEFT_MARGIN + BAN_WIDTH + 5 : 10;
-        hand.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - hand.height : 10;
+        hand.x = i == 0 ? MY_HAND_X : HIS_HAND_X;
+        hand.y = i == 0 ? MY_HAND_Y : HIS_HAND_Y;
         handBoxes[i] = hand;
         addChild(hand);
         
@@ -261,8 +272,9 @@ package  {
             square = new Square(10-(9-j),10-(i+1));
             _cells[8-i][8-j] = square;
           }
-          square.x = BAN_LEFT_MARGIN + 10 + j * KOMA_WIDTH;
-          square.y = BAN_TOP_MARGIN + 10 + i * KOMA_HEIGHT;
+          square.x = BAN_LEFT_MARGIN + BAN_EDGE_PADDING + j * KOMA_WIDTH;
+          square.y = BAN_TOP_MARGIN + BAN_EDGE_PADDING + i * KOMA_HEIGHT;
+		  square.addEventListener(MouseEvent.MOUSE_DOWN, _squareMouseDownHandler);
           square.addEventListener(MouseEvent.MOUSE_UP,_squareMouseUpHandler);
           addChild(square);
         }
@@ -274,10 +286,10 @@ package  {
       kifuMove.move = "Start";
       kifu_list.push(kifuMove);
 	  study_list = new Array();
-	  study_list_hold = new Array();
     }
 
-    public function setPosition(pos:Kyokumen):void{
+    public function setPosition(pos:Kyokumen):void {
+	  clearArrows();
       _position = pos
       for(var y:int=0;y<9;y++){
         for(var x:int=0;x<9;x++){
@@ -299,7 +311,8 @@ package  {
         for(var j:int=0;j<8;j++){
           if(hand.getNumOfKoma(j) > 0){
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
-              var handPiece:Square = new Square(Kyokumen.HAND+j,Kyokumen.HAND+j);
+              var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
+			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
               handPiece.source = images[j];
@@ -342,7 +355,9 @@ package  {
 		if (actual) {
 			_last_pos.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
+			trace(_last_pos.toString());
 			if (onListen) _position.loadFromString(_last_pos.toString());
+			trace(_position.toString());
 		} else {
 			_position.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
@@ -374,6 +389,10 @@ package  {
     public function setTimeoutCallback(callback:Function):void{
       _timeoutCallback = callback;
     }
+	
+	public function setAddMyArrowCallback(callback:Function):void {
+		_addMyArrowCallback = callback;
+	}
 
     public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
@@ -414,16 +433,21 @@ package  {
 			timers[1].stop();
 			name_labels[0].setStyle("color", 0x000000);
 			name_labels[1].setStyle("color", 0x000000);
-	    if(_selected_square != null){
-        _selected_square.setStyle('backgroundColor',undefined);
-        _from = null;
-        _selected_square = null;
-      }
+		cancelSquareSelect();
       _in_game = false;
 	  _client_timeout = false;
     }
 	
+	public function cancelSquareSelect():void {
+	   if(_selected_square != null){
+        _selected_square.setStyle('backgroundColor',undefined);
+        _from = null;
+        _selected_square = null;
+      }
+	}
+	
     public function closeGame():void {
+	  clearArrows();
 	  isPlayer = false;
       _player_infos[0] = null;
 	  _player_infos[1] = null;
@@ -436,7 +460,6 @@ package  {
 	  _player_flags[0].source = null;
 	  _player_flags[1].source = null;
 	  study_list = new Array();
-	  study_list_hold = new Array();
 	  post_game = false;
 	  since_last_move = 0;
     }
@@ -679,9 +702,27 @@ package  {
       }
       return kyokumen_str;
     }
+	
+    private function _squareMouseDownHandler(e:MouseEvent):void {
+		_arrow_from_type = BoardArrow.FROM_BOARD;
+		_arrow_from.x = Square(e.currentTarget).coord_x;
+		_arrow_from.y = Square(e.currentTarget).coord_y;
+	}
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
-      if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
+	  _arrow_to.x = Square(e.currentTarget).coord_x;
+	  _arrow_to.y = Square(e.currentTarget).coord_y;
+	  if (_arrow_from.x != _arrow_to.x || _arrow_from.y != _arrow_to.y) {
+		  if (isPlayer && !post_game) return;
+		  _addMyArrowCallback(_arrow_from_type, _arrow_from, _arrow_to);
+		  if (_selected_square != null) {
+			  _selected_square.setStyle('backgroundColor', undefined);
+			  _from = null;
+			  _selected_square = null;
+		  }
+		  return;
+	  }
+      if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
         if(_from == null){
@@ -746,9 +787,20 @@ package  {
 	  _from = null;
 	  _to = null;
     }
+	
+    private function _handMouseDownHandler(e:MouseEvent):void {
+		if (e.currentTarget.parent == handBoxes[0]) {
+			_arrow_from_type = _my_turn == Kyokumen.SENTE ? Kyokumen.SENTE : Kyokumen.GOTE;
+		} else {
+			_arrow_from_type = _my_turn == Kyokumen.SENTE ? Kyokumen.GOTE: Kyokumen.SENTE;
+		}
+		_arrow_from.x = e.currentTarget.x + KOMA_WIDTH / 2;
+		_arrow_from.y = e.currentTarget.y + KOMA_HEIGHT / 2;
+		trace(_arrow_from.x + "  " + _arrow_from.y);
+	}
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if ((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
+      if ((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
 		if (e.currentTarget.parent != handBoxes[_my_turn == Kyokumen.SENTE ? _position.turn : (1 - _position.turn)]) return;
         if(_from == null){
 		  if (_last_from_square != null) {
@@ -765,6 +817,25 @@ package  {
         }
       }
     }
+	
+	public function clearArrows():void {
+		if (_arrows.length > 0) {
+			for each (var arrow:BoardArrow in _arrows) {
+				removeChild(arrow);
+			}
+			_arrows = new Array();
+		}
+	}
+	
+	public function addArrow(fromType:int, from:Point, to:Point, color:uint, sender:String):void {
+		if (_arrows.length >= MAX_ARROWS) {
+			removeChild(_arrows.shift());
+		}
+		var arrow:BoardArrow = new BoardArrow(fromType, from, to, color, sender);
+		arrow.drawArrow(_my_turn);
+		addChild(arrow);
+		_arrows.push(arrow);
+	}
 
 		private function _checkTimeout(e:Event):void {
 			if (_in_game && _position.turn == _my_turn) _timeoutCallback();

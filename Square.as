@@ -19,8 +19,8 @@ package {
       _img.width = KOMA_WIDTH;
       _img.height = KOMA_HEIGHT;
       this.addChild(_img);
-      _coord_x = x; 
-      _coord_y = y; 
+      _coord_x = x;
+      _coord_y = y;
     }
 
     public function get coord_x():int{
