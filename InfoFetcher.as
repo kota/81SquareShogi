@@ -378,9 +378,13 @@
 			userSettings.endSound = true;
 			userSettings.pieceType = 0;
 			userSettings.byoyomi = 1;
+			userSettings.acceptArrow = true;
+			userSettings.arrowColor = 0x00CC00;
 			for (var i:int = 0; i < userData.length; i++) {
 				if (userData[i].name == _login_name) {
 					userSettings = userData[i];
+					if (userData[i].acceptArrow == null) userSettings.acceptArrow = true;
+					if (userData[i].arrowColor == null) userSettings.arrowColor = 0x00CC00;
 					break;
 				}
 			}

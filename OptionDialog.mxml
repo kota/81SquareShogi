@@ -9,58 +9,68 @@
 			public var language:int = 0;
         ]]>
     </mx:Script>
-    <mx:Label text="{Language.ac.getItemAt(language).sound}" fontWeight="bold"/>
-    <mx:VBox paddingLeft="30">
-		<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
-		<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
-		<mx:HBox>
-			<mx:Label text="incoming chat sound"/>
-			<mx:CheckBox label="Main Lobby" id="chatSound1CheckBox"/>
-			<mx:CheckBox label="Game Room" id="chatSound2CheckBox"/>
-		</mx:HBox>
-		<mx:HBox>
-			<mx:Label text="byoyomi sound"/>
-			<mx:RadioButtonGroup id="RadioGroup1"/>
-			<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
-			<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
-			<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="2"/>
-		</mx:HBox>
-    </mx:VBox>
-    <mx:Label text="Piece Type" fontWeight="bold"/>
-	<mx:RadioButtonGroup id="RadioGroup2"/>
-	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup2" value="0"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/Sou.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/Suma.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_ryoko1/Sfu.png')" width="31" height="36"/>
-	</mx:HBox>
-	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup2"  value="1"/>
-		<mx:Image source="@Embed('images/pieces_kinki/Sou.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_kinki/Suma.png')" width="31" height="36"/>
-		<mx:Image source="@Embed('images/pieces_kinki/Sfu.png')" width="31" height="36"/>
-	</mx:HBox>
-	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Hidetchi's Internationalized" groupName="RadioGroup2"  value="2"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/Sou.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/Suma.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_hidetchi/Sfu.png')" width="34" height="40"/>
-	</mx:HBox>
-	<mx:HBox paddingLeft="30">
-		<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup2"  value="3"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/Sou.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/Suma.png')" width="34" height="40"/>
-		<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
-	</mx:HBox>
-	<mx:HBox paddingLeft="30">
-		<mx:Label text="{Language.ac.getItemAt(language).blind_piece}"/>
-		<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
-		<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
-		<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
-	</mx:HBox>
+	<mx:TabNavigator id="optionTab" width="370" height="260" horizontalScrollPolicy="off" creationPolicy="all">
+		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
+			<mx:RadioButtonGroup id="RadioGroup2"/>
+			<mx:HBox>
+				<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup2" value="0"/>
+				<mx:Image source="@Embed('images/pieces_ryoko1/Sou.png')" width="31" height="36"/>
+				<mx:Image source="@Embed('images/pieces_ryoko1/Suma.png')" width="31" height="36"/>
+				<mx:Image source="@Embed('images/pieces_ryoko1/Sfu.png')" width="31" height="36"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup2"  value="1"/>
+				<mx:Image source="@Embed('images/pieces_kinki/Sou.png')" width="31" height="36"/>
+				<mx:Image source="@Embed('images/pieces_kinki/Suma.png')" width="31" height="36"/>
+				<mx:Image source="@Embed('images/pieces_kinki/Sfu.png')" width="31" height="36"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:RadioButton label="Hidetchi's Internationalized" groupName="RadioGroup2"  value="2"/>
+				<mx:Image source="@Embed('images/pieces_hidetchi/Sou.png')" width="34" height="40"/>
+				<mx:Image source="@Embed('images/pieces_hidetchi/Suma.png')" width="34" height="40"/>
+				<mx:Image source="@Embed('images/pieces_hidetchi/Sfu.png')" width="34" height="40"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup2"  value="3"/>
+				<mx:Image source="@Embed('images/pieces_alphabet/Sou.png')" width="34" height="40"/>
+				<mx:Image source="@Embed('images/pieces_alphabet/Suma.png')" width="34" height="40"/>
+				<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:Label text="{Language.ac.getItemAt(language).blind_piece}"/>
+				<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
+				<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
+				<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox label="{Language.ac.getItemAt(language).sound}" paddingLeft="20" paddingTop="10">
+			<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
+			<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
+			<mx:HBox>
+				<mx:Label text="incoming chat sound"/>
+				<mx:CheckBox label="Main Lobby" id="chatSound1CheckBox"/>
+				<mx:CheckBox label="Game Room" id="chatSound2CheckBox"/>
+			</mx:HBox>
+			<mx:HBox>
+				<mx:Label text="byoyomi sound"/>
+				<mx:RadioButtonGroup id="RadioGroup1"/>
+				<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
+				<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
+				<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="2"/>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox label="Analysis" paddingTop="10">
+			<mx:Label text="Arrow Drawing" fontWeight="bold" paddingLeft="10" />
+			<mx:CheckBox label="Accept arrows from others" id="acceptArrowsCheckBox" paddingLeft="30" />
+			<mx:HBox paddingLeft="30" verticalAlign="center">
+				<mx:Label text = "Your Color"/>
+				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" />
+			</mx:HBox>
+		</mx:VBox>
+	</mx:TabNavigator>
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 
         <mx:Button label="{Language.ac.getItemAt(language).cancel}" click="PopUpManager.removePopUp(this);"/> 
-		<mx:Button id="saveSettingsButton" label="{Language.ac.getItemAt(language).save_settings}"/>
-    </mx:HBox> 
+		<mx:Button id="saveSettingsButton" label="{Language.ac.getItemAt(language).save_settings}" click="Alert.show('Settings saved!');"/>
+    </mx:HBox>
 </mx:TitleWindow>

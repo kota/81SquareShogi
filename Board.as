@@ -35,7 +35,9 @@ package  {
 	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT;
 	public static const HIS_HAND_X:int = 10;
 	public static const HIS_HAND_Y:int = 10;
-	public static const MAX_ARROWS:int = 10;
+	public static const MAX_ARROWS:int = 7;
+	public static const ARROWS_SELF:int = 0;
+	public static const ARROWS_PUBLIC:int = 1;
     
     [Bindable]
     [Embed(source = "/images/ban_kaya_a.png")]
@@ -113,13 +115,12 @@ package  {
     private var _in_game:Boolean;
 	private var _move_sent:Boolean = false;
 	private var _client_timeout:Boolean;
-//    public var watch_game_end: Boolean;
 
     private var _selected_square:Square;
     private var _last_to_square:Square;
 	private var _last_from_square:Square;
 	private var _arrow_from_type:int;
-	private var _arrow_from:Point = new Point();
+	private var _arrow_from:Point;
 	private var _arrow_to:Point = new Point();
     public var piece_type:int = 0;
 	public var superior:int = Kyokumen.SENTE;
@@ -133,6 +134,7 @@ package  {
 	public var studyOrigin:int;
 	public var study_list:Array;
 	public var since_last_move:int = 0;
+	public var studyOn:Boolean = false;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -246,6 +248,8 @@ package  {
 		h_box.addChild(avatar_image);
         addChild(h_box);
       }
+	  _arrows[ARROWS_SELF] = new Array();
+	  _arrows[ARROWS_PUBLIC] = new Array();
     }
 
     public function reset():void{
@@ -289,7 +293,6 @@ package  {
     }
 
     public function setPosition(pos:Kyokumen):void {
-	  clearArrows();
       _position = pos
       for(var y:int=0;y<9;y++){
         for(var x:int=0;x<9;x++){
@@ -355,9 +358,7 @@ package  {
 		if (actual) {
 			_last_pos.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
-			trace(_last_pos.toString());
 			if (onListen) _position.loadFromString(_last_pos.toString());
-			trace(_position.toString());
 		} else {
 			_position.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
@@ -447,7 +448,6 @@ package  {
 	}
 	
     public function closeGame():void {
-	  clearArrows();
 	  isPlayer = false;
       _player_infos[0] = null;
 	  _player_infos[1] = null;
@@ -462,6 +462,9 @@ package  {
 	  study_list = new Array();
 	  post_game = false;
 	  since_last_move = 0;
+	  studyOn = false;
+	  clearArrows(ARROWS_PUBLIC);
+	  clearArrows(ARROWS_SELF);
     }
 
 		public function timeout():void{
@@ -705,21 +708,22 @@ package  {
 	
     private function _squareMouseDownHandler(e:MouseEvent):void {
 		_arrow_from_type = BoardArrow.FROM_BOARD;
-		_arrow_from.x = Square(e.currentTarget).coord_x;
-		_arrow_from.y = Square(e.currentTarget).coord_y;
+		_arrow_from = new Point(Square(e.currentTarget).coord_x, Square(e.currentTarget).coord_y);
 	}
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
+	  if (_arrow_from == null) return;
 	  _arrow_to.x = Square(e.currentTarget).coord_x;
 	  _arrow_to.y = Square(e.currentTarget).coord_y;
 	  if (_arrow_from.x != _arrow_to.x || _arrow_from.y != _arrow_to.y) {
-		  if (isPlayer && !post_game) return;
+		  if ((isPlayer && !post_game) || (post_game && onListen && !studyOn)) return;
 		  _addMyArrowCallback(_arrow_from_type, _arrow_from, _arrow_to);
 		  if (_selected_square != null) {
 			  _selected_square.setStyle('backgroundColor', undefined);
 			  _from = null;
 			  _selected_square = null;
 		  }
+		  _arrow_from = null;
 		  return;
 	  }
       if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
@@ -776,6 +780,7 @@ package  {
           }
         }
       }
+	  _arrow_from = null;
     }
 
     private function _promotionHandler(e:CloseEvent):void {
@@ -794,9 +799,7 @@ package  {
 		} else {
 			_arrow_from_type = _my_turn == Kyokumen.SENTE ? Kyokumen.GOTE: Kyokumen.SENTE;
 		}
-		_arrow_from.x = e.currentTarget.x + KOMA_WIDTH / 2;
-		_arrow_from.y = e.currentTarget.y + KOMA_HEIGHT / 2;
-		trace(_arrow_from.x + "  " + _arrow_from.y);
+		_arrow_from = new Point(e.currentTarget.x + KOMA_WIDTH / 2, e.currentTarget.y + KOMA_HEIGHT / 2);
 	}
 
     private function _handMouseUpHandler(e:MouseEvent):void{
@@ -816,25 +819,57 @@ package  {
             _selected_square = null;
         }
       }
+	  _arrow_from = null;
     }
 	
-	public function clearArrows():void {
-		if (_arrows.length > 0) {
-			for each (var arrow:BoardArrow in _arrows) {
-				removeChild(arrow);
+	public function clearArrows(target:int, sender:String = "*"):Boolean {
+		trace("Cleared " + target);
+		var found:Boolean = false;
+		if (_arrows[target].length > 0) {
+			for (var i:int = _arrows[target].length - 1; i >= 0; i--) {
+				var arrow:BoardArrow = _arrows[target][i];
+				if (sender == "*" || sender == arrow.sender) {
+					found = true;
+					removeChild(arrow);
+					arrow = null;
+					_arrows[target].splice(i, 1);
+				}
 			}
-			_arrows = new Array();
+		}
+		return found;
+	}
+	
+	public function addArrow(fromType:int, from:Point, to:Point, color:uint, sender:String, target:int, showNow:Boolean = false):void {
+		trace("Added to " + target + " as " + showNow);
+		if (_arrows[target].length >= MAX_ARROWS) {
+			removeChild(_arrows[target].shift());
+		}
+		var arrow:BoardArrow = new BoardArrow(fromType, from, to, color, sender);
+		_arrows[target].push(arrow);
+		addChild(arrow);
+		if (showNow) arrow.drawArrow(_my_turn);
+	}
+	
+	public function eraseArrows(target:int):void {
+		trace("Erased " + target);
+		if (_arrows[target].length > 0) {
+			for each (var arrow:BoardArrow in _arrows[target]) {
+				if (arrow.isDrawn) {
+					arrow.erase();
+				}
+			}
 		}
 	}
 	
-	public function addArrow(fromType:int, from:Point, to:Point, color:uint, sender:String):void {
-		if (_arrows.length >= MAX_ARROWS) {
-			removeChild(_arrows.shift());
+	public function showArrows(target:int):void {
+		trace("Shown " + target);
+		if (_arrows[target].length > 0) {
+			for each (var arrow:BoardArrow in _arrows[target]) {
+				if (!arrow.isDrawn) {
+					arrow.drawArrow(_my_turn);
+				}
+			}
 		}
-		var arrow:BoardArrow = new BoardArrow(fromType, from, to, color, sender);
-		arrow.drawArrow(_my_turn);
-		addChild(arrow);
-		_arrows.push(arrow);
 	}
 
 		private function _checkTimeout(e:Event):void {

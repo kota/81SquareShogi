@@ -53,6 +53,7 @@ package  {
 				var n:int = 0;
 				var label:Label = new Label();
 				var player_end:Boolean = false;
+				label.addEventListener(MouseEvent.CLICK, _handleFlip);
 				label.text = line.substr(6);
 				label.setStyle('textAlign', 'center');
 				label.y = y;
@@ -177,6 +178,10 @@ package  {
 		} else {
 			this.selectedIndex += 1;
 		}
+	}
+	
+	private function _handleFlip(e:MouseEvent):void {
+		flip();
 	}
 
   }

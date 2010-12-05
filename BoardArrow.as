@@ -22,7 +22,9 @@
 		private var _sender:String;
 		private var _sprite:Sprite = new Sprite();
 		private var _nameTag:TextField = new TextField();
-		private var _nameTagTimer:Timer = new Timer(2000);
+		private var _nameTagHoldTimer:Timer = new Timer(1500, 1);
+		private var _nameTagFadeTimer:Timer = new Timer(200, 5);
+		private var _isDrawn:Boolean = false;
 		
 		public static const FROM_BOARD:int = -1;
 		public static const FROM_HAND_SENTE:int = 0;
@@ -39,7 +41,9 @@
 			_color = color;
 			_sender = sender;
 			_nameTag.text = _sender;
-			_nameTagTimer.addEventListener(TimerEvent.TIMER, _handleTimer);
+			_nameTagHoldTimer.addEventListener(TimerEvent.TIMER, _handleTimerHold);
+			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER, _handleTimerFade);
+			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerFadeComplete);
 			this.addChild(_sprite);
 		}
 		
@@ -66,17 +70,36 @@
 			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta + HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta + HEAD_ANGLE))
 			_sprite.graphics.moveTo(to.x, to.y);
 			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta - HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta - HEAD_ANGLE))
+			_nameTag.alpha = 1.0;
 			_nameTag.x = to.x + 10;
 			_nameTag.y = to.y - 15;
 			_nameTag.textColor = _color;
 			_nameTag.autoSize = "left";
 			_nameTag.selectable = false;
 			_sprite.addChild(_nameTag);
-			_nameTagTimer.start();
+			_isDrawn = true;
+			_nameTagHoldTimer.start();
 		}
 		
-		private function _handleTimer(e:TimerEvent):void {
-			_nameTagTimer.stop();
+		public function erase():void {
+			_nameTagFadeTimer.reset();
+			_nameTagHoldTimer.reset();
+			if (_sprite.contains(_nameTag)) _sprite.removeChild(_nameTag);
+			_sprite.graphics.clear();
+			_isDrawn = false;
+		}
+		
+		private function _handleTimerHold(e:TimerEvent):void {
+			_nameTagHoldTimer.reset();
+			_nameTagFadeTimer.start();
+		}
+		
+		private function _handleTimerFade(e:TimerEvent):void {
+			_nameTag.alpha -= 0.2;
+		}
+		
+		private function _handleTimerFadeComplete(e:TimerEvent):void {
+			_nameTagFadeTimer.reset();
 			_sprite.removeChild(_nameTag);
 		}
 		
@@ -92,6 +115,14 @@
 			}
 			return new Point(Board.BAN_LEFT_MARGIN + Board.BAN_EDGE_PADDING + (i + 0.5) * Board.KOMA_WIDTH,
 								   Board.BAN_TOP_MARGIN + Board.BAN_EDGE_PADDING + (j + 0.5) * Board.KOMA_HEIGHT);
+		}
+		
+		public function get sender():String {
+			return this._sender;
+		}
+		
+		public function get isDrawn():Boolean {
+			return this._isDrawn;
 		}
 	}
 	
