@@ -896,7 +896,7 @@ package  {
 			  for (var i:int = 1; i <= n; i++ ) {
 			      var mvtmp:Movement;
 				  mvtmp = actual ? _position.generateMovementFromString(kifu_list[i].moveStr) : _position.generateMovementFromString(kifu_list_self[i].moveStr);
-				  if (!mvtmp) break;
+				  if (!mvtmp) continue;
 				  mv = mvtmp;
 			      _position.move(mv);
 			  }

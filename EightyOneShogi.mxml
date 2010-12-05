@@ -1857,10 +1857,11 @@
 		  if (board.post_game && board.isWinner) {
 			  if (!String(kifuDataGrid.selectedItem.num).match(/^\*/)) _sendAutoChat("Launched study mode at #" + board.studyOrigin);
 		  }
+		  var n:int = kifuDataGrid.selectedIndex;
 		  if (board.kifu_list_self.length == 0) {
-			var n:int = kifuDataGrid.selectedIndex;
 			for (var i:int = 0; i <= n; i++) board.kifu_list_self.push(board.kifu_list[i]);
 		  }
+		  while (board.kifu_list_self.length - 1 > n) board.kifu_list_self.pop();
 		  if (board.post_game || board.viewing) {
 			  board.makeMove(str + ",T0", false, true);
 		  } else {
