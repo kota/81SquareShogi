@@ -80,6 +80,7 @@ package  {
 	private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
 
     public var handBoxes:Array;
+	public var infoBoxes:Array;
     public var name_labels:Array;
     private var _info_labels:Array;
     private var _turn_symbols:Array;
@@ -182,6 +183,7 @@ package  {
       addChild(_board_ghand_image);
 	
       handBoxes = new Array(2);
+	  infoBoxes = new Array(2);
       name_labels = new Array(2);
       _info_labels = new Array(2);
       _turn_symbols = new Array(2);
@@ -235,18 +237,19 @@ package  {
         info_label.y = name_label.y + 20;
         _info_labels[i] = info_label;
 
-        var h_box:Canvas = new Canvas();
-        h_box.setStyle('backgroundColor',0xddee88);
-        h_box.setStyle('borderStyle','solid');
-        h_box.width = KOMADAI_WIDTH - 10
-        h_box.height = KOMADAI_HEIGHT - 10
-        h_box.x = i == 0 ? hand.x + 10 : hand.x
-        h_box.y = i == 0 ? BAN_TOP_MARGIN + 6 : BAN_TOP_MARGIN + hand.height + 57 ;
-        h_box.addChild(turn_symbol);
-        h_box.addChild(name_label);
-        h_box.addChild(info_label);
-		h_box.addChild(avatar_image);
-        addChild(h_box);
+        var i_box:Canvas = new Canvas();
+        i_box.setStyle('backgroundColor',0xddee88);
+        i_box.setStyle('borderStyle','solid');
+        i_box.width = KOMADAI_WIDTH - 10
+        i_box.height = KOMADAI_HEIGHT - 10
+        i_box.x = i == 0 ? hand.x + 10 : hand.x
+        i_box.y = i == 0 ? BAN_TOP_MARGIN + 6 : BAN_TOP_MARGIN + hand.height + 57 ;
+        i_box.addChild(turn_symbol);
+        i_box.addChild(name_label);
+        i_box.addChild(info_label);
+		i_box.addChild(avatar_image);
+		infoBoxes[i] = i_box;
+        addChild(i_box);
       }
 	  _arrows[ARROWS_SELF] = new Array();
 	  _arrows[ARROWS_PUBLIC] = new Array();
@@ -448,17 +451,16 @@ package  {
 	}
 	
     public function closeGame():void {
+	  for (var i:int = 0; i <= 1; i++) {
+		  infoBoxes[i].setStyle('borderThickness', undefined);
+		  infoBoxes[i].setStyle('borderColor', undefined);
+		  _player_infos[i] = null;
+		  timers[i].stop();
+		  name_labels[i].setStyle("color", 0x000000);
+		  while (_avatar_images[i].numChildren > 0) _avatar_images[i].removeChildAt(0);
+		  _player_flags[i].source = null;
+	  }
 	  isPlayer = false;
-      _player_infos[0] = null;
-	  _player_infos[1] = null;
-      timers[0].stop();
-      timers[1].stop();
-	  name_labels[0].setStyle("color", 0x000000);
-	  name_labels[1].setStyle("color", 0x000000);
-	  while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
-	  while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
-	  _player_flags[0].source = null;
-	  _player_flags[1].source = null;
 	  study_list = new Array();
 	  post_game = false;
 	  since_last_move = 0;

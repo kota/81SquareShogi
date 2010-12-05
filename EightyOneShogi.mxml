@@ -2,7 +2,10 @@
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
 	<mx:Style>
 		Alert {
-			fontSize : 13px;
+			fontSize: 13px;
+			color: Black;
+			backgroundColor: "0x99CCFF";
+			borderColor: "0x99CCFF";
 		}
 	</mx:Style>
 	<mx:Script>
@@ -19,6 +22,7 @@
 	import flash.net.URLVariables;
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
+	import mx.containers.Canvas;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -64,6 +68,7 @@
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
 	private var _leaving:Boolean = false;
+	private var _panelReplayColor:uint = 0xFF88CC;
 	[Bindable]
 	private var _lastChatTime:String;
 
@@ -541,6 +546,7 @@
 	  radioKifuListen.enabled = false;
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
+	  sidePanel.setStyle('borderColor', undefined);
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void {
@@ -577,17 +583,22 @@
 	  radioKifuReplay.enabled = true;
 	  radioKifuReplay.selected = true;
 	  board.onListen = false;
+	  sidePanel.setStyle('borderColor', _panelReplayColor);
       if (e.message.indexOf("LOSE") >= 0) {
 		board.isWinner = false;
 		board.isLoser = true;
 		radioKifuListen.enabled = true;
-		_openGameResultWindow(-1);
+		_openGameResultWindow( -1);
+		board.infoBoxes[1].setStyle('borderThickness', 2);
+		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isWinner = true;
 		board.isLoser = false;
 		_openGameResultWindow(1);
+		board.infoBoxes[0].setStyle('borderThickness', 2);
+		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_win.play();
       } else if (e.message.indexOf("DRAW") >= 0) {
@@ -792,21 +803,24 @@
     private function _handleMonitor(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
 	  var end_game:Boolean = false;
+	  var winnerTurn:int = -1;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
 	  if(_watch_game != null) board.monitor(e.message,_watch_game);
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
-        _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
+		winnerTurn = 1 - board.last_pos.turn;
+        _writeUserMessage((winnerTurn == Kyokumen.SENTE ? "White: " : "Black: ") + "Time up.\n", 2, "#DD0088");
 		kifuMove.num = board.kifu_list.length;
-        kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+        kifuMove.move = (winnerTurn == Kyokumen.SENTE ? "△" : "▲") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
 	  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
 		  end_game = true;
 		  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
       } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
-		end_game = true;  
+		end_game = true;
+		winnerTurn = board.last_pos.turn;
         _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
 		kifuMove.num = board.kifu_list.length;
 		kifuMove.move = "Illegal Move";
@@ -814,7 +828,8 @@
 		board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
 		  end_game = true;
-		  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
+		  winnerTurn = 1 - board.last_pos.turn;
+		  _writeUserMessage((winnerTurn == Kyokumen.SENTE ? "White" : "Black")  + " resigned.\n", 2, "#DD0088");
 	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 		  end_game = true;
           _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
@@ -844,6 +859,9 @@
 			radioKifuListen.enabled = true;
 			radioKifuReplay.selected = true;
 			board.onListen = false;
+			sidePanel.setStyle('borderColor', _panelReplayColor);
+			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
+			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 			board.endGame();
@@ -1068,6 +1086,8 @@
     }
 	
     private function _gameSelected():void {
+	  _keepAliveTimer.reset();
+	  _keepAliveTimer.start();
       var game:Object = gameListGrid.selectedItem;
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
@@ -1143,11 +1163,15 @@
 		board.post_game = false;
 		board.isWinner = false;
 		board.isLoser = false;
-		board.onListen = true;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
+		  if (_watch_game.rule.match(/^R/)) {
+			  _writeUserMessage("This game is Rated.\nPlayers CANNOT see your chat until the game ends.\n", 2, "#008800", true);
+		  } else {
+			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see your chat even during the game.\n", 2, "#008800", true);
+		  }
 		  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
@@ -1161,6 +1185,8 @@
 		  radioKifuListen.selected = true;
 		  radioKifuReplay.enabled = true;
 		  radioKifuListen.enabled = true;
+		  board.onListen = true;
+		  sidePanel.setStyle('borderColor', undefined);
 	  }
     }
 
@@ -1245,7 +1271,7 @@
 	//------------------------------------------------------------------------------------------------------------------------ BUTTONS
 	private function _resignAlert():void {
 		if (board.my_turn == board.position.turn)
-        Alert.show("","Resign?",Alert.YES|Alert.NO,this,_resign);
+        Alert.show("","Resign?",Alert.YES|Alert.NO, controlPanel, _resign);
 	}
 	
     private function _resign(e:CloseEvent):void {
@@ -1314,6 +1340,7 @@
   private function _toggleListen():void {
 	  if (radioKifuListen.selected) {
 		  board.onListen = true;
+		  sidePanel.setStyle('borderColor', undefined);
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.showArrows(Board.ARROWS_PUBLIC);
 		  kifuDataGrid.dataProvider = board.kifu_list;
@@ -1338,6 +1365,7 @@
 		  kifuDataGrid.callLater(_scrollDownKifu);
 	  } else {
 		  board.onListen = false;
+		  sidePanel.setStyle('borderColor', _panelReplayColor);
 		  if (!board.isWinner){
 			board.eraseArrows(Board.ARROWS_PUBLIC);
 			board.showArrows(Board.ARROWS_SELF);
@@ -1376,6 +1404,7 @@
 	radioKifuReplay.selected = true;
 	if (board.onListen) {
 		board.onListen = false;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	board.clearArrows(Board.ARROWS_SELF);
@@ -1400,6 +1429,7 @@
 	radioKifuReplay.selected = true;
 	if (board.onListen) {
 		board.onListen = false;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	board.clearArrows(Board.ARROWS_SELF);
@@ -1568,6 +1598,7 @@
 		forwardOneButton.enabled = true;
 		radioKifuReplay.enabled = true;
 		radioKifuReplay.selected = true;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
 		radioKifuListen.enabled = false;
 		chatMessage2.enabled = false;
 		mainViewStack.selectedIndex = 2;
@@ -1781,7 +1812,7 @@
 	
     private function _handleKeepAlive(e:Event):void {
 	  _refresh();
-  	  if (mainViewStack.selectedIndex == 1) bulletin.flip();
+//  	  if (mainViewStack.selectedIndex == 1) bulletin.flip();
     }
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
@@ -1930,27 +1961,27 @@
     ]]>
   </mx:Script>
   <mx:Component id="gameListBlackRenderer">
-	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0">
-		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-7" paddingRight="-7" color="{data.blackColor}" />
+	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-7" paddingRight="-7" color="{data.blackColor}"/>
 		<mx:Image source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}" />
 		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.blackColor}" width="83" textAlign="left" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="gameListWhiteRenderer">
-	  <mx:HBox horizontalAlign="right" paddingLeft="0" paddingRight="0">
+	  <mx:HBox horizontalAlign="right"  paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.whiteColor}" width="83" textAlign="right" />
 		<mx:Image source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
 		<mx:Label text="{data.whiteRank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-7" color="{data.whiteColor}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
-	  <mx:HBox paddingLeft="2" paddingRight="0" verticalAlign="middle">
-		<mx:Image source="{data.flagURL}" width="16" height="11" />
-		<mx:Label text="{data.country}" paddingLeft="-9" paddingRight="-7" fontSize="10" width="100" />
+	  <mx:HBox verticalAlign="middle" paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Image source="{data.flagURL}" width="16" height="13" />
+		<mx:Label text="{data.country}" textAlign="left" paddingLeft="-9" paddingRight="-7" fontSize="10" width="70" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="waiterListNameRenderer">
-	  <mx:HBox paddingLeft="0" paddingRight="0">
+	  <mx:HBox paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Image source="{data.flagURL}" width="27" height="17" toolTip="{data.country}" />
 		<mx:Label text="■" paddingLeft="-6" paddingRight="-9" width="5" color="{data.rankColor}" />
 		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" width="100" />
@@ -2032,7 +2063,7 @@
 ================================================================== -->
 	<mx:HBox paddingTop="10" paddingLeft="10">
     <mx:VBox fontSize="11">
-      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFF3">
+      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
 		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
@@ -2048,7 +2079,7 @@
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox>
-			<mx:DataGrid id="userListGrid" width="360" height="360" change="_userSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);">
+			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
 			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="56" paddingLeft="0" textAlign="center" />
@@ -2058,7 +2089,7 @@
 			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:DataGrid id="waiterListGrid" width="360" height="105" change="_waiterSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));">
+			<mx:DataGrid id="waiterListGrid" width="360" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
 			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{Language.ac.getItemAt(_language).waiter}" width="120" paddingLeft="2" sortable="false" />
 <!--			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
@@ -2071,7 +2102,7 @@
 		</mx:VDividedBox>
 		<mx:VBox>
 			<mx:VDividedBox>
-				<mx:DataGrid id="gameListGrid" width="570" height="220" headerHeight="23" change="_gameSelected();" rowHeight="21" doubleClickEnabled="true" doubleClick="_watchDialog();">
+				<mx:DataGrid id="gameListGrid" width="570" height="220" headerHeight="21" change="_gameSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_watchDialog();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 				 <mx:columns>
 				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
@@ -2151,33 +2182,37 @@
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22" horizontalScrollPolicy="off">
-		<mx:HBox paddingBottom="-2">
-          <mx:Label id="watcherListTitle" text="{Language.ac.getItemAt(_language).watchers}" fontWeight="bold" paddingRight="0" />
-		  <mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>
-		</mx:HBox>
-		<mx:DataGrid id="watcherListGrid" width="160" height="234" rowHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));">
-         <mx:columns>
-          <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="80" paddingLeft="2" sortCompareFunction="_sortName" />
-		  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="40" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
-		  <mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
-         </mx:columns>
-        </mx:DataGrid>
-		<mx:HBox paddingBottom="-2">
-			<mx:Label text="{Language.ac.getItemAt(_language).kifu}" fontWeight="bold"/>
-			<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{Language.ac.getItemAt(_language).copy}" click="System.setClipboard(_formatKIF());"/>
-			<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{Language.ac.getItemAt(_language).save}" click="_saveKIF();" />
-		</mx:HBox>
-        <mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="322" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
-         <mx:columns>
-          <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="5" />
-          <mx:DataGridColumn dataField="move"/>
-         </mx:columns>
-        </mx:DataGrid>
-        <mx:HBox paddingTop="-3">
-			<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
-			<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).replay}" />
-			<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).listen}"/>
-        </mx:HBox>
+		  <mx:HBox paddingBottom="-2">
+			<mx:Label id="watcherListTitle" text="{Language.ac.getItemAt(_language).watchers}" fontWeight="bold" paddingRight="0" />
+			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>
+		  </mx:HBox>
+		  <mx:DividedBox>
+			<mx:DataGrid id="watcherListGrid" width="160" height="145" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+			 <mx:columns>
+			  <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="80" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="40" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
+			  <mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+			 </mx:columns>
+			</mx:DataGrid>
+			<mx:VBox height="435">
+				<mx:HBox paddingBottom="-2">
+					<mx:Label text="{Language.ac.getItemAt(_language).kifu}" fontWeight="bold"/>
+					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{Language.ac.getItemAt(_language).copy}" click="System.setClipboard(_formatKIF());"/>
+					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{Language.ac.getItemAt(_language).save}" click="_saveKIF();" />
+				</mx:HBox>
+				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
+				 <mx:columns>
+				  <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="5" />
+				  <mx:DataGridColumn dataField="move"/>
+				 </mx:columns>
+				</mx:DataGrid>
+			</mx:VBox>
+		  </mx:DividedBox>
+		  <mx:HBox paddingTop="-3">
+				<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
+				<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).replay}" />
+				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).listen}"/>
+		  </mx:HBox>
         </mx:Panel>
 	</mx:HBox>
 	</mx:Panel>
@@ -2205,7 +2240,7 @@
 					<mx:Label text="To"/>
 					<mx:DateChooser id="kifuSearchToChooser" showToday="false" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="575" height="470" rowHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();">
+				<mx:DataGrid id="kifuSearchGrid" width="575" height="470" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 					<mx:columns>
 					<mx:DataGridColumn dataField="winner" headerText="{Language.ac.getItemAt(_language).result}" width="45" textAlign="center" paddingLeft="0" />
 					<mx:DataGridColumn dataField="black" headerText="{Language.ac.getItemAt(_language).black}" width="80" paddingLeft="2" />

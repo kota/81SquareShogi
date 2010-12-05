@@ -7,6 +7,8 @@
 package  {
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	import mx.containers.Canvas;
 	import mx.containers.VBox;
 	import mx.containers.ViewStack;
@@ -25,6 +27,7 @@ package  {
 	private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
 	private var _hideEffect:Effect = new WipeUp();
 	private var _showEffect:Effect = new WipeDown();
+	private var _flipTimer:Timer = new Timer(30000);
     
     public function BulletinGadget() {
       super();
@@ -33,6 +36,7 @@ package  {
 	  _urlLoader.load(new URLRequest(SOURCE + "tournaments/official/bulletin.txt?" + nowDate.getTime().toString()));
 	  _hideEffect.duration = 800;
 	  _showEffect.duration = 800;
+	  _flipTimer.addEventListener(TimerEvent.TIMER, _handleFlip);
       }
     
 
@@ -166,6 +170,7 @@ package  {
 			y += 15;
 		}
 		this.selectedIndex = 0;
+		_flipTimer.start();
     }
 	
 	private function _jumpURL(e:MouseEvent):void {
@@ -180,8 +185,10 @@ package  {
 		}
 	}
 	
-	private function _handleFlip(e:MouseEvent):void {
+	private function _handleFlip(e:Event):void {
 		flip();
+		_flipTimer.reset();
+		_flipTimer.start();
 	}
 
   }
