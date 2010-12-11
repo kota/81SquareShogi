@@ -6,10 +6,12 @@
 	 * @author Hidetchi
 	 */
 	import flash.display.Sprite;
+	import flash.display.JointStyle;
 	import flash.events.TimerEvent;
 	import flash.geom.Point;
 	import flash.text.TextField;
 	import flash.text.TextFormat;
+	import flash.text.AntiAliasType;
 	import flash.utils.Timer;
 	import mx.controls.Text;
 	import mx.core.UIComponent;
@@ -23,16 +25,16 @@
 		private var _sprite:Sprite = new Sprite();
 		private var _nameTag:TextField = new TextField();
 		private var _nameTagHoldTimer:Timer = new Timer(1500, 1);
-		private var _nameTagFadeTimer:Timer = new Timer(200, 5);
+		private var _nameTagFadeTimer:Timer = new Timer(100, 10);
 		private var _isDrawn:Boolean = false;
 		
 		public static const FROM_BOARD:int = -1;
 		public static const FROM_HAND_SENTE:int = 0;
 		public static const FROM_HAND_GOTE:int = 1;
 		
-		private static const HEAD_LENGTH:Number = 13;
-		private static const HEAD_ANGLE:Number = Math.PI / 7;
-		private static const OFFSET:Number = 5;
+		private static const HEAD_LENGTH:Number = 16; // 13;
+		private static const HEAD_ANGLE:Number = Math.PI / 6; //7;
+		private static const OFFSET:Number = 3;
 		
 		public function BoardArrow(fromType:int, from:Point, to:Point, color:uint, sender:String) {
 			_fromType = fromType;
@@ -40,7 +42,8 @@
 			_to = to;
 			_color = color;
 			_sender = sender;
-			_nameTag.text = _sender;
+			_nameTag.htmlText = "<b>" + _sender + "</b>";
+//			_nameTag.text = _sender;
 			_nameTagHoldTimer.addEventListener(TimerEvent.TIMER, _handleTimerHold);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER, _handleTimerFade);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerFadeComplete);
@@ -49,7 +52,7 @@
 		
 		public function drawArrow(myTurn:int):void {
 			_sprite.graphics.clear();
-			_sprite.graphics.lineStyle(2, _color);
+			_sprite.graphics.lineStyle(1, _color,1,true,"normal",null,JointStyle.MITER);
 			var from:Point = new Point();
 			var to:Point = new Point();
 			if (_fromType == FROM_BOARD) {
@@ -66,13 +69,22 @@
 			from = new Point(from.x - OFFSET * Math.cos(theta), from.y - OFFSET * Math.sin(theta));
 			to = new Point(to.x + OFFSET * Math.cos(theta), to.y + OFFSET * Math.sin(theta));
 			_sprite.graphics.moveTo(from.x, from.y);
-			_sprite.graphics.lineTo(to.x, to.y);
+			_sprite.graphics.lineTo(to.x + HEAD_LENGTH / 2 * Math.cos(theta + HEAD_ANGLE * 0.4), to.y + HEAD_LENGTH / 2 * Math.sin(theta + HEAD_ANGLE * 0.4))
 			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta + HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta + HEAD_ANGLE))
-			_sprite.graphics.moveTo(to.x, to.y);
+			_sprite.graphics.lineStyle(1.5, _color,0.8,true,"normal",null,JointStyle.MITER);
+			_sprite.graphics.lineTo(to.x, to.y);
 			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta - HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta - HEAD_ANGLE))
+			_sprite.graphics.lineStyle(1, _color,1,true,"normal",null,JointStyle.MITER);
+			_sprite.graphics.lineTo(to.x + HEAD_LENGTH / 2 * Math.cos(theta - HEAD_ANGLE * 0.4), to.y + HEAD_LENGTH / 2 * Math.sin(theta - HEAD_ANGLE * 0.4))
+			_sprite.graphics.lineTo(from.x, from.y);
+//			_sprite.graphics.lineTo(to.x, to.y);
+//			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta + HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta + HEAD_ANGLE))
+//			_sprite.graphics.moveTo(to.x, to.y);
+//			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta - HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta - HEAD_ANGLE))
 			_nameTag.alpha = 1.0;
+			_nameTag.antiAliasType = AntiAliasType.ADVANCED;
 			_nameTag.x = to.x + 10;
-			_nameTag.y = to.y - 15;
+			_nameTag.y = to.y - 16;
 			_nameTag.textColor = _color;
 			_nameTag.autoSize = "left";
 			_nameTag.selectable = false;
@@ -95,7 +107,7 @@
 		}
 		
 		private function _handleTimerFade(e:TimerEvent):void {
-			_nameTag.alpha -= 0.2;
+			_nameTag.alpha -= 0.1;
 		}
 		
 		private function _handleTimerFadeComplete(e:TimerEvent):void {

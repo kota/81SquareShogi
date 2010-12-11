@@ -622,7 +622,6 @@
       }
       closeButton.enabled = true;
       resignButton.enabled = false;
-	  greetButton.enabled = false;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
@@ -989,6 +988,7 @@
 		saveSettingsButton.addEventListener("click", _handleSaveSettings);
 		if (_so.data.optionTab) optionTab.selectedIndex = _so.data.optionTab;
       }
+	  _optionWindow.drawArrow();
     }
 
      private function _waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void{

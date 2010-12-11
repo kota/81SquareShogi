@@ -35,7 +35,7 @@ package  {
 	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT;
 	public static const HIS_HAND_X:int = 10;
 	public static const HIS_HAND_Y:int = 10;
-	public static const MAX_ARROWS:int = 7;
+	public static const MAX_ARROWS:int = 8;
 	public static const ARROWS_SELF:int = 0;
 	public static const ARROWS_PUBLIC:int = 1;
     

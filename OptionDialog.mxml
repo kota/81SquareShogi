@@ -3,10 +3,21 @@
 		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="8">
 	<mx:Script>
         <![CDATA[
+			import flash.geom.Point;
         	import mx.controls.*;
             import mx.managers.PopUpManager;
 			[Bindable]
 			public var language:int = 0;
+			
+			public function drawArrow():void {
+				arrowCanvas.removeAllChildren();
+				var arrow:BoardArrow = new BoardArrow( -1, new Point(6, 1), new Point(9, 1), arrowColorPicker.selectedColor, parentApplication.login_name);
+				arrow.drawArrow(0);
+				arrow.x = - 205;
+				arrow.y = - 29;
+				arrowCanvas.addChild(arrow);
+			}
+			
         ]]>
     </mx:Script>
 	<mx:TabNavigator id="optionTab" width="370" height="260" horizontalScrollPolicy="off" creationPolicy="all">
@@ -64,7 +75,9 @@
 			<mx:CheckBox label="Accept arrows from others" id="acceptArrowsCheckBox" paddingLeft="30" />
 			<mx:HBox paddingLeft="30" verticalAlign="center">
 				<mx:Label text = "Your Color"/>
-				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" />
+				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" change="drawArrow();" />
+				<mx:Label text="" paddingRight="0" />
+				<mx:Canvas id="arrowCanvas" backgroundColor="#FFDD55" width="160" height="30"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:TabNavigator>
