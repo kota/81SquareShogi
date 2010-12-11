@@ -41,7 +41,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/07";
+	public const VERSION:String = "ver.2010/12/11";
 	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -2053,6 +2053,7 @@
 					<mx:Object label="{Language.ac.getItemAt(12).LANGUAGE}" image="{DIRECTORY}images/flags_s/112.gif" />
 					<mx:Object label="{Language.ac.getItemAt(13).LANGUAGE}" image="{DIRECTORY}images/flags_s/643.gif" />
 					<mx:Object label="{Language.ac.getItemAt(14).LANGUAGE}" image="{DIRECTORY}images/flags_s/764.gif" />
+					<mx:Object label="{Language.ac.getItemAt(15).LANGUAGE}" image="{DIRECTORY}images/flags_s/804.gif" />
 				</mx:Array></mx:dataProvider>
                 <mx:itemRenderer>
                     <mx:Component>
