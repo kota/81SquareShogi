@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+
+        ]]>
+    </mx:Script>
+	<mx:Button id="greet1" label="お願いします。 (Onegai-shimasu)" click="PopUpManager.removePopUp(this);"/>
+	<mx:Button id="greet2" label="有難うございました。 (Arigatou-gozaimashita)" click="PopUpManager.removePopUp(this);"/>
+	<mx:Label text=""/>
+	<mx:Button label="Cancel" click="PopUpManager.removePopUp(this);" />
+</mx:TitleWindow>
