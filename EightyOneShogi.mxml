@@ -70,10 +70,8 @@
     private var _challenging:Boolean = false;
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
-	[Bindable]
-	private var _lastChatTime:String;
-	private const filterDefault:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, ]);
-	private const filterGrey:ColorMatrixFilter = new ColorMatrixFilter([0.5, 0.25, 0.25, 0,120, 0.25, 0.5, 0.25, 0,120, 0.25, 0.25, 0.5, 0,120, 0, 0, 0, 1, 0, ]);
+	private const filterDefault:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 ]);
+	private const filterGrey:ColorMatrixFilter = new ColorMatrixFilter([0.5, 0.25, 0.25, 0,120, 0.25, 0.5, 0.25, 0,120, 0.25, 0.25, 0.5, 0,120, 0, 0, 0, 1, 0 ]);
 
     [Embed(source = "/sound/win.mp3")]
     private var Sound_win:Class;
@@ -582,8 +580,8 @@
       }
 	  radioKifuReplay.enabled = true;
 	  radioKifuReplay.selected = true;
-	  board.onListen = false;
-	  sidePanel.setStyle('borderColor', _panelReplayColor);
+//	  board.onListen = false;
+//	  sidePanel.setStyle('borderColor', _panelReplayColor);
       if (e.message.indexOf("LOSE") >= 0) {
 		board.isWinner = false;
 		board.isLoser = true;
@@ -596,6 +594,8 @@
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isWinner = true;
 		board.isLoser = false;
+		board.onListen = false;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
 		_openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
 		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
@@ -844,21 +844,20 @@
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
       }
-	  if (!board.onListen) {
-		  if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) return;
+	  if (board.onListen || !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+		  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
+		  kifuDataGrid.scrollToIndex(0);
+		  kifuDataGrid.dataProvider = board.kifu_list;
+		  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
+		  kifuDataGrid.callLater(_scrollDownKifu);
 	  }
-	  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
-	  kifuDataGrid.scrollToIndex(0);
-	  kifuDataGrid.dataProvider = board.kifu_list;
-	  kifuDataGrid.selectedIndex = board.onListen ? (board.kifu_list.length - 1) : i;
-	  kifuDataGrid.callLater(_scrollDownKifu);
 	  if (end_game) {
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
-			radioKifuReplay.selected = true;
-			board.onListen = false;
-			sidePanel.setStyle('borderColor', _panelReplayColor);
+//			radioKifuReplay.selected = true;
+//			board.onListen = false;
+//			sidePanel.setStyle('borderColor', _panelReplayColor);
 			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
 			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
@@ -1206,7 +1205,7 @@
 	  PopUpManager.centerPopUp(_playerInfoWindows[user.name]);
 	  _playerInfoWindows[user.name].language = _language;
       _playerInfoWindows[user.name].title = "Player Info";
-	  _playerInfoWindows[user.name].addEventListener(Event.CLOSE, _handlePlayerInfoClose);
+	  _playerInfoWindows[user.name].addEventListener("close_info", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isPlayer()) {
 		  _playerInfoWindows[user.name].invite.enabled = false;
@@ -1372,6 +1371,7 @@
 		  sidePanel.setStyle('borderColor', undefined);
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.showArrows(Board.ARROWS_PUBLIC);
+		  kifuDataGrid.scrollToIndex(0);
 		  kifuDataGrid.dataProvider = board.kifu_list;
 		  if (board.kifu_list_self.length > 0) board.kifu_list_self = new Array();
 		  if (board.post_game && !board.isWinner) {
@@ -1386,9 +1386,8 @@
 			  }
 		  }
 		  if (_monitoring && !board.post_game) {
-			  kifuDataGrid.scrollToIndex(0);
-			  kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
 			  board.replayMoves(board.kifu_list.length - 1, true);
+			  kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
 		  }
 		  kifuDataGrid.callLater(_scrollDownKifu);
 	  } else {
@@ -1604,7 +1603,7 @@
 	private function _shareKifu():void {
 		var kifu:Object = kifuSearchGrid.selectedItem;
 		if (kifu) {
-			  _kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(this, KifuShareWindow, true));
+			  _kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(searchAccordion, KifuShareWindow, true));
 			  PopUpManager.centerPopUp(_kifuShareWindow);
 			  _kifuShareWindow.kifu = kifu;
 		} else {
@@ -1861,8 +1860,6 @@
 		message = message.replace(/\\n/g, "\n");
 		switch (n) {
 			case 1:
-				var nowDate:Date = new Date(); 
-				_lastChatTime = "Last message receive: " + nowDate.getHours().toString() + ":" + (100 + nowDate.getMinutes()).toString().substr(1);
 				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
 				userMessage1.htmlText += message;
 				userMessage1.callLater(_scrollDown1);
@@ -2109,7 +2106,7 @@
 ================================================================== -->
 	<mx:HBox paddingTop="10" paddingLeft="10">
     <mx:VBox fontSize="11">
-      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}  {_lastChatTime}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
+      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
 		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />

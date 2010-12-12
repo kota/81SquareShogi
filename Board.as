@@ -423,6 +423,8 @@ package  {
     }
 	
 	private function _arrangeInfos():void {
+      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
+      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       name_labels[0].text = _player_infos[_my_turn].name;
       name_labels[1].text = _player_infos[1 - _my_turn].name;
 	  if (viewing) return;
@@ -438,8 +440,6 @@ package  {
 	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
-      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
-      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
 	}
 	
 	public function flipBoard():void {

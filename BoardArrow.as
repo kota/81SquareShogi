@@ -81,7 +81,7 @@
 //			_sprite.graphics.moveTo(to.x, to.y);
 //			_sprite.graphics.lineTo(to.x + HEAD_LENGTH * Math.cos(theta - HEAD_ANGLE), to.y + HEAD_LENGTH * Math.sin(theta - HEAD_ANGLE))
 			_nameTag.alpha = 1.0;
-			_nameTag.antiAliasType = AntiAliasType.ADVANCED;
+//			_nameTag.antiAliasType = AntiAliasType.ADVANCED;
 			_nameTag.x = to.x + 10;
 			_nameTag.y = to.y - 16;
 			_nameTag.textColor = _color;

@@ -3,6 +3,7 @@
 					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" mouseDown="_clearHighlight();" headerHeight="25">
 	    <mx:Script>
         <![CDATA[
+		  import flash.events.Event;
           import mx.controls.*;
 		  import mx.effects.Effect;
 		  import mx.effects.Move;
@@ -91,6 +92,7 @@
 		  }
 
           private function _closeButton():void {
+			dispatchEvent(new Event("close_info"));
             PopUpManager.removePopUp(this);
           }
 
