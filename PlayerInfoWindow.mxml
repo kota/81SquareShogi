@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" headerHeight="25">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" mouseDown="_clearHighlight();" headerHeight="25">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
+		  import mx.effects.Effect;
+		  import mx.effects.Move;
           import mx.managers.PopUpManager;
+
 		  [Bindable]
 		  public var language:int = 0;
-
 		  [Bindable]
 		  private var _name:String;
 		  [Bindable]
@@ -32,6 +34,9 @@
 		  private var _streak:int;
 		  [Bindable]
 		  private var _streak_best:int;
+		  [Bindable]
+
+		  public var pmText:String = "";
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
 		  
 		  public function readUser(user:Object):void {
@@ -67,6 +72,23 @@
 		  private function _swfError():void {
 //			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
 		  }
+		  
+		public function scrollDown():void{
+		  pmTextArea.verticalScrollPosition = pmTextArea.maxVerticalScrollPosition;
+		}
+		  
+		  private function _togglePM():void {
+			  if (pmCheckBox.selected) {
+				  viewStack.selectedIndex = 1;
+			  } else {
+				  viewStack.selectedIndex = 0;
+			  }
+		  }
+		  
+		  private function _clearHighlight():void {
+			  pmTextArea.setStyle('backgroundColor', undefined);
+			  pmTextArea.callLater(scrollDown);
+		  }
 
           private function _closeButton():void {
             PopUpManager.removePopUp(this);
@@ -74,6 +96,8 @@
 
         ]]>
     </mx:Script>
+    <mx:Move id="showMove" yFrom="73" yTo="0" duration="250" />
+	<mx:Move id="hideMove" yFrom="0" yTo="73" duration="150" />
 	<mx:HBox>
 		<mx:Canvas id="avatarCanvas" width="128" height="128">
 			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_rank}.jpg"/>
@@ -89,26 +113,35 @@
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:Label text="{Language.ac.getItemAt(language).rate}:  {_rating}  ({_rank})"/>
-			<mx:HBox>
-				<mx:Label text="{_wins} {Language.ac.getItemAt(language).win_small}"/>
-				<mx:Label text="{_losses} {Language.ac.getItemAt(language).loss_small}"/>
-				<mx:Label text="({_percentage.toFixed(1)}%)"/>
-				<mx:Label text="{Language.ac.getItemAt(language).total}: {_wins + _losses}"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:Label text="{Language.ac.getItemAt(language).streak}: {_streak_best}"/>
-				<mx:Label text="({Language.ac.getItemAt(language).current}: {_streak})"/>
-			</mx:HBox>
+			<mx:ViewStack id="viewStack" creationPolicy="all">
+				<mx:VBox width="260" height="73" horizontalScrollPolicy="off">
+					<mx:Label text="{Language.ac.getItemAt(language).rate}:  {_rating}  ({_rank})"/>
+					<mx:HBox>
+						<mx:Label text="{_wins} {Language.ac.getItemAt(language).win_small}"/>
+						<mx:Label text="{_losses} {Language.ac.getItemAt(language).loss_small}"/>
+						<mx:Label text="({_percentage.toFixed(1)}%)"/>
+						<mx:Label text="{Language.ac.getItemAt(language).total}: {_wins + _losses}"/>
+					</mx:HBox>
+					<mx:HBox>
+						<mx:Label text="{Language.ac.getItemAt(language).streak}: {_streak_best}"/>
+						<mx:Label text="({Language.ac.getItemAt(language).current}: {_streak})"/>
+					</mx:HBox>
+				</mx:VBox>
+				<mx:VBox width="260" height="73" showEffect="{showMove}" hideEffect="{hideMove}">
+					<mx:TextArea id="pmTextArea" htmlText="{pmText}" wordWrap="true" editable="false" width="100%" height="100%"/>
+				</mx:VBox>
+			</mx:ViewStack>
 		</mx:VBox>
 	</mx:HBox>
 	<mx:HBox>
 		<mx:Label text="PM:"/>
-		<mx:TextInput id="directMessage" width="360"/>
+		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" />
 	</mx:HBox>
-	<mx:HBox width="100%" horizontalAlign="center" paddingTop="0">
+	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
 		<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
 		<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
+		<mx:CheckBox id="pmCheckBox" label="" click="_togglePM();" paddingRight="-5" />
+		<mx:Image source="@Embed('images/icon_greet.png')"/>
 	</mx:HBox>
 </mx:TitleWindow>

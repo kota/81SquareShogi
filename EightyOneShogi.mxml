@@ -41,7 +41,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/12";
+	public const VERSION:String = "ver.2010/12/13";
 	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -99,11 +99,11 @@
     private var _end_sound_play:Boolean = true;
     private var _chat_sound1_play:Boolean = true;
     private var _chat_sound2_play:Boolean = true;
+	private var _chat_sound3_play:Boolean = true;
 	private var _accept_arrows:Boolean = true;
 	private var _arrow_color:uint = 0x00CC00;
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
-	private var _regExpCalled:RegExp;
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _initPositionStr:String;
@@ -113,10 +113,11 @@
 	private var _leaveMinutes:int;
 	private var _leaveMessage:String;
 	private var _infoFetcher:InfoFetcher;
+	private var _pmLog:Object = new Object();
 	
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
-    private var _playerInfoWindow:PlayerInfoWindow;
+	private var _playerInfoWindows:Object = new Object();
 	private var _challengerAlertWindow:ChallengerAlertWindow;
 	private var _greetMenuWindow:GreetMenuWindow;
 	private var _gameResultWindow:GameResultWindow;
@@ -173,7 +174,6 @@
       loginMessage.text = "Logging in...";
       _client.login(loginname.text, password.text);
       login_name = loginname.text;
-	  _regExpCalled = new RegExp("@" + login_name.toLowerCase(), "i");
     } 
 
     private function _handleLoggedIn(e:ServerMessageEvent):void {
@@ -677,8 +677,6 @@
     private function _handleChat(e:ServerMessageEvent):void{
 		if (e.message.match(/\[auto\-chat\]/)) {
 			_writeUserMessage(e.message.substr(8), 1, "#888888");
-		} else if (e.message.match(_regExpCalled)) {
-			_writeUserMessage(e.message.substr(8), 1, "#FF0000");
 		} else if (e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1] == login_name) {
 			_writeUserMessage(e.message.substr(8), 1, "#0033DD");
 		} else {
@@ -687,8 +685,6 @@
 		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
 			if (e.message.match(/\[auto\-chat\]/)) {
 				_sound_chat4.play();
-			} else if (e.message.match(_regExpCalled)) {
-				_sound_chat3.play();
 			} else {
 				_sound_chat1.play();
 			}
@@ -752,9 +748,7 @@
 			}
 			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
 		} else {
-			if (e.message.match(_regExpCalled)) {
-				_writeUserMessage(e.message.substr(12), 2, "#FF0000");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
+			if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#000000");
 			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[1].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#666666");
@@ -763,30 +757,35 @@
 			} else {
 				_writeUserMessage(e.message.substr(12), 2, "#660000");
 			}
-			if (_chat_sound2_play){
-				if (e.message.match(_regExpCalled)) {
-					_sound_chat3.play();
-				} else {
-					_sound_chat1.play();
-				}
-			}
+			if (_chat_sound2_play) _sound_chat1.play();
 		}
     }
 	
 	private function _handlePrivateChat(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex == 1 || mainViewStack.selectedIndex == 3) {
+		var match:Array;
+		match = e.message.substr(15).match(/^\[(.+?)\]\s(.+)$/);
+		var name:String = match[1];
+		var message:String = match[2];
+		if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
+		if (!_pmLog[name]) _pmLog[name] = "";
+		_pmLog[name] += "<font color='#FF0000'>" + message + "</font>" + "\n";
+		if (_playerInfoWindows[name]) {
+			_playerInfoWindows[name].pmText = _pmLog[name];
+			_playerInfoWindows[name].viewStack.selectedIndex = 1;
+			_playerInfoWindows[name].pmCheckBox.selected = true;
+			_playerInfoWindows[name].pmTextArea.setStyle('backgroundColor', 0xFFFFBB);
+			_playerInfoWindows[name].callLater(_playerInfoWindows[name].scrollDown);
+		} else if (mainViewStack.selectedIndex == 1 || mainViewStack.selectedIndex == 3) {
 			_writeUserMessage("PM: " + e.message.substr(15), 1, "#FF0000");
 		} else if (mainViewStack.selectedIndex == 2) {
 			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
 		}
-		if (_chat_sound1_play) _sound_chat3.play();
+		if (_chat_sound3_play) _sound_chat3.play();
 		if (_leaving) {
-			var match:Array;
-			match = e.message.substr(15).match(/^\[(.+?)\]/);
-			if (_findPlayerFromList(match[1])) {
+			if (_findPlayerFromList(name)) {
 				var hour:int = (_leaveMinutes - _leaveTimer.currentCount) / 60;
 				var minute:int = (_leaveMinutes - _leaveTimer.currentCount) % 60;
-				_sendPrivateChat(match[1], "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
+				_sendPrivateChat(name, "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
 			}
 		}
 	}
@@ -970,6 +969,7 @@
         gameEndSoundCheckBox.selected = _end_sound_play;
         chatSound1CheckBox.selected = _chat_sound1_play;
         chatSound2CheckBox.selected = _chat_sound2_play;
+		chatSound3CheckBox.selected = _chat_sound3_play;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
         OkButton.addEventListener("click", _handleOption);
@@ -1199,26 +1199,34 @@
 
 	private function _openPlayerInfo(user:Object):void {
 	  if (!user) return;
-	  _playerInfoWindow = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, false));
-      PopUpManager.centerPopUp(_playerInfoWindow);
-	  _playerInfoWindow.language = _language;
-      _playerInfoWindow.title = "Player Info";
-	  _playerInfoWindow.readUser(user);
+	  if (_playerInfoWindows[user.name]) return;
+	  _playerInfoWindows[user.name] = new PlayerInfoWindow();
+	  _playerInfoWindows[user.name] = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, false));
+	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
+	  PopUpManager.centerPopUp(_playerInfoWindows[user.name]);
+	  _playerInfoWindows[user.name].language = _language;
+      _playerInfoWindows[user.name].title = "Player Info";
+	  _playerInfoWindows[user.name].addEventListener(Event.CLOSE, _handlePlayerInfoClose);
+	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isPlayer()) {
-		  _playerInfoWindow.invite.enabled = false;
-		  _playerInfoWindow.directMessage.enabled = false;
+		  _playerInfoWindows[user.name].invite.enabled = false;
+		  _playerInfoWindows[user.name].directMessage.enabled = false;
 	  } else {
-		  _playerInfoWindow.directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
-		  _playerInfoWindow.directMessage.setFocus();
+		  _playerInfoWindows[user.name].directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
+		  _playerInfoWindows[user.name].directMessage.setFocus();
 	  }
 	  if (user.status == "game_waiting" && user.name != login_name && user.game_name.indexOf(user.name) >= 0) {
-		  _playerInfoWindow.challenge.addEventListener(MouseEvent.CLICK, _handleChallenge);
-		  _playerInfoWindow.challenge.enabled = true;
+		  _playerInfoWindows[user.name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge);
+		  _playerInfoWindows[user.name].challenge.enabled = true;
 	  }
 	  if (user.status != "game" && user.name != login_name) {
-		  _playerInfoWindow.invite.addEventListener(MouseEvent.CLICK, _handleInvite);
-		  _playerInfoWindow.invite.enabled = true;
+		  _playerInfoWindows[user.name].invite.addEventListener(MouseEvent.CLICK, _handleInvite);
+		  _playerInfoWindows[user.name].invite.enabled = true;
 	  }
+	}
+	
+	private function _handlePlayerInfoClose(e:Event):void {
+		_playerInfoWindows[e.target.nameLabel.text] = null;
 	}
 
     private function _handleSendChat1(e:FlexEvent):void {
@@ -1797,6 +1805,7 @@
       _end_sound_play = _optionWindow.gameEndSoundCheckBox.selected;
       _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
+	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
@@ -1810,6 +1819,7 @@
 		urlVariables.endSound = _end_sound_play;
 		urlVariables.chatSound1 = _chat_sound1_play;
 		urlVariables.chatSound2 = _chat_sound2_play;
+		urlVariables.chatSound3 = _chat_sound3_play;
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
 		urlVariables.byoyomi = GameTimer.soundType;
@@ -1822,6 +1832,7 @@
 		_end_sound_play = _infoFetcher.userSettings.endSound;
 		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
 		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
+		_chat_sound3_play = _infoFetcher.userSettings.chatSound3;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
@@ -1940,26 +1951,35 @@
 				return;
 			} else if (user.status == "game") {
 				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
-					_client.privateChat(sendTo, message);
+//					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
 				} else if (_game_name && _monitoring && sendTo == board.playerInfos[1].name) {
-					_client.privateChat(sendTo, message);
+//					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to White.");
 				} else {
 					Alert.show("User is now playing.");
 					return;
 				}
+			}
+			_client.privateChat(sendTo, message);
+			if (_playerInfoWindows[sendTo]) {
+				var match:Array;
+				if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
+				if (!_pmLog[sendTo]) _pmLog[sendTo] = "";
+				_pmLog[sendTo] += "<font color='#0033DD'>" + message + "</font>" + "\n";
+				_playerInfoWindows[sendTo].pmText = _pmLog[sendTo];
+				_playerInfoWindows[sendTo].viewStack.selectedIndex = 1;
+				_playerInfoWindows[sendTo].pmCheckBox.selected = true;
+				_playerInfoWindows[sendTo].callLater(_playerInfoWindows[sendTo].scrollDown);
+				if (_chat_sound3_play) _sound_chat1.play();
+			} else if (mainViewStack.selectedIndex == 1) {
+				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
+				if (_chat_sound1_play) _sound_chat1.play();
 			} else {
-				_client.privateChat(sendTo, message);
-				if (mainViewStack.selectedIndex == 1) {
-					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 1, "#0033DD");
-					if (_chat_sound1_play) _sound_chat1.play();
-				} else {
-					_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
-					if (_chat_sound2_play) _sound_chat2.play();
-				}
+				_writeUserMessage("PM To " + sendTo + ": " + message + "\n", 2, "#0033DD");
+				if (_chat_sound2_play) _sound_chat2.play();
 			}
 		}
 	}
@@ -2143,7 +2163,7 @@
 				  <mx:DataGridColumn dataField="opening" headerText="{Language.ac.getItemAt(_language).opening_short}" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
 				 </mx:columns>
 				</mx:DataGrid>
-				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" /> <!-- height="185" -->
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" />
 			</mx:VDividedBox>
 			<mx:HBox>
 				<mx:Label text="{Language.ac.getItemAt(_language).chat}"/>

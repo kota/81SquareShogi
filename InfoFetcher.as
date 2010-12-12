@@ -385,6 +385,7 @@
 			userSettings.pieceSound = true;
 			userSettings.chatSound1 = true;
 			userSettings.chatSound2 = true;
+			userSettings.chatSound3 = true;
 			userSettings.endSound = true;
 			userSettings.pieceType = 0;
 			userSettings.byoyomi = 1;
@@ -395,6 +396,7 @@
 					userSettings = userData[i];
 					if (userData[i].acceptArrow == null) userSettings.acceptArrow = true;
 					if (userData[i].arrowColor == null) userSettings.arrowColor = 0x00CC00;
+					if (userData[i].chatSound3 == null) userSettings.chatSound3 = true;
 					break;
 				}
 			}

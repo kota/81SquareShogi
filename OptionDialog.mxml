@@ -59,8 +59,11 @@
 			<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
 			<mx:HBox>
 				<mx:Label text="incoming chat sound"/>
-				<mx:CheckBox label="Main Lobby" id="chatSound1CheckBox"/>
-				<mx:CheckBox label="Game Room" id="chatSound2CheckBox"/>
+				<mx:VBox>
+					<mx:CheckBox label="Main Lobby" id="chatSound1CheckBox"/>
+					<mx:CheckBox label="Game Room" id="chatSound2CheckBox"/>
+					<mx:CheckBox label="Private Message" id="chatSound3CheckBox"/>
+				</mx:VBox>
 			</mx:HBox>
 			<mx:HBox>
 				<mx:Label text="byoyomi sound"/>
