@@ -93,15 +93,25 @@
 				if (i >= rank_thresholds[j]) return rank_names[j];
 			}
 			return "";
-//		    if (i < 790) return rank_names[0];     //smaller rank range (temporarily)
-//		    else if (i < 1190) return rank_names[int((i - 770) / 20)];
-//		    else return rank_names[21];
-
-	        // if (i < 1550) return rank_names[int((i + 50) / 100)];
-	        // else if (i < 2300) return rank_names[int((i + 1700) / 200)];
-	        // else if (i < 2450) return rank_names[20];
-	        // else return rank_names[21];
 	    }
+		
+		public static function makeColorFromRating(i:int):uint {
+			if (i >= rank_thresholds[1]) {
+				return 0x000000;
+			} else if (i >= rank_thresholds[4]) {
+				return 0xFF0000;
+			} else if (i >= rank_thresholds[7]) {
+				return 0xEE8800;
+			} else if (i >= rank_thresholds[10]) {
+				return 0x009300;
+			} else if (i >= rank_thresholds[13]) {
+				return 0x1166FF;
+			} else if (i >= rank_thresholds[16]) {
+				return 0xAA55FF;
+			} else {
+				return 0x777777;
+			}
+		}
 		
 		public static function gameType(str:String):String {
 			switch (str) {

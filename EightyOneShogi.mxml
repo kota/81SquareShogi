@@ -299,21 +299,7 @@
 	  for (i = 0; i < user_list.length; i++) {
 		  if (user_list[i].wins + user_list[i].losses >= 10 || user_list[i].titleName != "") {
 			  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
-			  if (user_list[i].rating >= InfoFetcher.rank_thresholds[1]) {
-				  user_list[i].rankColor = 0x000000;
-			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[4]) {
-				  user_list[i].rankColor = 0xFF0000;
-			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[7]) {
-				  user_list[i].rankColor = 0xEE8800;
-			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[10]) {
-				  user_list[i].rankColor = 0x009300;
-			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[13]) {
-				  user_list[i].rankColor = 0x1166FF;
-			  } else if (user_list[i].rating >= InfoFetcher.rank_thresholds[16]) {
-				  user_list[i].rankColor = 0xAA55FF;
-			  } else {
-				  user_list[i].rankColor = 0x777777;
-			  }
+			  user_list[i].rankColor = InfoFetcher.makeColorFromRating(user_list[i].rating);
 		  } else {
 			  user_list[i].rank = "-";
 			  user_list[i].rankColor = 0xCCCCCC;
@@ -446,6 +432,8 @@
 		  if (game.blackColor == 0x999999 || game.whiteColor == 0x999999) game.maxRating -= 3000;
 		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
 		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
+		  game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
+		  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
 		  var total:int = parseInt(game_info[3]) / 60;
 		  var hc:String;
@@ -1991,7 +1979,7 @@
   </mx:Script>
   <mx:Component id="gameListBlackRenderer">
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-7" paddingRight="-7" color="{data.blackColor}"/>
+		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-7" paddingRight="-7" color="{data.blackRankColor}"/>
 		<mx:Image filters="{[data.blackFlagFilter]}" source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}"/>
 		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.blackColor}" textDecoration="{data.blackDecoration}" width="83" textAlign="left" />
 	  </mx:HBox>
@@ -2000,7 +1988,7 @@
 	  <mx:HBox horizontalAlign="right"  paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.whiteColor}" textDecoration="{data.whiteDecoration}" width="83" textAlign="right" />
 		<mx:Image filters="{[data.whiteFlagFilter]}" source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
-		<mx:Label text="{data.whiteRank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-7" color="{data.whiteColor}" />
+		<mx:Label text="{data.whiteRank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-7" color="{data.whiteRankColor}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
