@@ -183,9 +183,6 @@ package {
 		}
 
 		private function _tickHandler(e:TimerEvent):void{
-			//if(_timeout_flag){
-				//dispatchEvent(new Event(CHECK_TIMEOUT));
-			//}
 			_time_left--;
 			if(_time_left <= 0){
 				_time_left = 0;

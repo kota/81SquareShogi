@@ -38,12 +38,11 @@
 		
 		public function BoardArrow(fromType:int, from:Point, to:Point, color:uint, sender:String) {
 			_fromType = fromType;
-			_from = from;
-			_to = to;
+			_from = new Point(from.x, from.y);
+			_to = new Point(to.x, to.y);
 			_color = color;
 			_sender = sender;
 			_nameTag.htmlText = "<b>" + _sender + "</b>";
-//			_nameTag.text = _sender;
 			_nameTagHoldTimer.addEventListener(TimerEvent.TIMER, _handleTimerHold);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER, _handleTimerFade);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerFadeComplete);
@@ -136,6 +135,7 @@
 		public function get isDrawn():Boolean {
 			return this._isDrawn;
 		}
+		
 	}
 	
 }

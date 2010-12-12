@@ -239,7 +239,9 @@ package  {
 
         var i_box:Canvas = new Canvas();
         i_box.setStyle('backgroundColor',0xddee88);
-        i_box.setStyle('borderStyle','solid');
+        i_box.setStyle('borderStyle', 'solid');
+		i_box.setStyle('borderThickness', 2);
+		i_box.horizontalScrollPolicy = "off";
         i_box.width = KOMADAI_WIDTH - 10
         i_box.height = KOMADAI_HEIGHT - 10
         i_box.x = i == 0 ? hand.x + 10 : hand.x
@@ -255,7 +257,7 @@ package  {
 	  _arrows[ARROWS_PUBLIC] = new Array();
     }
 
-    public function reset():void{
+    public function resetBoard():void{
      if(_my_turn == Kyokumen.SENTE){
         _board_coord_image.source = board_scoord_e
       } else {
@@ -286,14 +288,17 @@ package  {
           addChild(square);
         }
       }
-      kifu_list = new Array();
+    }
+	
+	public function initializeKifu():void {
+	  kifu_list = new Array();
 	  kifu_list_self = new Array();
       var kifuMove:Object = new Object();
       kifuMove.num = "0";
       kifuMove.move = "Start";
       kifu_list.push(kifuMove);
 	  study_list = new Array();
-    }
+	}
 
     public function setPosition(pos:Kyokumen):void {
       _position = pos
@@ -403,12 +408,24 @@ package  {
 	  isPlayer = true;
 	  _player_infos = player_infos;
       _my_turn = my_turn;
-      reset();
+      resetBoard();
+	  initializeKifu();
       _position = new Kyokumen(kyokumen_str);
 	  _last_pos = new Kyokumen(kyokumen_str);
       setPosition(_position);
-      name_labels[0].text = player_infos[_my_turn].name;
-      name_labels[1].text = player_infos[1 - _my_turn].name;
+	  _arrangeInfos();
+	  timers[0].reset(time_total,time_byoyomi);
+	  timers[1].reset(time_total,time_byoyomi);
+	  timers[_my_turn == _position.turn ? 0 : 1].start();
+      _in_game = true;
+	  _client_timeout = false;
+	  studyOrigin = 0;
+    }
+	
+	private function _arrangeInfos():void {
+      name_labels[0].text = _player_infos[_my_turn].name;
+      name_labels[1].text = _player_infos[1 - _my_turn].name;
+	  if (viewing) return;
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
@@ -423,13 +440,55 @@ package  {
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
       _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
-	  timers[0].reset(time_total,time_byoyomi);
-	  timers[1].reset(time_total,time_byoyomi);
-	  timers[_my_turn == _position.turn ? 0 : 1].start();
-      _in_game = true;
-	  _client_timeout = false;
-	  studyOrigin = 0;
-    }
+	}
+	
+	public function flipBoard():void {
+		var infoBoxBorderColor:Array = new Array(2);
+		var nameLabelColor:Array = new Array(2);
+		for (var i:int = 0; i < 2; i++) {
+			infoBoxBorderColor[i] = infoBoxes[i].getStyle('borderColor');
+			nameLabelColor[i] = name_labels[i].getStyle('color');
+		}
+		while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
+		while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
+		if (_last_to_square != null) {
+			var i_last:int = _last_to_square.coord_x;
+			var j_last:int = _last_to_square.coord_y;
+		}
+		var timer_tmp:GameTimer = timers[0];
+		timers[0] = timers[1];
+		timers[1] = timer_tmp;
+		for (i = 0; i < 2; i++) {
+			timers[i].x = i == 0 ?  handBoxes[i].x + 6 : handBoxes[i].x + KOMADAI_WIDTH / 2 - 19;
+		}
+		_my_turn = 1 - _my_turn;
+		_arrangeInfos();
+		for (i = 0; i < 2; i++) {
+			infoBoxes[i].setStyle('borderColor', infoBoxBorderColor[1 - i]);
+			name_labels[i].setStyle('color', nameLabelColor[1 - i]);
+		}
+		resetBoard();
+		setPosition(_position);
+		if (_last_to_square != null) {
+			_last_to_square = _cells[j_last - 1][9 - i_last];
+			_last_to_square.setStyle('backgroundColor', '0xCC3333');
+		}
+		_from = null;
+		_selected_square == null;
+		
+		var arrow_type:int;
+		if ((post_game && isWinner) || onListen) {
+			arrow_type = ARROWS_PUBLIC;
+		} else {
+			arrow_type = ARROWS_SELF;
+		}
+		for each(var arrow:BoardArrow in _arrows[arrow_type]) {
+			arrow.erase();
+			removeChild(arrow);
+			arrow.drawArrow(_my_turn);
+			addChild(arrow);
+		}
+	}
 
     public function endGame():void{
       trace("game end");
@@ -451,12 +510,14 @@ package  {
 	}
 	
     public function closeGame():void {
+	  replayMoves(0, true);
 	  for (var i:int = 0; i <= 1; i++) {
-		  infoBoxes[i].setStyle('borderThickness', undefined);
 		  infoBoxes[i].setStyle('borderColor', undefined);
 		  _player_infos[i] = null;
 		  timers[i].stop();
 		  name_labels[i].setStyle("color", 0x000000);
+		  name_labels[i].text = "";
+		  _info_labels[i].text = "";
 		  while (_avatar_images[i].numChildren > 0) _avatar_images[i].removeChildAt(0);
 		  _player_flags[i].source = null;
 	  }
@@ -562,8 +623,9 @@ package  {
 	  
       var kyokumen_str:String = _parsePosition(game_info);
       if(kyokumen_str != ""){
-        reset();
-        _position = new Kyokumen(kyokumen_str);
+        resetBoard();
+		initializeKifu();
+		_position = new Kyokumen(kyokumen_str);
 		_last_pos = new Kyokumen(kyokumen_str);
         setPosition(_position);
       }
@@ -591,23 +653,7 @@ package  {
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
-	  
-      name_labels[0].text = _player_infos[_my_turn].name;
-      name_labels[1].text = _player_infos[1-_my_turn].name;
-      _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
-      _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
-	  var avatar:Image = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
-	  _avatar_images[0].addChild(avatar);
-	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
-	  avatar = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
-	  _avatar_images[1].addChild(avatar);
-	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
-	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
-	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
-      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
-      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+	  _arrangeInfos();
       timers[0].reset(total_time,byoyomi);
       timers[1].reset(total_time,byoyomi);
 
@@ -661,8 +707,9 @@ package  {
 	  
       if (kyokumen_str != "") {
 		trace(kyokumen_str);
-        reset();
-        _position = new Kyokumen(kyokumen_str);
+        resetBoard();
+		initializeKifu();
+		_position = new Kyokumen(kyokumen_str);
 		_last_pos = new Kyokumen(kyokumen_str);
         setPosition(_position);
       }
@@ -878,7 +925,7 @@ package  {
 			if (_in_game && _position.turn == _my_turn) _timeoutCallback();
 		}
 		
-	  public function replayMoves(n:int, actual:Boolean):void {
+	  public function replayMoves(n:int, actual:Boolean = true):void {
 		  var mv:Movement;
 		  if (_last_to_square != null){
 		  	_last_to_square.setStyle('backgroundColor',undefined);

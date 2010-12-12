@@ -41,7 +41,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/11";
+	public const VERSION:String = "ver.2010/12/12";
 	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -532,6 +532,7 @@
       stopButton.enabled = false;
       closeButton.enabled = false;
       resignButton.enabled = true;
+	  reverseButton.enabled = false;
 	  greetButton.enabled = true;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
@@ -1133,14 +1134,15 @@
 
 	private function _watchDialog():void {
 		if (_game_name) return;
-		Alert.yesLabel = Language.ac.getItemAt(_language).black;
-        Alert.noLabel = Language.ac.getItemAt(_language).white;
-		Alert.buttonWidth = 120;
-        Alert.show(Language.ac.getItemAt(_language).view_as,Language.ac.getItemAt(_language).watch,Alert.YES|Alert.NO,this,_watch);
+		Alert.show("Watch this game?", Language.ac.getItemAt(_language).watch, Alert.YES | Alert.NO, gameListGrid, _watch);
+//		Alert.yesLabel = Language.ac.getItemAt(_language).black;
+//        Alert.noLabel = Language.ac.getItemAt(_language).white;
+//		Alert.buttonWidth = 120;
+//        Alert.show(Language.ac.getItemAt(_language).view_as,Language.ac.getItemAt(_language).watch,Alert.YES|Alert.NO,this,_watch);
         //set properties back to default.
-        Alert.yesLabel = "Yes";
-        Alert.noLabel = "No";
-        Alert.buttonWidth = 60;
+//        Alert.yesLabel = "Yes";
+//        Alert.noLabel = "No";
+//        Alert.buttonWidth = 60;
 	}
 
     private function _watch(e:CloseEvent):void {
@@ -1149,7 +1151,8 @@
 		 if (e.detail == Alert.YES) {
 			board.my_turn = Kyokumen.SENTE;
 		 } else {
-			 board.my_turn = Kyokumen.GOTE;
+			 return;
+//			 board.my_turn = Kyokumen.GOTE;
 		 }
 		 _game_name = _watch_game.id;
 		 if (_watch_game.rule.match(/^HC/)) {
@@ -1176,6 +1179,7 @@
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
+		  reverseButton.enabled = true;
 		  greetButton.enabled = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
@@ -1188,6 +1192,8 @@
 		  radioKifuListen.enabled = true;
 		  board.onListen = true;
 		  sidePanel.setStyle('borderColor', undefined);
+	  } else {
+		  Alert.show("The game list has been refreshed.\nPlease select a game again.", Language.ac.getItemAt(_language).error, Alert.OK, gameListGrid);
 	  }
     }
 
@@ -1372,6 +1378,7 @@
 			  }
 		  }
 		  if (_monitoring && !board.post_game) {
+			  kifuDataGrid.scrollToIndex(0);
 			  kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
 			  board.replayMoves(board.kifu_list.length - 1, true);
 		  }
@@ -1604,6 +1611,7 @@
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
+		reverseButton.enabled = true;
 		greetButton.enabled = false;
 		if (_viewerAlone) {
 			closeButton.enabled = false;
@@ -2175,9 +2183,9 @@
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off">
-          <mx:HBox>
-			
+          <mx:HBox>			
             <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
+			<mx:Button id="reverseButton" label="Flip" click="board.flipBoard();"/>
             <mx:Button id="impasseButton" label="{Language.ac.getItemAt(_language).impasse}" click="_showImpasse();"/>
             <mx:Button id="closeButton" label="{Language.ac.getItemAt(_language).close_game}" click="_closeGame();" enabled="false"/>           
           </mx:HBox>
