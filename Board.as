@@ -947,11 +947,13 @@ package  {
 				  mv = mvtmp;
 			      _position.move(mv);
 			  }
-		      _last_to_square = _cells[mv.to.y][mv.to.x];
-		      _last_to_square.setStyle('backgroundColor', '0xCC3333');
-			  if (mv.from.x < Kyokumen.HAND) {
-				_last_from_square = _cells[mv.from.y][mv.from.x];
-				_last_from_square.setStyle('backgroundColor', '0xFF5555');
+			  if (mv) {
+				  _last_to_square = _cells[mv.to.y][mv.to.x];
+				  _last_to_square.setStyle('backgroundColor', '0xCC3333');
+				  if (mv.from.x < Kyokumen.HAND) {
+					_last_from_square = _cells[mv.from.y][mv.from.x];
+					_last_from_square.setStyle('backgroundColor', '0xFF5555');
+				  }
 			  }
 		  }
       setPosition(_position);
