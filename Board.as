@@ -128,8 +128,7 @@ package  {
     public var piece_sound_play:Boolean = true;
 	public var post_game:Boolean = false;
 	public var isPlayer:Boolean = false;
-	public var isWinner:Boolean = false;
-	public var isLoser:Boolean = false;
+	public var isStudyHost:Boolean = false;
 	public var onListen:Boolean = false;
 	public var viewing:Boolean = false;
 	public var studyOrigin:int;
@@ -477,7 +476,7 @@ package  {
 		_selected_square == null;
 		
 		var arrow_type:int;
-		if ((post_game && isWinner) || onListen) {
+		if (isStudyHost || onListen) {
 			arrow_type = ARROWS_PUBLIC;
 		} else {
 			arrow_type = ARROWS_SELF;
