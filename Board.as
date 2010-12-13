@@ -124,6 +124,7 @@ package  {
 	private var _arrow_from:Point;
 	private var _arrow_to:Point = new Point();
     public var piece_type:int = 0;
+	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
 	public var post_game:Boolean = false;
