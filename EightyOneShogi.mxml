@@ -531,7 +531,7 @@
       closeButton.enabled = false;
       resignButton.enabled = true;
 	  reverseButton.enabled = false;
-	  greetButton.enabled = true;
+	  greetButton.visible = true;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
       forwardOneButton.enabled = false;
@@ -579,13 +579,10 @@
 		board.kifu_list.push(kifuMove);
       }
 	  radioKifuReplay.enabled = true;
-	  radioKifuReplay.selected = true;
-//	  board.onListen = false;
-//	  sidePanel.setStyle('borderColor', _panelReplayColor);
+	  radioKifuListen.enabled = true;
       if (e.message.indexOf("LOSE") >= 0) {
 		board.isWinner = false;
 		board.isLoser = true;
-		radioKifuListen.enabled = true;
 		_openGameResultWindow( -1);
 		board.infoBoxes[1].setStyle('borderThickness', 2);
 		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
@@ -595,6 +592,8 @@
 		board.isWinner = true;
 		board.isLoser = false;
 		board.onListen = false;
+		radioKifuReplay.selected = true;
+		radioKifuListen.enabled = false;
 		sidePanel.setStyle('borderColor', _panelReplayColor);
 		_openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
@@ -604,7 +603,6 @@
       } else if (e.message.indexOf("DRAW") >= 0) {
 		board.isWinner = false;
 		board.isLoser = false;
-		radioKifuListen.enabled = true;
 		_openGameResultWindow(0);
         _writeUserMessage("### Draw ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_win.play();
@@ -626,7 +624,7 @@
     }
 
 	private function _openGameResultWindow(v:int):void {
-	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(this, GameResultWindow, false));
+	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(board, GameResultWindow, false));
       PopUpManager.centerPopUp(_gameResultWindow);
 	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn], board.playerInfos[1 - board.my_turn], _game_name, v);
 	}
@@ -855,9 +853,6 @@
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
-//			radioKifuReplay.selected = true;
-//			board.onListen = false;
-//			sidePanel.setStyle('borderColor', _panelReplayColor);
 			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
 			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
@@ -936,8 +931,9 @@
 	
     private function _newGameForm():void{
       _newGameWindow = NewGameForm(PopUpManager.createPopUp(this, NewGameForm, true));
-      PopUpManager.centerPopUp(_newGameWindow);
       with (_newGameWindow) {
+		_newGameWindow.x = mouseX;
+		_newGameWindow.y = mouseY + 50;
 		language = _language;
         title = "Create new game";
 		if (_so.data.rule_base) timeSetting.selectedValue = _so.data.rule_base;
@@ -1018,7 +1014,8 @@
   }
 	 private function _leavePC():void{
 		_leavePCWindow = LeavePCForm(PopUpManager.createPopUp(this, LeavePCForm, true));
-		PopUpManager.centerPopUp(_leavePCWindow);
+		_leavePCWindow.x = mouseX;
+		_leavePCWindow.y = mouseY + 50;
 		_leavePCWindow.language = _language;
 		_leavePCWindow.title = Language.ac.getItemAt(_language).set_autoreply;
 		if (_so.data.leave_hours) _leavePCWindow.hoursCombo.selectedIndex = _so.data.leave_hours;
@@ -1179,7 +1176,7 @@
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
 		  reverseButton.enabled = true;
-		  greetButton.enabled = false;
+		  greetButton.visible = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
 		  forwardOneButton.enabled = true;
@@ -1200,9 +1197,10 @@
 	  if (!user) return;
 	  if (_playerInfoWindows[user.name]) return;
 	  _playerInfoWindows[user.name] = new PlayerInfoWindow();
-	  _playerInfoWindows[user.name] = PlayerInfoWindow(PopUpManager.createPopUp(this, PlayerInfoWindow, false));
+	  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
+	  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
+	  PopUpManager.addPopUp(_playerInfoWindows[user.name], this, false);
 	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
-	  PopUpManager.centerPopUp(_playerInfoWindows[user.name]);
 	  _playerInfoWindows[user.name].language = _language;
       _playerInfoWindows[user.name].title = "Player Info";
 	  _playerInfoWindows[user.name].addEventListener("close_info", _handlePlayerInfoClose);
@@ -1619,7 +1617,7 @@
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
-		greetButton.enabled = false;
+		greetButton.visible = false;
 		if (_viewerAlone) {
 			closeButton.enabled = false;
 			checkLobbyButton.enabled = false;

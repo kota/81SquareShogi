@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" headerHeight="25">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
@@ -143,7 +143,7 @@
 		<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
 		<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
 		<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
-		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" />
-		<mx:Image source="@Embed('images/icon_greet.png')"/>
+		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" toolTip="Open PM window" />
+		<mx:Image source="@Embed('images/icon_greet.png')" click="pmCheckBox.selected = !pmCheckBox.selected; togglePM();" toolTip="Open PM window" />
 	</mx:HBox>
 </mx:TitleWindow>
