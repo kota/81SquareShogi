@@ -771,8 +771,8 @@
 		_pmLog[name] += "<font color='#FF0000'>" + message + "</font>" + "\n";
 		if (_playerInfoWindows[name]) {
 			_playerInfoWindows[name].pmText = _pmLog[name];
-			_playerInfoWindows[name].viewStack.selectedIndex = 1;
 			_playerInfoWindows[name].pmCheckBox.selected = true;
+			_playerInfoWindows[name].togglePM();
 			_playerInfoWindows[name].pmTextArea.setStyle('backgroundColor', 0xFFFFBB);
 			_playerInfoWindows[name].callLater(_playerInfoWindows[name].scrollDown);
 		} else if (mainViewStack.selectedIndex == 1 || mainViewStack.selectedIndex == 3) {
@@ -1967,8 +1967,8 @@
 				if (!_pmLog[sendTo]) _pmLog[sendTo] = "";
 				_pmLog[sendTo] += "<font color='#0033DD'>" + message + "</font>" + "\n";
 				_playerInfoWindows[sendTo].pmText = _pmLog[sendTo];
-				_playerInfoWindows[sendTo].viewStack.selectedIndex = 1;
 				_playerInfoWindows[sendTo].pmCheckBox.selected = true;
+				_playerInfoWindows[sendTo].togglePM();
 				_playerInfoWindows[sendTo].callLater(_playerInfoWindows[sendTo].scrollDown);
 				if (_chat_sound3_play) _sound_chat1.play();
 			} else if (mainViewStack.selectedIndex == 1) {
