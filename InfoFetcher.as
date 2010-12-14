@@ -22,16 +22,16 @@
 		private var _urlLoader:URLLoader = new URLLoader();
 		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
 		public var newestVer:String;
-		public var titleUser:Array = new Array();
-		public var titleName:Array = new Array();
-		public var titleRate:Array = new Array();
-		public static var rank_thresholds:Array = new Array();
-		public static var rank_names:Array = new Array();
-		public var country_codes:Array = new Array();
-		public var country_names:Array = new Array();
-		public var country_names3:Array = new Array();
-		public var cheaters:Array = new Array();
-		public var banned:Array = new Array();
+		public var titleUser:Array;
+		public var titleName:Array;
+		public var titleRate:Array;
+		public static var rank_thresholds:Array;
+		public static var rank_names:Array;
+		public var country_codes:Array;
+		public var country_names:Array;
+		public var country_names3:Array;
+		public var cheaters:Array;
+		public var banned:Array;
 		public var initMessage:String
 		public var gameMessage:String
 		private var _urlRequest:URLRequest = new URLRequest();
@@ -47,12 +47,26 @@
 		
 		public function InfoFetcher()
 		{
-	  _urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
-	  var nowDate:Date = new Date(); 
-	  _urlLoader.load(new URLRequest(SOURCE + "infoData.txt?" + nowDate.getTime().toString()));
-	  _urlRequest.url = SOURCE + "users/write.php";
-	  _urlRequest.method = URLRequestMethod.GET;
-	  _httpService.url = SOURCE + "users/userConfig.xml";
+			_urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
+			_urlRequest.url = SOURCE + "users/write.php";
+			_urlRequest.method = URLRequestMethod.GET;
+			_httpService.url = SOURCE + "users/userConfig.xml";
+			refresh();
+		}
+		
+		public function refresh():void {
+			titleUser = new Array();
+			titleName = new Array();
+			titleRate = new Array();
+			rank_thresholds = new Array();
+			rank_names = new Array();
+			country_codes = new Array();
+			country_names = new Array();
+			country_names3 = new Array();
+			cheaters = new Array();
+			banned = new Array();
+			var nowDate:Date = new Date(); 
+			_urlLoader.load(new URLRequest(SOURCE + "infoData.txt?" + nowDate.getTime().toString()));
 		}
 		
 		private function _parseInfo(e:Event):void {
