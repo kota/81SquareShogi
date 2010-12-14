@@ -32,14 +32,18 @@ package  {
     public function BulletinGadget() {
       super();
 	  _urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
-	  var nowDate:Date = new Date(); 
-	  _urlLoader.load(new URLRequest(SOURCE + "tournaments/official/bulletin.txt?" + nowDate.getTime().toString()));
 	  _hideEffect.duration = 800;
 	  _showEffect.duration = 800;
 	  _flipTimer.addEventListener(TimerEvent.TIMER, _handleFlip);
+	  refresh();
       }
+	  
+	  public function refresh():void {
+		  removeAllChildren();
+		  var nowDate:Date = new Date(); 
+		  _urlLoader.load(new URLRequest(SOURCE + "tournaments/official/bulletin.txt?" + nowDate.getTime().toString()));
+	  }
     
-
     private function _parseInfo(e:Event):void {
 		var tokens:Array;
 		var lines:Array = _urlLoader.data.split("\n");
