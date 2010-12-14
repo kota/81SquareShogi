@@ -146,6 +146,27 @@
 		  if (_so.data.language) languageCombo.selectedIndex = _so.data.language;
 	  }
 	  _language = languageCombo.selectedIndex;
+      _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
+      _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
+      _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
+	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
+      _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
+      _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
+      _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
+	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
+	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
+      _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
+      _client.addEventListener(CsaShogiClient.WHO,_handleWho);
+      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
+      _client.addEventListener(CsaShogiClient.LIST, _handleList);
+      _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
+      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
+      _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
+	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
+	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
+	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
+	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
+	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
       chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat1);
@@ -205,6 +226,7 @@
 	  }
 	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + _infoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
+	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -218,6 +240,7 @@
 		loginMessage.text = "logged out successfully";
 		titleBanner.source = DIRECTORY + "images/81Dojo_bye.jpg";
 		mainViewStack.selectedIndex = 0;
+//		loginButton.enabled = true;
 	}
 
 	//----------------------------------------------------------------------------------------------------------------------------- INFO
@@ -332,7 +355,7 @@
 	  }
       user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  for (i = 0; i < user_list.length; i++) {
-		  if (user_list[i].wins + user_list[i].losses < 10 && user_list[i].titleName == "") user_list[i].rating = "*" + String(user_list[i].rating);
+		  if (user_list[i].wins + user_list[i].losses < 10 && user_list[i].rating < InfoFetcher.rank_thresholds[1]) user_list[i].rating = "*" + String(user_list[i].rating);
 	  }
 	  _user_list = user_list;
       userListGrid.dataProvider = _user_list;
@@ -700,6 +723,7 @@
 	}
 	
     private function _handleGameChat(e:ServerMessageEvent):void {
+		if (!_game_name) return;
 		var match:Array;
 		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			if (!board.studyOn) board.studyOn = true;
@@ -755,6 +779,18 @@
 				}
 			}
 			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
+		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##LEAVE\]$/))) {
+			_writeUserMessage(match[1] + " has left.\n", 2, "#008800");
+		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
+			if (match[1] == login_name) {
+				board.isStudyHost = true;
+				_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
+				board.onListen = false;
+				radioKifuReplay.selected = true;
+				radioKifuListen.enabled = false;
+				sidePanel.setStyle('borderColor', _panelReplayColor);
+				_sendStudy();
+			}
 		} else {
 			if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#000000");
@@ -882,27 +918,6 @@
 	//=========================================================
     private function _connectAndLogin():void{
       trace("connecting.");
-      _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
-      _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
-      _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
-	  _client.addEventListener(CsaShogiClient.LOGOUT_COMPLETED, _handleLogout);
-      _client.addEventListener(CsaShogiClient.GAME_STARTED,_handleGameStarted);
-      _client.addEventListener(CsaShogiClient.GAME_END,_handleGameEnd);
-      _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
-	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
-	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
-      _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
-      _client.addEventListener(CsaShogiClient.WHO,_handleWho);
-      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
-      _client.addEventListener(CsaShogiClient.LIST, _handleList);
-      _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
-      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
-      _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
-	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
-	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
-	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
-	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
-	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
       _client.connect();
@@ -1329,8 +1344,9 @@
 			  _monitoring = false;
 		  } else if (board.viewing) {
 		  } else {
+			  _client.gameChat(_game_name, "[##LEAVE]");
+			  if (board.isStudyHost) _client.gameChat(_game_name, "[##GIVEHOST]" + board.playerInfos[board.playerInfos[0].name == login_name ? 1 : 0].name);
 			  _client.closeGame();
-			  _sendAutoChat("I have left this room.");
 		  }
           _game_name = null;
 	  }
@@ -1367,6 +1383,7 @@
 			} else {
 				board.clearArrows(Board.ARROWS_PUBLIC);
 			}
+			if (board.isStudyHost) board.clearArrows(Board.ARROWS_SELF);
 		} else {
 			board.clearArrows(Board.ARROWS_SELF);
 		}
@@ -1972,11 +1989,11 @@
 				}
 			}
 			_client.privateChat(sendTo, message);
+			if (!_pmLog[sendTo]) _pmLog[sendTo] = "";
+			_pmLog[sendTo] += "<font color='#0033DD'>" + message + "</font>" + "\n";
 			if (_playerInfoWindows[sendTo]) {
 				var match:Array;
 				if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
-				if (!_pmLog[sendTo]) _pmLog[sendTo] = "";
-				_pmLog[sendTo] += "<font color='#0033DD'>" + message + "</font>" + "\n";
 				_playerInfoWindows[sendTo].pmText = _pmLog[sendTo];
 				_playerInfoWindows[sendTo].pmCheckBox.selected = true;
 				_playerInfoWindows[sendTo].togglePM();
