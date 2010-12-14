@@ -209,7 +209,7 @@ package{
 		  _socket.removeEventListener(ProgressEvent.SOCKET_DATA,_handleSocketData);
 		  _socket.removeEventListener(IOErrorEvent.IO_ERROR,_handleIOError);
 		  _socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, _handleSecurityError);
-		  Alert.show("You lost connection!");
+		  if (_current_state != STATE_NOT_CONNECTED) Alert.show("You lost connection!");
 		}
 
 		private function _handleSocketData(e:ProgressEvent):void{
@@ -287,6 +287,7 @@ package{
 			            _dispatchServerMessageEvent(MONITOR);
                 }
               } else if (line.match(/^LOGOUT:completed/)) {
+				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
 			  }
               break;
@@ -300,6 +301,7 @@ package{
 			            _dispatchServerMessageEvent(MONITOR);
                 }
               } else if (line.match(/^LOGOUT:completed/)) {
+				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
 			  }
               break;
