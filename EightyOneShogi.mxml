@@ -121,6 +121,7 @@
 	private var _gameResultWindow:GameResultWindow;
 	private var _leavePCWindow:LeavePCForm;
 	private var _kifuShareWindow:KifuShareWindow;
+	private var _impasseStatusWindow:ImpasseStatusWindow;
 
     private function initApp():void
     {
@@ -1334,8 +1335,17 @@
 	}
 	
     private function _showImpasse():void {
-      Alert.show(Language.ac.getItemAt(_language).black + ": " + board.position.calcImpasse(Kyokumen.SENTE) + " points\n" + Language.ac.getItemAt(_language).white + ": " + board.position.calcImpasse(Kyokumen.GOTE) + " points", "Points for Impasse", Alert.OK);
+		board.position.calcImpasse();
+		_impasseStatusWindow =  ImpasseStatusWindow(PopUpManager.createPopUp(board, ImpasseStatusWindow, true));
+		PopUpManager.centerPopUp(_impasseStatusWindow);
+		_impasseStatusWindow.title = "Impasse Status";
+		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
+		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isPlayer() && board.position.turn == board.my_turn) ? board.my_turn : -1);
     }
+	
+	private function _handleKachiDeclare(e:MouseEvent):void {
+		_client.kachi();
+	}
 	
     private function _closeGame():void {
 	  if (_game_name) {
@@ -2224,10 +2234,10 @@
       <mx:VBox>
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox>
-        <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="435" height="200" headerHeight="22">
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="415" height="166" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
+        <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="435" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="419" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
-        <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="340" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off">
+        <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox>			
             <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
 			<mx:Button id="reverseButton" label="Flip" click="board.flipBoard();"/>
@@ -2256,7 +2266,7 @@
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="180" height="680" headerHeight="22" horizontalScrollPolicy="off">
+        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="680" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2">
 			<mx:Label id="watcherListTitle" text="{Language.ac.getItemAt(_language).watchers}" fontWeight="bold" paddingRight="0" />
 			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>

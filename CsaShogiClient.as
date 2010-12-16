@@ -156,6 +156,10 @@ package{
     public function resign():void{
       send("%TORYO");
     }
+	
+	public function kachi():void {
+		send("%KACHI");
+	}
 
     public function who():void{
       send("%%WHO");

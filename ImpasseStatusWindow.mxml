@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" fontSize="13">
+	    <mx:Script>
+        <![CDATA[
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+          import mx.collections.ArrayCollection;
+		  [Bindable]
+		  private var _black:Object;
+		  [Bindable]
+		  private var _white:Object;
+		  
+		  public function setStatus(status:Array, turn:int):void {
+			  var hasRight:Array = new Array(true, true); 
+			  var whiteHasRight:Boolean = true;
+			  _black = status[Kyokumen.SENTE];
+			  _white = status[Kyokumen.GOTE];
+			  if (_black.entered) blackEntered.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
+			  if (_black.pieces >= 10) blackPieces.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
+			  if (_black.points >= 28) blackPoints.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
+			  if (_white.entered) whiteEntered.setStyle('color', 0xFF0000); else hasRight[Kyokumen.GOTE] = false;
+			  if (_white.pieces >= 10) whitePieces.setStyle('color', 0xFF0000); else hasRight[Kyokumen.GOTE] = false;
+			  if (_white.points >= 27) whitePoints.setStyle('color', 0xFF0000); else hasRight[Kyokumen.GOTE] = false;
+			  if (turn >= 0) {
+//				  if (hasRight[turn]) kachiButton.enabled = true;
+			  }
+		  }
+
+        ]]>
+    </mx:Script>
+
+	<mx:HBox horizontalAlign="center" width="100%">
+		<mx:VBox horizontalAlign="center">
+			<mx:Label text=""/>
+			<mx:Label text="Entered"/>
+			<mx:Label text="Pieces"/>
+			<mx:Label text="Points"/>
+		</mx:VBox>
+		<mx:VBox horizontalAlign="center">
+			<mx:Label text="Black" fontWeight="bold" />
+			<mx:Label id="blackEntered" text="{_black.entered ? 'YES' : 'NO'}"/>
+			<mx:Label id="blackPieces" text="{_black.pieces}" textAlign="right" />
+			<mx:Label id="blackPoints" text="{_black.points}" textAlign="right" />
+		</mx:VBox>
+		<mx:VBox horizontalAlign="center">
+			<mx:Label text="White" fontWeight="bold" />
+			<mx:Label id="whiteEntered" text="{_white.entered ? 'YES' : 'NO'}"/>
+			<mx:Label id="whitePieces" text="{_white.pieces}" textAlign="right" />
+			<mx:Label id="whitePoints" text="{_white.points}" textAlign="right" />
+		</mx:VBox>
+	</mx:HBox>
+	<mx:HBox width="100%" horizontalAlign="center">
+		<mx:Button id="kachiButton" label="Declare Win" click="PopUpManager.removePopUp(this);" enabled="false" />
+		<mx:Button label="Close" click="PopUpManager.removePopUp(this);"/>
+	</mx:HBox>
+</mx:TitleWindow>
