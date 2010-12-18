@@ -25,6 +25,7 @@ package  {
     private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
     private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
     private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
+	private static const ALL_POINTS:int = 2 * (koma_impasse_points[0] + 27);
 	
 	public var initialPositionStr:String;
 
@@ -410,6 +411,7 @@ package  {
 		
 		public function calcImpasse():void {
 			var turn:int;
+			var total_points:int = 0;
 			for (turn = 0; turn < 2; turn++) {
 				_impasseStatus[turn].entered = false;
 				_impasseStatus[turn].pieces = 0;
@@ -417,22 +419,27 @@ package  {
 				for (var i:int = 0; i < 8; i++) {
 					_impasseStatus[turn].points += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
 				}
+				total_points += _impasseStatus[turn].points;
 			}
 			for (var y:int = 0; y < 9; y++) {
-				if (y <= 2) {
-					turn = SENTE;
-				} else if (y >= 6) {
-					turn = GOTE;
-				} else {
-					continue;
-				}
 				for (var x:int = 0; x < 9; x++) {
-					if (_ban[x][y] && _ban[x][y].ownerPlayer == turn) {
-						_impasseStatus[turn].pieces += 1;
-						_impasseStatus[turn].points += koma_impasse_points[_ban[x][y].type];
+					if (_ban[x][y]) {
+						total_points += koma_impasse_points[_ban[x][y].type];
+						if (y <= 2) {
+							turn = SENTE;
+						} else if (y >= 6) {
+							turn = GOTE;
+						} else {
+							continue;
+						}
+						if (_ban[x][y].ownerPlayer == turn) {
+							_impasseStatus[turn].pieces += 1;
+							_impasseStatus[turn].points += koma_impasse_points[_ban[x][y].type];
+						}
 					}
 				}
 			}
+			_impasseStatus[GOTE].points += ALL_POINTS - total_points;
 			for (turn = 0; turn < 2; turn++) {
 				if (_impasseStatus[turn].points >= koma_impasse_points[0]) {
 					_impasseStatus[turn].points -= koma_impasse_points[0];
