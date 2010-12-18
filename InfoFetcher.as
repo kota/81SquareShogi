@@ -400,6 +400,7 @@
 			userSettings.chatSound1 = true;
 			userSettings.chatSound2 = true;
 			userSettings.chatSound3 = true;
+			userSettings.pmAutoOpen = false;
 			userSettings.endSound = true;
 			userSettings.pieceType = 0;
 			userSettings.byoyomi = 1;

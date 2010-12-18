@@ -6,9 +6,10 @@
           import mx.managers.PopUpManager;
 		  [Bindable]
 		  public var language:int = 0;
-		  
 		  [Bindable]
-		  public var user:Object;
+		  public var challenger_name:String;
+		  [Bindable]
+		  public var user:Object = new Object();
 		  [Bindable]
 		  public var remainTime:int;
 
@@ -19,7 +20,7 @@
         ]]>
     </mx:Script>
 	<mx:VBox horizontalAlign="left" paddingLeft="10">
-		<mx:Label text="{user.name}" fontSize="16" fontWeight="bold" />
+		<mx:Label text="{challenger_name}" fontSize="16" fontWeight="bold" />
 		<mx:Label text="  {Language.ac.getItemAt(language).rate}: {user.rating}, ({user.rank})"/>
 		<mx:Label text="  {Language.ac.getItemAt(language).country}: {user.country}"/>
 	</mx:VBox>

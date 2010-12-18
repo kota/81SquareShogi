@@ -20,7 +20,7 @@
 			
         ]]>
     </mx:Script>
-	<mx:TabNavigator id="optionTab" width="370" height="260" horizontalScrollPolicy="off" creationPolicy="all">
+	<mx:TabNavigator id="optionTab" width="370" height="270" horizontalScrollPolicy="off" creationPolicy="all">
 		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
 			<mx:HBox>
@@ -73,7 +73,11 @@
 				<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="2"/>
 			</mx:HBox>
 		</mx:VBox>
-		<mx:VBox label="Analysis" paddingTop="10">
+		<mx:VBox label="Communication">
+			<mx:HBox>
+				<mx:Label text="PM Reception" fontWeight="bold" paddingLeft="10" />
+				<mx:CheckBox id="pmAutoOpenCheckBox" label="Auto-open Window"/>
+			</mx:HBox>
 			<mx:Label text="Arrow Drawing" fontWeight="bold" paddingLeft="10" />
 			<mx:CheckBox label="Accept arrows from others" id="acceptArrowsCheckBox" paddingLeft="30" />
 			<mx:HBox paddingLeft="30" verticalAlign="center">
@@ -81,6 +85,11 @@
 				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" change="drawArrow();" />
 				<mx:Label text="" paddingRight="0" />
 				<mx:Canvas id="arrowCanvas" backgroundColor="#FFDD55" width="160" height="30"/>
+			</mx:HBox>
+			<mx:Label text="Ignore List" fontWeight="bold" paddingLeft="10" />
+			<mx:HBox paddingLeft="30" verticalAlign="center">
+				<mx:List id="ignoreList" rowCount="4" />
+				<mx:Button id="ignoreDeleteButton" label="Remove"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:TabNavigator>

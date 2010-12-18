@@ -526,6 +526,7 @@ package  {
 	  post_game = false;
 	  since_last_move = 0;
 	  studyOn = false;
+	  isStudyHost = false;
 	  clearArrows(ARROWS_PUBLIC);
 	  clearArrows(ARROWS_SELF);
     }

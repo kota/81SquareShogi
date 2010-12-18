@@ -24,6 +24,7 @@
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
 	import mx.containers.Canvas;
+	import mx.containers.utilityClasses.Flex;
     import mx.events.FlexEvent;
     import mx.events.CloseEvent;
     import flash.media.Sound;
@@ -98,6 +99,8 @@
     private var _chat_sound1_play:Boolean = true;
     private var _chat_sound2_play:Boolean = true;
 	private var _chat_sound3_play:Boolean = true;
+	private var _prev_piece_type:int;
+	private var _pmAutoOpen:Boolean = false;
 	private var _accept_arrows:Boolean = true;
 	private var _arrow_color:uint = 0x00CC00;
 	private var _chat_auto_scroll1:Boolean = true;
@@ -371,6 +374,7 @@
 	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
+	  if (_challengerAlertWindow) _challengerAlertWindow.user = _findPlayerFromList(_challengerAlertWindow.challenger_name);
     }
 
     private function _handleList(e:ServerMessageEvent):void{                                 //<<<<<< Handle LIST response
@@ -529,7 +533,7 @@
 		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 	  }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
-      _game_name = e.message.substr(6);
+      _game_name = e.message.split(":")[1];
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
 	  } else if (_game_name.split("+")[1].match(/^nr_/)) {
@@ -574,6 +578,9 @@
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
+	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
     }
 
     private function _handleGameEnd(e:ServerMessageEvent):void {
@@ -697,8 +704,9 @@
       with (_challengerAlertWindow) {
 		language = _language;
         title = "Here comes a new challenger!!";
-		remainTime = 20;
+		challenger_name = challengerName;
 		user = _findPlayerFromList(challengerName);
+		remainTime = 20;
         acceptButton.addEventListener("click", _handleChallengerAcceptButton);
 		rejectButton.addEventListener("click", _handleChallengerRejectButton);
       }
@@ -811,6 +819,7 @@
 		match = e.message.substr(15).match(/^\[(.+?)\]\s(.+)$/);
 		var name:String = match[1];
 		var message:String = match[2];
+		if (_pmAutoOpen) _openPlayerInfo(_findPlayerFromList(name));
 		if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
 		if (!_pmLog[name]) _pmLog[name] = "";
 		_pmLog[name] += "<font color='#FF0000'>" + message + "</font>" + "\n";
@@ -900,8 +909,10 @@
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
-			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
-			board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
+			if (winnerTurn != -1) {
+				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
+				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
+			}
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 			board.endGame();
@@ -982,7 +993,8 @@
       stopButton.enabled = false;
     }
 
-	private function _showOptions():void{
+	private function _showOptions():void {
+	  _prev_piece_type = board.piece_type;
       _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, true));
       PopUpManager.centerPopUp(_optionWindow);
       with (_optionWindow) {
@@ -995,6 +1007,7 @@
         chatSound1CheckBox.selected = _chat_sound1_play;
         chatSound2CheckBox.selected = _chat_sound2_play;
 		chatSound3CheckBox.selected = _chat_sound3_play;
+		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
         OkButton.addEventListener("click", _handleOption);
@@ -1238,16 +1251,29 @@
 		  _playerInfoWindows[user.name].invite.enabled = false;
 		  _playerInfoWindows[user.name].directMessage.enabled = false;
 	  } else {
-		  _playerInfoWindows[user.name].directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat);
+		  _playerInfoWindows[user.name].directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat(user.name));
 		  _playerInfoWindows[user.name].directMessage.setFocus();
 	  }
-	  if (user.status == "game_waiting" && user.name != login_name && user.game_name.indexOf(user.name) >= 0) {
-		  _playerInfoWindows[user.name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge);
-		  _playerInfoWindows[user.name].challenge.enabled = true;
-	  }
-	  if (user.status != "game" && user.name != login_name) {
-		  _playerInfoWindows[user.name].invite.addEventListener(MouseEvent.CLICK, _handleInvite);
-		  _playerInfoWindows[user.name].invite.enabled = true;
+	  if (user.name == login_name) {
+		  _playerInfoWindows[user.name].selfCommands.includeInLayout = true;
+		  _playerInfoWindows[user.name].selfCommands.visible = true;
+		  if (user.wins + user.losses < 10) {
+			  _playerInfoWindows[user.name].setRateButton.addEventListener(MouseEvent.CLICK, _setRate(user.name));
+			  _playerInfoWindows[user.name].setRateButton.enabled = true;
+			  _playerInfoWindows[user.name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(8, 16);
+			  _playerInfoWindows[user.name].setRateCombo.enabled = true;
+		  }
+	  } else {
+		  _playerInfoWindows[user.name].othersCommands.includeInLayout = true;
+		  _playerInfoWindows[user.name].othersCommands.visible = true;
+		  if (user.status == "game_waiting"  && user.game_name.indexOf(user.name) >= 0) {
+			  _playerInfoWindows[user.name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge(user.name));
+			  _playerInfoWindows[user.name].challenge.enabled = true;
+		  }
+		  if (user.status != "game") {
+			  _playerInfoWindows[user.name].invite.addEventListener(MouseEvent.CLICK, _handleInvite(user.name));
+			  _playerInfoWindows[user.name].invite.enabled = true;
+		  }
 	  }
 	  _playerInfoWindows[user.name].callLater(_playerInfoWindows[user.name].scrollDown);
 	}
@@ -1266,24 +1292,26 @@
       e.target.text = "";
     }
 	
-	private function _handleChallenge(e:MouseEvent):void {
-      _challengeUser = _findPlayerFromList(e.target.parent.parent.nameLabel.text);
-	  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
-		  Alert.show("The opponent is not waiting for a game.", Language.ac.getItemAt(_language).error);
-	  } else {
-        var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-        var total:int = parseInt(match[3]) / 60 ;
-        var rule:String = total + "min - " + match[4] + "sec";
-		var hc:String = InfoFetcher.gameType(match[1]);
-        Alert.yesLabel = Language.ac.getItemAt(_language).challenge;
-		Alert.cancelLabel = Language.ac.getItemAt(_language).cancel;
-        Alert.buttonWidth = 140;
-        Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL,this,_handleChallengeAlert);
-        //set properties back to default.
-        Alert.yesLabel = "Yes";
-		Alert.cancelLabel = "Cancel";
-        Alert.buttonWidth = 60;
-      }    
+	private function _handleChallenge(name:String):Function {
+		return function(e:MouseEvent):void {
+		  _challengeUser = _findPlayerFromList(name);
+		  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
+			  Alert.show("The opponent is not waiting for a game.", Language.ac.getItemAt(_language).error);
+		  } else {
+			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+			var total:int = parseInt(match[3]) / 60 ;
+			var rule:String = total + "min - " + match[4] + "sec";
+			var hc:String = InfoFetcher.gameType(match[1]);
+			Alert.yesLabel = Language.ac.getItemAt(_language).challenge;
+			Alert.cancelLabel = Language.ac.getItemAt(_language).cancel;
+			Alert.buttonWidth = 140;
+			Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL, null,_handleChallengeAlert);
+			//set properties back to default.
+			Alert.yesLabel = "Yes";
+			Alert.cancelLabel = "Cancel";
+			Alert.buttonWidth = 60;
+		  }    
+		}
 	}
 
     private function _handleChallengeAlert(e:CloseEvent):void{
@@ -1295,14 +1323,22 @@
       }
     }
 	
-	private function _handleInvite(e:MouseEvent):void {
-		if (!_waiting) {
-			Alert.show("Create a game first.", Language.ac.getItemAt(_language).error);
-		} else {
-			var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-			var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
-			var hc:String = InfoFetcher.gameType(match[1]);
-			_sendPrivateChat(e.target.parent.parent.nameLabel.text, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
+	private function _handleInvite(name:String):Function {
+		return function(e:MouseEvent):void{
+			if (!_waiting) {
+				Alert.show("Create a game first.", Language.ac.getItemAt(_language).error);
+			} else {
+				var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+				var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
+				var hc:String = InfoFetcher.gameType(match[1]);
+				_sendPrivateChat(name, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
+			}
+		}
+	}
+	
+	private function _setRate(name:String):Function {
+		return function(e:MouseEvent):void {
+			_client.setRate(InfoFetcher.rank_thresholds[_playerInfoWindows[name].setRateCombo.selectedIndex + 8]);
 		}
 	}
 	
@@ -1840,9 +1876,19 @@
       _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
 	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
+	  _pmAutoOpen = _optionWindow.pmAutoOpenCheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
+	  if (_isPlayer()) {
+		  if (board.piece_type >= 4 && board.piece_type != _prev_piece_type) {
+			  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+			  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+			  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+		  } else if (board.piece_type <= 3 && _prev_piece_type >= 4) {
+			  _sendAutoChat("Pieces set to Normal.");
+		  }
+	  }
     }
 	
 	private function _handleSaveSettings(e:Event):void {
@@ -1854,6 +1900,7 @@
 		urlVariables.chatSound1 = _chat_sound1_play;
 		urlVariables.chatSound2 = _chat_sound2_play;
 		urlVariables.chatSound3 = _chat_sound3_play;
+		urlVariables.pmAutoOpen = _pmAutoOpen;
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
 		urlVariables.byoyomi = GameTimer.soundType;
@@ -1867,6 +1914,7 @@
 		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
 		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
 		_chat_sound3_play = _infoFetcher.userSettings.chatSound3;
+		_pmAutoOpen = _infoFetcher.userSettings.pmAutoOpen;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
@@ -1874,9 +1922,11 @@
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------------------------- PLAYER INFO WINDOW
-	private function _handleSendPrivateChat(e:FlexEvent):void {
-		_sendPrivateChat(e.target.parent.parent.nameLabel.text, e.target.text);
-		e.target.text = "";
+	private function _handleSendPrivateChat(name:String):Function {
+		return function(e:FlexEvent):void {
+			_sendPrivateChat(name, e.target.text);
+			e.target.text = "";
+		}
 	}
 	
 	//=========================================================
