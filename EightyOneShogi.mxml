@@ -42,7 +42,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/15";
+	public const VERSION:String = "ver.2010/12/17";
 	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -103,6 +103,7 @@
 	private var _pmAutoOpen:Boolean = false;
 	private var _accept_arrows:Boolean = true;
 	private var _arrow_color:uint = 0x00CC00;
+	private var _ignore_list:Array = new Array();
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
 	private var _userMessageScrollPos1:int;
@@ -1010,7 +1011,9 @@
 		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
+		ignoreList.dataProvider = _ignore_list;
         OkButton.addEventListener("click", _handleOption);
+		removeIgnoreButton.addEventListener("click", _handleRemoveIgnore);
 		if (login_name == "guest") saveSettingsButton.enabled = false;
 		saveSettingsButton.addEventListener("click", _handleSaveSettings);
 		if (_so.data.optionTab) optionTab.selectedIndex = _so.data.optionTab;
@@ -1018,7 +1021,12 @@
 	  _optionWindow.drawArrow();
     }
 
-     private function _waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void{
+     private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r"):void {
+	  var nowDate:Date = new Date();
+	  if (nowDate.valueOf() > _infoFetcher.serverMaintenanceTime) {
+		  Alert.show("Server Maintenance Time.\nCannot open game.");
+		  return;
+	  }
       _client.waitForGame(total,byoyomi,handicap);
       _refresh();
       stopButton.enabled = true;
@@ -1274,6 +1282,10 @@
 			  _playerInfoWindows[user.name].invite.addEventListener(MouseEvent.CLICK, _handleInvite(user.name));
 			  _playerInfoWindows[user.name].invite.enabled = true;
 		  }
+		  if (user.titleName != "admin") {
+			  _playerInfoWindows[user.name].ignore.addEventListener(MouseEvent.CLICK, _handleIgnore(user.name));
+			  _playerInfoWindows[user.name].ignore.enabled = true;
+		  }
 	  }
 	  _playerInfoWindows[user.name].callLater(_playerInfoWindows[user.name].scrollDown);
 	}
@@ -1294,6 +1306,11 @@
 	
 	private function _handleChallenge(name:String):Function {
 		return function(e:MouseEvent):void {
+		  var nowDate:Date = new Date();
+		  if (nowDate.valueOf() > _infoFetcher.serverMaintenanceTime) {
+			  Alert.show("Server Maintenance Time.\nCannot open game.");
+			  return;
+		  }
 		  _challengeUser = _findPlayerFromList(name);
 		  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
 			  Alert.show("The opponent is not waiting for a game.", Language.ac.getItemAt(_language).error);
@@ -1333,6 +1350,15 @@
 				var hc:String = InfoFetcher.gameType(match[1]);
 				_sendPrivateChat(name, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
 			}
+		}
+	}
+	
+	private function _handleIgnore(name:String):Function {
+		return function(e:MouseEvent):void {
+			for each (var str:String in _ignore_list) {
+				if (str == name.toLowerCase()) return;
+			}
+			_ignore_list.push(name.toLowerCase());
 		}
 	}
 	
@@ -1903,9 +1929,18 @@
 		urlVariables.pmAutoOpen = _pmAutoOpen;
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
+		urlVariables.ignoreList = _ignore_list.join("/");
 		urlVariables.byoyomi = GameTimer.soundType;
 		urlVariables.pieceType = board.piece_type;
 		_infoFetcher.writeSettings(urlVariables);
+	}
+	
+	private function _handleRemoveIgnore(e:Event):void {
+		if (!_optionWindow) return;
+		if (_optionWindow.ignoreList.selectedIndex >= 0) {
+			_ignore_list.splice(_optionWindow.ignoreList.selectedIndex, 1);
+			_optionWindow.ignoreList.dataProvider = _ignore_list;
+		}
 	}
 	
 	private function _handleLoadOption(e:Event):void {
@@ -1917,6 +1952,7 @@
 		_pmAutoOpen = _infoFetcher.userSettings.pmAutoOpen;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
+		if (_infoFetcher.userSettings.ignoreList != "") _ignore_list = _infoFetcher.userSettings.ignoreList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
 		board.setPieceType(_infoFetcher.userSettings.pieceType);
 	}

@@ -88,8 +88,8 @@
 			</mx:HBox>
 			<mx:Label text="Ignore List" fontWeight="bold" paddingLeft="10" />
 			<mx:HBox paddingLeft="30" verticalAlign="center">
-				<mx:List id="ignoreList" rowCount="4" />
-				<mx:Button id="ignoreDeleteButton" label="Remove"/>
+				<mx:List id="ignoreList" rowCount="4" width="80" />
+				<mx:Button id="removeIgnoreButton" label="Remove"/>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:TabNavigator>

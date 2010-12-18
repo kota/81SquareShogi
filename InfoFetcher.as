@@ -34,6 +34,7 @@
 		public var banned:Array;
 		public var initMessage:String
 		public var gameMessage:String
+		public var serverMaintenanceTime:Number;
 		private var _urlRequest:URLRequest = new URLRequest();
 		private var _httpService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
@@ -71,7 +72,7 @@
 		
 		private function _parseInfo(e:Event):void {
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###BANNED\n(.+)\n###/s);
+			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###BANNED\n(.+)\n###MAINTENANCE\n(.+)\n###/s);
 			newestVer = match[1];
 			initMessage = match[2];
 			gameMessage = match[3];
@@ -100,6 +101,7 @@
 			for each(line in lines) {
 				banned.push(line);
 			}
+			serverMaintenanceTime = Date.parse(match[9]);
 		}
 		
 	    public static function makeRankFromRating(i:int):String {
@@ -406,12 +408,14 @@
 			userSettings.byoyomi = 1;
 			userSettings.acceptArrow = true;
 			userSettings.arrowColor = 0x00CC00;
+			userSettings.ignoreList = "";
 			for (var i:int = 0; i < userData.length; i++) {
 				if (userData[i].name == _login_name) {
 					userSettings = userData[i];
 					if (userData[i].acceptArrow == null) userSettings.acceptArrow = true;
 					if (userData[i].arrowColor == null) userSettings.arrowColor = 0x00CC00;
 					if (userData[i].chatSound3 == null) userSettings.chatSound3 = true;
+					if (userData[i].ignoreList == null) userSettings.ignoreList = "";
 					break;
 				}
 			}
