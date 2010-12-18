@@ -140,9 +140,15 @@
 		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" />
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
-		<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
-		<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
-		<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
+		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
+			<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
+			<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
+			<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
+		</mx:HBox>
+		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
+			<mx:ComboBox id="setRateCombo" enabled="false" width="70" fontSize="10" />
+			<mx:Button id="setRateButton" label="Set Rate" enabled="false" />
+		</mx:HBox>
 		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" toolTip="Open PM window" />
 		<mx:Image source="@Embed('images/icon_greet.png')" click="pmCheckBox.selected = !pmCheckBox.selected; togglePM();" toolTip="Open PM window" />
 	</mx:HBox>

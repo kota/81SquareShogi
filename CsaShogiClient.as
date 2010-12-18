@@ -192,6 +192,10 @@ package{
     public function list():void{
       send("%%LIST");
     }
+	
+	public function setRate(n:int):void {
+//		send("%%SETRATE " + n);
+	}
 
     public function keepAlive():void{
       send("\n");
