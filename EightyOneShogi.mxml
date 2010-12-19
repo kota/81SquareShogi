@@ -232,6 +232,9 @@
 	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + _infoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
+	  if (_infoFetcher.serverMaintenanceTime != null) {
+		  _writeUserMessage("Server Update from [" + _infoFetcher.serverMaintenanceTime.toUTCString() + "]", 1, "#FF0000", true);
+	  }
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -1023,7 +1026,7 @@
 
      private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r"):void {
 	  var nowDate:Date = new Date();
-	  if (nowDate.valueOf() > _infoFetcher.serverMaintenanceTime) {
+	  if (nowDate > _infoFetcher.serverMaintenanceTime) {
 		  Alert.show("Server Maintenance Time.\nCannot open game.");
 		  return;
 	  }
@@ -1307,7 +1310,7 @@
 	private function _handleChallenge(name:String):Function {
 		return function(e:MouseEvent):void {
 		  var nowDate:Date = new Date();
-		  if (nowDate.valueOf() > _infoFetcher.serverMaintenanceTime) {
+		  if (nowDate > _infoFetcher.serverMaintenanceTime) {
 			  Alert.show("Server Maintenance Time.\nCannot open game.");
 			  return;
 		  }

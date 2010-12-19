@@ -12,6 +12,7 @@
 	import mx.rpc.events.ResultEvent;
 	import mx.rpc.http.HTTPService;
 	import flash.events.EventDispatcher;
+	import mx.controls.Alert;
 	
 	/**
 	 * ...
@@ -34,7 +35,7 @@
 		public var banned:Array;
 		public var initMessage:String
 		public var gameMessage:String
-		public var serverMaintenanceTime:Number;
+		public var serverMaintenanceTime:Date;
 		private var _urlRequest:URLRequest = new URLRequest();
 		private var _httpService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
@@ -101,7 +102,11 @@
 			for each(line in lines) {
 				banned.push(line);
 			}
-			serverMaintenanceTime = Date.parse(match[9]);
+			if (match[9] != "*") {
+				serverMaintenanceTime = new Date();
+				serverMaintenanceTime.setTime(Date.parse(match[9]));
+			}
+			Alert.show("load comp.");
 		}
 		
 	    public static function makeRankFromRating(i:int):String {
