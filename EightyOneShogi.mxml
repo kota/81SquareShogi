@@ -797,7 +797,7 @@
 				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 			}
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
-			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, match[1]);
+			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
 			for each (var str:String in _ignore_list) {
 				if (sender.toLowerCase() == str) return;
@@ -805,6 +805,7 @@
 			if (!_accept_arrows && sender != login_name) return;
 			if (board.isPlayer && !board.post_game) return;
 			if (board.post_game && !board.studyOn) return;
+			if (sender == login_name) sender = "";
 			if (board.isStudyHost || board.onListen) {
 				board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC, true);
 			} else {
@@ -1436,7 +1437,7 @@
 				}
 			}
 			_ignore_list.push(name.toLowerCase());
-			Alert.show("Added to ignore list temporarily.\nSave settings in Option Window to set it permanent.");
+			Alert.show("Added to ignore list temporarily.\nGo to Option Window to set it permanent or cancel.");
 		}
 	}
 	
@@ -1541,7 +1542,7 @@
   
 	private function _clearArrows():void {
 		if (board.isStudyHost || board.onListen) {
-			if (board.clearArrows(Board.ARROWS_PUBLIC, login_name)) {
+			if (board.clearArrows(Board.ARROWS_PUBLIC, "")) {
 				_client.gameChat(_game_name, "[##ARROW]CLEAR");
 			} else {
 				board.clearArrows(Board.ARROWS_PUBLIC);
@@ -2177,7 +2178,7 @@
 		if (board.isStudyHost || board.onListen) {
 			_client.gameChat(_game_name, "[##ARROW]" + fromType + "," + from.x + "," + from.y + "," + to.x + "," + to.y + ",0x" + _arrow_color.toString(16));
 		} else {
-			board.addArrow(fromType, from, to, _arrow_color, login_name, Board.ARROWS_SELF, true);
+			board.addArrow(fromType, from, to, _arrow_color, "", Board.ARROWS_SELF, true);
 		}
 	}
 	
