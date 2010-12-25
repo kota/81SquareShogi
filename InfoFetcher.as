@@ -435,6 +435,7 @@
 			userSettings.acceptArrow = true;
 			userSettings.arrowColor = 0x00CC00;
 			userSettings.ignoreList = "";
+			userSettings.favoriteList = "";
 			for (var i:int = 0; i < userData.length; i++) {
 				if (userData[i].name == _login_name) {
 					userSettings = userData[i];
@@ -442,6 +443,7 @@
 					if (userData[i].arrowColor == null) userSettings.arrowColor = 0x00CC00;
 					if (userData[i].chatSound3 == null) userSettings.chatSound3 = true;
 					if (userData[i].ignoreList == null) userSettings.ignoreList = "";
+					if (userData[i].favoriteList == null) userSettings.favoriteList = "";
 					break;
 				}
 			}

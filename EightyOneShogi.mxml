@@ -105,6 +105,7 @@
 	private var _accept_arrows:Boolean = true;
 	private var _arrow_color:uint = 0x00CC00;
 	private var _ignore_list:Array = new Array();
+	private var _favorite_list:Array = new Array();
 	private var _chat_auto_scroll1:Boolean = true;
 	private var _chat_auto_scroll2:Boolean = true;
 	private var _userMessageScrollPos1:int;
@@ -720,6 +721,12 @@
       _client.agree();
     } else {
 	  var challengerName:String = login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
+	  for each (var str:String in _ignore_list) {
+		  if (challengerName.toLowerCase() == str) {
+			  _client.reject();
+			  return;
+		  }
+	  }
       _sound_challenger.play();
 	  _challengerTicker.reset();
 	  _challengerTicker.start();
@@ -738,10 +745,14 @@
   }
   
 //--------------------------------------------------------------------------------------------------------------------------------- CHAT 
-    private function _handleChat(e:ServerMessageEvent):void{
+    private function _handleChat(e:ServerMessageEvent):void {
+		var sender:String = e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1];
+		for each (var str:String in _ignore_list) {
+			if (sender.toLowerCase() == str) return;
+		}
 		if (e.message.match(/\[auto\-chat\]/)) {
 			_writeUserMessage(e.message.substr(8), 1, "#888888");
-		} else if (e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1] == login_name) {
+		} else if (sender == login_name) {
 			_writeUserMessage(e.message.substr(8), 1, "#0033DD");
 		} else {
 			_writeUserMessage(e.message.substr(8), 1, "#000000");
@@ -757,6 +768,7 @@
 	
     private function _handleGameChat(e:ServerMessageEvent):void {
 		if (!_game_name) return;
+		var sender:String = e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1];
 		var match:Array;
 		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			if (!board.studyOn) board.studyOn = true;
@@ -784,34 +796,37 @@
 				kifuDataGrid.selectedIndex = board.kifu_list_self.length - 1;
 				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 			}
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##ARROW\]CLEAR$/))) {
-			if (match[1] != login_name) board.clearArrows(Board.ARROWS_PUBLIC, match[1]);
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
-			if (!_accept_arrows && match[1] != login_name) return;
+		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
+			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, match[1]);
+		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
+			for each (var str:String in _ignore_list) {
+				if (sender.toLowerCase() == str) return;
+			}
+			if (!_accept_arrows && sender != login_name) return;
 			if (board.isPlayer && !board.post_game) return;
 			if (board.post_game && !board.studyOn) return;
 			if (board.isStudyHost || board.onListen) {
-				board.addArrow(parseInt(match[2]), new Point(Number(match[3]), Number(match[4])), new Point(Number(match[5]), Number(match[6])), uint(match[7]), match[1],Board.ARROWS_PUBLIC, true);
+				board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC, true);
 			} else {
-				board.addArrow(parseInt(match[2]), new Point(Number(match[3]), Number(match[4])), new Point(Number(match[5]), Number(match[6])), uint(match[7]), match[1],Board.ARROWS_PUBLIC);
+				board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC);
 			}
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
-			if (match[1] != login_name) {
-				if (match[1] == board.name_labels[0].text) {
-					if (match[2] == "OUT") {
+		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
+			if (sender != login_name) {
+				if (sender == board.name_labels[0].text) {
+					if (match[1] == "OUT") {
 						board.name_labels[0].setStyle("color", 0x555555);
 					} else {
 						board.name_labels[0].setStyle("color", 0x000000);
 					}
-				} else if (match[1] == board.name_labels[1].text) {
-					if (match[2] == "OUT") {
+				} else if (sender == board.name_labels[1].text) {
+					if (match[1] == "OUT") {
 						board.name_labels[1].setStyle("color", 0x555555);
 					} else {
 						board.name_labels[1].setStyle("color", 0x000000);
 					}
 				}
 			}
-			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
+			trace(sender + "-" + match[1] + "-" + match[2] + "-" + match[3]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
 			if (match[1] == login_name) {
 				board.isStudyHost = true;
@@ -823,11 +838,14 @@
 				_sendStudy();
 			}
 		} else {
-			if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[0].name) {
+			for each (str in _ignore_list) {
+				if (sender.toLowerCase() == str) return;
+			}
+			if (sender == board.playerInfos[0].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#000000");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == board.playerInfos[1].name) {
+			} else if (sender == board.playerInfos[1].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#666666");
-			} else if (e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1] == login_name) {
+			} else if (sender == login_name) {
 				_writeUserMessage(e.message.substr(12), 2, "#0033DD");
 			} else {
 				_writeUserMessage(e.message.substr(12), 2, "#660000");
@@ -841,6 +859,9 @@
 		match = e.message.substr(15).match(/^\[(.+?)\]\s(.+)$/);
 		var name:String = match[1];
 		var message:String = match[2];
+		for each (var str:String in _ignore_list) {
+			if (name.toLowerCase() == str) return;
+		}
 		if (_pmAutoOpen) _openPlayerInfo(_findPlayerFromList(name));
 		if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
 		if (!_pmLog[name]) _pmLog[name] = "";
@@ -1059,6 +1080,7 @@
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
 		ignoreList.dataProvider = _ignore_list;
+		favoriteList.dataProvider = _favorite_list;
         OkButton.addEventListener("click", _handleOption);
 		removeIgnoreButton.addEventListener("click", _handleRemoveIgnore);
 		if (login_name == "guest") saveSettingsButton.enabled = false;
@@ -1408,9 +1430,22 @@
 	private function _handleIgnore(name:String):Function {
 		return function(e:MouseEvent):void {
 			for each (var str:String in _ignore_list) {
-				if (str == name.toLowerCase()) return;
+				if (str == name.toLowerCase()) {
+					Alert.show("Already in ignore list.");
+					return;
+				}
 			}
 			_ignore_list.push(name.toLowerCase());
+			Alert.show("Added to ignore list temporarily.\nSave settings in Option Window to set it permanent.");
+		}
+	}
+	
+	private function _handleFavorite(name:String):Function {
+		return function(e:MouseEvent):void {
+			for each (var str:String in _favorite_list) {
+				if (str == name.toLowerCase()) return;
+			}
+			_favorite_list.push(name.toLowerCase());
 		}
 	}
 	
@@ -2029,6 +2064,7 @@
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
 		urlVariables.ignoreList = _ignore_list.join("/");
+		urlVariables.favoriteList = _favorite_list.join("/");
 		urlVariables.byoyomi = GameTimer.soundType;
 		urlVariables.pieceType = board.piece_type;
 		_infoFetcher.writeSettings(urlVariables);
@@ -2042,6 +2078,14 @@
 		}
 	}
 	
+	private function _handleRemoveFavorite(e:Event):void {
+		if (!_optionWindow) return;
+		if (_optionWindow.favoriteList.selectedIndex >= 0) {
+			_favorite_list.splice(_optionWindow.favoriteList.selectedIndex, 1);
+			_optionWindow.favoriteList.dataProvider = _favorite_list;
+		}
+	}
+	
 	private function _handleLoadOption(e:Event):void {
 		board.piece_sound_play = _infoFetcher.userSettings.pieceSound;
 		_end_sound_play = _infoFetcher.userSettings.endSound;
@@ -2052,6 +2096,7 @@
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
 		if (_infoFetcher.userSettings.ignoreList != "") _ignore_list = _infoFetcher.userSettings.ignoreList.split("/");
+		if (_infoFetcher.userSettings.favoriteList != "") _favorite_list = _infoFetcher.userSettings.favoriteList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
 		board.setPieceType(_infoFetcher.userSettings.pieceType);
 	}

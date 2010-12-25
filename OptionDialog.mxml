@@ -20,7 +20,7 @@
 			
         ]]>
     </mx:Script>
-	<mx:TabNavigator id="optionTab" width="370" height="270" horizontalScrollPolicy="off" creationPolicy="all">
+	<mx:TabNavigator id="optionTab" width="370" height="300" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
 		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
 			<mx:HBox>
@@ -86,10 +86,17 @@
 				<mx:Label text="" paddingRight="0" />
 				<mx:Canvas id="arrowCanvas" backgroundColor="#FFDD55" width="160" height="30"/>
 			</mx:HBox>
-			<mx:Label text="Ignore List" fontWeight="bold" paddingLeft="10" />
-			<mx:HBox paddingLeft="30" verticalAlign="center">
-				<mx:List id="ignoreList" rowCount="4" width="80" />
-				<mx:Button id="removeIgnoreButton" label="Remove"/>
+			<mx:HBox>
+				<mx:VBox paddingLeft="10" width="140" horizontalAlign="center">
+					<mx:Label text="Ignored" fontWeight="bold" width="100%" />
+					<mx:List id="ignoreList" rowCount="4" width="110" />
+					<mx:Button id="removeIgnoreButton" label="Remove" />
+				</mx:VBox>
+				<mx:VBox paddingLeft="10" width="140" horizontalAlign="center">
+					<mx:Label text="Favorite" fontWeight="bold" width="100%" />
+					<mx:List id="favoriteList" rowCount="4" width="110" />
+					<mx:Button id="removeFavoriteButton" label="Remove"/>
+				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
 	</mx:TabNavigator>
