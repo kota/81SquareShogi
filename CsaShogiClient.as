@@ -27,6 +27,8 @@ package{
     public static var GAME_SUMMARY:String = 'game_summary';
     public static var REJECT:String = 'reject';
     public static var WATCHERS:String = 'watchers';
+	public static var ENTER:String = 'enter';
+	public static var LEAVE:String = 'leave';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -194,7 +196,11 @@ package{
     }
 	
 	public function setRate(n:int):void {
-//		send("%%SETRATE " + n);
+		if (_current_state == STATE_CONNECTED) {
+			send("%%SETRATE " + n);
+		} else {
+			Alert.show("You cannot set rate while playing or waiting for a game.", "Error");
+		}
 	}
 
     public function keepAlive():void{
@@ -260,7 +266,11 @@ package{
 		} else if(line.match(/^##\[CHAT\]/)){
           dispatchEvent(new ServerMessageEvent(CHAT,line + "\n"));
         } else if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO),T/)){
-          dispatchEvent(new ServerMessageEvent(MOVE,line));
+          dispatchEvent(new ServerMessageEvent(MOVE, line));
+		} else if ((match = line.match(/^##\[ENTER\]\[(.+)\]/))) {
+			dispatchEvent(new ServerMessageEvent(ENTER, match[1]));
+		} else if ((match = line.match(/^##\[LEAVE\]\[(.+)\]/))) {
+			dispatchEvent(new ServerMessageEvent(LEAVE, match[1]));
         } else if(line.match(/^##\[WHO\]/) != null){
           _buffer_response(WHO,line);
           if(line.match(/^##\[WHO\] \+OK$/)){
@@ -297,6 +307,8 @@ package{
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  } else if (line.match(/^##\[SETRATE\] \+OK/)) {
+				  Alert.show("Rate successfully updated.");
 			  }
               break;
             case STATE_GAME_WAITING:

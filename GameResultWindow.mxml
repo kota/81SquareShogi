@@ -37,7 +37,7 @@
 			  if (String(you.rating).match(/^\*/)) you.rating = parseInt(you.rating.substr(1));
 			  if (String(opponent.rating).match(/^\*/)) opponent.rating = parseInt(opponent.rating.substr(1));
 			  var match:Array = game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-			  var multiply:Number = 1 + (Math.pow(parseInt(match[3])/300, 0.8) - 1) / (Math.pow(9, 0.8) -1);
+			  var multiply:Number = 1 + (Math.pow(parseInt(match[3]) / 300, 0.8) - 1) / (Math.pow(9, 0.8) -1);
 			  if (match[1] == "r") {
 				  var dif:int = InfoFetcher.ratingDif(you.rating, opponent.rating, multiply, v);
 			  } else {
@@ -52,13 +52,14 @@
 				  _dy = -2;
 				  _main = "YOU WIN!";
 				  mainLabel.setStyle('color', 0xFF0000);
+				  var difL:int = v > 1 ? Math.round(dif / 2.0) : dif;
 				  _you_after = "-> " + (you.rating + dif) + " (+" + dif +")";
-				  _opponent_after = "-> " + (opponent.rating - dif) + " (-" + dif + ")";
+				  _opponent_after = "-> " + (opponent.rating - difL) + " (-" + difL + ")";
 				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + dif)) {
 					  _you_rank = "Rank Up!";
 					  youRank.setStyle('color', 0xFF0000);
 				  }
-				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating - dif)) {
+				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating - difL)) {
 					  _opponent_rank = "Rank Down";
 					  opponentRank.setStyle('color', 0x0000FF);
 				  }
@@ -66,9 +67,10 @@
 				  _dy = 2;
 				  _main = "YOU LOST";
 				  mainLabel.setStyle('color', 0x0000FF);
-				  _you_after = "-> " + (you.rating - dif) + " (-" + dif +")";
+				  difL = v < -1 ? Math.round(dif / 2.0) : dif;
+				  _you_after = "-> " + (you.rating - difL) + " (-" + difL +")";
 				  _opponent_after = "-> " + (opponent.rating + dif) + " (+" + dif + ")";
-				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating - dif)) {
+				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating - difL)) {
 					  _you_rank = "Rank Down!";
 					  youRank.setStyle('color', 0x0000FF);
 				  }
@@ -100,7 +102,6 @@
 		  
           private function _close(e:TimerEvent):void {
 			  _fadeTimer.start();
-//            PopUpManager.removePopUp(this);
           }
 		  
 		  private function _fade(e:TimerEvent):void {

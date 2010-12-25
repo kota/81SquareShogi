@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_closeButton();" headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_close();" headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
@@ -91,8 +91,8 @@
 			  pmTextArea.callLater(scrollDown);
 		  }
 
-          private function _closeButton():void {
-			dispatchEvent(new Event("close_info"));
+          private function _close():void {
+			dispatchEvent(new Event("close_window"));
             PopUpManager.removePopUp(this);
           }
 
@@ -141,12 +141,12 @@
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
-			<mx:Button id="challenge" click="_closeButton();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
+			<mx:Button id="challenge" click="_close();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
 			<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
 			<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
-			<mx:ComboBox id="setRateCombo" enabled="false" width="70" fontSize="10" />
+			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
 			<mx:Button id="setRateButton" label="Set Rate" enabled="false" />
 		</mx:HBox>
 		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" toolTip="Open PM window" />

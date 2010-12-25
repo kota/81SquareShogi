@@ -123,6 +123,8 @@ package  {
 	private var _arrow_from_type:int;
 	private var _arrow_from:Point;
 	private var _arrow_to:Point = new Point();
+	public var kid:int;
+	public var opening:String = "";
     public var piece_type:int = 0;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
@@ -407,6 +409,8 @@ package  {
       trace("game started");
 	  isPlayer = true;
 	  _player_infos = player_infos;
+	  _player_infos[0].labelColor = 0x000000;
+	  _player_infos[1].labelColor = 0x000000;
       _my_turn = my_turn;
       resetBoard();
 	  initializeKifu();
@@ -427,17 +431,16 @@ package  {
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       name_labels[0].text = _player_infos[_my_turn].name;
       name_labels[1].text = _player_infos[1 - _my_turn].name;
-	  if (viewing) return;
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
 	  _avatar_images[0].addChild(avatar);
-	  _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
+	  if (!viewing) _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
 	  _avatar_images[1].addChild(avatar);
-	  _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
+	  if (!viewing) _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
 	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
 	}
@@ -452,8 +455,12 @@ package  {
 		while (_avatar_images[0].numChildren > 0) _avatar_images[0].removeChildAt(0);
 		while (_avatar_images[1].numChildren > 0) _avatar_images[1].removeChildAt(0);
 		if (_last_to_square != null) {
-			var i_last:int = _last_to_square.coord_x;
-			var j_last:int = _last_to_square.coord_y;
+			var i_last_to:int = _last_to_square.coord_x;
+			var j_last_to:int = _last_to_square.coord_y;
+		}
+		if (_last_from_square != null) {
+			var i_last_from:int = _last_from_square.coord_x;
+			var j_last_from:int = _last_from_square.coord_y;
 		}
 		var timer_tmp:GameTimer = timers[0];
 		timers[0] = timers[1];
@@ -470,8 +477,12 @@ package  {
 		resetBoard();
 		setPosition(_position);
 		if (_last_to_square != null) {
-			_last_to_square = _cells[j_last - 1][9 - i_last];
+			_last_to_square = _cells[j_last_to - 1][9 - i_last_to];
 			_last_to_square.setStyle('backgroundColor', '0xCC3333');
+		}
+		if (_last_from_square != null) {
+			_last_from_square = _cells[j_last_from - 1][9 - i_last_from];
+			_last_from_square.setStyle('backgroundColor', '0xFF5555');
 		}
 		_from = null;
 		_selected_square == null;
@@ -494,8 +505,8 @@ package  {
       trace("game end");
 			timers[0].stop();
 			timers[1].stop();
-			name_labels[0].setStyle("color", 0x000000);
-			name_labels[1].setStyle("color", 0x000000);
+		    name_labels[0].setStyle('color', _player_infos[_my_turn].labelColor);
+		    name_labels[1].setStyle('color', _player_infos[1 - _my_turn].labelColor);
 		cancelSquareSelect();
       _in_game = false;
 	  _client_timeout = false;
@@ -571,7 +582,8 @@ package  {
 
     public function monitor(game_info:String, watch_game:Object):void{
       var match:Array;
-      if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] V2$/)){
+      if ((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[(.*)\] V2$/))) {
+		kid = parseInt(match[1]);
         _startMonitor(game_info, watch_game);
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
@@ -638,9 +650,7 @@ package  {
 		  'rank':watch_game.blackRank,
 		  'titleName':watch_game.blackTitle,
 		  'country_code':watch_game.blackCountryCode,
-		  'wins':watch_game.blackWins,
-		  'losses':watch_game.blackLosses,
-		  'streak_best':watch_game.blackStreakBest
+		  'labelColor':watch_game.blackColor
 	  }
 	  var whiteInfo:Object = {
 		  'name':watch_game.whiteName,
@@ -648,9 +658,7 @@ package  {
 		  'rank':watch_game.whiteRank,
 		  'titleName':watch_game.whiteTitle,
 		  'country_code':watch_game.whiteCountryCode,
-		  'wins':watch_game.whiteWins,
-		  'losses':watch_game.whiteLosses,
-		  'streak_best':watch_game.whiteStreakBest
+		  'labelColor':watch_game.whiteColor
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
@@ -692,17 +700,39 @@ package  {
 		  } else if (line.match(/^N\+.+$/)) {
 			  _player_infos[0] = new Object();
 			  _player_infos[0].name = line.substring(2);
+			  _player_infos[0].titleName = "";
 		  } else if (line.match(/^N\-.+$/)) {
 			  _player_infos[1] = new Object();
 			  _player_infos[1].name = line.substring(2);
+			  _player_infos[1].titleName = "";
+		  } else if (line.match(/^I\+.+$/)) {
+			  _player_infos[0].rating = line.substring(2).split(",")[0];
+			  if (_player_infos[0].rating.match(/^\*/)) {
+				  _player_infos[0].rank = "-";
+			  } else {
+				  _player_infos[0].rating = parseInt(_player_infos[0].rating);
+				  _player_infos[0].rank = InfoFetcher.makeRankFromRating(_player_infos[0].rating);
+			  }
+			  _player_infos[0].country_code = parseInt(line.substring(2).split(",")[1]);
+		  } else if (line.match(/^I\-.+$/)) {
+			  _player_infos[1].rating = line.substring(2).split(",")[0];
+			  if (_player_infos[1].rating.match(/^\*/)) {
+				  _player_infos[1].rank = "-";
+			  } else {
+				  _player_infos[1].rating = parseInt(_player_infos[1].rating);
+				  _player_infos[1].rank = InfoFetcher.makeRankFromRating(_player_infos[1].rating);
+			  }
+			  _player_infos[1].country_code = parseInt(line.substring(2).split(",")[1]);
 		  } else if(line.match(/([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
             var move_and_time:Object = new Object();
             move_and_time.move = line;
             moves.push(move_and_time);
           } else if (line.match(/^(T.*)$/)) {
             Object(moves[moves.length - 1]).time = line;
-          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) {
-			  break;
+//          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
+//			  break;
+		  } else if (line.match(/summary/)) {
+			  opening = line.split(":")[5] ? InfoFetcher.openingNameEn(line.split(":")[5]) : "";
 		  }
       }
 	  
@@ -716,12 +746,13 @@ package  {
       }
 
 	  _my_turn = Kyokumen.SENTE;
-      name_labels[0].text = _player_infos[_my_turn].name;
-      name_labels[1].text = _player_infos[1-_my_turn].name;
-      _info_labels[0].text = "";
-      _info_labels[1].text = "";
-      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
-      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+//      name_labels[0].text = _player_infos[_my_turn].name;
+//      name_labels[1].text = _player_infos[1-_my_turn].name;
+//      _info_labels[0].text = "";
+//      _info_labels[1].text = "";
+//      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
+//      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+	  _arrangeInfos();
 	  timers[0].reset(0, 0);
 	  timers[1].reset(0, 0);
 

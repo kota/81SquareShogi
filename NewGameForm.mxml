@@ -36,6 +36,7 @@
 			{label:"Bishop Down", data:"hcbishop" },
 			{label:"Rook Down", data:"hcrook" },
 			{label:"Rook-Lance Down", data:"hcrooklance" },
+			{label:"Rook-Silver Down", data:"hcrooksilver" },
 			{label:"2-piece Down", data:"hc2p" },
 			{label:"4-piece Down", data:"hc4p" },
 			{label:"6-piece Down", data:"hc6p" },

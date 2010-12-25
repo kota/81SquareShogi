@@ -16,8 +16,9 @@
 			}
 			
 			private function _sendTwitter():void {
-				var str:String = "http://twitter.com/share?text=81Dojo Kifu: ";
-				str += "[" + kifu.black + " vs " + kifu.white + "]";
+				var str:String = "http://twitter.com/share?text=81Dojo Kifu: [";
+				str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ", " + kifu.blackRank + ") vs ";
+				str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ", " + kifu.whiteRank +")]";
 				if (kifu.opening != "") str += ", " + kifu.opening;
 				str += ". %2381dojo";
 				str += "&url=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id;
@@ -25,9 +26,7 @@
 			}
 			
 			private function _sendFacebook():void {
-				var str:String = "http://www.facebook.com/sharer.php?u=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id + "&t=";
-				str += "81Dojo Kifu | ▲" + kifu.black + " - △" + kifu.white;
-				if (kifu.opening != "") str += ", " + kifu.opening + "(" + kifu.opening_jp + ")";
+				var str:String = "http://www.facebook.com/sharer.php?u=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id;
 				navigateToURL(new URLRequest(str),"_blank");
 			}
         ]]>
@@ -35,7 +34,7 @@
 	<mx:HBox horizontalAlign="center" paddingBottom="15">
 		<mx:Button label="URL" fontSize="20" height="44" click="_copyURL();" />
 		<mx:Button icon="@Embed('images/icon_twitter.png')" toolTip="Twitter" click="_sendTwitter();" />
-		<mx:Button icon="@Embed('images/icon_facebook.png')" toolTip="Facebook" />
+		<mx:Button icon="@Embed('images/icon_facebook.png')" toolTip="Facebook" click="_sendFacebook();" />
 	</mx:HBox>
 	<mx:Button label="Close" click="PopUpManager.removePopUp(this);" fontSize="12" />
 </mx:TitleWindow>

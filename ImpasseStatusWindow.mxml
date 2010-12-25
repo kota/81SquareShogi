@@ -6,16 +6,17 @@
           import mx.controls.*;
           import mx.managers.PopUpManager;
           import mx.collections.ArrayCollection;
+		  import mx.utils.ObjectProxy;
 		  [Bindable]
-		  private var _black:Object;
+		  private var _black:ObjectProxy;
 		  [Bindable]
-		  private var _white:Object;
+		  private var _white:ObjectProxy;
 		  
 		  public function setStatus(status:Array, turn:int):void {
 			  var hasRight:Array = new Array(true, true); 
 			  var whiteHasRight:Boolean = true;
-			  _black = status[Kyokumen.SENTE];
-			  _white = status[Kyokumen.GOTE];
+			  _black = new ObjectProxy(status[Kyokumen.SENTE]);
+			  _white = new ObjectProxy(status[Kyokumen.GOTE]);
 			  if (_black.entered) blackEntered.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
 			  if (_black.pieces >= 10) blackPieces.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
 			  if (_black.points >= 28) blackPoints.setStyle('color', 0xFF0000); else hasRight[Kyokumen.SENTE] = false;
@@ -23,9 +24,14 @@
 			  if (_white.pieces >= 10) whitePieces.setStyle('color', 0xFF0000); else hasRight[Kyokumen.GOTE] = false;
 			  if (_white.points >= 27) whitePoints.setStyle('color', 0xFF0000); else hasRight[Kyokumen.GOTE] = false;
 			  if (turn >= 0) {
-//				  if (hasRight[turn]) kachiButton.enabled = true;
+				   kachiButton.enabled = hasRight[turn];
 			  }
 		  }
+		  
+          private function _close():void {
+			dispatchEvent(new Event("close_window"));
+            PopUpManager.removePopUp(this);
+          }
 
         ]]>
     </mx:Script>
@@ -51,7 +57,7 @@
 		</mx:VBox>
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center">
-		<mx:Button id="kachiButton" label="Declare Win" click="PopUpManager.removePopUp(this);" enabled="false" />
-		<mx:Button label="Close" click="PopUpManager.removePopUp(this);"/>
+		<mx:Button id="kachiButton" label="Declare Win" click="_close();" enabled="false" />
+		<mx:Button label="Close" click="_close();"/>
 	</mx:HBox>
 </mx:TitleWindow>

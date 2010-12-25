@@ -23,6 +23,7 @@
 	import flash.net.URLVariables;
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
+	import mx.utils.ObjectProxy;
 	import mx.containers.Canvas;
 	import mx.containers.utilityClasses.Flex;
     import mx.events.FlexEvent;
@@ -42,7 +43,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/17";
+	public const VERSION:String = "ver.2010/12/25";
 	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -141,6 +142,7 @@
 		_viewerAlone = true;
 		_api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 		_api.kifuDetail(this.parameters["kid"]);
+		board.kid = this.parameters["kid"];
 		return;
 	  }
       _client = new CsaShogiClient();
@@ -167,6 +169,8 @@
       _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
       _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
+	  _client.addEventListener(CsaShogiClient.ENTER, _handleEnter);
+	  _client.addEventListener(CsaShogiClient.LEAVE, _handleLeave);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
@@ -229,11 +233,13 @@
 			  break;
 		  }
 	  }
-	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + _infoFetcher.country_names[e.message.split(":")[2]] + ".");
+	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
 	  if (_infoFetcher.serverMaintenanceTime != null) {
 		  _writeUserMessage("Server Update from [" + _infoFetcher.serverMaintenanceTime.toUTCString() + "]", 1, "#FF0000", true);
+	  } else {
+		  _infoFetcher.serverMaintenanceTime = new Date(2099, 0, 1, 0, 0, 0, 0);
 	  }
     }
 
@@ -281,7 +287,7 @@
 			  'streak':parseInt(match[2].split(" ")[10]), 
 			  'streak_best':parseInt(match[2].split(" ")[11])
 			  }
-		  user.country = _infoFetcher.country_names[user.country_code];
+		  user.country = InfoFetcher.country_names[user.country_code];
 		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.monitor_game != "*") user.status2 = "M ";
@@ -311,7 +317,8 @@
 				  break;
 			  }
 		  }
-          user_list.push(user);
+		  var userProxy:ObjectProxy = new ObjectProxy(user);
+          user_list.push(userProxy);
         }
       }
 	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
@@ -340,7 +347,7 @@
 				  'rating':user_list[i].rating,
 				  'game_name': user_list[i].game_name,
 				  'country': user_list[i].country,
-				  'country3':_infoFetcher.country_names3[user_list[i].country_code],
+				  'country3':InfoFetcher.country_names3[user_list[i].country_code],
 				  'flagURL': DIRECTORY + "images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
 				  'rankColor': user_list[i].rankColor
 				  }
@@ -352,8 +359,9 @@
 				  user.rated = "NR"
 			  }
 			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
-			  user.time = total + "-" + game_info[4] ;
-			  waiter_list.push(user);
+			  user.time = total + "-" + game_info[4];
+			  userProxy = new ObjectProxy(user);
+			  waiter_list.push(userProxy);
 			  if (user.name == login_name && game_info[2] != login_name) {
 				  _challenging = false;
 				  _client.stopWaiting();
@@ -422,20 +430,9 @@
 			  game.opening = InfoFetcher.openingNameJp(tokens[11]);
 			  game.opening_en = InfoFetcher.openingNameEn(tokens[11]);
 		  }
-		  var user:Object;
-		  if ((user = _findPlayerFromList(game.blackName))) {
-			  game.blackWins = user.wins;
-			  game.blackLosses = user.losses;
-			  game.blackStreakBest = user.streak_best;
-		  }
-		  if ((user = _findPlayerFromList(game.whiteName))) {
-			  game.whiteWins = user.wins;
-			  game.whiteLosses = user.losses;
-			  game.whiteStreakBest = user.streak_best;
-		  }
-		  game.blackCountry = _infoFetcher.country_names[game.blackCountryCode];
+		  game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
 		  game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
-		  game.whiteCountry = _infoFetcher.country_names[game.whiteCountryCode];
+		  game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
 		  game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
 		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
 				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
@@ -451,7 +448,7 @@
 			  i = 0;
 			  for each (user in _user_list) {
 				  if (game.id == user.monitor_game) {
-					  game.watcher_names += (user.name + " (" + _infoFetcher.country_names3[user.country_code] + ")\n");
+					  game.watcher_names += (user.name + " (" + InfoFetcher.country_names3[user.country_code] + ")\n");
 					  i += 1;
 					  if (i >= game.watchers) break;
 				  }
@@ -459,10 +456,23 @@
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
 		  if (game.blackColor == 0x999999 || game.whiteColor == 0x999999) game.maxRating -= 3000;
-		  game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
-		  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
-		  game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
-		  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
+		  var user:Object;
+		  if (game.blackRating == 0) {
+			  game.blackRank = "-";
+			  game.blackRankColor = 0x999999;
+			if ((user = _findPlayerFromList(game.blackName))) game.blackRating = user.rating;
+		  } else {
+			game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
+			game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
+		  }
+		  if (game.whiteRating == 0) {
+			  game.whiteRank = "-";
+			  game.whiteRankColor = 0x999999;
+			  if ((user = _findPlayerFromList(game.whiteName))) game.whiteRating = user.rating;
+		  } else {
+			  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
+			  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
+		  }
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
 		  var total:int = parseInt(game_info[3]) / 60;
 		  var hc:String;
@@ -479,7 +489,8 @@
 //			game.hcTip = "";
 		  }
 		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
-		  game_list.push(game);
+		  var gameProxy:ObjectProxy = new ObjectProxy(game);
+		  game_list.push(gameProxy);
         }
 		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
 		for (i = 0; i < game_list.length; i++) game_list[i].gameNo = i + 1;
@@ -510,8 +521,8 @@
         if(match){
           watcher.name = match[1];
 		  watcher.rate = parseInt(match[2]);
-		  watcher.country3 = _infoFetcher.country_names3[parseInt(match[3])];
-		  watcher.country = _infoFetcher.country_names[parseInt(match[3])];
+		  watcher.country3 = InfoFetcher.country_names3[parseInt(match[3])];
+		  watcher.country = InfoFetcher.country_names[parseInt(match[3])];
           watcher_list.unshift(watcher);
         }
       }
@@ -538,6 +549,7 @@
 	  }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       _game_name = e.message.split(":")[1];
+	  board.kid = parseInt(e.message.split(":")[2]);
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
 	  } else if (_game_name.split("+")[1].match(/^nr_/)) {
@@ -569,6 +581,7 @@
       resignButton.enabled = true;
 	  reverseButton.enabled = false;
 	  greetButton.visible = true;
+	  shareKifuButton2.enabled = false;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
       forwardOneButton.enabled = false;
@@ -621,14 +634,16 @@
 	  radioKifuReplay.enabled = true;
 	  radioKifuListen.enabled = true;
       if (e.message.indexOf("LOSE") >= 0) {
-		_openGameResultWindow( -1);
+		if (board.playerInfos[0].rank != "-" && board.playerInfos[1].rank == "-") _openGameResultWindow(-2);
+		else _openGameResultWindow(-1);
 		board.infoBoxes[1].setStyle('borderThickness', 2);
 		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isStudyHost = true;
-		_openGameResultWindow(1);
+		if (board.playerInfos[0].rank == "-" && board.playerInfos[1].rank != "-") _openGameResultWindow(2);
+		else _openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
 		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
@@ -655,6 +670,7 @@
 	  }
       closeButton.enabled = true;
       resignButton.enabled = false;
+	  shareKifuButton2.enabled = true;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
@@ -671,7 +687,7 @@
 	private function _openGameResultWindow(v:int):void {
 	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(board, GameResultWindow, false));
       PopUpManager.centerPopUp(_gameResultWindow);
-	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn], board.playerInfos[1 - board.my_turn], _game_name, v);
+	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn], board.playerInfos[1 - board.my_turn], board.kifu_list.length < 5 ? "hoge+nr_hoge-0-30+hoge1+hoge2+111" : _game_name, v);
 	}
 
     private function _handleMove(e:ServerMessageEvent):void {
@@ -687,7 +703,11 @@
 		board.makeMove(e.message, true, true);
 	  }
 	  kifuDataGrid.dataProvider = board.kifu_list;
-      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
+      kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
+	  if (_impasseStatusWindow) {
+		  board.position.calcImpasse();
+		  _impasseStatusWindow.setStatus(board.position.impasseStatus, board.position.turn == board.my_turn ? board.my_turn : -1);
+	  }
     }
   
   private function _handleGameSummary(e:ServerMessageEvent):void {
@@ -767,7 +787,7 @@
 		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##ARROW\]CLEAR$/))) {
 			if (match[1] != login_name) board.clearArrows(Board.ARROWS_PUBLIC, match[1]);
 		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
-			if (!_accept_arrows && !match[1] == login_name) return;
+			if (!_accept_arrows && match[1] != login_name) return;
 			if (board.isPlayer && !board.post_game) return;
 			if (board.post_game && !board.studyOn) return;
 			if (board.isStudyHost || board.onListen) {
@@ -792,8 +812,6 @@
 				}
 			}
 			trace(match[1] + "-" + match[2] + "-" + match[3] + "-" + match[4]);
-		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##LEAVE\]$/))) {
-			_writeUserMessage(match[1] + " has left.\n", 2, "#008800");
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
 			if (match[1] == login_name) {
 				board.isStudyHost = true;
@@ -814,7 +832,7 @@
 			} else {
 				_writeUserMessage(e.message.substr(12), 2, "#660000");
 			}
-			if (_chat_sound2_play) _sound_chat1.play();
+			if (_chat_sound2_play) _sound_chat2.play();
 		}
     }
 	
@@ -847,6 +865,27 @@
 			}
 		}
 	}
+	
+//--------------------------------------------------------------------------------------------------------------------------------- CHAT 
+	private function _handleEnter(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex != 2) return;
+		_writeUserMessage(e.message + " entered.\n", 2, "#008800");
+	}
+	
+	private function _handleLeave(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex != 2) return;
+		if (e.message == board.playerInfos[0].name) {
+			_writeUserMessage(e.message + " left.\n", 2, "#000000", true);
+			board.name_labels[board.my_turn].setStyle("color", 0x999999);
+			if (_chat_sound2_play) _sound_chat2.play();
+		} else if (e.message == board.playerInfos[1].name) {
+			_writeUserMessage(e.message + " left.\n", 2, "#666666", true);
+			board.name_labels[1 - board.my_turn].setStyle("color", 0x999999);
+			if (_chat_sound2_play) _sound_chat2.play();
+		} else {
+			_writeUserMessage(e.message + " left.\n", 2, "#008800");
+		}
+	}
 
     private function _format_message(message:String):String{
       message = message.substr(8);
@@ -862,7 +901,11 @@
 	  var end_game:Boolean = false;
 	  var winnerTurn:int = -1;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
-	  if(_watch_game != null) board.monitor(e.message,_watch_game);
+	  if (_watch_game != null) board.monitor(e.message, _watch_game);
+	  if (_impasseStatusWindow) {
+		  board.position.calcImpasse();
+		  _impasseStatusWindow.setStatus(board.position.impasseStatus, -1);
+	  }
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
@@ -913,6 +956,7 @@
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
+			shareKifuButton2.enabled = true;
 			if (winnerTurn != -1) {
 				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
 				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
@@ -1230,6 +1274,7 @@
 		  resignButton.enabled = false;
 		  reverseButton.enabled = true;
 		  greetButton.visible = false;
+		  shareKifuButton2.enabled = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
 		  forwardOneButton.enabled = true;
@@ -1248,7 +1293,11 @@
 
 	private function _openPlayerInfo(user:Object):void {
 	  if (!user) return;
-	  if (_playerInfoWindows[user.name]) return;
+	  if (_playerInfoWindows[user.name]) {
+		  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
+		  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
+		  return;
+	  }
 	  _playerInfoWindows[user.name] = new PlayerInfoWindow();
 	  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
 	  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
@@ -1256,7 +1305,7 @@
 	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
 	  _playerInfoWindows[user.name].language = _language;
       _playerInfoWindows[user.name].title = "Player Info";
-	  _playerInfoWindows[user.name].addEventListener("close_info", _handlePlayerInfoClose);
+	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isPlayer()) {
 		  _playerInfoWindows[user.name].invite.enabled = false;
@@ -1271,7 +1320,7 @@
 		  if (user.wins + user.losses < 10) {
 			  _playerInfoWindows[user.name].setRateButton.addEventListener(MouseEvent.CLICK, _setRate(user.name));
 			  _playerInfoWindows[user.name].setRateButton.enabled = true;
-			  _playerInfoWindows[user.name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(8, 16);
+			  _playerInfoWindows[user.name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(8, 17);
 			  _playerInfoWindows[user.name].setRateCombo.enabled = true;
 		  }
 	  } else {
@@ -1402,11 +1451,16 @@
     private function _showImpasse():void {
 		board.position.calcImpasse();
 		_impasseStatusWindow =  ImpasseStatusWindow(PopUpManager.createPopUp(board, ImpasseStatusWindow, true));
+		_impasseStatusWindow.addEventListener("close_window", _handleImpasseStatusClose);
 		PopUpManager.centerPopUp(_impasseStatusWindow);
 		_impasseStatusWindow.title = "Impasse Status";
 		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
 		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isPlayer() && board.position.turn == board.my_turn) ? board.my_turn : -1);
     }
+	
+	private function _handleImpasseStatusClose(e:Event):void {
+		_impasseStatusWindow = null;
+	}
 	
 	private function _handleKachiDeclare(e:MouseEvent):void {
 		_client.kachi();
@@ -1419,7 +1473,6 @@
 			  _monitoring = false;
 		  } else if (board.viewing) {
 		  } else {
-			  _client.gameChat(_game_name, "[##LEAVE]");
 			  if (board.isStudyHost) _client.gameChat(_game_name, "[##GIVEHOST]" + board.playerInfos[board.playerInfos[0].name == login_name ? 1 : 0].name);
 			  _client.closeGame();
 		  }
@@ -1462,6 +1515,33 @@
 		} else {
 			board.clearArrows(Board.ARROWS_SELF);
 		}
+	}
+	
+	private function _shareKifu2():void {
+		var kifu:Object = new Object();
+		kifu.id = board.kid;
+		kifu.opening = board.opening;
+		kifu.black = board.playerInfos[0].name;
+		kifu.white = board.playerInfos[1].name;
+		kifu.blackRank = board.playerInfos[0].rank;
+		kifu.whiteRank = board.playerInfos[1].rank;
+		kifu.blackCountryCode = board.playerInfos[0].country_code;
+		kifu.whiteCountryCode = board.playerInfos[1].country_code;
+		if (!board.viewing) {
+			for each (var game:Object in _game_list) {
+				if (game.id == _game_name) {
+					kifu.opening = game.opening_en;
+					break;
+				}
+			}
+		}
+		_openKifuShareWindow(kifu);
+	}
+	
+	private function _openKifuShareWindow(kifu:Object):void {
+		_kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(this, KifuShareWindow, true));
+		PopUpManager.centerPopUp(_kifuShareWindow);
+		_kifuShareWindow.kifu = kifu;
 	}
 
 	private function _gamePlayerInfo(e:MouseEvent):void {
@@ -1684,9 +1764,24 @@
 				} else {
 					kifu.winner = "DRAW";
 				}
-				kifu.moves = kifu.result.split(":")[4] ? kifu.result.split(":")[4] : "-";
-				kifu.opening = kifu.result.split(":")[5] ? InfoFetcher.openingNameEn(kifu.result.split(":")[5]) : "";
-				kifu.opening_jp = kifu.result.split(":")[5] ? InfoFetcher.openingNameJp(kifu.result.split(":")[5]) : "";
+				var summaries:Array = kifu.result.split(":");
+				kifu.moves = summaries[4] ? summaries[4] : "-";
+				kifu.opening = summaries[5] ? InfoFetcher.openingNameEn(summaries[5]) : "";
+				kifu.opening_jp = summaries[5] ? InfoFetcher.openingNameJp(summaries[5]) : "";
+				if (summaries[6]) {
+					kifu.blackRankColor = String(summaries[6]).match(/^\*/) ? 0x999999 : InfoFetcher.makeColorFromRating(summaries[6].split(",")[0]);
+					kifu.blackRank = String(summaries[6]).match(/^\*/) ? "-" : InfoFetcher.makeRankFromRating(summaries[6].split(",")[0]);
+					kifu.blackCountryCode = parseInt(summaries[6].split(",")[1]);
+					kifu.blackFlagURL = DIRECTORY + "images/flags_ss/" + String(kifu.blackCountryCode + 1000).substr(1) + ".png";
+					kifu.blackCountry = InfoFetcher.country_names[kifu.blackCountryCode];
+				} else kifu.blackRankColor = 0xFFFFFF;
+				if (summaries[7]) {
+					kifu.whiteRankColor = String(summaries[7]).match(/^\*/) ? 0x999999 : InfoFetcher.makeColorFromRating(summaries[7].split(",")[0]);
+					kifu.whiteRank = String(summaries[7]).match(/^\*/) ? "-" : InfoFetcher.makeRankFromRating(summaries[7].split(",")[0]);
+					kifu.whiteCountryCode = parseInt(summaries[7].split(",")[1]);
+					kifu.whiteFlagURL = DIRECTORY + "images/flags_ss/" + String(kifu.whiteCountryCode + 1000).substr(1) + ".png";
+					kifu.whiteCountry = InfoFetcher.country_names[kifu.whiteCountryCode];
+				} else kifu.whiteRankColor = 0xFFFFFF;
 				_kifu_search_list.push(kifu);
 			}
 		}
@@ -1696,16 +1791,16 @@
 	private function _kifuSearchSelected():void {
 		if (kifuSearchGrid.selectedItem) {
 			searchAccordion.enabled = false;
+			board.opening = kifuSearchGrid.selectedItem.opening;
+			board.kid = kifuSearchGrid.selectedItem.id;
 			_api.kifuDetail(kifuSearchGrid.selectedItem.id);
 		}
 	}
 	
-	private function _shareKifu():void {
+	private function _shareKifu3():void {
 		var kifu:Object = kifuSearchGrid.selectedItem;
 		if (kifu) {
-			  _kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(searchAccordion, KifuShareWindow, true));
-			  PopUpManager.centerPopUp(_kifuShareWindow);
-			  _kifuShareWindow.kifu = kifu;
+			_openKifuShareWindow(kifu);
 		} else {
 			Alert.show("Highlight the kifu first.", Language.ac.getItemAt(_language).error);
 		}
@@ -1720,6 +1815,7 @@
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
 		greetButton.visible = false;
+		shareKifuButton2.enabled = true;
 		if (_viewerAlone) {
 			closeButton.enabled = false;
 			checkLobbyButton.enabled = false;
@@ -1758,7 +1854,7 @@
 		searchAccordion.enabled = true;
 		_player_search_list = new Array();
 		for each (var player:Object in e.target.bufferData) {
-			player.country = _infoFetcher.country_names[_infoFetcher.country_codes[player.country_id - 1]];
+			player.country = InfoFetcher.country_names[_infoFetcher.country_codes[player.country_id - 1]];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
 			player.flagURL = DIRECTORY + "images/flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
@@ -1817,7 +1913,7 @@
 				'number':num,
 				'login':String(playerXML.login),
 				'country_code':String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
-				'country':_infoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
+				'country':InfoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
 				'wins':parseInt(playerXML.wins),
 				'losses':parseInt(playerXML.losses),
 				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),
@@ -2121,7 +2217,7 @@
 		  if (board.playerInfos[0].name == login_name || board.playerInfos[1].name == login_name) return true;
 	  }
 	  return false;
-  } 
+  }
   
 	//=========================================================
 	//                       MXML PART
@@ -2158,6 +2254,20 @@
   </mx:Component>
   <mx:Component id="rankRenderer">
 		<mx:Label text="{data.rank}" color="{data.rankColor}" paddingLeft="-8" paddingRight="-7" />
+  </mx:Component>
+  <mx:Component id="kifuSearchBlackRenderer">
+	  <mx:HBox verticalAlign="middle" paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Image source="{data.blackFlagURL}" width="16" height="13" toolTip="{data.blackCountry}" />
+		<mx:Label text="■" paddingLeft="-7" paddingRight="-9" width="5" color="{data.blackRankColor}" fontSize="9" />
+		<mx:Label text="{data.black}" paddingLeft="-9" paddingRight="-7" width="80" />
+	  </mx:HBox>
+  </mx:Component>
+  <mx:Component id="kifuSearchWhiteRenderer">
+	  <mx:HBox verticalAlign="middle" paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Image source="{data.whiteFlagURL}" width="16" height="13" toolTip="{data.whiteCountry}" />
+		<mx:Label text="■" paddingLeft="-7" paddingRight="-9" width="5" color="{data.whiteRankColor}" fontSize="9" />
+		<mx:Label text="{data.white}" paddingLeft="-9" paddingRight="-7" width="80" />
+	  </mx:HBox>
   </mx:Component>
   <mx:Fade id="hideLogin" alphaFrom="1.0" alphaTo="0.0" duration="1000" />
   <mx:ViewStack id="mainViewStack" creationPolicy="all" width="100%" height="100%">
@@ -2311,6 +2421,8 @@
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
 	  </mx:HBox>
+<!--	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_client.send('SCRATCH');"/>
+	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_client.send('%%GHOST ' + chatMessage1.text);"/> -->
     </mx:VBox>
 	<eightyOneSquare:BulletinGadget id="bulletin" paddingLeft="8" />
 	</mx:HBox>
@@ -2327,20 +2439,26 @@
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="419" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
-          <mx:HBox>			
+          <mx:HBox width="300">			
             <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
-			<mx:Button id="reverseButton" label="Flip" click="board.flipBoard();"/>
             <mx:Button id="impasseButton" label="{Language.ac.getItemAt(_language).impasse}" click="_showImpasse();"/>
-            <mx:Button id="closeButton" label="{Language.ac.getItemAt(_language).close_game}" click="_closeGame();" enabled="false"/>           
-          </mx:HBox>
-          <mx:HBox>
+			  <mx:HBox width="100%" horizontalAlign="right">
+				<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="Flip Board" click="board.flipBoard();"/>
+				<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{Language.ac.getItemAt(_language).close_game}" click="_closeGame();" enabled="false"/>           
+			  </mx:HBox>
+		  </mx:HBox>
+          <mx:HBox width="300" horizontalAlign="right">
             <mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
             <mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
             <mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
             <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
-			<mx:Button label="Clear Arrows" click="_clearArrows();"/>
           </mx:HBox>
-		 <mx:HBox verticalAlign="middle">
+		 <mx:HBox width="300" horizontalAlign="right">
+			<mx:Button label="Clear Arrows" click="_clearArrows();"/>
+			<mx:Button id="shareKifuButton2" label="Share" click="_shareKifu2();"/>
+		 </mx:HBox>
+		 <mx:Spacer height="-20"/>
+		 <mx:HBox verticalAlign="bottom">
 			<mx:Label text="{Language.ac.getItemAt(_language).chat}"/>
 			<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="Greet" click="_greetMenu();"/>
 		 </mx:HBox>
@@ -2397,12 +2515,12 @@
 	<mx:VBox paddingLeft="10" paddingTop="10">
     <mx:Panel id="searchPanel" title="{Language.ac.getItemAt(_language).search_panel}" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 	  <mx:HBox>
-		<mx:Accordion id="searchAccordion" width="780" height="560" selectedIndex="2">
-			<mx:HBox label="{Language.ac.getItemAt(_language).kifu_search}" paddingTop="8" paddingLeft="8" width="800" height="530">
+		<mx:Accordion id="searchAccordion" width="820" height="560" selectedIndex="2">
+			<mx:HBox label="{Language.ac.getItemAt(_language).kifu_search}" paddingTop="8" paddingLeft="8" width="820" height="530">
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendKifuSearch();" />
-						<mx:Button id="shareKifuButton" label="Share" click="_shareKifu();" fontSize="11" />
+						<mx:Button id="shareKifuButton3" label="Share" click="_shareKifu3();" fontSize="11" />
 						<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 					</mx:HBox>
 					<mx:HBox>
@@ -2414,11 +2532,11 @@
 					<mx:Label text="To"/>
 					<mx:DateChooser id="kifuSearchToChooser" showToday="false" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="575" height="470" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+				<mx:DataGrid id="kifuSearchGrid" width="615" height="470" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 					<mx:columns>
 					<mx:DataGridColumn dataField="winner" headerText="{Language.ac.getItemAt(_language).result}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="black" headerText="{Language.ac.getItemAt(_language).black}" width="80" paddingLeft="2" />
-					<mx:DataGridColumn dataField="white" headerText="{Language.ac.getItemAt(_language).white}" width="80" paddingLeft="2" />
+					<mx:DataGridColumn itemRenderer="{kifuSearchBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}" width="100" paddingLeft="0" />
+					<mx:DataGridColumn itemRenderer="{kifuSearchWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}" width="100" paddingLeft="0" />
 					<mx:DataGridColumn dataField="rule" headerText="{Language.ac.getItemAt(_language).rule}" width="110" paddingLeft="2" />
 					<mx:DataGridColumn dataField="opening" headerText="{Language.ac.getItemAt(_language).opening}" width="120" paddingLeft="2" />
 					<mx:DataGridColumn dataField="moves" headerText="{Language.ac.getItemAt(_language).moves}" width="45" textAlign="center" paddingLeft="0" />

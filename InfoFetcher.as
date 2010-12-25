@@ -26,11 +26,11 @@
 		public var titleUser:Array;
 		public var titleName:Array;
 		public var titleRate:Array;
-		public static var rank_thresholds:Array;
-		public static var rank_names:Array;
+		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
+		public static const rank_names:Array = new Array('PRO', '7-Dan', '6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan', '1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu', '6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu', '11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu');
 		public var country_codes:Array;
-		public var country_names:Array;
-		public var country_names3:Array;
+		public static var country_names:Array;
+		public static var country_names3:Array;
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String
@@ -60,8 +60,8 @@
 			titleUser = new Array();
 			titleName = new Array();
 			titleRate = new Array();
-			rank_thresholds = new Array();
-			rank_names = new Array();
+//			rank_thresholds = new Array();
+//			rank_names = new Array();
 			country_codes = new Array();
 			country_names = new Array();
 			country_names3 = new Array();
@@ -83,11 +83,11 @@
 				titleName.push(line.split("\t")[1]);
 				titleRate.push(line.split("\t")[2]);
 			}
-			lines = match[5].split("\n");
-			for each(line in lines) {
-				rank_thresholds.push(line.split("\t")[0]);
-				rank_names.push(line.split("\t")[1]);
-			}
+//			lines = match[5].split("\n");
+//			for each(line in lines) {
+//				rank_thresholds.push(line.split("\t")[0]);
+//				rank_names.push(line.split("\t")[1]);
+//			}
 			lines = match[6].split("\n");
 			for each(line in lines) {
 				country_codes.push(parseInt(line.split("\t")[0]));
@@ -106,7 +106,6 @@
 				serverMaintenanceTime = new Date();
 				serverMaintenanceTime.setTime(Date.parse(match[9]));
 			}
-			Alert.show("load comp.");
 		}
 		
 	    public static function makeRankFromRating(i:int):String {
@@ -148,6 +147,8 @@
 				return "Rook Handicap (Non-rated)";
 			case "hcrooklance":
 				return "Rook-Lance Handicap (Non-rated)";
+			case "hcrooksilver":
+				return "Rook-Silver Handicap (Non-rated)";
 			case "hc2p":
 				return "2-piece Handicap (Non-rated)";
 			case "hc4p":
@@ -182,6 +183,8 @@
 				return "Rook HC";
 			case "hcrooklance":
 				return "1.5";
+			case "hcrooksilver":
+				return "1.75";
 			case "hc2p":
 				return "2-piece HC";
 			case "hc4p":
@@ -212,6 +215,8 @@
 				return "飛車落ち";
 			case "hcrooklance":
 				return "一丁半";
+			case "hcrooksilver":
+				return "飛銀落ち";
 			case "hc2p":
 				return "二枚落ち";
 			case "hc4p":
@@ -247,6 +252,22 @@
 				type_str += "飛車落ち"; break;
 			case "hcrooklance":
 				type_str += "飛香落ち"; break;
+			case "hcrooksilver":
+				type_str += "その他\r\n";
+				type_str += "上手の持駒：なし\r\n";
+				type_str += "９ ８ ７ ６ ５ ４ ３ ２ １\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "|v香v桂v銀v金v玉v金 ・v桂v香|一\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・v角 ・|二\r\n";
+				type_str += "|v歩v歩v歩v歩v歩v歩v歩v歩v歩|三\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|四\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|五\r\n";
+				type_str += "| ・ ・ ・ ・ ・ ・ ・ ・ ・|六\r\n";
+				type_str += "| 歩 歩 歩 歩 歩 歩 歩 歩 歩|七\r\n";
+				type_str += "| ・ 角 ・ ・ ・ ・ ・ 飛 ・|八\r\n";
+				type_str += "| 香 桂 銀 金 玉 金 銀 桂 香|九\r\n";
+				type_str += "+---------------------------+\r\n";
+				type_str += "上手番"; break;
 			case "hc2p":
 				type_str += "二枚落ち"; break;
 			case "hc4p":
