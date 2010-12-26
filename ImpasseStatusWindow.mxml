@@ -8,6 +8,8 @@
           import mx.collections.ArrayCollection;
 		  import mx.utils.ObjectProxy;
 		  [Bindable]
+		  public var language:int = 0;
+		  [Bindable]
 		  private var _black:ObjectProxy;
 		  [Bindable]
 		  private var _white:ObjectProxy;
@@ -44,13 +46,13 @@
 			<mx:Label text="Points"/>
 		</mx:VBox>
 		<mx:VBox horizontalAlign="center">
-			<mx:Label text="Black" fontWeight="bold" />
+			<mx:Label text="{Language.ac.getItemAt(language).black}" fontWeight="bold" />
 			<mx:Label id="blackEntered" text="{_black.entered ? 'YES' : 'NO'}"/>
 			<mx:Label id="blackPieces" text="{_black.pieces}" textAlign="right" />
 			<mx:Label id="blackPoints" text="{_black.points}" textAlign="right" />
 		</mx:VBox>
 		<mx:VBox horizontalAlign="center">
-			<mx:Label text="White" fontWeight="bold" />
+			<mx:Label text="{Language.ac.getItemAt(language).white}" fontWeight="bold" />
 			<mx:Label id="whiteEntered" text="{_white.entered ? 'YES' : 'NO'}"/>
 			<mx:Label id="whitePieces" text="{_white.pieces}" textAlign="right" />
 			<mx:Label id="whitePoints" text="{_white.points}" textAlign="right" />

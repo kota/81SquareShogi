@@ -868,6 +868,7 @@
 		if (!_pmLog[name]) _pmLog[name] = "";
 		_pmLog[name] += "<font color='#FF0000'>" + message + "</font>" + "\n";
 		if (_playerInfoWindows[name]) {
+			_playerInfoWindows[name].maximize();
 			_playerInfoWindows[name].pmText = _pmLog[name];
 			_playerInfoWindows[name].pmCheckBox.selected = true;
 			_playerInfoWindows[name].togglePM();
@@ -921,7 +922,6 @@
     private function _handleMonitor(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
 	  var end_game:Boolean = false;
-	  var winnerTurn:int = -1;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
 	  if (_watch_game != null) board.monitor(e.message, _watch_game);
 	  if (_impasseStatusWindow) {
@@ -931,10 +931,9 @@
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
-		winnerTurn = 1 - board.last_pos.turn;
-        _writeUserMessage((winnerTurn == Kyokumen.SENTE ? "White: " : "Black: ") + "Time up.\n", 2, "#DD0088");
+        _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
 		kifuMove.num = board.kifu_list.length;
-        kifuMove.move = (winnerTurn == Kyokumen.SENTE ? "△" : "▲") + "Time up";
+        kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
 	  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
@@ -942,7 +941,6 @@
 		  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
       } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
 		end_game = true;
-		winnerTurn = board.last_pos.turn;
         _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
 		kifuMove.num = board.kifu_list.length;
 		kifuMove.move = "Illegal Move";
@@ -950,8 +948,7 @@
 		board.kifu_list.push(kifuMove);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
 		  end_game = true;
-		  winnerTurn = 1 - board.last_pos.turn;
-		  _writeUserMessage((winnerTurn == Kyokumen.SENTE ? "White" : "Black")  + " resigned.\n", 2, "#DD0088");
+		  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 		  end_game = true;
           _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
@@ -979,9 +976,12 @@
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
 			shareKifuButton2.enabled = true;
-			if (winnerTurn != -1) {
-				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderThickness', 2);
-				board.infoBoxes[winnerTurn == board.my_turn ? 0 : 1].setStyle('borderColor', 0xFF0000);
+			if (e.message.indexOf("#SENTE_WIN") >= 0) {
+				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderThickness', 2);
+				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderColor', 0xFF0000);
+			} else if (e.message.indexOf("#GOTE_WIN") >= 0) {
+				board.infoBoxes[board.my_turn == Kyokumen.GOTE ? 0 : 1].setStyle('borderThickness', 2);
+				board.infoBoxes[board.my_turn == Kyokumen.GOTE ? 0 : 1].setStyle('borderColor', 0xFF0000);
 			}
 			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
@@ -1319,6 +1319,7 @@
 	  if (_playerInfoWindows[user.name]) {
 		  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
 		  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
+		  _playerInfoWindows[user.name].maximize();
 		  return;
 	  }
 	  _playerInfoWindows[user.name] = new PlayerInfoWindow();
@@ -1327,7 +1328,6 @@
 	  PopUpManager.addPopUp(_playerInfoWindows[user.name], this, false);
 	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
 	  _playerInfoWindows[user.name].language = _language;
-      _playerInfoWindows[user.name].title = "Player Info";
 	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isPlayer()) {
@@ -1489,6 +1489,7 @@
 		_impasseStatusWindow =  ImpasseStatusWindow(PopUpManager.createPopUp(board, ImpasseStatusWindow, true));
 		_impasseStatusWindow.addEventListener("close_window", _handleImpasseStatusClose);
 		PopUpManager.centerPopUp(_impasseStatusWindow);
+	    _impasseStatusWindow.language = _language;
 		_impasseStatusWindow.title = "Impasse Status";
 		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
 		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isPlayer() && board.position.turn == board.my_turn) ? board.my_turn : -1);

@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" close="_close();" headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" doubleClickEnabled="true" doubleClick="_minmax();" close="_close();"
+					headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5" title="Player Info">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
@@ -39,6 +40,7 @@
 
 		  public var pmText:String = "";
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
+		  private const MINIMIZED_HEIGHT:int = 26;
 		  
 		  public function readUser(user:Object):void {
 			  _name = user.name;
@@ -89,6 +91,26 @@
 		  private function _clearHighlight():void {
 			  pmTextArea.setStyle('backgroundColor', undefined);
 			  pmTextArea.callLater(scrollDown);
+		  }
+		  
+		  private function _minmax():void {
+			  if (this.height == MINIMIZED_HEIGHT) {
+				  this.height = undefined;
+				  this.title = "Player Info";
+				  this.setStyle('borderAlpha', undefined);
+			  } else {
+				  this.height = MINIMIZED_HEIGHT;
+				  this.title = "Player Info (" + _name + ")";
+				  this.setStyle('borderAlpha', 0.8);
+			  }
+		  }
+		  
+		  public function maximize():void {
+			  if (this.height == MINIMIZED_HEIGHT) {
+				  this.height = undefined;
+				  this.title = "Player Info";
+				  this.setStyle('borderAlpha', undefined);
+			  }
 		  }
 
           private function _close():void {
