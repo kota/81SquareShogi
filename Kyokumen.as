@@ -17,6 +17,7 @@ package  {
 		private var _komadai:Array;
 		private var _superior:int;
 		private var _impasseStatus:Array;
+		private var _last_to:Point;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
     private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
@@ -68,6 +69,7 @@ package  {
 				_impasseStatus[i] = { 'entered':false, 'pieces':0, 'points':0 };
 			}
 			loadFromString(initialPositionStr);
+			this._last_to = new Point(0, 0);
 		}
 
     public function loadFromString(position_str:String):void{
@@ -467,7 +469,7 @@ package  {
 //			return n;
 //		}
 		
-	public static function generateWesternNotationFromMovement(mv:Movement):String {
+	public function generateWesternNotationFromMovement(mv:Movement):String {
 	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
 	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
 	  notationStr += koma_western_names[originalType];
@@ -478,18 +480,24 @@ package  {
 	  } else {
 	  	notationStr += "-";
 	  }
-	  notationStr += 9 - mv.to.x
-	  notationStr += rank_western_names[mv.to.y];
+	  if (mv.to.x != _last_to.x || mv.to.y != _last_to.y) {
+		notationStr += 9 - mv.to.x
+		notationStr += rank_western_names[mv.to.y];
+	  }
+	  _last_to = mv.to;
 	  if (mv.promote) {
 	  	notationStr += "+";
 	  } else if (mv.from.x != HAND && !mv.koma.isPromoted() && mv.koma.type != Koma.OU && mv.koma.type != Koma.KI){
 	  	if ( (1-mv.turn)*mv.from.y + mv.turn*(8-mv.from.y) <= 2 || (1-mv.turn)*mv.to.y + mv.turn*(8-mv.to.y) <=2 ) notationStr += "=";
 	  } 
+	  do {
+		  notationStr += " ";
+	  } while (notationStr.length < 7);
 	  notationStr += " (" + mv.time + ")";
 	  return notationStr;	
 	}
 	
-	public static function generateKIFTextFromMovement(mv:Movement):String{
+	public function generateKIFTextFromMovement(mv:Movement):String{
 	  var KIFStr:String = file_japanese_names[8 - mv.to.x];
 	  KIFStr += rank_japanese_names[mv.to.y];
 	  

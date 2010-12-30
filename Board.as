@@ -345,9 +345,9 @@ package  {
 			var mv:Movement = _position.generateMovementFromString(move);
 			var kifuMove:Object = new Object();
 			kifuMove.num = "*" + kifu_list_self.length;										//No. of the Move
-			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
+			kifuMove.move = _position.generateWesternNotationFromMovement(mv);	//Western Notation
 			kifuMove.moveStr = move;												//CSA
-			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
+			kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list_self.push(kifuMove);
 		} else {
 			mv = _last_pos.generateMovementFromString(move);
@@ -360,9 +360,9 @@ package  {
 			}
 			kifuMove = new Object();
 			kifuMove.num = kifu_list.length;										//No. of the Move
-			kifuMove.move = Kyokumen.generateWesternNotationFromMovement(mv);	//Western Notation
+			kifuMove.move = _last_pos.generateWesternNotationFromMovement(mv);	//Western Notation
 			kifuMove.moveStr = move;												//CSA
-			kifuMove.moveKIF = Kyokumen.generateKIFTextFromMovement(mv);			//Japanese Notation
+			kifuMove.moveKIF = _last_pos.generateKIFTextFromMovement(mv);			//Japanese Notation
 			kifu_list.push(kifuMove);
 		}
 		if (actual) {

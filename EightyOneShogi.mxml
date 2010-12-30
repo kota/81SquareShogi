@@ -2573,7 +2573,7 @@
 				</mx:HBox>
 				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
 				 <mx:columns>
-				  <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="5" />
+				  <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
 				  <mx:DataGridColumn dataField="move"/>
 				 </mx:columns>
 				</mx:DataGrid>
