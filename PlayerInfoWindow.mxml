@@ -163,9 +163,10 @@
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
+			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="Favorite" />
+			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
 			<mx:Button id="challenge" click="_close();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
 			<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
-			<mx:Button id="ignore" label="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
 			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
