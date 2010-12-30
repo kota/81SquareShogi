@@ -1370,6 +1370,10 @@
 	}
 
     private function _handleSendChat1(e:FlexEvent):void {
+	  if (e.target.text.match(/\[auto\-chat\]/)) {
+		  Alert.show("You cannot imitate auto-chat.");
+		  return;
+	  }
 	  var match:Array;
 	  if ((match = e.target.text.match(/^@(.+?)\s(.+)$/))) {
 		  _sendPrivateChat(match[1], match[2]);
@@ -1528,6 +1532,10 @@
     }
 
     private function _handleSendChat2(e:FlexEvent):void {
+	  if (e.target.text.match(/\[auto\-chat\]/)) {
+		  Alert.show("You cannot imitate auto-chat.");
+		  return;
+	  }
 	  var match:Array;
 	  if ((match = e.target.text.match(/^@(.+?)\s(.+)$/))) {
 		  _sendPrivateChat(match[1], match[2]);
