@@ -135,6 +135,16 @@ package{
 		}
 	  }
     }
+	
+	public function rematch(game_name:String, turn:int):void {
+		_current_state = STATE_GAME_WAITING;
+		var match:Array = game_name.match(/^([0-9a-z]+?)_(.*)$/);
+		if (match[0].match(/^hc/)) {
+			send("%%GAME " + match[1] + "_@" + match[2] + (turn == Kyokumen.SENTE ? " +" : " -"));
+		} else {
+			send("%%GAME " + match[1] + "_@" + match[2] + (turn == Kyokumen.SENTE ? " -" : " +"));
+		}
+	}
 
     public function agree():void {
       trace("AGREE");

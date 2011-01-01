@@ -138,6 +138,7 @@ package  {
 	public var study_list:Array;
 	public var since_last_move:int = 0;
 	public var studyOn:Boolean = false;
+	public var rematch:Array = new Array(2);
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -408,6 +409,8 @@ package  {
 
     public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int):void {
       trace("game started");
+	  rematch[0] = false;
+	  rematch[1] = false;
 	  isPlayer = true;
 	  _player_infos = player_infos;
 	  _player_infos[0].labelColor = 0x000000;
@@ -643,6 +646,8 @@ package  {
 		_last_pos = new Kyokumen(kyokumen_str);
         setPosition(_position);
       }
+	  rematch[0] = false;
+	  rematch[1] = false;
 //      watch_game_end = false;
 
 	  var blackInfo:Object = {

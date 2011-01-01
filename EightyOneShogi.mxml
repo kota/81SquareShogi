@@ -43,7 +43,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2010/12/30";
+	public const VERSION:String = "ver.2011/01/01";
 	private const DIRECTORY:String = "http://www.81dojo.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
@@ -70,6 +70,7 @@
     private var _monitoring:Boolean;
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
+	private var _rematching:Boolean = false;
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
 	private const filterDefault:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 ]);
@@ -316,7 +317,7 @@
 				hc = "NR";
 			}
             user.rule = hc + ": " + total + "-" + game_info[4];
-            if(user.status == "game_waiting"){
+            if(user.status == "game_waiting" && !user.game_name.match(/_@/)){
               user.status2 += "W";
             } else if (user.status == "post_game") {
 				user.status2 = "P "; // + (user.turn == "+" ? "▲" : "△");
@@ -542,6 +543,7 @@
     private function _handleGameStarted(e:ServerMessageEvent):void {
 	  _waiting = false;
 	  _challenging = false;
+	  _rematching = false;
 	  if(_game_name && _monitoring){
         _client.monitorOff(_game_name);
         _monitoring = false;
@@ -590,6 +592,7 @@
       resignButton.enabled = true;
 	  reverseButton.enabled = false;
 	  greetButton.visible = true;
+	  rematchButton.visible = false;
 	  shareKifuButton2.enabled = false;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
@@ -679,6 +682,7 @@
 	  }
       closeButton.enabled = true;
       resignButton.enabled = false;
+	  rematchButton.visible = true;
 	  shareKifuButton2.enabled = true;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
@@ -725,7 +729,7 @@
 	  for each(var line:String in e.message.split("\n")) {
 		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
 	  }
-    if (_challenging) {
+    if (_challenging || _rematching) {
       _client.agree();
     } else {
 	  var challengerName:String = login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
@@ -843,6 +847,20 @@
 				sidePanel.setStyle('borderColor', _panelReplayColor);
 				_sendStudy();
 			}
+		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##REMATCH\]$/))) {
+			if (match[1] == board.playerInfos[0].name) {
+				board.rematch[0] = true;
+			} else if (match[1] == board.playerInfos[1].name) {
+				board.rematch[1] = true;
+			}
+			if (board.isPlayer && board.post_game && board.rematch[0] && board.rematch[1]) {
+				board.rematch[0] == false;
+				board.rematch[1] == false;
+				_client.closeGame();
+				board.closeGame();
+				_rematching = true;
+				_client.rematch(_game_name.split("+")[1], board.my_turn);
+			}
 		} else {
 			if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 			if (sender == board.playerInfos[0].name) {
@@ -911,6 +929,7 @@
 	
 	private function _handleLeave(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex != 2) return;
+		if (board.playerInfos[0] == null) return;
 		if (e.message == board.playerInfos[0].name) {
 			_writeUserMessage(e.message + " left.\n", 2, "#000000", true);
 			board.name_labels[board.my_turn].setStyle("color", 0x999999);
@@ -1317,6 +1336,7 @@
 		  resignButton.enabled = false;
 		  reverseButton.enabled = true;
 		  greetButton.visible = false;
+		  rematchButton.visible = false;
 		  shareKifuButton2.enabled = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
@@ -1350,7 +1370,7 @@
 	  _playerInfoWindows[user.name].language = _language;
 	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
-	  if (_isPlayer()) {
+	  if (_isDuringMyGame()) {
 		  _playerInfoWindows[user.name].invite.enabled = false;
 		  _playerInfoWindows[user.name].directMessage.enabled = false;
 	  } else {
@@ -1517,7 +1537,7 @@
 	    _impasseStatusWindow.language = _language;
 		_impasseStatusWindow.title = "Impasse Status";
 		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
-		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isPlayer() && board.position.turn == board.my_turn) ? board.my_turn : -1);
+		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isDuringMyGame() && board.position.turn == board.my_turn) ? board.my_turn : -1);
     }
 	
 	private function _handleImpasseStatusClose(e:Event):void {
@@ -1526,6 +1546,13 @@
 	
 	private function _handleKachiDeclare(e:MouseEvent):void {
 		_client.kachi();
+	}
+	
+	private function _rematch():void {
+		if (_game_name && !board.rematch[board.my_turn]) {
+			_sendAutoChat("Standing by for Rematch");
+			_client.gameChat(_game_name, "[##REMATCH]");
+		}
 	}
 	
     private function _closeGame():void {
@@ -1751,11 +1778,11 @@
 	
  	//------------------------------------------------------------------------------------------------------------------------ MOUSE DETECTION
 	private function _rollOver(e:MouseEvent):void {
-		if (_isPlayer() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
+		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
 	}
 	
 	private function _rollOut(e:MouseEvent):void {
-		if (_isPlayer() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_OUT]0,0");
+		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_OUT]0,0");
 	}
 
 	private function _playerInfoFromText(textArea:TextArea):void {
@@ -1881,6 +1908,7 @@
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
 		greetButton.visible = false;
+		rematchButton.visible = false;
 		shareKifuButton2.enabled = true;
 		if (_viewerAlone) {
 			closeButton.enabled = false;
@@ -2068,7 +2096,7 @@
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
-	  if (_isPlayer()) {
+	  if (_isDuringMyGame()) {
 		  if (board.piece_type >= 4 && board.piece_type != _prev_piece_type) {
 			  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
 			  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
@@ -2237,7 +2265,7 @@
 	}
 	
 	private function _sendPrivateChat(sendTo:String, message:String):void {
-		if (!_isPlayer()) {
+		if (!_isDuringMyGame()) {
 			var user:Object = _findPlayerFromList(sendTo);
 			if (!user) {
 				Alert.show("User not found online");
@@ -2285,10 +2313,10 @@
 	}
   }
   
-  private function _isPlayer():Boolean {
-	  if (_game_name && !board.post_game) {
-		  if (board.playerInfos[0].name == login_name || board.playerInfos[1].name == login_name) return true;
-	  }
+  private function _isDuringMyGame():Boolean {
+	  if (_game_name && board.isPlayer && !board.post_game) return true;
+//		  if (board.playerInfos[0].name == login_name || board.playerInfos[1].name == login_name) return true;
+//	  }
 	  return false;
   }
   
@@ -2527,10 +2555,13 @@
 			  </mx:HBox>
 		  </mx:HBox>
           <mx:HBox width="300" horizontalAlign="right">
-            <mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
-            <mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
-            <mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
-            <mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
+			<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="Rematch" click="_rematch();"/>
+			<mx:HBox width="100%" horizontalAlign="right">
+				<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
+				<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
+				<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
+				<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
+			</mx:HBox>
           </mx:HBox>
 		 <mx:HBox width="300" horizontalAlign="right">
 			<mx:Button label="Clear Arrows" click="_clearArrows();"/>
