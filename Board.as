@@ -77,7 +77,7 @@ package  {
 	[Embed(source = "/sound/piece_double.mp3")]
 	private var sound_piece_double:Class;
 	private var _sound_piece_double:Sound = new sound_piece_double();
-	private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
+	private const IMAGE_DIRECTORY:String = "http://www.81dojo.com/dojo/images/";
 
     public var handBoxes:Array;
 	public var infoBoxes:Array;
@@ -244,6 +244,7 @@ package  {
         i_box.setStyle('borderStyle', 'solid');
 		i_box.setStyle('borderThickness', 2);
 		i_box.horizontalScrollPolicy = "off";
+		i_box.verticalScrollPolicy = "off";
         i_box.width = KOMADAI_WIDTH - 10
         i_box.height = KOMADAI_HEIGHT - 10
         i_box.x = i == 0 ? hand.x + 10 : hand.x

@@ -21,7 +21,7 @@
 	public class InfoFetcher extends EventDispatcher
 	{
 		private var _urlLoader:URLLoader = new URLLoader();
-		private const SOURCE:String = "http://www.81squareuniverse.com/dojo/";
+		private const SOURCE:String = "http://www.81dojo.com/dojo/";
 		public var newestVer:String;
 		public var titleUser:Array;
 		public var titleName:Array;
@@ -46,6 +46,8 @@
 		private static var silver_medal:Class;
 		[Embed(source = "/images/bronze_medal.png")]
 		private static var bronze_medal:Class;
+		public static const horizontalTextBars:Array = new Array('　', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█');
+		public static const verticalTextBars:Array = new Array('　', '▁', '▂', '▃', '▄', '▅', '▆', '▇', '█');
 		
 		public function InfoFetcher()
 		{
@@ -548,6 +550,12 @@
 			}
 			var dif:Number = winner - loser;
 			return Math.round(multiply * Math.min(31, Math.max(1, 32*(0.5 - 1.4217e-3*dif + 2.4336e-7*dif*Math.abs(dif) + 2.514e-9*dif*dif*dif - 1.991e-12*dif*dif*dif*Math.abs(dif)))));
+		}
+		
+		public static function textBar(v:int):String {
+			var i:int = v / 10;
+			if (i > 8) i = 8;
+			return verticalTextBars[i];
 		}
 	}
 

@@ -44,7 +44,7 @@
 	import Language;
 	
 	public const VERSION:String = "ver.2010/12/30";
-	private const DIRECTORY:String = "http://www.81squareuniverse.com/dojo/";
+	private const DIRECTORY:String = "http://www.81dojo.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
@@ -321,7 +321,8 @@
             } else if (user.status == "post_game") {
 				user.status2 = "P "; // + (user.turn == "+" ? "▲" : "△");
 			} else {
-              user.status2 = "G " + user.moves; // + (user.turn == "+" ? "▲" : "△");
+              user.status2 = "G " + InfoFetcher.textBar(user.moves);
+			  //for (var i:int = 1; i <= int(user.moves / 3); i++) user.status2 += "|";// + user.moves; // + (user.turn == "+" ? "▲" : "△");
             }
           }
 		  if (user.name != login_name && _infoFetcher.cheaters.indexOf(user.name.toLowerCase()) >= 0) user.titleName = "!!!";
@@ -1960,7 +1961,6 @@
 		var listed:Boolean = true;
 		switch (String(e.target.bufferXML.@item)) {
 			case "wins":
-				trace("hit");
 				_ranking_wins_list = new Array(); break;
 			case "rate":
 				_ranking_rate_list = new Array(); break;
@@ -1994,7 +1994,7 @@
 					  break;
 				  }
 			}
-			if (_infoFetcher.cheaters.indexOf(player.login)) { // Temporarily
+			if (_infoFetcher.cheaters.indexOf(player.login) >= 0) { // Temporarily
 				listed = false;
 				num -= 1;
 			}
@@ -2440,7 +2440,7 @@
 		<mx:VDividedBox liveDragging="true">
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="56" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{Language.ac.getItemAt(_language).rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" sortCompareFunction="_sortName" />

@@ -39,8 +39,8 @@
 		  [Bindable]
 
 		  public var pmText:String = "";
-		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
-		  private const MINIMIZED_HEIGHT:int = 26;
+		  private const IMAGE_DIRECTORY:String = "http://www.81dojo.com/dojo/images/";
+		  private const MINIMIZED_HEIGHT:int = 29;
 		  
 		  public function readUser(user:Object):void {
 			  _name = user.name;
@@ -94,13 +94,16 @@
 		  }
 		  
 		  private function _minmax():void {
+			  if (contentMouseY > 2) return;
 			  if (this.height == MINIMIZED_HEIGHT) {
 				  this.height = undefined;
 				  this.title = "Player Info";
+  				  this.setStyle('borderColor', undefined);
 				  this.setStyle('borderAlpha', undefined);
 			  } else {
 				  this.height = MINIMIZED_HEIGHT;
 				  this.title = "Player Info (" + _name + ")";
+				  this.setStyle('borderColor', 0xFFAA33);
 				  this.setStyle('borderAlpha', 0.8);
 			  }
 		  }
