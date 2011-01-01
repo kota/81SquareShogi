@@ -593,7 +593,7 @@
 	  reverseButton.enabled = false;
 	  greetButton.visible = true;
 	  rematchButton.visible = false;
-	  shareKifuButton2.enabled = false;
+	  shareKifuButton2.visible = false;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
       forwardOneButton.enabled = false;
@@ -683,7 +683,7 @@
       closeButton.enabled = true;
       resignButton.enabled = false;
 	  rematchButton.visible = true;
-	  shareKifuButton2.enabled = true;
+	  shareKifuButton2.visible = true;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
@@ -1009,7 +1009,7 @@
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
-			shareKifuButton2.enabled = true;
+			shareKifuButton2.visible = true;
 			if (e.message.indexOf("#SENTE_WIN") >= 0) {
 				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderThickness', 2);
 				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderColor', 0xFF0000);
@@ -1337,7 +1337,7 @@
 		  reverseButton.enabled = true;
 		  greetButton.visible = false;
 		  rematchButton.visible = false;
-		  shareKifuButton2.enabled = false;
+		  shareKifuButton2.visible = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
 		  forwardOneButton.enabled = true;
@@ -1909,7 +1909,7 @@
 		reverseButton.enabled = true;
 		greetButton.visible = false;
 		rematchButton.visible = false;
-		shareKifuButton2.enabled = true;
+		shareKifuButton2.visible = true;
 		if (_viewerAlone) {
 			closeButton.enabled = false;
 			checkLobbyButton.enabled = false;
@@ -2555,8 +2555,9 @@
 			  </mx:HBox>
 		  </mx:HBox>
           <mx:HBox width="300" horizontalAlign="right">
+			<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="Share This Game" click="_shareKifu2();"/>
 			<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="Rematch" click="_rematch();"/>
-			<mx:HBox width="100%" horizontalAlign="right">
+			<mx:HBox width="100%" horizontalAlign="right" horizontalScrollPolicy="off" horizontalGap="5">
 				<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
 				<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
 				<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
@@ -2565,7 +2566,6 @@
           </mx:HBox>
 		 <mx:HBox width="300" horizontalAlign="right">
 			<mx:Button label="Clear Arrows" click="_clearArrows();"/>
-			<mx:Button id="shareKifuButton2" label="Share" click="_shareKifu2();"/>
 		 </mx:HBox>
 		 <mx:Spacer height="-20"/>
 		 <mx:HBox verticalAlign="bottom">
@@ -2630,7 +2630,7 @@
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendKifuSearch();" />
-						<mx:Button id="shareKifuButton3" label="Share" click="_shareKifu3();" fontSize="11" />
+						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="Share" click="_shareKifu3();" fontSize="11" />
 						<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 					</mx:HBox>
 					<mx:HBox>
