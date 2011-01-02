@@ -464,7 +464,7 @@
 				medal.toolTip = "Non-major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "81Ou" || user.titleName == "CosmOu") {
+				if (user.titleName == "八一王" || user.titleName == "宇宙王") {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
 				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {

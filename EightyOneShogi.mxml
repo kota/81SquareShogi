@@ -297,7 +297,10 @@
 			  'favorite':"",
 			  'favoriteWidth':0
 			  }
-		  if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
+		  if (user.name == login_name) {
+			  user.favorite = "◆";
+			  user.favoriteWidth = 11;
+		  } else if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
 			  user.favorite = "★";
 			  user.favoriteWidth = 11;
 		  }
@@ -885,9 +888,7 @@
 		var message:String = match[2];
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
 		if (_pmAutoOpen) _openPlayerInfo(_findPlayerFromList(name));
-		if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
-		if (!_pmLog[name]) _pmLog[name] = "";
-		_pmLog[name] += "<font color='#FF0000'>" + message + "</font>" + "\n";
+		_writePmLog(name, message, "#FF0000");
 		if (_playerInfoWindows[name]) {
 			_playerInfoWindows[name].maximize();
 			_playerInfoWindows[name].pmText = _pmLog[name];
@@ -1140,12 +1141,14 @@
 	}
 
   private function _checkLobby():void {
+	  userListPanel.setStyle('borderColor', _panelReplayColor);
 	  mainViewStack.selectedIndex = 1;
 	  backToGameButton.visible = true;
 	  searchViewButton.enabled = false;
   }
 
   private function _backToGame():void {
+	  userListPanel.setStyle('borderColor', undefined);
 	  mainViewStack.selectedIndex = 2;
 	  backToGameButton.visible = false;
 	  searchViewButton.enabled = true;
@@ -2176,8 +2179,10 @@
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
 		var match:Array;
-		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message.replace(/</g, "&lt;") + (bold ? "</b>" : "") + "</font>";
-		if ((match = message.match(/\s(https?\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttps?\:\/\/[^\"]+?\s/, " <a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a> ");
+		message = message.replace(/</g, "&lt;");
+//		if ((match = message.match(/\s(https?\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttps?\:\/\/[^\"]+?\s/, " <u><a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a></u> ");
+		if ((match = message.match(/(https?\:\/\/[^\"^\s^\\]+)/))) message = message.replace(/https?\:\/\/[^\"^\s^\\]+/, "<u><a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a></u>");
+		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message + (bold ? "</b>" : "") + "</font>";
 		message = message.replace(/\\n/g, "\n");
 		switch (n) {
 			case 1:
@@ -2191,6 +2196,16 @@
 				userMessage2.callLater(_scrollDown2);
 				break;		
 		}
+    }
+	
+    private function _writePmLog(name:String, message:String, colorCode:String, bold:Boolean = false):void {
+		var match:Array;
+		message = message.replace(/</g, "&lt;");
+		if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<u><a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a></u>");
+		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message + (bold ? "</b>" : "") + "</font>";
+		if (!_pmLog[name]) _pmLog[name] = "";
+		_pmLog[name] += message + "\n";
+		trace(message);
     }
 
     private function _scrollDown1():void{
@@ -2272,11 +2287,9 @@
 				return;
 			} else if (user.status == "game") {
 				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
-//					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
 				} else if (_game_name && _monitoring && sendTo == board.playerInfos[1].name) {
-//					_client.privateChat(sendTo, message);
 					_client.privateChat(board.playerInfos[0].name, "[auto-chat] Sent private message to White.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to White.");
 				} else {
@@ -2285,11 +2298,8 @@
 				}
 			}
 			_client.privateChat(sendTo, message);
-			if (!_pmLog[sendTo]) _pmLog[sendTo] = "";
-			_pmLog[sendTo] += "<font color='#0033DD'>" + message + "</font>" + "\n";
+			_writePmLog(sendTo, message, "#0033DD");
 			if (_playerInfoWindows[sendTo]) {
-				var match:Array;
-				if ((match = message.match(/(https?\:\/\/[^\"^\s]+)/))) message = message.replace(/https?\:\/\/[^\"^\s]+/, "<a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a>");
 				_playerInfoWindows[sendTo].pmText = _pmLog[sendTo];
 				_playerInfoWindows[sendTo].pmCheckBox.selected = true;
 				_playerInfoWindows[sendTo].togglePM();
@@ -2545,7 +2555,7 @@
         <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="435" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="419" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
-        <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+        <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
             <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
             <mx:Button id="impasseButton" label="{Language.ac.getItemAt(_language).impasse}" click="_showImpasse();"/>
