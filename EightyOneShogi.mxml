@@ -364,6 +364,7 @@
 				  'flagURL': DIRECTORY + "images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
 				  'rankColor': user_list[i].rankColor
 				  }
+			  if (user_list[i].wins + user_list[i].losses < 10) user.rating = "*" + String(user.rating);
 		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			  total = parseInt(game_info[3]) / 60;
 			  if (game_info[1] == "r") {
@@ -536,6 +537,15 @@
 		  watcher.rate = parseInt(match[2]);
 		  watcher.country3 = InfoFetcher.country_names3[parseInt(match[3])];
 		  watcher.country = InfoFetcher.country_names[parseInt(match[3])];
+		  watcher.favorite = "";
+		  watcher.favoriteWidth = 0;
+		  if (watcher.name == login_name) {
+			  watcher.favorite = "◆";
+			  watcher.favoriteWidth = 11;
+		  } else if (_favorite_list.indexOf(watcher.name.toLowerCase()) >= 0) {
+			  watcher.favorite = "★";
+			  watcher.favoriteWidth = 11;
+		  }
           watcher_list.unshift(watcher);
         }
       }
@@ -2494,10 +2504,10 @@
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
 			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="56" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="53" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{Language.ac.getItemAt(_language).rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{Language.ac.getItemAt(_language).country}" width="90" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{Language.ac.getItemAt(_language).country}" width="93" paddingLeft="2" sortCompareFunction="_sortCountry" />
 			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
@@ -2616,8 +2626,8 @@
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="name" headerText="{Language.ac.getItemAt(_language).name}" width="80" paddingLeft="2" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="40" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
+			  <mx:DataGridColumn dataField="name" itemRenderer="{playerListNameRenderer}" headerText="{Language.ac.getItemAt(_language).name}" width="85" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="35" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
 			  <mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
