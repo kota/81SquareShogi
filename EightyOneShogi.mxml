@@ -1907,6 +1907,21 @@
 		board.viewing = true;
 		board.my_turn = Kyokumen.SENTE;
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
+		var blackRate:String;
+		var whiteRate:String;
+		if (e.target.kifuContents.split("\n")[5].match(/^I\+(\d+),/)) blackRate = e.target.kifuContents.split("\n")[5].match(/^I\+(\d+),/)[1];
+		else blackRate = "0";
+		if (e.target.kifuContents.split("\n")[6].match(/^I\-(\d+),/)) whiteRate = e.target.kifuContents.split("\n")[6].match(/^I\-(\d+),/)[1];
+		else whiteRate = "0";
+		if (_game_name.split("+")[1].match(/^hc/) || blackRate.match(/^\*/)) {
+		  board.superior = Kyokumen.GOTE;
+		} else if (whiteRate.match(/^\*/)) {
+		  board.superior = Kyokumen.SENTE;
+		} else if (parseInt(blackRate) > parseInt(whiteRate)) {
+		  board.superior = Kyokumen.SENTE;
+		} else {
+		  board.superior = Kyokumen.GOTE;
+		}
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
