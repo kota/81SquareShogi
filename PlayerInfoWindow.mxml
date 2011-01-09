@@ -39,7 +39,7 @@
 		  [Bindable]
 
 		  public var pmText:String = "";
-		  private const IMAGE_DIRECTORY:String = "http://www.81dojo.com/dojo/images/";
+		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private const MINIMIZED_HEIGHT:int = 29;
 		  
 		  public function readUser(user:Object):void {

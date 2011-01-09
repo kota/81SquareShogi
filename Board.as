@@ -77,7 +77,7 @@ package  {
 	[Embed(source = "/sound/piece_double.mp3")]
 	private var sound_piece_double:Class;
 	private var _sound_piece_double:Sound = new sound_piece_double();
-	private const IMAGE_DIRECTORY:String = "http://www.81dojo.com/dojo/images/";
+	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 
     public var handBoxes:Array;
 	public var infoBoxes:Array;
@@ -770,7 +770,7 @@ package  {
 		  } else {
 			  var kifuMove:Object = new Object();
 			  kifuMove.num = kifu_list.length
-			  kifuMove.move = (_position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
+			  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
 			  kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";
 			  kifu_list.push(kifuMove);
 		  }
