@@ -656,7 +656,10 @@ package  {
 		  'rank':watch_game.blackRank,
 		  'titleName':watch_game.blackTitle,
 		  'country_code':watch_game.blackCountryCode,
-		  'labelColor':watch_game.blackColor
+		  'labelColor':watch_game.blackColor,
+		  'wins':watch_game.blackWins,
+		  'losses':watch_game.blackLosses,
+		  'streak_best':watch_game.blackStreakBest
 	  }
 	  var whiteInfo:Object = {
 		  'name':watch_game.whiteName,
@@ -664,7 +667,10 @@ package  {
 		  'rank':watch_game.whiteRank,
 		  'titleName':watch_game.whiteTitle,
 		  'country_code':watch_game.whiteCountryCode,
-		  'labelColor':watch_game.whiteColor
+		  'labelColor':watch_game.whiteColor,
+		  'wins':watch_game.whiteWins,
+		  'losses':watch_game.whiteLosses,
+		  'streak_best':watch_game.whiteStreakBest
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;

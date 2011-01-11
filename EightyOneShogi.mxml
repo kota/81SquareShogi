@@ -444,6 +444,17 @@
 			  game.opening = InfoFetcher.openingNameJp(tokens[11]);
 			  game.opening_en = InfoFetcher.openingNameEn(tokens[11]);
 		  }
+		  var user:Object;
+		  if ((user = _findPlayerFromList(game.blackName))) {
+			game.blackWins = user.wins;
+			game.blackLosses = user.losses;
+			game.blackStreakBest = user.streak_best;
+		  }
+		  if ((user = _findPlayerFromList(game.whiteName))) {
+			game.whiteWins = user.wins;
+			game.whiteLosses = user.losses;
+			game.whiteStreakBest = user.streak_best;
+		  }
 		  game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
 		  game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		  game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
@@ -470,7 +481,6 @@
 		  }
 		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
 		  if (game.blackColor == 0x999999 || game.whiteColor == 0x999999) game.maxRating -= 3000;
-		  var user:Object;
 		  if (game.blackRating == 0) {
 			  game.blackRank = "-";
 			  game.blackRankColor = 0x999999;
