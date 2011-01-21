@@ -159,6 +159,7 @@
 		  if (_so.data.login) loginname.text = _so.data.login;
 		  if (_so.data.pass) password.text = _so.data.pass;
 		  if (_so.data.language) languageCombo.selectedIndex = _so.data.language;
+		  if (_so.data.server) serverCombo.selectedIndex = _so.data.server;
 	  }
 	  _language = languageCombo.selectedIndex;
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
@@ -218,6 +219,7 @@
 		  _so.data.login = loginname.text;
 		  _so.data.pass = password.text;
 		  _so.data.language = languageCombo.selectedIndex;
+		  _so.data.server = serverCombo.selectedIndex;
 		  _so.flush();
 	  }
       loginMessage.text = "Logged in Successfully";
@@ -1060,6 +1062,15 @@
       trace("connecting.");
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
+	  switch (serverCombo.selectedIndex) {
+		  case 0:
+			_client.setServer('81dojo.com', 4081); break;
+		  case 1:
+			_client.setServer('81dojo.dyndns.org', 4081); break;
+		  case 2:
+			_client.setServer('127.0.0.1', 4081);
+			_api.setHostToLocal();
+	  }
       _client.connect();
     }
 	
@@ -1074,12 +1085,12 @@
 		_connectAndLogin();
 	}
 	
-	private function _localLogin():void {
-		_client.setHostToLocal();
-		_api.setHostToLocal();
-		loginButton.setStyle('color', '0xFF0000');
-		loginButton.setStyle('textRollOverColor', '0xFF0000');
-	}
+//	private function _localLogin():void {
+//		_client.setHostToLocal();
+//		_api.setHostToLocal();
+//		loginButton.setStyle('color', '0xFF0000');
+//		loginButton.setStyle('textRollOverColor', '0xFF0000');
+//	}
 	
 	//=========================================================
 	//                   CONTROLS for VIEWSTACK INDEX = 1
@@ -2437,14 +2448,8 @@
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
       <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
       <mx:Form paddingBottom="0">
-        <mx:FormItem label="{Language.ac.getItemAt(_language).loginname}" paddingTop="-2">
-            <mx:TextInput id="loginname" width="200"/>
-        </mx:FormItem>
-        <mx:FormItem label="{Language.ac.getItemAt(_language).password}" paddingTop="-2">
-            <mx:TextInput id="password" width="200" displayAsPassword="true"/>
-        </mx:FormItem>
 		<mx:FormItem label="{Language.ac.getItemAt(_language).language}" paddingTop="-2">
-			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170" rowCount="10">
+			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170" rowCount="13">
 				<mx:dataProvider><mx:Array>
 					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="{DIRECTORY}images/flags_s/826.gif" />
 					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="{DIRECTORY}images/flags_s/392.gif" />
@@ -2465,7 +2470,7 @@
 				</mx:Array></mx:dataProvider>
                 <mx:itemRenderer>
                     <mx:Component>
-                        <mx:HBox>
+                        <mx:HBox paddingTop="1" paddingBottom="1" verticalAlign="middle">
                             <mx:Image source="{data.image}" width="27" height="17"/>
                             <mx:Text text="{data.label}"/>
                         </mx:HBox>
@@ -2473,6 +2478,29 @@
                 </mx:itemRenderer>
 			</mx:ComboBox>
 		</mx:FormItem>
+		<mx:FormItem label="Server" paddingTop="-2">
+			<mx:ComboBox id="serverCombo" width="170">
+				<mx:dataProvider><mx:Array>
+					<mx:Object label="EARTH (main)" image="{DIRECTORY}images/earth.png" />
+					<mx:Object label="MARS (back-up)" image="{DIRECTORY}images/mars.png" />
+					<mx:Object label="MOON (admin)" image="{DIRECTORY}images/moon.png" />
+				</mx:Array></mx:dataProvider>
+                <mx:itemRenderer>
+                    <mx:Component>
+                        <mx:HBox paddingTop="0" paddingBottom="0" verticalAlign="middle">
+                            <mx:Image source="{data.image}" width="25" height="25"/>
+                            <mx:Text text="{data.label}"/>
+                        </mx:HBox>
+                    </mx:Component>
+                </mx:itemRenderer>
+			</mx:ComboBox>
+		</mx:FormItem>
+        <mx:FormItem label="{Language.ac.getItemAt(_language).loginname}" paddingTop="-2">
+            <mx:TextInput id="loginname" width="200"/>
+        </mx:FormItem>
+        <mx:FormItem label="{Language.ac.getItemAt(_language).password}" paddingTop="-2">
+            <mx:TextInput id="password" width="200" displayAsPassword="true"/>
+        </mx:FormItem>
 		<mx:FormItem label="" paddingTop="-2">
 			<mx:CheckBox label="{Language.ac.getItemAt(_language).save_login_info}" id="savelogin" selected="false" />
 		</mx:FormItem>
@@ -2485,11 +2513,11 @@
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
       <mx:Label paddingTop="5" text="Chief Programmer: Kota" fontSize="13" />
 	  <mx:HBox>
-		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_localLogin();"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
-		  <mx:Label text="Assistant: Hidetchi"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/>
+		  <mx:Label text="Assistant: Hidetchi"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
+		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0" label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
