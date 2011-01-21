@@ -43,7 +43,7 @@
     import mx.utils.StringUtil;
 	import Language;
 	
-	public const VERSION:String = "ver.2011/01/01";
+	public const VERSION:String = "ver.2011/01/21";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	[Bindable]
 	private var _language:int = 0;
