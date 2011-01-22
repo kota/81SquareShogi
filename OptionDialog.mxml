@@ -6,8 +6,6 @@
 			import flash.geom.Point;
         	import mx.controls.*;
             import mx.managers.PopUpManager;
-			[Bindable]
-			public var language:int = 0;
 			
 			public function drawArrow():void {
 				arrowCanvas.removeAllChildren();
@@ -48,13 +46,13 @@
 				<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
 			</mx:HBox>
 			<mx:HBox>
-				<mx:Label text="{Language.ac.getItemAt(language).blind_piece}"/>
+				<mx:Label text="{parentApplication.lan.blind_piece}"/>
 				<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
 				<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
 				<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
 			</mx:HBox>
 		</mx:VBox>
-		<mx:VBox label="{Language.ac.getItemAt(language).sound}" paddingLeft="20" paddingTop="10">
+		<mx:VBox label="{parentApplication.lan.sound}" paddingLeft="20" paddingTop="10">
 			<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
 			<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
 			<mx:HBox>
@@ -102,7 +100,7 @@
 	</mx:TabNavigator>
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 
-        <mx:Button label="{Language.ac.getItemAt(language).cancel}" click="PopUpManager.removePopUp(this);"/> 
-		<mx:Button id="saveSettingsButton" label="{Language.ac.getItemAt(language).save_settings}" click="Alert.show('Settings saved!');"/>
+        <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
+		<mx:Button id="saveSettingsButton" label="{parentApplication.lan.save_settings}" click="Alert.show('Settings saved!');"/>
     </mx:HBox>
 </mx:TitleWindow>

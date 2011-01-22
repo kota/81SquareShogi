@@ -5,8 +5,6 @@
           import mx.controls.*;
           import mx.managers.PopUpManager;
 		  [Bindable]
-		  public var language:int = 0;
-		  [Bindable]
 		  public var challenger_name:String;
 		  [Bindable]
 		  public var user:Object = new Object();
@@ -21,13 +19,13 @@
     </mx:Script>
 	<mx:VBox horizontalAlign="left" paddingLeft="10">
 		<mx:Label text="{challenger_name}" fontSize="16" fontWeight="bold" />
-		<mx:Label text="  {Language.ac.getItemAt(language).rate}: {user.rating}, ({user.rank})"/>
-		<mx:Label text="  {Language.ac.getItemAt(language).country}: {user.country}"/>
+		<mx:Label text="  {parentApplication.lan.rate}: {user.rating}, ({user.rank})"/>
+		<mx:Label text="  {parentApplication.lan.country}: {user.country}"/>
 	</mx:VBox>
 	<mx:VBox width="100%" horizontalAlign="center">
 		<mx:HBox>
-			<mx:Button id="acceptButton" click="_closeButton();" label="{Language.ac.getItemAt(language).accept}"/>
-			<mx:Button id="rejectButton" click="_closeButton();" label="{Language.ac.getItemAt(language).reject}"/>
+			<mx:Button id="acceptButton" click="_closeButton();" label="{parentApplication.lan.accept}"/>
+			<mx:Button id="rejectButton" click="_closeButton();" label="{parentApplication.lan.reject}"/>
 			<mx:Label text="{remainTime}" fontSize="16" fontWeight="bold" />
 		</mx:HBox>
 	</mx:VBox>

@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" width="170" rowCount="13" dataProvider="{_items}" change="loadLanguage();" >
+	
+	<mx:Script>
+        <![CDATA[
+		  import flash.events.Event;
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+          import mx.collections.ArrayCollection;
+		  import flash.net.URLLoader;
+		  import flash.net.URLRequest;
+		  import mx.utils.ObjectProxy;
+		  
+		  private const LANGUAGE_DIRECTORY:String = "http://81dojo.com/dojo/languages/";
+          [Bindable]
+          private var _items:ArrayCollection = new ArrayCollection(
+            [{label:"English", image:"826", fileName:"english"},
+             {label:"日本語", image:"392", fileName:"japanese"},
+             {label:"简体中文", image:"156", fileName:"chinese_s"},
+             {label:"繁體中文", image:"hongkong", fileName:"chinese_t"},
+			 {label:"Español", image:"724", fileName:"spanish"},
+             {label:"Français", image:"250", fileName:"french"},
+             {label:"Deutsch", image:"276", fileName:"german"},
+			 {label:"Polski", image:"616", fileName:"polish"},
+			 {label:"Svenska", image:"752", fileName:"swedish"},
+			 {label:"Ελληνικά", image:"300", fileName:"greek"},
+			 {label:"Português", image:"380", fileName:"portugese"},
+			 {label:"Italiano", image:"620", fileName:"italian"},
+			 {label:"Беларуская", image:"112", fileName:"belorussian"},
+			 {label:"Русский", image:"643", fileName:"russian"},
+			 {label:"ไทย", image:"764", fileName:"thai"},
+			 {label:"Українська", image:"804", fileName:"ukranian"}]
+          );
+		  
+		  private var _words:Object = {	// Default (ENGLISH)
+				LANGUAGE: "English",
+				loginname: "Login name",
+				password: "Password",
+				language: "Language",
+				server: "Server",
+				save_login_info: "Save login info",
+				login: "Login",
+				lobby: "Main Lobby",
+				refresh: "Refresh",
+				wait: "Wait for Game",
+				stop: "Stop Waiting",
+				challenge: "Challenge",
+				options: "Options",
+				search: "Search",
+				mute: "Mute",
+				leave: "Leave PC",
+				logout: "Log Out",
+				back_to_game: "Back to Game",
+				status_short: "Stat",
+				title: "Title",
+				rank: "Rank",
+				name: "Name",
+				country: "Country",
+				rate: "Rate",
+				waiter: "Waiting Player",
+				country_short: "Ctry",
+				thinking_time: "Time",
+				handicap: "Handicap",
+				black: "Black",
+				white: "White",
+				rule: "Rule",
+				status: "Status",
+				monitor: "Mon",
+				opening_short: "Opng",
+				watch: "Watch Game",
+				view_as: "View as:",
+				chat: "Chat",
+				auto_scroll: "Auto-scroll",
+				resign: "Resign",
+				impasse: "Impasse?",
+				flip: "Flip Board",
+				rematch: "Rematch",
+				clear_arrows: "Clear Arrows",
+				greet: "Greet",
+				close_game: "Exit",
+				check_lobby: "Check Lobby",
+				watchers: "Watchers",
+				kifu: "Kifu",
+				copy: "Copy to Clipboard as KIF",
+				save: "Save to KIF",
+				replay: "Replay",
+				listen: "Listen",
+				search_panel: "Search Panel",
+				kifu_search: "Kifu Search",
+				share: "Share",
+				close_search: "Close",
+				result: "Result",
+				opening: "Opening",
+				moves: "Moves",
+				game_date: "Date",
+				player_search: "Player Search",
+				win: "Win",
+				loss: "Loss",
+				total: "Total",
+				percentage_short: "%-win",
+				streak_short: "Streak",
+				signed_up: "Signed up",
+				last_updated: "Last updated",
+				view_rankings: "View Rankings",
+				streak: "Best Streak",
+				percentage: "Winning Percentage",
+				wins: "Wins",
+				total_games: "Total Games",
+				accept: "Accept",
+				reject: "Reject",
+				invitation: "Invitation",
+				set_autoreply: "Set auto-reply message",
+				will_be_back_in: "Will be back in",
+				hours: "hours",
+				minutes: "minutes",
+				message: "message",
+				cancel: "Cancel",
+				sound: "Sound",
+				blind_piece: "Blind Piece",
+				save_settings: "Save settings to server",
+				win_small: "win",
+				loss_small: "loss",
+				current: "Current",
+				invite: "Invite",
+				favorite: "Favorite",
+				ignore: "Block",
+				rated: "Rated",
+				nonrated: "Non-rated",
+				declare: "Declare Win",
+				error: "Error"
+			};
+		  
+			private var _urlLoader:URLLoader = new URLLoader();
+			
+			private function _readLanguage(e:Event):void {
+				for each (var line:String in e.target.data.split("\n")) {
+					var match:Array;
+					if ((match = line.match(/^(.+),(.+)$/))) {
+						_words[match[1]] = match[2];
+					}
+				}
+				parentApplication.lan = new ObjectProxy(_words);
+				_urlLoader.removeEventListener(Event.COMPLETE, _readLanguage);
+			}
+			
+			public function loadLanguage():void {
+				_urlLoader.addEventListener(Event.COMPLETE, _readLanguage);
+				var nowDate:Date = new Date(); 
+				_urlLoader.load(new URLRequest(LANGUAGE_DIRECTORY + this.selectedItem.fileName + ".txt?" + nowDate.getTime().toString()));
+			}
+
+        ]]>
+    </mx:Script>
+
+	<mx:itemRenderer>
+		<mx:Component>
+			<mx:HBox paddingTop="1" paddingBottom="1" verticalAlign="middle">
+				<mx:Image source="http://81dojo.com/dojo/images/flags_s/{data.image}.gif" width="27" height="17"/>
+				<mx:Text text="{data.label}"/>
+			</mx:HBox>
+		</mx:Component>
+	</mx:itemRenderer>
+</mx:ComboBox>

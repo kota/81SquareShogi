@@ -11,8 +11,6 @@
           import mx.managers.PopUpManager;
 
 		  [Bindable]
-		  public var language:int = 0;
-		  [Bindable]
 		  private var _name:String;
 		  [Bindable]
 		  private var _country:String;
@@ -136,21 +134,21 @@
 						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
 						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
-					<mx:Label paddingRight="10" text="{Language.ac.getItemAt(language).country}:  {_country}"/>
+					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}"/>
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
 			<mx:VBox width="260" height="73" horizontalScrollPolicy="off">
-				<mx:Label text="{Language.ac.getItemAt(language).rate}:  {_rating}  ({_rank})"/>
+				<mx:Label text="{parentApplication.lan.rate}:  {_rating}  ({_rank})"/>
 				<mx:HBox>
-					<mx:Label text="{_wins} {Language.ac.getItemAt(language).win_small}"/>
-					<mx:Label text="{_losses} {Language.ac.getItemAt(language).loss_small}"/>
+					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>
+					<mx:Label text="{_losses} {parentApplication.lan.loss_small}"/>
 					<mx:Label text="({_percentage.toFixed(1)}%)"/>
-					<mx:Label text="{Language.ac.getItemAt(language).total}: {_wins + _losses}"/>
+					<mx:Label text="{parentApplication.lan.total}: {_wins + _losses}"/>
 				</mx:HBox>
 				<mx:HBox>
-					<mx:Label text="{Language.ac.getItemAt(language).streak}: {_streak_best}"/>
-					<mx:Label text="({Language.ac.getItemAt(language).current}: {_streak})"/>
+					<mx:Label text="{parentApplication.lan.streak}: {_streak_best}"/>
+					<mx:Label text="({parentApplication.lan.current}: {_streak})"/>
 				</mx:HBox>
 			</mx:VBox>
 		</mx:VBox>
@@ -167,9 +165,9 @@
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
 			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="Favorite" />
-			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{Language.ac.getItemAt(language).ignore}" enabled="false"/>
-			<mx:Button id="challenge" click="_close();" label="{Language.ac.getItemAt(language).challenge}" enabled="false" />
-			<mx:Button id="invite" label="{Language.ac.getItemAt(language).invite}" enabled="false"/>
+			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{parentApplication.lan.ignore}" enabled="false"/>
+			<mx:Button id="challenge" click="_close();" label="{parentApplication.lan.challenge}" enabled="false" />
+			<mx:Button id="invite" label="{parentApplication.lan.invite}" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
 			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />

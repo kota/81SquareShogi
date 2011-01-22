@@ -41,12 +41,12 @@
     import ChallengeForm;
     import GameRuleEvent;
     import mx.utils.StringUtil;
-	import Language;
 	
-	public const VERSION:String = "ver.2011/01/21";
+	public const VERSION:String = "ver.2011/01/22";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
+	private var _server: String;
 	[Bindable]
-	private var _language:int = 0;
+	public var lan:ObjectProxy;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
     private var _client:CsaShogiClient;
 	private var _api:ApiClient;
@@ -158,10 +158,10 @@
 		  savelogin.selected = true;
 		  if (_so.data.login) loginname.text = _so.data.login;
 		  if (_so.data.pass) password.text = _so.data.pass;
-		  if (_so.data.language) languageCombo.selectedIndex = _so.data.language;
+		  if (_so.data.language) languageSelector.selectedIndex = _so.data.language;
 		  if (_so.data.server) serverCombo.selectedIndex = _so.data.server;
 	  }
-	  _language = languageCombo.selectedIndex;
+	  languageSelector.loadLanguage();
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
       _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
       _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
@@ -218,7 +218,7 @@
 		  _so.data.savelogin = true;
 		  _so.data.login = loginname.text;
 		  _so.data.pass = password.text;
-		  _so.data.language = languageCombo.selectedIndex;
+		  _so.data.language = languageSelector.selectedIndex;
 		  _so.data.server = serverCombo.selectedIndex;
 		  _so.flush();
 	  }
@@ -398,7 +398,7 @@
           break;
         }
       }
-	  userListPanel.title = Language.ac.getItemAt(_language).lobby + " (" + _user_list.length + " players)";
+	  userListPanel.title = lan.lobby + ": " + _server + " (" + _user_list.length + " players)";
 	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
@@ -562,7 +562,7 @@
         }
       }
       watcherListGrid.dataProvider = watcher_list;
-	  watcherListTitle.text = Language.ac.getItemAt(_language).watchers + " (" + watcher_list.length +")";
+	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
     }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
@@ -768,7 +768,6 @@
       _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
       PopUpManager.centerPopUp(_challengerAlertWindow);
       with (_challengerAlertWindow) {
-		language = _language;
         title = "Here comes a new challenger!!";
 		challenger_name = challengerName;
 		user = _findPlayerFromList(challengerName);
@@ -1062,15 +1061,10 @@
       trace("connecting.");
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
-	  switch (serverCombo.selectedIndex) {
-		  case 0:
-			_client.setServer('81dojo.com', 4081); break;
-		  case 1:
-			_client.setServer('81dojo.dyndns.org', 4081); break;
-		  case 2:
-			_client.setServer('127.0.0.1', 4081);
-			_api.setHostToLocal();
-	  }
+	  var serverObj:Object = serverCombo.selectedItem;
+	  _client.setServer(serverObj.host, parseInt(serverObj.port));
+	  _server = serverObj.name;
+	  if (serverCombo.selectedIndex == 2) _api.setHostToLocal();
       _client.connect();
     }
 	
@@ -1084,13 +1078,6 @@
 		password.text = "81dojo" + i;
 		_connectAndLogin();
 	}
-	
-//	private function _localLogin():void {
-//		_client.setHostToLocal();
-//		_api.setHostToLocal();
-//		loginButton.setStyle('color', '0xFF0000');
-//		loginButton.setStyle('textRollOverColor', '0xFF0000');
-//	}
 	
 	//=========================================================
 	//                   CONTROLS for VIEWSTACK INDEX = 1
@@ -1108,7 +1095,6 @@
       with (_newGameWindow) {
 		_newGameWindow.x = mouseX;
 		_newGameWindow.y = mouseY + 50;
-		language = _language;
         title = "Create new game";
 		if (_so.data.rule_base) {
 			timeSetting.selectedValue = _so.data.rule_base;
@@ -1135,7 +1121,6 @@
       _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, true));
       PopUpManager.centerPopUp(_optionWindow);
       with (_optionWindow) {
-		language = _language;
         title = "Options";
 		RadioGroup1.selectedValue = GameTimer.soundType;
         RadioGroup2.selectedValue = board.piece_type;
@@ -1207,8 +1192,7 @@
 		_leavePCWindow = LeavePCForm(PopUpManager.createPopUp(this, LeavePCForm, true));
 		_leavePCWindow.x = mouseX;
 		_leavePCWindow.y = mouseY + 50;
-		_leavePCWindow.language = _language;
-		_leavePCWindow.title = Language.ac.getItemAt(_language).set_autoreply;
+		_leavePCWindow.title = lan.set_autoreply;
 		if (_so.data.leave_hours) _leavePCWindow.hoursCombo.selectedIndex = _so.data.leave_hours;
 		if (_so.data.leave_minutes) _leavePCWindow.minutesCombo.selectedIndex = _so.data.leave_minutes;
 		if (_so.data.leave_message) _leavePCWindow.messageText.text = _so.data.leave_message;
@@ -1327,11 +1311,11 @@
 
 	private function _watchDialog():void {
 		if (_game_name) return;
-		Alert.show("Watch this game?", Language.ac.getItemAt(_language).watch, Alert.YES | Alert.NO, gameListGrid, _watch);
-//		Alert.yesLabel = Language.ac.getItemAt(_language).black;
-//        Alert.noLabel = Language.ac.getItemAt(_language).white;
+		Alert.show("Watch this game?", lan.watch, Alert.YES | Alert.NO, gameListGrid, _watch);
+//		Alert.yesLabel = lan.black;
+//        Alert.noLabel = lan.white;
 //		Alert.buttonWidth = 120;
-//        Alert.show(Language.ac.getItemAt(_language).view_as,Language.ac.getItemAt(_language).watch,Alert.YES|Alert.NO,this,_watch);
+//        Alert.show(lan.view_as,lan.watch,Alert.YES|Alert.NO,this,_watch);
         //set properties back to default.
 //        Alert.yesLabel = "Yes";
 //        Alert.noLabel = "No";
@@ -1387,7 +1371,7 @@
 		  board.onListen = true;
 		  sidePanel.setStyle('borderColor', undefined);
 	  } else {
-		  Alert.show("The game list has been refreshed.\nPlease select a game again.", Language.ac.getItemAt(_language).error, Alert.OK, gameListGrid);
+		  Alert.show("The game list has been refreshed.\nPlease select a game again.", lan.error, Alert.OK, gameListGrid);
 	  }
     }
 
@@ -1404,7 +1388,6 @@
 	  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
 	  PopUpManager.addPopUp(_playerInfoWindows[user.name], this, false);
 	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
-	  _playerInfoWindows[user.name].language = _language;
 	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isDuringMyGame()) {
@@ -1470,14 +1453,14 @@
 		  }
 		  _challengeUser = _findPlayerFromList(name);
 		  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
-			  Alert.show("The opponent is not waiting for a game.", Language.ac.getItemAt(_language).error);
+			  Alert.show("The opponent is not waiting for a game.", lan.error);
 		  } else {
 			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 			var total:int = parseInt(match[3]) / 60 ;
 			var rule:String = total + "min - " + match[4] + "sec";
 			var hc:String = InfoFetcher.gameType(match[1]);
-			Alert.yesLabel = Language.ac.getItemAt(_language).challenge;
-			Alert.cancelLabel = Language.ac.getItemAt(_language).cancel;
+			Alert.yesLabel = lan.challenge;
+			Alert.cancelLabel = lan.cancel;
 			Alert.buttonWidth = 140;
 			Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL, null,_handleChallengeAlert);
 			//set properties back to default.
@@ -1500,7 +1483,7 @@
 	private function _handleInvite(name:String):Function {
 		return function(e:MouseEvent):void{
 			if (!_waiting) {
-				Alert.show("Create a game first.", Language.ac.getItemAt(_language).error);
+				Alert.show("Create a game first.", lan.error);
 			} else {
 				var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 				var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
@@ -1574,7 +1557,6 @@
 		_impasseStatusWindow =  ImpasseStatusWindow(PopUpManager.createPopUp(board, ImpasseStatusWindow, true));
 		_impasseStatusWindow.addEventListener("close_window", _handleImpasseStatusClose);
 		PopUpManager.centerPopUp(_impasseStatusWindow);
-	    _impasseStatusWindow.language = _language;
 		_impasseStatusWindow.title = "Impasse Status";
 		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
 		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isDuringMyGame() && board.position.turn == board.my_turn) ? board.my_turn : -1);
@@ -1935,7 +1917,7 @@
 		if (kifu) {
 			_openKifuShareWindow(kifu);
 		} else {
-			Alert.show("Highlight the kifu first.", Language.ac.getItemAt(_language).error);
+			Alert.show("Highlight the kifu first.", lan.error);
 		}
 	}
 	
@@ -2446,44 +2428,18 @@
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
     <mx:Image id="titleBanner" source="{DIRECTORY}images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
+	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
       <mx:Form paddingBottom="0">
-		<mx:FormItem label="{Language.ac.getItemAt(_language).language}" paddingTop="-2">
-			<mx:ComboBox id="languageCombo" change="_language = languageCombo.selectedIndex;" width="170" rowCount="13">
-				<mx:dataProvider><mx:Array>
-					<mx:Object label="{Language.ac.getItemAt(0).LANGUAGE}" image="{DIRECTORY}images/flags_s/826.gif" />
-					<mx:Object label="{Language.ac.getItemAt(1).LANGUAGE}" image="{DIRECTORY}images/flags_s/392.gif" />
-					<mx:Object label="{Language.ac.getItemAt(2).LANGUAGE}" image="{DIRECTORY}images/flags_s/156.gif" />
-					<mx:Object label="{Language.ac.getItemAt(3).LANGUAGE}" image="{DIRECTORY}images/flags_s/hongkong.gif" />
-					<mx:Object label="{Language.ac.getItemAt(4).LANGUAGE}" image="{DIRECTORY}images/flags_s/724.gif" />
-					<mx:Object label="{Language.ac.getItemAt(5).LANGUAGE}" image="{DIRECTORY}images/flags_s/250.gif" />
-					<mx:Object label="{Language.ac.getItemAt(6).LANGUAGE}" image="{DIRECTORY}images/flags_s/276.gif" />
-					<mx:Object label="{Language.ac.getItemAt(7).LANGUAGE}" image="{DIRECTORY}images/flags_s/616.gif" />
-					<mx:Object label="{Language.ac.getItemAt(8).LANGUAGE}" image="{DIRECTORY}images/flags_s/752.gif" />
-					<mx:Object label="{Language.ac.getItemAt(9).LANGUAGE}" image="{DIRECTORY}images/flags_s/300.gif" />
-					<mx:Object label="{Language.ac.getItemAt(10).LANGUAGE}" image="{DIRECTORY}images/flags_s/380.gif" />
-					<mx:Object label="{Language.ac.getItemAt(11).LANGUAGE}" image="{DIRECTORY}images/flags_s/620.gif" />
-					<mx:Object label="{Language.ac.getItemAt(12).LANGUAGE}" image="{DIRECTORY}images/flags_s/112.gif" />
-					<mx:Object label="{Language.ac.getItemAt(13).LANGUAGE}" image="{DIRECTORY}images/flags_s/643.gif" />
-					<mx:Object label="{Language.ac.getItemAt(14).LANGUAGE}" image="{DIRECTORY}images/flags_s/764.gif" />
-					<mx:Object label="{Language.ac.getItemAt(15).LANGUAGE}" image="{DIRECTORY}images/flags_s/804.gif" />
-				</mx:Array></mx:dataProvider>
-                <mx:itemRenderer>
-                    <mx:Component>
-                        <mx:HBox paddingTop="1" paddingBottom="1" verticalAlign="middle">
-                            <mx:Image source="{data.image}" width="27" height="17"/>
-                            <mx:Text text="{data.label}"/>
-                        </mx:HBox>
-                    </mx:Component>
-                </mx:itemRenderer>
-			</mx:ComboBox>
-		</mx:FormItem>
-		<mx:FormItem label="Server" paddingTop="-2">
+        <mx:FormItem label="{lan.language}" paddingTop="-2">
+            <eightyOneSquare:LanguageSelector id="languageSelector"/>
+        </mx:FormItem>
+		<mx:FormItem label="{lan.server}" paddingTop="-2">
 			<mx:ComboBox id="serverCombo" width="170">
 				<mx:dataProvider><mx:Array>
-					<mx:Object label="EARTH (main)" image="{DIRECTORY}images/earth.png" />
-					<mx:Object label="MARS (back-up)" image="{DIRECTORY}images/mars.png" />
-					<mx:Object label="MOON (admin)" image="{DIRECTORY}images/moon.png" />
+					<mx:Object label="EARTH (main)" image="{DIRECTORY}images/earth.png" name="EARTH" host="81dojo.com" port="4081" />
+					<mx:Object label="MARS (back-up)" image="{DIRECTORY}images/mars.png" name="MARS" host="81dojo.dyndns.org" port="4081" />
+					<mx:Object label="MOON (admin)" image="{DIRECTORY}images/moon.png" name="MOON" host="127.0.0.1" port="4081" />
 				</mx:Array></mx:dataProvider>
                 <mx:itemRenderer>
                     <mx:Component>
@@ -2495,17 +2451,17 @@
                 </mx:itemRenderer>
 			</mx:ComboBox>
 		</mx:FormItem>
-        <mx:FormItem label="{Language.ac.getItemAt(_language).loginname}" paddingTop="-2">
+        <mx:FormItem label="{lan.loginname}" paddingTop="-2">
             <mx:TextInput id="loginname" width="200"/>
         </mx:FormItem>
-        <mx:FormItem label="{Language.ac.getItemAt(_language).password}" paddingTop="-2">
+        <mx:FormItem label="{lan.password}" paddingTop="-2">
             <mx:TextInput id="password" width="200" displayAsPassword="true"/>
         </mx:FormItem>
 		<mx:FormItem label="" paddingTop="-2">
-			<mx:CheckBox label="{Language.ac.getItemAt(_language).save_login_info}" id="savelogin" selected="false" />
+			<mx:CheckBox label="{lan.save_login_info}" id="savelogin" selected="false" />
 		</mx:FormItem>
         <mx:FormItem paddingTop="-2">
-            <mx:Button id="loginButton" label="{Language.ac.getItemAt(_language).login}" y="400" />
+            <mx:Button id="loginButton" label="{lan.login}" y="400" />
         </mx:FormItem>
       </mx:Form>
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
@@ -2521,7 +2477,9 @@
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0" label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
+	  <mx:Spacer height="-10"/>
       <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="www.otosozai.com - ONGAKUSITU" click="navigateToURL(new URLRequest('http://www.otosozai.com/'), 'quote')"/>
+	  <mx:Spacer height="-10"/>
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
     </mx:VBox>
 <!-- =============================================================
@@ -2531,38 +2489,38 @@
     <mx:VBox fontSize="11">
       <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
-        <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" click="_refresh();"/>
-		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="mainViewStack.selectedIndex=3;" />
-        <mx:Button id="startButton" label="{Language.ac.getItemAt(_language).wait}" click="_newGameForm();"/>
-        <mx:Button id="stopButton" label="{Language.ac.getItemAt(_language).stop}" click="_stopWaiting()" enabled="false" />
-<!--        <mx:Button id="challengeButton" label="{Language.ac.getItemAt(_language).challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" /> -->
-		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();" enabled="true"/>
-		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
-		<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck1.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
-		<mx:Button id="leaveButton" label="{Language.ac.getItemAt(_language).leave}" click="_leavePC();"/>
-		<mx:Button id="logoutButton" label="{Language.ac.getItemAt(_language).logout}" click="_logout()"/>
-		<mx:Button id="backToGameButton" label="{Language.ac.getItemAt(_language).back_to_game}" click="_backToGame();" visible="false" color="#FF0000" />
+        <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_refresh();"/>
+		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
+        <mx:Button id="startButton" label="{lan.wait}" click="_newGameForm();"/>
+        <mx:Button id="stopButton" label="{lan.stop}" click="_stopWaiting()" enabled="false" />
+<!--        <mx:Button id="challengeButton" label="{lan.challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" /> -->
+		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();" enabled="true"/>
+		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{lan.mute}"/>
+		<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck1.selected)" toolTip="{lan.mute}"/>
+		<mx:Button id="leaveButton" label="{lan.leave}" click="_leavePC();"/>
+		<mx:Button id="logoutButton" label="{lan.logout}" click="_logout()"/>
+		<mx:Button id="backToGameButton" label="{lan.back_to_game}" click="_backToGame();" visible="false" color="#FF0000" />
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox liveDragging="true">
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="status2" headerText="{Language.ac.getItemAt(_language).status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="titleName" headerText="{Language.ac.getItemAt(_language).title}" width="53" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{Language.ac.getItemAt(_language).rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
-			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{Language.ac.getItemAt(_language).name}" width="106" paddingLeft="1" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{Language.ac.getItemAt(_language).country}" width="93" paddingLeft="2" sortCompareFunction="_sortCountry" />
-			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="titleName" headerText="{lan.title}" width="53" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
+			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="106" paddingLeft="1" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="93" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{Language.ac.getItemAt(_language).waiter}" width="120" paddingLeft="2" sortable="false" />
-<!--			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
-			  <mx:DataGridColumn dataField="rating" headerText="{Language.ac.getItemAt(_language).rate}" width="35" paddingRight="3" textAlign="right" sortable="false" />
-			  <mx:DataGridColumn dataField="time" headerText="{Language.ac.getItemAt(_language).thinking_time}" width="40" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{lan.waiter}" width="120" paddingLeft="2" sortable="false" />
+<!--			  <mx:DataGridColumn dataField="country3" headerText="{lan.country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
+			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="35" paddingRight="3" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn dataField="time" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="handicap" headerText="{Language.ac.getItemAt(_language).handicap}" width="60" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="handicap" headerText="{lan.handicap}" width="60" paddingLeft="0" textAlign="center" />
 			 </mx:columns>
 			</mx:DataGrid>
 		</mx:VDividedBox>
@@ -2573,22 +2531,22 @@
 				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
 <!--				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
-				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}(▲)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
-				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{lan.black}(▲)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
-				  <mx:DataGridColumn dataField="rule" headerText="{Language.ac.getItemAt(_language).rule}" width="78" paddingLeft="3" />
-				  <mx:DataGridColumn dataField="status" headerText="{Language.ac.getItemAt(_language).status_short}" width="35" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="watchers" headerText="{Language.ac.getItemAt(_language).monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
-				  <mx:DataGridColumn dataField="opening" headerText="{Language.ac.getItemAt(_language).opening_short}" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="rule" headerText="{lan.rule}" width="78" paddingLeft="3" />
+				  <mx:DataGridColumn dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
+				  <mx:DataGridColumn dataField="opening" headerText="{lan.opening_short}" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" />
 			</mx:VDividedBox>
 			<mx:HBox>
-				<mx:Label text="{Language.ac.getItemAt(_language).chat}"/>
+				<mx:Label text="{lan.chat}"/>
 				<mx:TextInput id="chatMessage1" width="430"/>
-				<mx:CheckBox id="autoScrollCheck1" label="{Language.ac.getItemAt(_language).auto_scroll}" selected="true" click="_change_auto_scroll1();" />
+				<mx:CheckBox id="autoScrollCheck1" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll1();" />
 			</mx:HBox>
 		</mx:VBox>
 	  </mx:HBox>
@@ -2626,16 +2584,16 @@
         </mx:Panel>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
-            <mx:Button id="resignButton" label="{Language.ac.getItemAt(_language).resign}" click="_resignAlert();"/>
-            <mx:Button id="impasseButton" label="{Language.ac.getItemAt(_language).impasse}" click="_showImpasse();"/>
+            <mx:Button id="resignButton" label="{lan.resign}" click="_resignAlert();"/>
+            <mx:Button id="impasseButton" label="{lan.impasse}" click="_showImpasse();"/>
 			  <mx:HBox width="100%" horizontalAlign="right">
-				<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="Flip Board" click="board.flipBoard();"/>
-				<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{Language.ac.getItemAt(_language).close_game}" click="_closeGame();" enabled="false"/>           
+				<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="{lan.flip}" click="board.flipBoard();"/>
+				<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{lan.close_game}" click="_closeGame();" enabled="false"/>           
 			  </mx:HBox>
 		  </mx:HBox>
           <mx:HBox width="300" horizontalAlign="right">
-			<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="Share This Game" click="_shareKifu2();"/>
-			<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="Rematch" click="_rematch();"/>
+			<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
+			<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="{lan.rematch}" click="_rematch();"/>
 			<mx:HBox width="100%" horizontalAlign="right" horizontalScrollPolicy="off" horizontalGap="5">
 				<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
 				<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
@@ -2644,42 +2602,42 @@
 			</mx:HBox>
           </mx:HBox>
 		 <mx:HBox width="300" horizontalAlign="right">
-			<mx:Button label="Clear Arrows" click="_clearArrows();"/>
+			<mx:Button label="{lan.clear_arrows}" click="_clearArrows();"/>
 		 </mx:HBox>
 		 <mx:Spacer height="-20"/>
 		 <mx:HBox verticalAlign="bottom">
-			<mx:Label text="{Language.ac.getItemAt(_language).chat}"/>
-			<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="Greet" click="_greetMenu();"/>
+			<mx:Label text="{lan.chat}"/>
+			<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="{lan.greet}" click="_greetMenu();"/>
 		 </mx:HBox>
 		 <mx:TextInput id="chatMessage2" width="300"/>
 		 <mx:HBox>
-			<mx:CheckBox id="autoScrollCheck2" label="{Language.ac.getItemAt(_language).auto_scroll}" selected="true" click="_change_auto_scroll2();" />
-			<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{Language.ac.getItemAt(_language).options}" click="_showOptions();"/>
-			<mx:CheckBox id="muteCheck2" paddingRight="-8" toolTip="{Language.ac.getItemAt(_language).mute}" click="_mute(muteCheck2.selected)"/>
-			<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck2.selected)" toolTip="{Language.ac.getItemAt(_language).mute}"/>
-			<mx:Button id="checkLobbyButton" label="{Language.ac.getItemAt(_language).check_lobby}" enabled="true" click="_checkLobby();" />
+			<mx:CheckBox id="autoScrollCheck2" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll2();" />
+			<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();"/>
+			<mx:CheckBox id="muteCheck2" paddingRight="-8" toolTip="{lan.mute}" click="_mute(muteCheck2.selected)"/>
+			<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck2.selected)" toolTip="{lan.mute}"/>
+			<mx:Button id="checkLobbyButton" label="{lan.check_lobby}" enabled="true" click="_checkLobby();" />
 		</mx:HBox>
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="176" height="680" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2">
-			<mx:Label id="watcherListTitle" text="{Language.ac.getItemAt(_language).watchers}" fontWeight="bold" paddingRight="0" />
-			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{Language.ac.getItemAt(_language).refresh}" fontSize="9" click="_refresh();"/>
+			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
+			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
 		  </mx:HBox>
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="name" itemRenderer="{playerListNameRenderer}" headerText="{Language.ac.getItemAt(_language).name}" width="85" paddingLeft="2" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn dataField="country3" headerText="{Language.ac.getItemAt(_language).country_short}" width="35" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
-			  <mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+			  <mx:DataGridColumn dataField="name" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="85" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn dataField="country3" headerText="{lan.country_short}" width="35" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
+			  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:VBox height="428">
 				<mx:HBox paddingBottom="-2">
-					<mx:Label text="{Language.ac.getItemAt(_language).kifu}" fontWeight="bold"/>
-					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{Language.ac.getItemAt(_language).copy}" click="System.setClipboard(_formatKIF());"/>
-					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{Language.ac.getItemAt(_language).save}" click="_saveKIF();" />
+					<mx:Label text="{lan.kifu}" fontWeight="bold"/>
+					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
+					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
 				</mx:HBox>
 				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
 				 <mx:columns>
@@ -2691,8 +2649,8 @@
 		  </mx:VDividedBox>
 		  <mx:HBox paddingTop="-3">
 				<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
-				<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).replay}" />
-				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{Language.ac.getItemAt(_language).listen}"/>
+				<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
+				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}"/>
 		  </mx:HBox>
         </mx:Panel>
 	</mx:HBox>
@@ -2702,18 +2660,18 @@
                   VIEWSTACK INDEX = 3
 ================================================================== -->
 	<mx:VBox paddingLeft="10" paddingTop="10">
-    <mx:Panel id="searchPanel" title="{Language.ac.getItemAt(_language).search_panel}" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+    <mx:Panel id="searchPanel" title="{lan.search_panel}" paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
 	  <mx:HBox>
 		<mx:Accordion id="searchAccordion" width="820" height="560" selectedIndex="2">
-			<mx:HBox label="{Language.ac.getItemAt(_language).kifu_search}" paddingTop="8" paddingLeft="8" width="820" height="530">
+			<mx:HBox label="{lan.kifu_search}" paddingTop="8" paddingLeft="8" width="820" height="530">
 				<mx:VBox>
 					<mx:HBox>
-						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendKifuSearch();" />
+						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendKifuSearch();" />
 						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="Share" click="_shareKifu3();" fontSize="11" />
-						<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+						<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 					</mx:HBox>
 					<mx:HBox>
-						<mx:Label text="{Language.ac.getItemAt(_language).name}"/>
+						<mx:Label text="{lan.name}"/>
 						<mx:TextInput id="kifuSearchPlayerText" width="90" />
 					</mx:HBox>
 					<mx:Label text="From"/>
@@ -2723,125 +2681,125 @@
 				</mx:VBox>
 				<mx:DataGrid id="kifuSearchGrid" width="615" height="470" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 					<mx:columns>
-					<mx:DataGridColumn dataField="winner" headerText="{Language.ac.getItemAt(_language).result}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn itemRenderer="{kifuSearchBlackRenderer}" headerText="{Language.ac.getItemAt(_language).black}" width="100" paddingLeft="0" />
-					<mx:DataGridColumn itemRenderer="{kifuSearchWhiteRenderer}" headerText="{Language.ac.getItemAt(_language).white}" width="100" paddingLeft="0" />
-					<mx:DataGridColumn dataField="rule" headerText="{Language.ac.getItemAt(_language).rule}" width="110" paddingLeft="2" />
-					<mx:DataGridColumn dataField="opening" headerText="{Language.ac.getItemAt(_language).opening}" width="120" paddingLeft="2" />
-					<mx:DataGridColumn dataField="moves" headerText="{Language.ac.getItemAt(_language).moves}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="date" headerText="{Language.ac.getItemAt(_language).game_date}"/>
+					<mx:DataGridColumn dataField="winner" headerText="{lan.result}" width="45" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn itemRenderer="{kifuSearchBlackRenderer}" headerText="{lan.black}" width="100" paddingLeft="0" />
+					<mx:DataGridColumn itemRenderer="{kifuSearchWhiteRenderer}" headerText="{lan.white}" width="100" paddingLeft="0" />
+					<mx:DataGridColumn dataField="rule" headerText="{lan.rule}" width="110" paddingLeft="2" />
+					<mx:DataGridColumn dataField="opening" headerText="{lan.opening}" width="120" paddingLeft="2" />
+					<mx:DataGridColumn dataField="moves" headerText="{lan.moves}" width="45" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="date" headerText="{lan.game_date}"/>
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:HBox>
-			<mx:VBox label="{Language.ac.getItemAt(_language).player_search}" paddingTop="10" paddingLeft="10" width="800" height="530">
+			<mx:VBox label="{lan.player_search}" paddingTop="10" paddingLeft="10" width="800" height="530">
 				<mx:HBox>
-					<mx:Label text="{Language.ac.getItemAt(_language).name}"/>
+					<mx:Label text="{lan.name}"/>
 					<mx:TextInput id="playerSearchNameText"/>
-					<mx:Button id="searchPlayerButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendPlayerSearch();" />
-					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+					<mx:Button id="searchPlayerButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendPlayerSearch();" />
+					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:HBox>
 				<mx:DataGrid id="playerSearchGrid" width="755" height="440" rowHeight="21">
 					<mx:columns>
-					<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="50" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="95" />
+					<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="50" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+					<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="95" />
 					<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-					<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-					<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="43" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="losses" headerText="{Language.ac.getItemAt(_language).loss}" width="43" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="total" headerText="{Language.ac.getItemAt(_language).total}" width="43" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="percentage" headerText="{Language.ac.getItemAt(_language).percentage_short}" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="streak_best" headerText="{Language.ac.getItemAt(_language).streak_short}" width="50" textAlign="right" paddingRight="5" />
-					<mx:DataGridColumn dataField="created_at" headerText="{Language.ac.getItemAt(_language).signed_up}" width="90" />
-					<mx:DataGridColumn dataField="updated_at" headerText="{Language.ac.getItemAt(_language).last_updated}"/>
+					<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+					<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="43" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="43" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="total" headerText="{lan.total}" width="43" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="streak_best" headerText="{lan.streak_short}" width="50" textAlign="right" paddingRight="5" />
+					<mx:DataGridColumn dataField="created_at" headerText="{lan.signed_up}" width="90" />
+					<mx:DataGridColumn dataField="updated_at" headerText="{lan.last_updated}"/>
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
-			<mx:HBox label="{Language.ac.getItemAt(_language).view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
+			<mx:HBox label="{lan.view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox horizontalAlign="center" paddingRight="20">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
-					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{Language.ac.getItemAt(_language).search}" click="_sendRankingSearch();" />
-					<mx:Button label="{Language.ac.getItemAt(_language).close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
+					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
-					<mx:VBox label="{Language.ac.getItemAt(_language).rate}">
+					<mx:VBox label="{lan.rate}">
 						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="100" />
+							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="{Language.ac.getItemAt(_language).loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="percentage" headerText="{Language.ac.getItemAt(_language).percentage_short}" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" textAlign="right" paddingRight="5" />
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
-					<mx:VBox label="{Language.ac.getItemAt(_language).streak}">
+					<mx:VBox label="{lan.streak}">
 						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="streak_best" headerText="{Language.ac.getItemAt(_language).streak_short}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="100" />
+							<mx:DataGridColumn dataField="streak_best" headerText="{lan.streak_short}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="{Language.ac.getItemAt(_language).loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" textAlign="right" paddingRight="5"/>
+							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
-					<mx:VBox label="{Language.ac.getItemAt(_language).percentage}">
+					<mx:VBox label="{lan.percentage}">
 						<mx:DataGrid id="percentageRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="percentage" headerText="{Language.ac.getItemAt(_language).percentage_short}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="100" />
+							<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="{Language.ac.getItemAt(_language).loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" textAlign="right" paddingRight="5"/>
+							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
-					<mx:VBox label="{Language.ac.getItemAt(_language).wins}">
+					<mx:VBox label="{lan.wins}">
 						<mx:DataGrid id="winRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="100" />
+							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="total" headerText="{Language.ac.getItemAt(_language).total}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="percentage" headerText="{Language.ac.getItemAt(_language).percentage_short}" width="45" paddingRight="5" textAlign="right" />
-							<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" textAlign="right" paddingRight="5"/>
+							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="total" headerText="{lan.total}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" width="45" paddingRight="5" textAlign="right" />
+							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
-					<mx:VBox label="{Language.ac.getItemAt(_language).total_games}">
+					<mx:VBox label="{lan.total_games}">
 						<mx:DataGrid id="totalRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="total" headerText="{Language.ac.getItemAt(_language).total}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{Language.ac.getItemAt(_language).name}" width="100" />
+							<mx:DataGridColumn dataField="total" headerText="{lan.total}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{Language.ac.getItemAt(_language).country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{Language.ac.getItemAt(_language).title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{Language.ac.getItemAt(_language).rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="wins" headerText="{Language.ac.getItemAt(_language).win}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="{Language.ac.getItemAt(_language).loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{Language.ac.getItemAt(_language).rate}" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
+							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5" />
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
