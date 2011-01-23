@@ -162,6 +162,10 @@
 		  if (_so.data.server) serverCombo.selectedIndex = _so.data.server;
 	  }
 	  languageSelector.loadLanguage();
+	  var date:Date = new Date();
+	  kifuSearchToChooser.selectedDate = date;
+	  date.setTime(date.getTime() - (1000 * 60 * 60 * 24 * 7));
+	  kifuSearchFromChooser.selectedDate = date;
       _client.addEventListener(CsaShogiClient.CONNECTED,_handleConnected);
       _client.addEventListener(CsaShogiClient.LOGIN,_handleLoggedIn);
       _client.addEventListener(CsaShogiClient.LOGIN_FAILED, _handleLoginFailed);
@@ -1377,6 +1381,7 @@
 
 	private function _openPlayerInfo(user:Object):void {
 	  if (!user) return;
+	  kifuSearchPlayerText.text = user.name;
 	  if (_playerInfoWindows[user.name]) {
 		  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
 		  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
