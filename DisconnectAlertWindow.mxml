@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="150" fontSize="13" horizontalScrollPolicy="off" title="Disconnection">
+	    <mx:Script>
+        <![CDATA[
+		  import flash.events.TimerEvent;
+		  import flash.utils.Timer;
+          import mx.controls.*;
+          import mx.managers.PopUpManager;
+
+		  public var _timer:Timer = new Timer(1000, 120);
+		  [Bindable]
+		  public var remainTime:int = 120;
+		  
+		  public function startTimer():void {
+			_timer.addEventListener(TimerEvent.TIMER, _handleTick);
+			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerComplete);
+			_timer.start();
+		  }
+		  
+		  public function terminate():void {
+			  _timer.stop();
+			  PopUpManager.removePopUp(this);
+		  }
+		  
+		  private function _handleTick(e:TimerEvent):void {
+			  remainTime -= 1;
+		  }
+		  
+		  private function _handleTimerComplete(e:TimerEvent):void {
+			  declare();
+		  }
+		  
+          public function declare():void {
+			_timer.stop();
+			dispatchEvent(new Event("declare"));
+            PopUpManager.removePopUp(this);
+          }
+
+        ]]>
+    </mx:Script>
+	<mx:VBox horizontalAlign="left" paddingLeft="10">
+		<mx:Label text="Opponent disconnected!" fontSize="12" fontWeight="bold" />
+		<mx:Label text="You can declare win now, or wait for the opponent to return." fontSize="11" paddingBottom="0" />
+		<mx:Spacer height="-17"/>
+		<mx:Label text="Declaration is automatically made after 120 seconds." fontSize="11" paddingTop="0" />
+	</mx:VBox>
+	<mx:VBox width="100%" horizontalAlign="center">
+		<mx:HBox>
+			<mx:Button id="declareButton" click="declare();" label="{parentApplication.lan.declare}"/>
+			<mx:Label text="{remainTime}" fontSize="16" fontWeight="bold" />
+		</mx:HBox>
+	</mx:VBox>
+</mx:TitleWindow>

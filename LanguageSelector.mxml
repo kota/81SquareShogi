@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" width="170" rowCount="13" dataProvider="{_items}" change="loadLanguage();" >
+<mx:ComboBox xmlns:mx="http://www.adobe.com/2006/mxml" width="150" rowCount="13" dataProvider="{_items}" change="loadLanguage();" >
 	
 	<mx:Script>
         <![CDATA[

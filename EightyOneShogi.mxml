@@ -42,8 +42,9 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/01/22";
+	public const VERSION:String = "ver.2011/02/05";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
+	private var _servers: Array = new Array();
 	private var _server: String;
 	[Bindable]
 	public var lan:ObjectProxy;
@@ -102,6 +103,14 @@
     private var _sound_door_close:Sound = new Sound_door_close();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
+    [Embed(source = "/images/earth.png")]
+    private var _icon_earth:Class
+    [Embed(source = "/images/moon.png")]
+    private var _icon_moon:Class
+    [Embed(source = "/images/mars.png")]
+    private var _icon_mars:Class
+    [Embed(source = "/images/mercury.png")]
+    private var _icon_mercury:Class
     private var _sound_challenger:Sound = new Sound_challenger();
     private var _end_sound_play:Boolean = true;
     private var _chat_sound1_play:Boolean = true;
@@ -135,6 +144,7 @@
 	private var _leavePCWindow:LeavePCForm;
 	private var _kifuShareWindow:KifuShareWindow;
 	private var _impasseStatusWindow:ImpasseStatusWindow;
+	private var _disconnectAlertWindow:DisconnectAlertWindow;
 
     private function initApp():void
     {
@@ -154,14 +164,24 @@
 		return;
 	  }
       _client = new CsaShogiClient();
+  serverListGrid.dataProvider = { 'name':"Loading..."};
+  var server:Object = { 'name':"EARTH", 'description':"main", 'icon':_icon_earth, 'host':"81dojo.com", 'port':"4081", 'alive':"NO" };
+  _servers.push(server);
+  server = { 'name':"MARS", 'description':"back-up", 'icon':_icon_mars, 'host':"81dojo.dyndns.org", 'port':"4081", 'alive':"NO" };
+  _servers.push(server);
+  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
+  _servers.push(server);
+  server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
+  _servers.push(server);
 	  if (_so.data.savelogin) {
 		  savelogin.selected = true;
 		  if (_so.data.login) loginname.text = _so.data.login;
 		  if (_so.data.pass) password.text = _so.data.pass;
 		  if (_so.data.language) languageSelector.selectedIndex = _so.data.language;
-		  if (_so.data.server) serverCombo.selectedIndex = _so.data.server;
 	  }
 	  languageSelector.loadLanguage();
+	  _api.addEventListener(ApiClient.READ_SERVER, _handleReadServer);
+	  _api.readServer();
 	  var date:Date = new Date();
 	  kifuSearchToChooser.selectedDate = date;
 	  date.setTime(date.getTime() - (1000 * 60 * 60 * 24 * 7));
@@ -177,13 +197,15 @@
 	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
-      _client.addEventListener(CsaShogiClient.MONITOR,_handleMonitor);
+      _client.addEventListener(CsaShogiClient.MONITOR, _handleMonitor);
+	  _client.addEventListener(CsaShogiClient.RECONNECT, _handleReconnect);
       _client.addEventListener(CsaShogiClient.LIST, _handleList);
       _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
       _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
 	  _client.addEventListener(CsaShogiClient.ENTER, _handleEnter);
 	  _client.addEventListener(CsaShogiClient.LEAVE, _handleLeave);
+	  _client.addEventListener(CsaShogiClient.DISCONNECT, _handleDisconnect);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
@@ -223,7 +245,7 @@
 		  _so.data.login = loginname.text;
 		  _so.data.pass = password.text;
 		  _so.data.language = languageSelector.selectedIndex;
-		  _so.data.server = serverCombo.selectedIndex;
+		  _so.data.server = serverListGrid.selectedIndex;
 		  _so.flush();
 	  }
       loginMessage.text = "Logged in Successfully";
@@ -402,7 +424,7 @@
           break;
         }
       }
-	  userListPanel.title = lan.lobby + ": " + _server + " (" + _user_list.length + " players)";
+	  userListPanel.title = _server + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
@@ -490,6 +512,7 @@
 		  if (game.blackRating == 0) {
 			  game.blackRank = "-";
 			  game.blackRankColor = 0x999999;
+			  game.blackRating = 1000;
 			if ((user = _findPlayerFromList(game.blackName))) game.blackRating = user.rating;
 		  } else {
 			game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
@@ -498,6 +521,7 @@
 		  if (game.whiteRating == 0) {
 			  game.whiteRank = "-";
 			  game.whiteRankColor = 0x999999;
+			  game.whiteRating = 1000;
 			  if ((user = _findPlayerFromList(game.whiteName))) game.whiteRating = user.rating;
 		  } else {
 			  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
@@ -641,8 +665,217 @@
 	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
     }
 
+    private function _handleReconnect(e:ServerMessageEvent):void {
+	  _waiting = false;
+	  _challenging = false;
+	  _rematching = false;
+	  board.post_game = false;
+	  board.isStudyHost = false;
+//	  for (var j:int = 0; j < 2 ; j++) {
+//		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
+//	  }
+	  var blackInfo:Object = {
+		  'name':_watch_game.blackName,
+		  'rating':_watch_game.blackRating,
+		  'rank':_watch_game.blackRank,
+		  'titleName':_watch_game.blackTitle,
+		  'country_code':_watch_game.blackCountryCode,
+		  'labelColor':_watch_game.blackColor,
+		  'wins':_watch_game.blackWins,
+		  'losses':_watch_game.blackLosses,
+		  'streak_best':_watch_game.blackStreakBest,
+		  'game_name':_game_name.split("+")[1]
+	  }
+	  var whiteInfo:Object = {
+		  'name':_watch_game.whiteName,
+		  'rating':_watch_game.whiteRating,
+		  'rank':_watch_game.whiteRank,
+		  'titleName':_watch_game.whiteTitle,
+		  'country_code':_watch_game.whiteCountryCode,
+		  'labelColor':_watch_game.whiteColor,
+		  'wins':_watch_game.whiteWins,
+		  'losses':_watch_game.whiteLosses,
+		  'streak_best':_watch_game.whiteStreakBest,
+		  'game_name':_game_name.split("+")[1]
+	  }
+	  _player_infos[0] = blackInfo;
+	  _player_infos[1] = whiteInfo;
+
+	  if (_game_name.split("+")[1].match(/^r_/)) {
+		  board.gameType = "r";
+	  } else if (_game_name.split("+")[1].match(/^nr_/)) {
+		  board.gameType = "nr";
+	  } else if (_game_name.split("+")[1].match(/^hc/)) {
+		  board.gameType = "hc";
+	  }
+	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
+		  board.superior = Kyokumen.GOTE;
+	  } else if (String(_player_infos[1].rating).match(/^\*/)) {
+		  board.superior = Kyokumen.SENTE;
+	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
+		  board.superior = Kyokumen.SENTE;
+	  } else {
+		  board.superior = Kyokumen.GOTE;
+	  }
+	  var total:int = parseInt(_game_name.split("+")[1].split("-")[1]);
+	  var byoyomi:int = parseInt(_game_name.split("+")[1].split("-")[2]);
+	  var end_game:Boolean = false;
+	  var result:String = "";
+	  var moves:Array = new Array();
+	  for each (var line:String in e.message.split("\n")) {
+		  var match:Array;
+		  if ((match = line.match(/^##\[RECONNECT\]\[(.+)\]\sTo_Move\:(\+|\-)$/))) {
+			  board.kid = parseInt(match[1]);
+			  _initPositionStr = "P0" + match[2] + "\n";
+		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s(P[0-9\+\-].*)$/))) {
+			  _initPositionStr += match[1] + "\n";	  
+		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s([-+][0-9]{4}.{2}|%TORYO)$/))) {
+			  var move_and_time:Object = new Object();
+			  move_and_time.move = match[1];
+			  moves.push(move_and_time);
+		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s(T.*)$/))) {
+			  Object(moves[moves.length - 1]).time = match[1];
+		  } else if (line.match(/#SENTE_WIN$/)) {
+			  end_game = true;
+			  result = board.my_turn == Kyokumen.SENTE ? "WIN" : "LOSE";
+		  } else if (line.match(/#GOTE_WIN$/)) {
+			  end_game = true;
+			  result = board.my_turn == Kyokumen.SENTE ? "LOSE" : "WIN";
+		  } else if (line.match(/#DRAW$/)) {
+			  end_game = true;
+			  result = "DRAW";
+		  } else if ((match = line.match(/SINCE_LAST_MOVE:(\d+)/))) {
+			  board.since_last_move = parseInt(match[1]);
+		  }	  
+	  }
+	  radioKifuListen.selected = true;
+	  radioKifuListen.enabled = false;
+	  radioKifuReplay.enabled = false;
+	  board.onListen = true;
+	  sidePanel.setStyle('borderColor', undefined);
+	  
+	  board.startGame(_initPositionStr, _client.myTurn, _player_infos, total, byoyomi, moves);
+	  
+	  _client.watchers(_game_name);
+	  userMessage2.htmlText = "";
+	  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
+	  _writeUserMessage("Reconnected to game.\n", 2, "#008800", true);
+	  startButton.enabled = false;
+      stopButton.enabled = false;
+      closeButton.enabled = false;
+      resignButton.enabled = true;
+	  reverseButton.enabled = false;
+	  greetButton.visible = true;
+	  rematchButton.visible = false;
+	  shareKifuButton2.visible = false;
+      rewindAllButton.enabled = false;
+      rewindOneButton.enabled = false;
+      forwardOneButton.enabled = false;
+      forwardAllButton.enabled = false;
+      kifuDataGrid.selectable = false;
+	  logoutButton.enabled = false;
+      kifuDataGrid.dataProvider = board.kifu_list;
+      mainViewStack.selectedIndex = 2;
+	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+
+	  if (end_game) {
+		  var kifuMove:Object = new Object();
+		  if(e.message.indexOf("#TIME_UP") >= 0){
+			board.timeout();
+			_writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
+			kifuMove.num = board.kifu_list.length;
+			kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
+			kifuMove.moveKIF = "切れ負け";
+			board.kifu_list.push(kifuMove);
+		  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
+			  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
+		  } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
+			_writeUserMessage("Illegal Move.\n", 2, "#DD0088");
+			kifuMove.num = board.kifu_list.length;
+			kifuMove.move = "Illegal Move";
+			kifuMove.moveKIF = "相手の反則にて勝ち";
+			board.kifu_list.push(kifuMove);
+		  } else if (e.message.indexOf("#RESIGN") >= 0) {
+			  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
+		  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
+			  _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
+			  kifuMove.num = board.kifu_list.length;
+			  kifuMove.move = "Perpetual Check";
+			  kifuMove.moveKIF = "王手千日手";
+			  board.kifu_list.push(kifuMove);		  
+		  } else if (e.message.indexOf("#SENNICHITE") >= 0) {
+			  _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
+			  kifuMove.num = board.kifu_list.length;
+			  kifuMove.move = "Repetition Draw";
+			  kifuMove.moveKIF = "千日手";
+			  board.kifu_list.push(kifuMove);
+		  }
+		  board.post_game = true;
+		  radioKifuReplay.enabled = true;
+		  radioKifuListen.enabled = true;
+		  if (result == "LOSE") {
+//			if (board.playerInfos[0].rank != "-" && board.playerInfos[1].rank == "-") _openGameResultWindow(-2);
+//			else _openGameResultWindow(-1);
+			board.infoBoxes[1].setStyle('borderThickness', 2);
+			board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
+			_writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
+			if (_end_sound_play) _sound_lose.play();
+		  } else if (result == "WIN") {
+//			board.isStudyHost = true;
+//			if (board.playerInfos[0].rank == "-" && board.playerInfos[1].rank != "-") _openGameResultWindow(2);
+//			else _openGameResultWindow(1);
+			board.infoBoxes[0].setStyle('borderThickness', 2);
+			board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
+			_writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
+			if (_end_sound_play) _sound_win.play();
+		  } else if (result == "DRAW") {
+//			if (board.my_turn == Kyokumen.GOTE) board.isStudyHost = true;
+//			_openGameResultWindow(0);
+			_writeUserMessage("### Draw ###\n", 2, "#DD0088", true);
+			if (_end_sound_play) _sound_win.play();
+		  }
+//		  if (board.gameType == "hc") {
+//			  if (board.my_turn == Kyokumen.GOTE) {
+//				  board.isStudyHost = true;
+//			  } else {
+//				  board.isStudyHost = false;
+//			  }
+//		  }
+//		  if (board.isStudyHost) {
+//			_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
+//			board.onListen = false;
+//			radioKifuReplay.selected = true;
+//			radioKifuListen.enabled = false;
+//			sidePanel.setStyle('borderColor', _panelReplayColor);
+//		  }
+		  closeButton.enabled = true;
+		  resignButton.enabled = false;
+		  rematchButton.visible = true;
+		  shareKifuButton2.visible = true;
+		  rewindAllButton.enabled = true;
+		  rewindOneButton.enabled = true;
+		  forwardOneButton.enabled = true;
+		  forwardAllButton.enabled = true;
+		  startButton.enabled = true;
+		  kifuDataGrid.dataProvider = board.kifu_list;
+		  kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
+		  kifuDataGrid.selectable = true;
+		  kifuDataGrid.selectedIndex = board.kifu_list.length;
+//		  if (board.isStudyHost) _sendStudy();
+		  board.endGame();
+	  } else {
+		  board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(board.since_last_move);
+	  }
+    }
+	
     private function _handleGameEnd(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
+	  if (_disconnectAlertWindow) {
+		  _disconnectAlertWindow.terminate();
+		  _disconnectAlertWindow = null;
+	  }
 	  board.post_game = true;
       kifuMove.num = board.kifu_list.length;
       if(e.message.indexOf("TIME_UP") >= 0){
@@ -742,6 +975,10 @@
 			kifuMove.moveKIF = "投了   ( " + int(e.message.split(",T")[1]/60) + ":" + e.message.split(",T")[1] % 60 + "/)";
 			board.kifu_list.push(kifuMove);
 	  } else {
+		if (board.since_last_move > 0) {
+			board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(- board.since_last_move);
+			board.since_last_move = 0;
+		}
 		board.makeMove(e.message, true, true);
 	  }
 	  kifuDataGrid.dataProvider = board.kifu_list;
@@ -840,7 +1077,7 @@
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
 			if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 			if (!_accept_arrows && sender != login_name) return;
-			if (board.isPlayer && !board.post_game) return;
+			if (_isDuringMyGame()) return; // (board.isPlayer && !board.post_game) return;
 			if (board.post_game && !board.studyOn) return;
 			if (sender == login_name) sender = "";
 			if (board.isStudyHost || board.onListen) {
@@ -885,6 +1122,7 @@
 				_writeUserMessage("Rematch Agreed.\n", 2, "#008800", true);
 				board.rematch[0] == false;
 				board.rematch[1] == false;
+				trace(board.isPlayer);
 				if (board.isPlayer) {
 					_client.closeGame();
 					board.closeGame();
@@ -943,10 +1181,18 @@
 	private function _handleEnter(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex != 2) return;
 		if (e.message == board.playerInfos[0].name) {
+			if (_disconnectAlertWindow) {
+				_disconnectAlertWindow.terminate();
+				_disconnectAlertWindow = null;
+			}
 			_writeUserMessage(e.message + " entered.\n", 2, "#000000", true);
 			board.name_labels[board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
 		} else if (e.message == board.playerInfos[1].name) {
+			if (_disconnectAlertWindow) {
+				_disconnectAlertWindow.terminate();
+				_disconnectAlertWindow = null;
+			}
 			_writeUserMessage(e.message + " entered.\n", 2, "#666666", true);
 			board.name_labels[1 - board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
@@ -971,6 +1217,32 @@
 			_writeUserMessage(e.message + " left.\n", 2, "#008800");
 			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_close.play();
 		}
+	}
+	
+	private function _handleDisconnect(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex != 2) return;
+		if (board.playerInfos[0] == null) return;
+		if (e.message == board.playerInfos[0].name) {
+			_writeUserMessage(e.message + " disconnected.\n", 2, "#000000", true);
+			board.name_labels[board.my_turn].setStyle("color", 0x999999);
+			if (_chat_sound2_play) _sound_door_close.play();
+		} else if (e.message == board.playerInfos[1].name) {
+			_writeUserMessage(e.message + " disconnected.\n", 2, "#666666", true);
+			board.name_labels[1 - board.my_turn].setStyle("color", 0x999999);
+			if (_chat_sound2_play) _sound_door_close.play();
+		}
+		if (_isDuringMyGame() && e.message != login_name) _openDisconnectAlertWindow();
+	}
+	
+	private function _openDisconnectAlertWindow():void {
+	  _disconnectAlertWindow = DisconnectAlertWindow(PopUpManager.createPopUp(board, DisconnectAlertWindow, false));
+      PopUpManager.centerPopUp(_disconnectAlertWindow);
+	  _disconnectAlertWindow.addEventListener("declare", _handleDisconnectDeclare);
+	  _disconnectAlertWindow.startTimer();
+	}
+	
+	private function _handleDisconnectDeclare(e:Event):void {
+		_client.declare();
 	}
 
     private function _format_message(message:String):String{
@@ -1061,14 +1333,16 @@
 	//=========================================================
 	//                   CONTROLS for VIEWSTACK INDEX = 0
 	//=========================================================
-    private function _connectAndLogin():void{
+    private function _connectAndLogin():void {
+	  var serverObj:Object = serverListGrid.selectedItem;
+	  if (serverObj.alive == "NO") return;
+	  userListPanel.titleIcon = serverObj.icon;
       trace("connecting.");
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
-	  var serverObj:Object = serverCombo.selectedItem;
 	  _client.setServer(serverObj.host, parseInt(serverObj.port));
 	  _server = serverObj.name;
-	  if (serverCombo.selectedIndex == 2) _api.setHostToLocal();
+	  if (_server == "MOON") _api.setHostToLocal();
       _client.connect();
     }
 	
@@ -1081,6 +1355,27 @@
 		loginname.text = "test" + i;
 		password.text = "81dojo" + i;
 		_connectAndLogin();
+	}
+	
+	private function _handleReadServer(e:Event):void {
+		for each (var server:Object in _servers) {
+			for each (var data:Object in e.target.bufferData) {
+				if (server.name == data.name) {
+					if (data.population < 0) {
+						server.population = "";
+						server.alive = "NO";
+					} else {
+						if (server.name == "EARTH" && data.population <= 15) server.population = "15↓";
+						else server.population = data.population;
+						server.alive = "YES";
+					}
+					break;
+				}
+			}
+		}
+		serverListGrid.dataProvider = _servers;
+		serverListGrid.selectedIndex = 0;
+		if (_so.data.savelogin && _so.data.server) serverListGrid.selectedIndex = _so.data.server;
 	}
 	
 	//=========================================================
@@ -1315,7 +1610,12 @@
 
 	private function _watchDialog():void {
 		if (_game_name) return;
-		Alert.show("Watch this game?", lan.watch, Alert.YES | Alert.NO, gameListGrid, _watch);
+		_watch_game = gameListGrid.selectedItem;
+		if (_watch_game.blackName == login_name || _watch_game.whiteName == login_name) {
+			Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
+		} else {
+			Alert.show("Watch this game?", lan.watch, Alert.YES | Alert.NO, gameListGrid, _watch);
+		}
 //		Alert.yesLabel = lan.black;
 //        Alert.noLabel = lan.white;
 //		Alert.buttonWidth = 120;
@@ -1324,6 +1624,14 @@
 //        Alert.yesLabel = "Yes";
 //        Alert.noLabel = "No";
 //        Alert.buttonWidth = 60;
+	}
+	
+	private function _reconnect(e:CloseEvent):void {
+		_watch_game = gameListGrid.selectedItem;
+		if (_watch_game != null && e.detail == Alert.YES) {
+			_game_name = _watch_game.id;
+			_client.reconnect(_game_name);
+		}
 	}
 
     private function _watch(e:CloseEvent):void {
@@ -2307,8 +2615,15 @@
 	}
 
     private function _checkTimeout():void {
-	  board.clientTimeout();
-      _client.checkTimeout();
+		if (board.last_pos.turn == board.my_turn) {
+			board.clientTimeout();
+			_client.checkTimeout();
+		} else {
+			if (_disconnectAlertWindow) {
+				_disconnectAlertWindow.declare();
+				_disconnectAlertWindow = null;
+			}
+		}
     }
 	
 	private function _findPlayerFromList(str:String):Object {
@@ -2363,10 +2678,9 @@
   }
   
   private function _isDuringMyGame():Boolean {
-	  if (_game_name && board.isPlayer && !board.post_game) return true;
-//		  if (board.playerInfos[0].name == login_name || board.playerInfos[1].name == login_name) return true;
-//	  }
-	  return false;
+	  return board.inGame;
+//	  if (_game_name && board.isPlayer && !board.post_game) return true;
+//	  return false;
   }
   
 	//=========================================================
@@ -2375,6 +2689,12 @@
   
     ]]>
   </mx:Script>
+  <mx:Component id="serverListRenderer">
+	  <mx:HBox verticalAlign="middle" paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Image source="{data.icon}" width="25" height="25" />
+		<mx:Label text="{data.name}" textAlign="left" paddingLeft="-9" paddingRight="-7" fontSize="10" width="80" />
+	  </mx:HBox>
+  </mx:Component>
   <mx:Component id="gameListBlackRenderer">
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-9" paddingRight="-7" color="{data.blackRankColor}"/>
@@ -2435,40 +2755,33 @@
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
-      <mx:Form paddingBottom="0">
-        <mx:FormItem label="{lan.language}" paddingTop="-2">
-            <eightyOneSquare:LanguageSelector id="languageSelector"/>
-        </mx:FormItem>
-		<mx:FormItem label="{lan.server}" paddingTop="-2">
-			<mx:ComboBox id="serverCombo" width="170">
-				<mx:dataProvider><mx:Array>
-					<mx:Object label="EARTH (main)" image="{DIRECTORY}images/earth.png" name="EARTH" host="81dojo.com" port="4081" />
-					<mx:Object label="MARS (back-up)" image="{DIRECTORY}images/mars.png" name="MARS" host="81dojo.dyndns.org" port="4081" />
-					<mx:Object label="MOON (admin)" image="{DIRECTORY}images/moon.png" name="MOON" host="127.0.0.1" port="4081" />
-				</mx:Array></mx:dataProvider>
-                <mx:itemRenderer>
-                    <mx:Component>
-                        <mx:HBox paddingTop="0" paddingBottom="0" verticalAlign="middle">
-                            <mx:Image source="{data.image}" width="25" height="25"/>
-                            <mx:Text text="{data.label}"/>
-                        </mx:HBox>
-                    </mx:Component>
-                </mx:itemRenderer>
-			</mx:ComboBox>
-		</mx:FormItem>
-        <mx:FormItem label="{lan.loginname}" paddingTop="-2">
-            <mx:TextInput id="loginname" width="200"/>
-        </mx:FormItem>
-        <mx:FormItem label="{lan.password}" paddingTop="-2">
-            <mx:TextInput id="password" width="200" displayAsPassword="true"/>
-        </mx:FormItem>
-		<mx:FormItem label="" paddingTop="-2">
-			<mx:CheckBox label="{lan.save_login_info}" id="savelogin" selected="false" />
-		</mx:FormItem>
-        <mx:FormItem paddingTop="-2">
-            <mx:Button id="loginButton" label="{lan.login}" y="400" />
-        </mx:FormItem>
-      </mx:Form>
+	  <mx:HBox verticalAlign="middle" horizontalGap="35" >
+		  <mx:Form paddingBottom="0">
+			<mx:FormItem label="{lan.language}" paddingTop="-2">
+				<eightyOneSquare:LanguageSelector id="languageSelector"/>
+			</mx:FormItem>
+			<mx:FormItem label="{lan.loginname}" paddingTop="-2">
+				<mx:TextInput id="loginname" width="150"/>
+			</mx:FormItem>
+			<mx:FormItem label="{lan.password}" paddingTop="-2">
+				<mx:TextInput id="password" width="150" displayAsPassword="true"/>
+			</mx:FormItem>
+			<mx:FormItem label="" paddingTop="-2">
+				<mx:CheckBox label="{lan.save_login_info}" id="savelogin" selected="false" />
+			</mx:FormItem>
+			<mx:FormItem paddingTop="-2">
+				<mx:Button id="loginButton" label="{lan.login}" y="400" />
+			</mx:FormItem>
+		  </mx:Form>
+		  <mx:DataGrid id="serverListGrid" sortableColumns="false" height="135">
+			 <mx:columns>
+			  <mx:DataGridColumn itemRenderer="{serverListRenderer}" headerText="{lan.server}" width="90" paddingLeft="0" />
+			  <mx:DataGridColumn dataField="description" headerText="Description" width="80" paddingLeft="0" />
+			  <mx:DataGridColumn dataField="population" headerText="Player" width="45" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="alive" headerText="Alive" width="45" paddingLeft="0" textAlign="center" />
+			 </mx:columns>
+		  </mx:DataGrid>
+	  </mx:HBox>
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
       <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->

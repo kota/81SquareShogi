@@ -22,6 +22,7 @@ package{
 	public static var PRIVATECHAT:String = 'privatechat';
     public static var WHO:String = 'who';
     public static var MONITOR:String = 'monitor';
+	public static var RECONNECT:String = 'reconnect';
     public static var START_WATCH:String = 'start_watch';
     public static var LIST:String = 'list';
     public static var GAME_SUMMARY:String = 'game_summary';
@@ -29,6 +30,7 @@ package{
     public static var WATCHERS:String = 'watchers';
 	public static var ENTER:String = 'enter';
 	public static var LEAVE:String = 'leave';
+	public static var DISCONNECT:String = 'disconnect';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -171,6 +173,10 @@ package{
 	public function kachi():void {
 		send("%KACHI");
 	}
+	
+	public function declare():void {
+		send("%%%DECLARE");
+	}
 
     public function who():void{
       send("%%WHO");
@@ -199,6 +205,10 @@ package{
     public function monitorOff(game_name:String):void{
       send("%%MONITOR2OFF " + game_name);
     }
+	
+	public function reconnect(game_name:String):void {
+		send("%%RECONNECT " + game_name);
+	}
 
     public function list():void{
       send("%%LIST");
@@ -240,7 +250,7 @@ package{
 			_buffer = _buffer + response;
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
-			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\])/)) {
+			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\]|^##\[RECONNECT\])/)) {
 				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|REJECT\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
 					trace("buffer doesn't deserve dispatching.");
 					return;
@@ -280,6 +290,8 @@ package{
 			dispatchEvent(new ServerMessageEvent(ENTER, match[1]));
 		} else if ((match = line.match(/^##\[LEAVE\]\[(.+)\]/))) {
 			dispatchEvent(new ServerMessageEvent(LEAVE, match[1]));
+		} else if ((match = line.match(/^##\[DISCONNECT\]\[(.+)\]/))) {
+			dispatchEvent(new ServerMessageEvent(DISCONNECT, match[1]));
         } else if(line.match(/^##\[WHO\]/) != null){
           _buffer_response(WHO,line);
           if(line.match(/^##\[WHO\] \+OK$/)){
@@ -311,7 +323,20 @@ package{
               if(line.match(/^##\[MONITOR2\]/)){
                 _buffer_response(MONITOR,line);
                 if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
-			            _dispatchServerMessageEvent(MONITOR);
+			        _dispatchServerMessageEvent(MONITOR);
+                }
+			  } else if(line.match(/^##\[RECONNECT\]/)){
+                _buffer_response(RECONNECT, line);
+				if((match = line.match(/^##\[RECONNECT\]\[.+\]\sN\+(.+)$/))){
+					_player_names[0] = match[1];
+					if (match[1] == _login_name) _my_turn = Kyokumen.SENTE;
+				} else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\sN\-(.+)$/))) {
+					_player_names[1] = match[1];
+					if (match[1] == _login_name) _my_turn = Kyokumen.GOTE;
+				} else if (line.match(/##\[RECONNECT\]\[.*\] \+OK/)) {
+					_current_state = STATE_GAME;
+					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) _current_state = STATE_CONNECTED;
+			        _dispatchServerMessageEvent(RECONNECT);
                 }
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;

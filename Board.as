@@ -407,7 +407,7 @@ package  {
 		_addMyArrowCallback = callback;
 	}
 
-    public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int):void {
+    public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int, moves:Array = null):void {
       trace("game started");
 	  rematch[0] = false;
 	  rematch[1] = false;
@@ -425,6 +425,23 @@ package  {
 	  timers[0].reset(time_total,time_byoyomi);
 	  timers[1].reset(time_total,time_byoyomi);
 	  timers[_my_turn == _position.turn ? 0 : 1].start();
+      if (moves) {
+		  if (moves.length > 0) {
+			for each(var move:Object in moves) {
+				if (move.move == "%TORYO") {
+					var kifuMove:Object = new Object();
+					kifuMove.num = kifu_list.length;										//No. of the Move
+					kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
+					kifuMove.moveStr = "%TORYO";												//CSA
+					kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";			//Japanese Notation
+					kifu_list.push(kifuMove);
+					timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
+				} else {
+					makeMove(move.move + "," + move.time, true, false);
+				}
+			}
+		  }
+	  }
       _in_game = true;
 	  _client_timeout = false;
 	  studyOrigin = 0;
@@ -592,7 +609,7 @@ package  {
       } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
 		if (since_last_move > 0) {
-			time = "T" + String(parseInt(time.substr(1)) - since_last_move);
+			timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(- since_last_move);
 			since_last_move = 0;
 		}
         makeMove(match[1] + ',' + time, true, true);
@@ -966,7 +983,7 @@ package  {
 	}
 
 		private function _checkTimeout(e:Event):void {
-			if (_in_game && _position.turn == _my_turn) _timeoutCallback();
+			if (_in_game) _timeoutCallback();
 		}
 		
 	  public function replayMoves(n:int, actual:Boolean = true):void {

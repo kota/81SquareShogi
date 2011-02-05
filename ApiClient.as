@@ -14,6 +14,7 @@ package{
 		public static var KIFU_DETAIL:String = 'kifu_detail';
 		public static var PLAYER_SEARCH:String = 'player_search';
 		public static var RANKING_SEARCH:String = 'ranking_search';
+		public static var READ_SERVER:String = 'read_server';
 		public static var NOT_FOUND:String = 'not_found';
 		
 		public var bufferData:ArrayCollection;
@@ -24,6 +25,7 @@ package{
 		private var _kifuDetailService:HTTPService = new HTTPService();
 		private var _playerSearchService:HTTPService = new HTTPService();
 		private var _rankingService:HTTPService = new HTTPService();
+		private var _readServerService:HTTPService = new HTTPService();
 		
 		//private var _host:String = '127.0.0.1';
 		//private var _host:String = '81dojo.dyndns.org';
@@ -36,6 +38,20 @@ package{
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);
 			_rankingService.addEventListener(ResultEvent.RESULT, _handleRanking);
+			_readServerService.addEventListener(ResultEvent.RESULT, _handleReadServer);
+		}
+		
+		public function readServer():void {
+			_readServerService.url = "http://" + _host + ":" + _port + "/api/servers.xml";
+			trace("send: " + _readServerService.url);
+			_readServerService.send();
+		}
+		
+		private function _handleReadServer(e:ResultEvent):void {
+			bufferData = new ArrayCollection();
+			bufferData = e.result.servers.server as ArrayCollection;
+			dispatchEvent(new Event(READ_SERVER));
+			trace("dispatch api response");
 		}
 		
 		public function kifuSearch(name:String, from:Date, to:Date):void {
