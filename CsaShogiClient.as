@@ -20,6 +20,7 @@ package{
     public static var CHAT:String = 'chat';
 	public static var GAMECHAT:String = 'gamechat';
 	public static var PRIVATECHAT:String = 'privatechat';
+	public static var OFFLINE_PM:String = 'offline_pm';
     public static var WHO:String = 'who';
     public static var MONITOR:String = 'monitor';
 	public static var RECONNECT:String = 'reconnect';
@@ -63,7 +64,7 @@ package{
       _player_names = new Array(2);
       _buffer = "";
       _buffers = new Object();
-      for each(var key:String in [WHO,LIST,MONITOR,GAME_END,GAME_SUMMARY,WATCHERS]){
+      for each(var key:String in [WHO,LIST,MONITOR,RECONNECT,GAME_END,GAME_SUMMARY,WATCHERS,OFFLINE_PM]){
         _buffers[key] = "";
       }
 		}
@@ -357,6 +358,11 @@ package{
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  } else if ((match = line.match(/^##\[OFFLINE_PM\]/))) {
+                _buffer_response(OFFLINE_PM, line);
+				if (line.match(/##\[OFFLINE_PM\] \+OK$/)) {
+			        _dispatchServerMessageEvent(OFFLINE_PM);
+                }
 			  } else if (line.match(/^##\[SETRATE\] \+OK/)) {
 				  Alert.show("Rate successfully updated.");
 			  }

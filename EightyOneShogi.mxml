@@ -194,6 +194,7 @@
       _client.addEventListener(CsaShogiClient.CHAT, _handleChat);
 	  _client.addEventListener(CsaShogiClient.GAMECHAT, _handleGameChat);
 	  _client.addEventListener(CsaShogiClient.PRIVATECHAT, _handlePrivateChat);
+	  _client.addEventListener(CsaShogiClient.OFFLINE_PM, _handleOfflinePM);
       _client.addEventListener(CsaShogiClient.MOVE,_handleMove);
       _client.addEventListener(CsaShogiClient.WHO,_handleWho);
       _client.addEventListener(CsaShogiClient.MONITOR, _handleMonitor);
@@ -1194,6 +1195,15 @@
 				var minute:int = (_leaveMinutes - _leaveTimer.currentCount) % 60;
 				_sendPrivateChat(name, "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
 			}
+		}
+	}
+	
+	private function _handleOfflinePM(e:ServerMessageEvent):void {
+		_writeUserMessage("<Offline Private Messages>\n", 1, "#FF0000");
+		for each (var line:String in e.message.split("\n")) {
+			var match:Array;
+			if (line.match(/^##\[OFFLINE_PM\] \+OK$/)) break;
+			if ((match = line.match(/^##\[OFFLINE_PM\](.+)$/))) _writeUserMessage(match[1] + "\n", 1, "#FF0000");
 		}
 	}
 	
@@ -2637,10 +2647,7 @@
 	private function _sendPrivateChat(sendTo:String, message:String):void {
 		if (!_isDuringMyGame()) {
 			var user:Object = _findPlayerFromList(sendTo);
-			if (!user) {
-				Alert.show("User not found online");
-				return;
-			} else if (user.status == "game") {
+			if (user && user.status == "game") {
 				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
 					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
