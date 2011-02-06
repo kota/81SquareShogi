@@ -128,7 +128,6 @@
 	private var _userMessageScrollPos2:int;
 	private var _initPositionStr:String;
     private var _keepAliveTimer:Timer;
-	private var _challengerTicker:Timer;
 	private var _leaveTimer:Timer;
 	private var _leaveMinutes:int;
 	private var _leaveMessage:String;
@@ -201,11 +200,13 @@
 	  _client.addEventListener(CsaShogiClient.RECONNECT, _handleReconnect);
       _client.addEventListener(CsaShogiClient.LIST, _handleList);
       _client.addEventListener(CsaShogiClient.GAME_SUMMARY, _handleGameSummary);
-      _client.addEventListener(CsaShogiClient.REJECT, _handleReject);
       _client.addEventListener(CsaShogiClient.WATCHERS, _handleWatchers);
 	  _client.addEventListener(CsaShogiClient.ENTER, _handleEnter);
 	  _client.addEventListener(CsaShogiClient.LEAVE, _handleLeave);
 	  _client.addEventListener(CsaShogiClient.DISCONNECT, _handleDisconnect);
+	  _client.addEventListener(CsaShogiClient.CHALLENGE, _handleChallenger);
+	  _client.addEventListener(CsaShogiClient.ACCEPT, _handleAccept);
+	  _client.addEventListener(CsaShogiClient.DECLINE, _handleDecline);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
@@ -221,8 +222,6 @@
 	  playerSearchNameText.addEventListener(FlexEvent.ENTER, _handlePlayerSearchEnter);
 	  board.name_labels[0].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
 	  board.name_labels[1].addEventListener(MouseEvent.DOUBLE_CLICK, _gamePlayerInfo);
-	  _challengerTicker = new Timer(1000);
-	  _challengerTicker.addEventListener(TimerEvent.TIMER, _challengerTickHandler);
       _user_list = new Array();
       userListGrid.dataProvider = _user_list;
     }
@@ -404,11 +403,6 @@
 			  user.time = total + "-" + game_info[4];
 			  userProxy = new ObjectProxy(user);
 			  waiter_list.push(userProxy);
-			  if (user.name == login_name && game_info[2] != login_name) {
-				  _challenging = false;
-				  _client.stopWaiting();
-				  if (_waiting) _client.waitAgain();
-			  }
 		  }
 	  }
       user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
@@ -428,7 +422,6 @@
 	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
-	  if (_challengerAlertWindow) _challengerAlertWindow.user = _findPlayerFromList(_challengerAlertWindow.challenger_name);
     }
 
     private function _handleList(e:ServerMessageEvent):void{                                 //<<<<<< Handle LIST response
@@ -551,17 +544,6 @@
 		_game_list = game_list;
 		gameListGrid.dataProvider = _game_list;
     }
-	
-  private function _handleReject(e:ServerMessageEvent):void {
-	if (_challenging) {
-		_writeUserMessage("Rejected by the opponent.\n", 1, "#008800");
-		_challenging = false;
-	}
-	if (_waiting) {
-		_client.waitAgain();
-		stopButton.enabled = true;
-	}
-  }
 
     private function _handleWatchers(e:ServerMessageEvent):void{
       var watchers:Array = e.message.split("\n");
@@ -592,6 +574,74 @@
       watcherListGrid.dataProvider = watcher_list;
 	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
     }
+	
+	//----------------------------------------------------------------------------------------------------------------------------- MATCH MAKING
+
+	private function _handleChallenger(e:ServerMessageEvent):void {
+//	  _refresh();
+      _sound_challenger.play();
+      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
+      PopUpManager.centerPopUp(_challengerAlertWindow);
+	  _challengerAlertWindow.challenger = e.message.split(",")[0];
+	  _challengerAlertWindow.country = InfoFetcher.country_names[e.message.split(",")[1]];
+	  _challengerAlertWindow.rate = e.message.split(",")[2];
+	  _challengerAlertWindow.rank = InfoFetcher.makeRankFromRating(parseInt(e.message.split(",")[2]));
+      _challengerAlertWindow.addEventListener("accept", _handleChallengerAcceptButton);
+	  _challengerAlertWindow.addEventListener("decline", _handleChallengerRejectButton);
+	  _challengerAlertWindow.startTimer();
+	}
+	
+	private function _handleChallengerAcceptButton(e:Event):void {
+		_client.accept();
+		_challengerAlertWindow = null;
+	}
+  
+	private function _handleChallengerRejectButton(e:Event):void {
+		_client.decline();
+		_challengerAlertWindow = null;
+	}
+	
+	private function _handleDecline(e:ServerMessageEvent):void {
+		_writeUserMessage(e.message + "\n", 1, "#008800", true);
+		if (_challengerAlertWindow) {
+			_challengerAlertWindow.terminate();
+			_challengerAlertWindow = null;
+		}
+	}
+	
+	private function _handleAccept(e:ServerMessageEvent):void {
+		_writeUserMessage(e.message + "\n", 1, "#008800", true);
+		if (_challengeUser) _client.seek(_challengeUser);
+	}
+  
+   private function _handleGameSummary(e:ServerMessageEvent):void {
+	  _refresh();
+	  _initPositionStr = "";
+	  for each(var line:String in e.message.split("\n")) {
+		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
+	  }
+	  _client.agree(); return;
+    if (_challenging || _rematching) {
+      _client.agree();
+    } else {
+	  var challengerName:String = login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
+	  if (_ignore_list.indexOf(challengerName.toLowerCase()) >= 0) {
+		  _client.reject();
+		  return;
+	  }
+      _sound_challenger.play();
+      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
+      PopUpManager.centerPopUp(_challengerAlertWindow);
+      with (_challengerAlertWindow) {
+        title = "Here comes a new challenger!!";
+		challenger_name = challengerName;
+		user = _findPlayerFromList(challengerName);
+		remainTime = 20;
+        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
+		rejectButton.addEventListener("click", _handleChallengerRejectButton);
+      }
+    }
+  }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
 	  _waiting = false;
@@ -989,36 +1039,6 @@
 	  }
     }
   
-  private function _handleGameSummary(e:ServerMessageEvent):void {
-	  _refresh();
-	  _initPositionStr = "";
-	  for each(var line:String in e.message.split("\n")) {
-		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
-	  }
-    if (_challenging || _rematching) {
-      _client.agree();
-    } else {
-	  var challengerName:String = login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
-	  if (_ignore_list.indexOf(challengerName.toLowerCase()) >= 0) {
-		  _client.reject();
-		  return;
-	  }
-      _sound_challenger.play();
-	  _challengerTicker.reset();
-	  _challengerTicker.start();
-      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
-      PopUpManager.centerPopUp(_challengerAlertWindow);
-      with (_challengerAlertWindow) {
-        title = "Here comes a new challenger!!";
-		challenger_name = challengerName;
-		user = _findPlayerFromList(challengerName);
-		remainTime = 20;
-        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
-		rejectButton.addEventListener("click", _handleChallengerRejectButton);
-      }
-    }
-  }
-  
 //--------------------------------------------------------------------------------------------------------------------------------- CHAT 
     private function _handleChat(e:ServerMessageEvent):void {
 		var sender:String = e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1];
@@ -1177,7 +1197,7 @@
 		}
 	}
 	
-//--------------------------------------------------------------------------------------------------------------------------------- CHAT 
+//--------------------------------------------------------------------------------------------------------------------------------- GAME ROOM 
 	private function _handleEnter(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex != 2) return;
 		if (e.message == board.playerInfos[0].name) {
@@ -1788,7 +1808,7 @@
       if (e.detail == Alert.YES) {
       _challenging = true;
       _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
-      _client.challenge(_challengeUser);
+      _client.challenge(_challengeUser.name);
       } else if (e.detail == Alert.CANCEL) {
       }
     }
@@ -2413,25 +2433,6 @@
       _waitForGame(e.total, e.byoyomi, e.handicap);
 	  _waiting = true;
     }
-	//--------------------------------------------------------------------------------------------------------------------------------- CHALLENGE ALERT 
-  private function _handleChallengerAcceptButton(e:MouseEvent):void {
-	  _challengerTicker.reset();
-	  _client.agree();
-  }
-  
-  private function _handleChallengerRejectButton(e:MouseEvent):void {
-	  _challengerTicker.reset();
-	  _client.reject();
-  }
-	
-	private function _challengerTickHandler(e:TimerEvent):void {
-		_challengerAlertWindow.remainTime -= 1
-		if (_challengerAlertWindow.remainTime <= 0) {
-			_challengerTicker.reset();
-			_client.reject();
-			PopUpManager.removePopUp(_challengerAlertWindow);
-		}
-	}
 
 	//--------------------------------------------------------------------------------------------------------------------------------- OPTION WINDOW
     private function _handleOption(e:Event):void {
@@ -2893,12 +2894,12 @@
 ================================================================== -->
     <mx:HBox id="boardBox">
 	<mx:Panel width="100%" height="100%" headerHeight="0" backgroundColor="#FFcccc" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" paddingLeft="0" paddingRight="0" backgroundAlpha="0">
-	<mx:HBox paddingLeft="5" paddingTop="5">
-      <mx:VBox>
+	<mx:HBox paddingLeft="3" paddingTop="3" horizontalGap="2">
+      <mx:VBox verticalGap="0">
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
-      <mx:HBox>
-        <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="435" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="419" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
+      <mx:HBox horizontalGap="2">
+        <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="444" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="428" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
         </mx:Panel>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
@@ -2938,7 +2939,7 @@
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="680" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
 			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>

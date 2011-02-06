@@ -1,31 +1,66 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="175" fontSize="13">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="175" fontSize="13" title="Here comes a new challenger!!">
 	    <mx:Script>
         <![CDATA[
+		  import flash.events.Event;
           import mx.controls.*;
           import mx.managers.PopUpManager;
-		  [Bindable]
-		  public var challenger_name:String;
-		  [Bindable]
-		  public var user:Object = new Object();
-		  [Bindable]
-		  public var remainTime:int;
 
-          private function _closeButton():void {
+		  [Bindable]
+		  public var challenger:String;
+		  [Bindable]
+		  public var country:String;
+		  [Bindable]
+		  public var rank:String;
+		  [Bindable]
+		  public var rate:String;
+		  
+		  public var _timer:Timer = new Timer(1000, 20);
+		  [Bindable]
+		  public var remainTime:int = 20;
+		  
+		  public function startTimer():void {
+			_timer.addEventListener(TimerEvent.TIMER, _handleTick);
+			_timer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerComplete);
+			_timer.start();
+		  }
+		  
+		  private function _handleTick(e:TimerEvent):void {
+			  remainTime -= 1;
+		  }
+		  
+		  private function _handleTimerComplete(e:TimerEvent):void {
+			  _decline();
+		  }
+		  
+		  public function terminate():void {
+			_timer.stop();
+            PopUpManager.removePopUp(this);
+		  }
+
+          private function _decline():void {
+			_timer.stop();
+			dispatchEvent(new Event("decline"));
+            PopUpManager.removePopUp(this);
+          }
+		  
+          private function _accept():void {
+			_timer.stop();
+			dispatchEvent(new Event("accept"));
             PopUpManager.removePopUp(this);
           }
 
         ]]>
     </mx:Script>
 	<mx:VBox horizontalAlign="left" paddingLeft="10">
-		<mx:Label text="{challenger_name}" fontSize="16" fontWeight="bold" />
-		<mx:Label text="  {parentApplication.lan.rate}: {user.rating}, ({user.rank})"/>
-		<mx:Label text="  {parentApplication.lan.country}: {user.country}"/>
+		<mx:Label text="{challenger}" fontSize="16" fontWeight="bold" />
+		<mx:Label text="  {parentApplication.lan.rate}: {rate}, ({rank})"/>
+		<mx:Label text="  {parentApplication.lan.country}: {country}"/>
 	</mx:VBox>
 	<mx:VBox width="100%" horizontalAlign="center">
 		<mx:HBox>
-			<mx:Button id="acceptButton" click="_closeButton();" label="{parentApplication.lan.accept}"/>
-			<mx:Button id="rejectButton" click="_closeButton();" label="{parentApplication.lan.reject}"/>
+			<mx:Button id="acceptButton" click="_accept();" label="{parentApplication.lan.accept}"/>
+			<mx:Button id="rejectButton" click="_decline();" label="{parentApplication.lan.reject}"/>
 			<mx:Label text="{remainTime}" fontSize="16" fontWeight="bold" />
 		</mx:HBox>
 	</mx:VBox>

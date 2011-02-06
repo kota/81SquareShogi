@@ -31,6 +31,9 @@ package{
 	public static var ENTER:String = 'enter';
 	public static var LEAVE:String = 'leave';
 	public static var DISCONNECT:String = 'disconnect';
+	public static var CHALLENGE:String = 'challenge';
+	public static var ACCEPT:String = 'accept';
+	public static var DECLINE:String = 'decline';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -112,27 +115,33 @@ package{
 	  send("%%GAME " + _waiting_gamename);
     }
 	
-	public function waitAgain():void {
-		_current_state = STATE_GAME_WAITING;
-		send("%%GAME " + _waiting_gamename);
-	}
-	
 	public function stopWaiting():void {
 		if (_current_state == STATE_GAME_WAITING){
 			_current_state = STATE_CONNECTED;
 			send("%%GAME");
 		}
 	}
+	
+	public function accept():void {
+		send("ACCEPT");
+	}
+	
+	public function decline():void {
+		send("DECLINE");
+	}
 
-	public function challenge(user:Object):void {
-      if(user.game_name){
-        _current_state = STATE_GAME_WAITING;
+	public function challenge(name:String):void {
+	  send("%%CHALLENGE " + name)
+    }
+	
+	public function seek(user:Object):void {
+      if (user.game_name) {
 		if (user.turn == "+") {
-			send("%%GAME " + user.game_name + " -");
+			send("%%SEEK " + user.game_name + " -");
 		} else if (user.turn == "-") {
-			send("%%GAME " + user.game_name + " +");
+			send("%%SEEK " + user.game_name + " +");
 		} else {
-			send("%%GAME " + user.game_name + " *");
+			send("%%SEEK " + user.game_name + " *");
 		}
 	  }
     }
@@ -251,7 +260,7 @@ package{
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
 			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\]|^##\[RECONNECT\])/)) {
-				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|REJECT\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
+				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
 					trace("buffer doesn't deserve dispatching.");
 					return;
 				}
@@ -320,6 +329,9 @@ package{
               }
               break;
             case STATE_CONNECTED:
+              if (line == "BEGIN Game_Summary") {
+                _reading_game_summary_flag = true;
+              }
               if(line.match(/^##\[MONITOR2\]/)){
                 _buffer_response(MONITOR,line);
                 if(line.match(/##\[MONITOR2\]\[.*\] \+OK/)){
@@ -338,6 +350,10 @@ package{
 					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) _current_state = STATE_CONNECTED;
 			        _dispatchServerMessageEvent(RECONNECT);
                 }
+			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
+			  } else if ((match = line.match(/^##\[DECLINE\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(DECLINE, match[1]));
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
@@ -357,6 +373,12 @@ package{
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  } else if ((match = line.match(/^##\[CHALLENGE\](.+)$/))) {
+				  dispatchEvent(new ServerMessageEvent(CHALLENGE, match[1]));
+			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
+			  } else if ((match = line.match(/^##\[DECLINE\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(DECLINE, match[1]));
 			  }
               break;
             case STATE_AGREE_WAITING:
