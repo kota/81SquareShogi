@@ -42,7 +42,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/05";
+	public const VERSION:String = "ver.2011/02/12";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -272,6 +272,7 @@
 	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
+	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\n", 1, "#FF0000");
 	  if (_infoFetcher.serverMaintenanceTime != null) {
 		  _writeUserMessage("Server Update from [" + _infoFetcher.serverMaintenanceTime.toUTCString() + "]", 1, "#FF0000", true);
 	  } else {
@@ -2892,6 +2893,7 @@
 		  </mx:VBox>
 	  </mx:HBox>
 <!--	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_client.send('SCRATCH');"/>
+		<mx:Label text="MAINTENANCE" doubleClickEnabled="true" doubleClick="_client.send('%%MAINTENANCE ' + chatMessage1.text);"/>
 	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_client.send('%%GHOST ' + chatMessage1.text);"/> -->
     </mx:VBox>
 	<eightyOneSquare:BulletinGadget id="bulletin" paddingLeft="8" />
