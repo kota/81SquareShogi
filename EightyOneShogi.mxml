@@ -74,6 +74,7 @@
 	private var _rematching:Boolean = false;
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
+	private var _status_disconnected:Boolean = false;
 	private const filterDefault:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 ]);
 	private const filterGrey:ColorMatrixFilter = new ColorMatrixFilter([0.5, 0.25, 0.25, 0,120, 0.25, 0.5, 0.25, 0,120, 0.25, 0.25, 0.5, 0,120, 0, 0, 0, 1, 0 ]);
 
@@ -273,11 +274,6 @@
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
 	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\n", 1, "#FF0000");
-	  if (_infoFetcher.serverMaintenanceTime != null) {
-		  _writeUserMessage("Server Update from [" + _infoFetcher.serverMaintenanceTime.toUTCString() + "]", 1, "#FF0000", true);
-	  } else {
-		  _infoFetcher.serverMaintenanceTime = new Date(2099, 0, 1, 0, 0, 0, 0);
-	  }
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -326,16 +322,17 @@
 			  'favorite':"",
 			  'favoriteWidth':0
 			  }
+		  user.country = InfoFetcher.country_names[user.country_code];
+		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
+		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.name == login_name) {
 			  user.favorite = "◆";
 			  user.favoriteWidth = 11;
+			  if (_status_disconnected) user.status2 = "D";
 		  } else if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
 			  user.favorite = "★";
 			  user.favoriteWidth = 11;
 		  }
-		  user.country = InfoFetcher.country_names[user.country_code];
-		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
-		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
             var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
@@ -455,6 +452,8 @@
 			  continue;
 		  } else if (tokens[7] == "game") {
 			  game.status = parseInt(tokens[2]);
+			  if (login_name.toLowerCase() == game.blackName && tokens[8] != "true") _status_disconnected = true;
+			  else if (login_name.toLowerCase() == game.whiteName && tokens[9] != "true") _status_disconnected = true;
 		  } else {
 			  game.status = "End";
 			  if (tokens[7] == "win") {
@@ -560,7 +559,8 @@
           watcher.name = match[1];
 		  watcher.rate = parseInt(match[2]);
 		  watcher.country3 = InfoFetcher.country_names3[parseInt(match[3])];
-		  watcher.country = InfoFetcher.country_names[parseInt(match[3])];
+		  watcher.country = InfoFetcher.country_names3[parseInt(match[3])];
+		  watcher.flagURL = DIRECTORY + "images/flags_ss/" + String(parseInt(match[3]) + 1000).substr(1) + ".png";
 		  watcher.favorite = "";
 		  watcher.favoriteWidth = 0;
 		  if (watcher.name == login_name) {
@@ -573,6 +573,7 @@
           watcher_list.unshift(watcher);
         }
       }
+      watcher_list.sortOn("rate", Array.NUMERIC | Array.DESCENDING);
       watcherListGrid.dataProvider = watcher_list;
 	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
     }
@@ -789,10 +790,10 @@
 			  Object(moves[moves.length - 1]).time = match[1];
 		  } else if (line.match(/#SENTE_WIN$/)) {
 			  end_game = true;
-			  result = board.my_turn == Kyokumen.SENTE ? "WIN" : "LOSE";
+			  result = _client.myTurn == Kyokumen.SENTE ? "WIN" : "LOSE";
 		  } else if (line.match(/#GOTE_WIN$/)) {
 			  end_game = true;
-			  result = board.my_turn == Kyokumen.SENTE ? "LOSE" : "WIN";
+			  result = _client.myTurn == Kyokumen.SENTE ? "LOSE" : "WIN";
 		  } else if (line.match(/#DRAW$/)) {
 			  end_game = true;
 			  result = "DRAW";
@@ -1009,6 +1010,7 @@
       kifuDataGrid.selectedIndex = board.kifu_list.length;
 	  if (board.isStudyHost) _sendStudy();
       board.endGame();
+	  _status_disconnected = false;
     }
 
 	private function _openGameResultWindow(v:int):void {
@@ -1475,9 +1477,8 @@
     }
 
      private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r"):void {
-	  var nowDate:Date = new Date();
-	  if (nowDate > _infoFetcher.serverMaintenanceTime) {
-		  Alert.show("Server Maintenance Time.\nCannot open game.");
+	  if (_status_disconnected) {
+		  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
 		  return;
 	  }
       _client.waitForGame(total,byoyomi,handicap);
@@ -1645,6 +1646,10 @@
 		if (_watch_game.blackName == login_name || _watch_game.whiteName == login_name) {
 			Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
 		} else {
+		    if (_status_disconnected) {
+			    Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
+			    return;
+		    }
 			Alert.show("Watch this game?", lan.watch, Alert.YES | Alert.NO, gameListGrid, _watch);
 		}
 //		Alert.yesLabel = lan.black;
@@ -1790,9 +1795,8 @@
 	
 	private function _handleChallenge(name:String):Function {
 		return function(e:MouseEvent):void {
-		  var nowDate:Date = new Date();
-		  if (nowDate > _infoFetcher.serverMaintenanceTime) {
-			  Alert.show("Server Maintenance Time.\nCannot open game.");
+		  if (_status_disconnected) {
+			  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
 			  return;
 		  }
 		  _challengeUser = _findPlayerFromList(name);
@@ -2956,9 +2960,9 @@
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="name" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="85" paddingLeft="2" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn dataField="country3" headerText="{lan.country_short}" width="35" paddingLeft="2" textAlign="center" showDataTips="true" dataTipField="country" />
-			  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="40" paddingRight="3" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="78" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="45" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:VBox height="428">

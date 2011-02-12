@@ -987,6 +987,7 @@ package  {
 		}
 		
 	  public function replayMoves(n:int, actual:Boolean = true):void {
+		  if (!_position) return;
 		  var mv:Movement;
 		  if (_last_to_square != null){
 		  	_last_to_square.setStyle('backgroundColor',undefined);
