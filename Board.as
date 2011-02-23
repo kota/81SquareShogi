@@ -11,7 +11,8 @@ package  {
 	import flash.media.Sound;
 	import flash.system.System;
 	import mx.controls.SWFLoader;
-	import mx.core.UIComponent
+	import mx.core.UIComponent;
+	import mx.managers.CursorManager;
 	import BoardArrow;
 	
 	import mx.containers.Canvas;
@@ -47,6 +48,8 @@ package  {
     private var board_masu:Class
     [Embed(source = "/images/empty.png")]
     private var emptyImage:Class
+    [Embed(source = "/images/dead.png")]
+    private var deadSquare:Class
     [Embed(source = "/images/Scoord_e.png")]
     private var board_scoord_e:Class
     [Embed(source = "/images/Gcoord_e.png")]
@@ -317,6 +320,9 @@ package  {
           } else {
             _cells[y][x].source = emptyImage;
           }
+		  if (gameType == "mini") {
+			if (x <= 1 || x >=7 || y <= 1 || y >= 7) _cells[y][x].source = deadSquare;
+		  }
         }
       }
       handBoxes[0].removeAllChildren();
@@ -535,7 +541,9 @@ package  {
 	
 	public function cancelSquareSelect():void {
 	   if(_selected_square != null){
-        _selected_square.setStyle('backgroundColor',undefined);
+        _selected_square.setStyle('backgroundColor', undefined);
+		_selected_square.showPiece();
+		CursorManager.removeCursor(CursorManager.currentCursorID);
         _from = null;
         _selected_square = null;
       }
@@ -561,6 +569,7 @@ package  {
 	  isStudyHost = false;
 	  clearArrows(ARROWS_PUBLIC);
 	  clearArrows(ARROWS_SELF);
+	  cancelSquareSelect();
     }
 
 		public function timeout():void{
@@ -828,17 +837,21 @@ package  {
 	  if (_arrow_from.x != _arrow_to.x || _arrow_from.y != _arrow_to.y) {
 		  if ((isPlayer && !post_game) || (post_game && onListen && !studyOn)) return;
 		  _addMyArrowCallback(_arrow_from_type, _arrow_from, _arrow_to);
-		  if (_selected_square != null) {
-			  _selected_square.setStyle('backgroundColor', undefined);
-			  _from = null;
-			  _selected_square = null;
-		  }
+//		  if (_selected_square != null) {
+//			  _selected_square.setStyle('backgroundColor', undefined);
+//			  _from = null;
+//			  _selected_square = null;
+//		  }
+		  cancelSquareSelect();
 		  _arrow_from = null;
 		  return;
 	  }
       if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
+		if (gameType == "mini") {
+			if (x <= 2 || x >= 8 || y <= 2 || y >= 8) return;
+		}
         if(_from == null){
 		  if (_last_from_square != null) {
 			  _last_from_square.setStyle('backgroundColor', undefined);
@@ -846,22 +859,28 @@ package  {
 		  }
           var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           if( koma != null && koma.ownerPlayer == _position.turn){
-            e.currentTarget.setStyle('backgroundColor','0x33CCCC');
+            e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
+			e.currentTarget.hidePiece();
+			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH/2, - Square.KOMA_HEIGHT/2);
             _selected_square = Square(e.currentTarget);
-            _from = new Point(x,y);
+            _from = new Point(x, y);
           }
         } else {
           koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
-          _selected_square.setStyle('backgroundColor',undefined);
+//          _selected_square.setStyle('backgroundColor', undefined);
+//		  _selected_square.showPiece();
+//		  CursorManager.removeCursor(CursorManager.currentCursorID);
           if( koma != null && (koma.ownerPlayer == _position.turn || _from.x >= Kyokumen.HAND)){
-          	_from = null;
-          	_selected_square = null;
+//          	_from = null;
+//          	_selected_square = null;
+			cancelSquareSelect();
           } else {
             _to = new Point(x,y);
             if (_position.cantMove(_from, _to)) {
-			    _from = null;
+//			    _from = null;
+				cancelSquareSelect();
 			    _to = null;
-            	_selected_square = null;
+//            	_selected_square = null;
             } else if (_position.canPromote(_from, _to)) {
 				if (_position.mustPromote(_from, _to)) {
 					if (!_client_timeout) {
@@ -869,14 +888,17 @@ package  {
 						_move_sent = true;
 						_playerMoveCallback(_from, _to, true);
 					}
-					_from = null;
+//					_from = null;
+//					cancelSquareSelect();
 					_to = null;
 				} else {
+					CursorManager.removeCursor(CursorManager.currentCursorID);
 					Alert.show("Promote?", "", Alert.YES | Alert.NO, Canvas(e.currentTarget), _promotionHandler);
 				}
-            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^nr_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
+            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^(nr|mini)_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
 					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
-					_from = null;
+//					_from = null;
+					cancelSquareSelect();
 					_to = null;
 			} else {
 			  if (!_client_timeout){
@@ -884,7 +906,8 @@ package  {
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
 			  }
-			  _from = null;
+//			  _from = null;
+//			  cancelSquareSelect();
 			  _to = null;
             }
           }
@@ -899,7 +922,8 @@ package  {
 		  _move_sent = true;
 		  _playerMoveCallback(_from, _to, e.detail == Alert.YES);
 	  }
-	  _from = null;
+//	  _from = null;
+//	  cancelSquareSelect();
 	  _to = null;
     }
 	
@@ -920,13 +944,16 @@ package  {
 			  _last_from_square.setStyle('backgroundColor', undefined);
 			  _last_from_square = null;
 		  }
-		  e.currentTarget.setStyle('backgroundColor','0x33CCCC');
-		  _selected_square = Square(e.currentTarget);
+          e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
+		  e.currentTarget.hidePiece();
+		  CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH/2, - Square.KOMA_HEIGHT/2);
+          _selected_square = Square(e.currentTarget);
 		  _from = new Point(e.currentTarget.coord_x, e.currentTarget.coord_y);
         } else {
-            _selected_square.setStyle('backgroundColor',undefined);
-            _from = null;
-            _selected_square = null;
+//            _selected_square.setStyle('backgroundColor',undefined);
+//            _from = null;
+//            _selected_square = null;
+			cancelSquareSelect();
         }
       }
 	  _arrow_from = null;

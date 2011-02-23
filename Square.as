@@ -22,6 +22,14 @@ package {
       _coord_x = x;
       _coord_y = y;
     }
+	
+	public function hidePiece():void {
+		_img.visible = false;
+	}
+	
+	public function showPiece():void {
+		_img.visible = true;
+	}
 
     public function get coord_x():int{
       return _coord_x;
@@ -31,9 +39,13 @@ package {
       return _coord_y;
     }
 
-    public function set source(cls:Class):void{
+    public function set source(cls:Object):void{
       _img.source = cls;
     }
+	
+	public function get source():Object {
+		return _img.source;
+	}
+	
   }
-
 }
