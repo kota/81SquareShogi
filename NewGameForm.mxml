@@ -42,7 +42,8 @@
 			{label:"Dragonfly", data:"hctombo" },
 			{label:"10-piece Down", data:"hc10p"},
 			{label:"Three Pawns", data:"hcfu3" },
-			{label:"Naked King", data:"hcnaked" } ]
+			{label:"Naked King", data:"hcnaked" },
+			{label:"Mini-shogi", data:"mini"}]
 		  );
 
           private function submit():void {

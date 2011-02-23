@@ -7,6 +7,11 @@
 			backgroundColor: "0x99CCFF";
 			borderColor: "0x99CCFF";
 		}
+		ToolTip {
+			font-size: 13px;
+			font-weight: "bold";
+			backgroundColor: "0xFFDD00";
+		}
 	</mx:Style>
 	<mx:Script>
     <![CDATA[
@@ -42,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/12";
+	public const VERSION:String = "ver.2011/02/21c";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -323,6 +328,7 @@
 			  'favoriteWidth':0
 			  }
 		  user.country = InfoFetcher.country_names[user.country_code];
+		  user.country3 = InfoFetcher.country_names3[user.country_code];
 		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
 		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
 		  if (user.name == login_name) {
@@ -379,6 +385,7 @@
 			  user_list[i].rank = "-";
 			  user_list[i].rankColor = 0xCCCCCC;
 		  }
+		  if (user_list[i].rank == "PRO" && user_list[i].titleName == "") user_list[i].titleName = "livebot";
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
 				  'name':user_list[i].name,
@@ -526,15 +533,16 @@
 		  var hc:String;
 		  if (game_info[1] == "r") {
 			hc = "R";
-//			game.hcTip = "";
 		  } else if (game_info[1].match(/^hc/)) {
 			hc = "HC";
 			game.opening = InfoFetcher.gameTypeJp(game_info[1]);
 			game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
-//			game.hcTip = InfoFetcher.gameTypeShort(game_info[1]);
 		  } else {
 			hc = "NR";
-//			game.hcTip = "";
+			if (game_info[1] != "nr") {
+				game.opening = InfoFetcher.gameTypeJp(game_info[1]);
+				game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
+			}
 		  }
 		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
 		  var gameProxy:ObjectProxy = new ObjectProxy(game);
@@ -558,8 +566,8 @@
         if(match){
           watcher.name = match[1];
 		  watcher.rate = parseInt(match[2]);
+		  watcher.country = InfoFetcher.country_names[parseInt(match[3])];
 		  watcher.country3 = InfoFetcher.country_names3[parseInt(match[3])];
-		  watcher.country = InfoFetcher.country_names3[parseInt(match[3])];
 		  watcher.flagURL = DIRECTORY + "images/flags_ss/" + String(parseInt(match[3]) + 1000).substr(1) + ".png";
 		  watcher.favorite = "";
 		  watcher.favoriteWidth = 0;
@@ -606,6 +614,7 @@
 	
 	private function _handleDecline(e:ServerMessageEvent):void {
 		_writeUserMessage(e.message + "\n", 1, "#008800", true);
+		_challenging = false;
 		if (_challengerAlertWindow) {
 			_challengerAlertWindow.terminate();
 			_challengerAlertWindow = null;
@@ -673,6 +682,8 @@
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
+	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
+		  board.gameType = "mini";
 	  }
 	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
 		  board.superior = Kyokumen.GOTE;
@@ -760,6 +771,8 @@
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
+	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
+		  board.gameType = "mini";
 	  }
 	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
 		  board.superior = Kyokumen.GOTE;
@@ -1004,10 +1017,11 @@
       forwardOneButton.enabled = true;
       forwardAllButton.enabled = true;
 	  startButton.enabled = true;
+	  kifuDataGrid.scrollToIndex(0);
       kifuDataGrid.dataProvider = board.kifu_list;
-      kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
       kifuDataGrid.selectable = true;
-      kifuDataGrid.selectedIndex = board.kifu_list.length;
+      kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
+      kifuDataGrid.callLater(_scrollDownKifu); //kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
 	  if (board.isStudyHost) _sendStudy();
       board.endGame();
 	  _status_disconnected = false;
@@ -1021,6 +1035,7 @@
 
     private function _handleMove(e:ServerMessageEvent):void {
 	  board.clearArrows(Board.ARROWS_PUBLIC);
+	  board.cancelSquareSelect();
 	  if (e.message.match(/%TORYO/)) {
 		  var kifuMove:Object = new Object;
 //		        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
@@ -1680,7 +1695,16 @@
 //			 board.my_turn = Kyokumen.GOTE;
 		 }
 		 _game_name = _watch_game.id;
-		 if (_watch_game.rule.match(/^HC/)) {
+		  if (_game_name.split("+")[1].match(/^r_/)) {
+			  board.gameType = "r";
+		  } else if (_game_name.split("+")[1].match(/^nr_/)) {
+			  board.gameType = "nr";
+		  } else if (_game_name.split("+")[1].match(/^hc/)) {
+			  board.gameType = "hc";
+		  } else if (_game_name.split("+")[1].match(/^mini_/)) {
+			  board.gameType = "mini";
+		  }
+		 if (board.gameType == "hc") {
 			 board.superior = Kyokumen.GOTE;
 		 } else if (_watch_game.blackRating > _watch_game.whiteRating) {
 			 board.superior = Kyokumen.SENTE;
@@ -1694,7 +1718,7 @@
 		_client.watchers(_game_name);
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
-		  if (_watch_game.rule.match(/^R/)) {
+		  if (board.gameType == "r") {
 			  _writeUserMessage("This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\n", 2, "#008800", true);
 		  } else {
 			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see watcher's chat even during game.\n", 2, "#008800", true);
@@ -1797,6 +1821,10 @@
 		return function(e:MouseEvent):void {
 		  if (_status_disconnected) {
 			  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
+			  return;
+		  }
+		  if (_challenging) {
+			  _writeUserMessage("You can only challenge one player at a time.\n", 1, "#008800");
 			  return;
 		  }
 		  _challengeUser = _findPlayerFromList(name);
@@ -2211,7 +2239,7 @@
 				hc = "R";
 			} else if (match[1] == "nr") {
 				hc = "NR";
-			} else if (match[1].match(/^hc/)) {
+			} else if (match[1].match(/^(hc|mini)/)) {
 				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
 			}
 			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
@@ -2585,6 +2613,7 @@
 	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
 	  if (!board.onListen) {
 		  board.clearArrows(Board.ARROWS_SELF);
+		  board.cancelSquareSelect();
 		  if (board.isStudyHost) {
 			  if (!String(kifuDataGrid.selectedItem.num).match(/^\*/)) _sendAutoChat("Launched study mode at #" + kifuDataGrid.selectedIndex);
 		  }
@@ -2729,9 +2758,9 @@
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
-	  <mx:HBox verticalAlign="middle" paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Image source="{data.flagURL}" width="16" height="13" />
-		<mx:Label text="{data.country}" textAlign="left" paddingLeft="-9" paddingRight="-7" fontSize="10" width="80" />
+	  <mx:HBox verticalAlign="middle" paddingLeft="3" paddingRight="0" height="100%" horizontalScrollPolicy="off">
+		<mx:Image source="{data.flagURL}" width="16" height="13" toolTip="{data.country}" />
+		<mx:Label text="{data.country3}" textAlign="center" paddingLeft="-9" paddingRight="-7" width="18" toolTip="{data.country}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="waiterListNameRenderer">
@@ -2839,9 +2868,9 @@
 			  <mx:DataGridColumn dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="titleName" headerText="{lan.title}" width="53" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
-			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="106" paddingLeft="1" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="93" paddingLeft="2" sortCompareFunction="_sortCountry" />
-			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="45" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="49" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
@@ -2952,7 +2981,7 @@
         </mx:Panel>
       </mx:HBox>
       </mx:VBox>
-        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
 			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
@@ -2960,8 +2989,8 @@
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="78" paddingLeft="2" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="45" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="72" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />
 			  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
@@ -2982,7 +3011,7 @@
 		  <mx:HBox paddingTop="-3">
 				<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
 				<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
-				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}"/>
+				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
 		  </mx:HBox>
         </mx:Panel>
 	</mx:HBox>

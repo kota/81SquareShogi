@@ -26,7 +26,8 @@
 		public var titleUser:Array;
 		public var titleName:Array;
 		public var titleRate:Array;
-		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
+//		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
+		public static const rank_thresholds:Array = new Array(2900, 1900, 1480, 1420, 1360, 1300, 1240, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_names:Array = new Array('PRO', '7-Dan', '6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan', '1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu', '6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu', '11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu');
 		public var country_codes:Array;
 		public static var country_names:Array;
@@ -167,6 +168,8 @@
 				return "Three Pawns Handicap (Non-rated)";
 			case "hcnaked":
 				return "Naked King Handicap (Non-rated)";
+			case "mini":
+				return "Mini Shogi";
 			}
 			return "";
 		}
@@ -203,6 +206,8 @@
 				return "Three Pawns";
 			case "hcnaked":
 				return "Naked King";
+			case "mini":
+				return "Mini Shogi";
 			}
 			return "";
 		}
@@ -235,6 +240,8 @@
 				return "歩三兵";
 			case "hcnaked":
 				return "裸玉";
+			case "mini":
+				return "5五将棋";
 			}
 			return "";
 		}
