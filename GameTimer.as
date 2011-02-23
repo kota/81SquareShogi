@@ -185,7 +185,7 @@ package {
 		private function _tickHandler(e:TimerEvent):void{
 			_time_left--;
 			if(_time_left <= 0){
-				_time_left = 0;
+//				_time_left = 0;
 				if(_byoyomi > 0 && !_byoyomi_flag){
 					_byoyomi_flag = true;
 					_box.setStyle('backgroundColor',0xFFFF00);
@@ -226,8 +226,14 @@ package {
 		private function _display():void{
 			var time:String = "";
 			var sec:int = _time_left % 60;
-			time = int(_time_left / 60).toString() + ":" + (sec < 10 ? '0' : '') + sec.toString();
-			_label.text = time;
+			if (_time_left <= -3) {
+				_label.text = "Delay";
+			} else if (_time_left < 0) {
+				_label.text = "0:00";
+			} else {
+				time = int(_time_left / 60).toString() + ":" + (sec < 10 ? '0' : '') + sec.toString();
+				_label.text = time;
+			}
 		}
 		
 	}
