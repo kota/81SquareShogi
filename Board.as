@@ -909,8 +909,8 @@ package  {
 //			_hoverBoardCallback(koma.ownerPlayer == Kyokumen.SENTE ? "+" : "-", (koma.type == Koma.OU && koma.ownerPlayer == superior) ? koma.type + Koma.PROMOTE : koma.type);
 //			_hoverBoardCallback(e.currentTarget.x + Square.KOMA_WIDTH/2, e.currentTarget.y + Square.KOMA_HEIGHT/2);
 			_grabPieceCallback(x, y);
-//			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
-			CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
+			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+//			CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
             _from = new Point(x, y);

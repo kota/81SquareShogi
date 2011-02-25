@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/24";
+	public const VERSION:String = "ver.2011/02/25";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -597,8 +597,10 @@
       PopUpManager.centerPopUp(_challengerAlertWindow);
 	  _challengerAlertWindow.challenger = e.message.split(",")[0];
 	  _challengerAlertWindow.country = InfoFetcher.country_names[e.message.split(",")[1]];
+	  _challengerAlertWindow.countryCode = String(parseInt(e.message.split(",")[1]) + 1000).substr(1);
 	  _challengerAlertWindow.rate = e.message.split(",")[2];
 	  _challengerAlertWindow.rank = InfoFetcher.makeRankFromRating(parseInt(e.message.split(",")[2]));
+	  _challengerAlertWindow.rankColor = InfoFetcher.makeColorFromRating(parseInt(e.message.split(",")[2]));
       _challengerAlertWindow.addEventListener("accept", _handleChallengerAcceptButton);
 	  _challengerAlertWindow.addEventListener("decline", _handleChallengerRejectButton);
 	  _challengerAlertWindow.startTimer();

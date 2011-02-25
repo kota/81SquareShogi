@@ -1,17 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="300" height="175" fontSize="13" title="Here comes a new challenger!!">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="320" height="175" fontSize="13" title="Here comes a new challenger!!" horizontalScrollPolicy="off">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
           import mx.controls.*;
           import mx.managers.PopUpManager;
 
+		  private static const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  [Bindable]
 		  public var challenger:String;
 		  [Bindable]
 		  public var country:String;
 		  [Bindable]
+		  public var countryCode:String;
+		  [Bindable]
 		  public var rank:String;
+		  [Bindable]
+		  public var rankColor:uint;
 		  [Bindable]
 		  public var rate:String;
 		  
@@ -49,15 +54,28 @@
 			dispatchEvent(new Event("accept"));
             PopUpManager.removePopUp(this);
           }
+		  
+		  private function _swfError():void {
+//			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
+		  }
 
         ]]>
     </mx:Script>
 	<mx:VBox horizontalAlign="left" paddingLeft="10">
-		<mx:Label text="{challenger}" fontSize="16" fontWeight="bold" />
+		<mx:HBox>
+			<mx:VBox paddingRight="20">
+				<mx:HBox>
+					<mx:Label text="■" fontSize="14" color="{rankColor}"/>
+					<mx:Spacer width="-18"/>
+					<mx:Label text="{challenger}" fontSize="16" fontWeight="bold" />
+				</mx:HBox>
+				<mx:Label text="  {parentApplication.lan.country}: {country}"/>
+			</mx:VBox>
+			<mx:SWFLoader width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{countryCode}.swf" ioError="_swfError();" />
+		</mx:HBox>
 		<mx:Label text="  {parentApplication.lan.rate}: {rate}, ({rank})"/>
-		<mx:Label text="  {parentApplication.lan.country}: {country}"/>
 	</mx:VBox>
-	<mx:VBox width="100%" horizontalAlign="center">
+	<mx:VBox width="100%" horizontalAlign="center" paddingTop="5">
 		<mx:HBox>
 			<mx:Button id="acceptButton" click="_accept();" label="{parentApplication.lan.accept}"/>
 			<mx:Button id="rejectButton" click="_decline();" label="{parentApplication.lan.reject}"/>
