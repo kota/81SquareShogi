@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/21c";
+	public const VERSION:String = "ver.2011/02/24";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -158,6 +158,8 @@
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
 	  board.setAddMyArrowCallback(_addMyArrow);
+	  board.setHoverCallback(_boardHover);
+	  board.setGrabPieceCallback(_grabPiece);
 	  _api = new ApiClient();
 	  if (this.parameters["kid"]) {
 		login_name = "guest";
@@ -1085,7 +1087,11 @@
 		if (!_game_name) return;
 		var sender:String = e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1];
 		var match:Array;
-		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
+//		if ((match = e.message.match(/\[\#\#HOVER\](.*),(.*)$/))) {
+//			if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
+		if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
+			if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
+		} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			if (!board.studyOn) board.studyOn = true;
 			board.clearArrows(Board.ARROWS_PUBLIC);
 			if (board.isStudyHost) return;
@@ -2175,6 +2181,14 @@
 	}
 	
  	//------------------------------------------------------------------------------------------------------------------------ MOUSE DETECTION
+	private function _boardHover(s1:String, s2:String):void {
+		_client.gameChat(_game_name, "[##HOVER]" + s1 + "," + s2);
+	}
+	
+	private function _grabPiece(x:int, y:int):void {
+		_client.gameChat(_game_name, "[##GRAB]" + x + "," + y);
+	}
+	
 	private function _rollOver(e:MouseEvent):void {
 		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
 	}

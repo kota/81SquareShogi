@@ -1,4 +1,7 @@
 package {
+	import flash.events.Event;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	import mx.containers.Canvas;
 	import mx.controls.Image;
 
@@ -6,21 +9,31 @@ package {
     private var _coord_x:int;
     private var _coord_y:int;
     private var _img:Image;
+	private var _stayTimer:Timer = new Timer(150, 1);
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
+	public static const STAY:String = "stay";
 
     public function Square(x:int,y:int):void{
       super();
       this.width = KOMA_WIDTH;
       this.height = KOMA_HEIGHT;
-      this.setStyle('backgroundAlpha',0.25);
+      this.setStyle('backgroundAlpha', 0.25);
+	  this.horizontalScrollPolicy = 'off';
+	  this.verticalScrollPolicy = 'off';
+	  this.setStyle('borderStyle', 'outSet');
+	  this.setStyle('borderThickness', 0);
+	  this.setStyle('borderColor', 0xDD0000);
       _img = new Image();
       _img.width = KOMA_WIDTH;
       _img.height = KOMA_HEIGHT;
+	  _img.x = -1;
+	  _img.y = -1;
       this.addChild(_img);
       _coord_x = x;
       _coord_y = y;
+	  _stayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleStay);
     }
 	
 	public function hidePiece():void {
@@ -29,6 +42,24 @@ package {
 	
 	public function showPiece():void {
 		_img.visible = true;
+	}
+	
+	public function mouseOver():void {
+		this.setStyle('borderThickness', 1);
+	}
+	
+	public function mouseOut():void {
+		_stayTimer.stop();
+		this.setStyle('borderThickness', 0);
+	}
+	
+	public function startTimer():void {
+		_stayTimer.reset();
+		_stayTimer.start();
+	}
+	
+	private function _handleStay(e:TimerEvent):void {
+		dispatchEvent(new Event(STAY));
 	}
 
     public function get coord_x():int{
