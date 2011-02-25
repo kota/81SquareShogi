@@ -2186,7 +2186,7 @@
 	}
 	
 	private function _grabPiece(x:int, y:int):void {
-		_client.gameChat(_game_name, "[##GRAB]" + x + "," + y);
+//		_client.gameChat(_game_name, "[##GRAB]" + x + "," + y);
 	}
 	
 	private function _rollOver(e:MouseEvent):void {
