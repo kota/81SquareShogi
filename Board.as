@@ -14,6 +14,7 @@ package  {
 	import flash.media.Sound;
 	import flash.system.System;
 	import flash.utils.Timer;
+	import mx.containers.HBox;
 	import mx.controls.SWFLoader;
 	import mx.core.UIComponent;
 	import mx.events.StateChangeEvent;
@@ -939,7 +940,13 @@ package  {
 //					_hoverBoardCallback("OFF", "");
 					CursorManager.removeCursor(CursorManager.currentCursorID);
 					_pieceGrab = false;
-					Alert.show("Promote?", "", Alert.YES | Alert.NO, Canvas(e.currentTarget), _promotionHandler);
+					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
+					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type][koma_type + Koma.PROMOTE];
+					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
+					alt.validateNow();
+					alt.width *= 0.8;
+					alt.x = mouseX - alt.width / 2 + 5;
+					alt.y = mouseY - 90;
 				}
             } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^(nr|mini)_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
 					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
