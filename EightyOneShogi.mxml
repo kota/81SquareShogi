@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/25";
+	public const VERSION:String = "ver.2011/02/26";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -1484,6 +1484,7 @@
         chatSound1CheckBox.selected = _chat_sound1_play;
         chatSound2CheckBox.selected = _chat_sound2_play;
 		chatSound3CheckBox.selected = _chat_sound3_play;
+		grabPieceCheckBox.selected = board.hold_piece;
 		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
@@ -2502,6 +2503,7 @@
       _chat_sound1_play = _optionWindow.chatSound1CheckBox.selected;
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
 	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
+	  board.hold_piece = _optionWindow.grabPieceCheckBox.selected;
 	  _pmAutoOpen = _optionWindow.pmAutoOpenCheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
@@ -2526,6 +2528,7 @@
 		urlVariables.chatSound1 = _chat_sound1_play;
 		urlVariables.chatSound2 = _chat_sound2_play;
 		urlVariables.chatSound3 = _chat_sound3_play;
+		urlVariables.grabPiece = board.hold_piece;
 		urlVariables.pmAutoOpen = _pmAutoOpen;
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
@@ -2558,6 +2561,7 @@
 		_chat_sound1_play = _infoFetcher.userSettings.chatSound1;
 		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
 		_chat_sound3_play = _infoFetcher.userSettings.chatSound3;
+		board.hold_piece = _infoFetcher.userSettings.grabPiece;
 		_pmAutoOpen = _infoFetcher.userSettings.pmAutoOpen;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;

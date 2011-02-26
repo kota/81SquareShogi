@@ -438,6 +438,7 @@
 			userSettings.chatSound2 = true;
 			userSettings.chatSound3 = true;
 			userSettings.pmAutoOpen = false;
+			userSettings.grabPiece = true;
 			userSettings.endSound = true;
 			userSettings.pieceType = 0;
 			userSettings.byoyomi = 1;
@@ -453,6 +454,8 @@
 					if (userData[i].chatSound3 == null) userSettings.chatSound3 = true;
 					if (userData[i].ignoreList == null) userSettings.ignoreList = "";
 					if (userData[i].favoriteList == null) userSettings.favoriteList = "";
+					if (userData[i].pmAutoOpen == null) userSettings.pmAutoOpen = false;
+					if (userData[i].grabPiece == null) userSettings.grabPiece = true;
 					break;
 				}
 			}

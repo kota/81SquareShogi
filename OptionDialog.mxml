@@ -51,6 +51,8 @@
 				<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
 				<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
 			</mx:HBox>
+			<mx:Spacer height="10"/>
+			<mx:CheckBox id="grabPieceCheckBox" label="Grab piece when moving"/>
 		</mx:VBox>
 		<mx:VBox label="{parentApplication.lan.sound}" paddingLeft="20" paddingTop="10">
 			<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>

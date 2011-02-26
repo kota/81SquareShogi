@@ -145,6 +145,7 @@ package  {
 	public var kid:int;
 	public var opening:String = "";
     public var piece_type:int = 0;
+	public var hold_piece:Boolean = true;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -905,12 +906,14 @@ package  {
           var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
           if( koma != null && koma.ownerPlayer == _position.turn){
             e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
-			e.currentTarget.hidePiece();
+			if (hold_piece) {
+				e.currentTarget.hidePiece();
+				CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+//				CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
+			}
 //			_hoverBoardCallback(koma.ownerPlayer == Kyokumen.SENTE ? "+" : "-", (koma.type == Koma.OU && koma.ownerPlayer == superior) ? koma.type + Koma.PROMOTE : koma.type);
 //			_hoverBoardCallback(e.currentTarget.x + Square.KOMA_WIDTH/2, e.currentTarget.y + Square.KOMA_HEIGHT/2);
 			_grabPieceCallback(x, y);
-			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
-//			CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
             _from = new Point(x, y);
@@ -999,10 +1002,12 @@ package  {
 			  _last_from_square = null;
 		  }
           e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
-		  e.currentTarget.hidePiece();
+		  if (hold_piece) {
+			e.currentTarget.hidePiece();
+			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+		  }
 //		  _hoverBoardCallback(_position.turn == Kyokumen.SENTE ? "+" : "-", e.currentTarget.coord_x - 100);
 		  _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
-		  CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 		  _pieceGrab = true;
           _selected_square = Square(e.currentTarget);
 		  _from = new Point(e.currentTarget.coord_x, e.currentTarget.coord_y);
