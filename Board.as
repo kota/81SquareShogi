@@ -585,7 +585,7 @@ package  {
         _selected_square.setStyle('backgroundColor', undefined);
 		_selected_square.showPiece();
 //		_hoverBoardCallback("OFF", "");
-		_grabPieceCallback(0, 0);
+		if (isPlayer && !post_game) _grabPieceCallback(0, 0);
 		CursorManager.removeCursor(CursorManager.currentCursorID);
 		_pieceGrab = false;
         _from = null;
@@ -914,7 +914,7 @@ package  {
 			}
 //			_hoverBoardCallback(koma.ownerPlayer == Kyokumen.SENTE ? "+" : "-", (koma.type == Koma.OU && koma.ownerPlayer == superior) ? koma.type + Koma.PROMOTE : koma.type);
 //			_hoverBoardCallback(e.currentTarget.x + Square.KOMA_WIDTH/2, e.currentTarget.y + Square.KOMA_HEIGHT/2);
-			_grabPieceCallback(x, y);
+			if (isPlayer && !post_game) _grabPieceCallback(x, y);
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
             _from = new Point(x, y);
@@ -983,12 +983,12 @@ package  {
 		if (_pieceGrab) {
 			e.currentTarget.mouseOver();
 //			e.currentTarget.startTimer(); // <<<<<<<======================================== DISABLED
-//			_grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
+//			if (isPalyer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
 		}
 	}
 	
 	private function _squareStayHandler(e:Event):void {
-		if (_pieceGrab) _grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
+		if (_pieceGrab && isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
 	}
 	
     private function _handMouseDownHandler(e:MouseEvent):void {
@@ -1014,7 +1014,7 @@ package  {
 			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 		  }
 //		  _hoverBoardCallback(_position.turn == Kyokumen.SENTE ? "+" : "-", e.currentTarget.coord_x - 100);
-		  _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
+		  if (isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
 		  _pieceGrab = true;
           _selected_square = Square(e.currentTarget);
 		  _from = new Point(e.currentTarget.coord_x, e.currentTarget.coord_y);
