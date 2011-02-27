@@ -111,7 +111,7 @@ package  {
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
 	private var _addMyArrowCallback:Function;
-	private var _hoverBoardCallback:Function;
+	private var _hoverPieceCallback:Function;
 	private var _grabPieceCallback:Function;
 
     [Bindable]
@@ -160,6 +160,7 @@ package  {
 	public var since_last_move:int = 0;
 	public var studyOn:Boolean = false;
 	public var rematch:Array = new Array(2);
+	public var sendHover:Boolean = false;
 
 		private var _time_sente:int;
 		private var _time_gote:int;
@@ -280,8 +281,6 @@ package  {
       }
 	  _arrows[ARROWS_SELF] = new Array();
 	  _arrows[ARROWS_PUBLIC] = new Array();
-//	  addEventListener(MouseEvent.MOUSE_MOVE, _hover);
-//	  _hoverImage.visible = false;
 	  _hoverImage.alpha = 0.3;
 	  _hoverImage.filters = [new ColorMatrixFilter([0, 0, 0, 0, 0, 0.25, 0.5, 0.25, 0, 0 , 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 ])];
       _centerX = BAN_LEFT_MARGIN + BAN_EDGE_PADDING + 4.5 * KOMA_WIDTH + 1;
@@ -410,7 +409,8 @@ package  {
 		}
 		if (!actual || onListen){
 			if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
-			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor',undefined);
+			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor', undefined);
+			if (_selected_square != null) _selected_square.showPiece();
 			setPosition(_position);
 			_last_to_square = _cells[mv.to.y][mv.to.x];
 			_last_to_square.setStyle('backgroundColor', '0xFF5555');
@@ -426,7 +426,10 @@ package  {
 				_sound_piece.play();
 			}
 		}
+//		if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+//		_pieceGrab = false;
 		if (contains(_hoverImage)) removeChild(_hoverImage);
+		_from = null;
 		if (_oppo_selected_square) {
 			_oppo_selected_square.setStyle('backgroundColor', undefined);
 			_oppo_selected_square = null;
@@ -445,8 +448,8 @@ package  {
 		_addMyArrowCallback = callback;
 	}
 	
-	public function setHoverCallback(callback:Function):void {
-		_hoverBoardCallback = callback;
+	public function setHoverPieceCallback(callback:Function):void {
+		_hoverPieceCallback = callback;
 	}
 	
 	public function setGrabPieceCallback(callback:Function):void {
@@ -615,6 +618,7 @@ package  {
 	  clearArrows(ARROWS_SELF);
 	  cancelSquareSelect();
 	  if (contains(_hoverImage)) removeChild(_hoverImage);
+	  _hoverImage.source = null;
 	  if (_oppo_selected_square) {
 		  _oppo_selected_square.setStyle('backgroundColor', undefined);
 		  _oppo_selected_square = null;
@@ -772,8 +776,6 @@ package  {
         }
       }
 	  studyOrigin = 0;
-	  _hoverOwner = _position.turn;
-	  _oppo_selected_square = new Square(0, 0);
     }
 	
     public function startView(kifu_contents:String):void {
@@ -912,8 +914,6 @@ package  {
 				CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 //				CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
 			}
-//			_hoverBoardCallback(koma.ownerPlayer == Kyokumen.SENTE ? "+" : "-", (koma.type == Koma.OU && koma.ownerPlayer == superior) ? koma.type + Koma.PROMOTE : koma.type);
-//			_hoverBoardCallback(e.currentTarget.x + Square.KOMA_WIDTH/2, e.currentTarget.y + Square.KOMA_HEIGHT/2);
 			if (isPlayer && !post_game) _grabPieceCallback(x, y);
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
@@ -929,6 +929,8 @@ package  {
 				cancelSquareSelect();
 			    _to = null;
             } else if (_position.canPromote(_from, _to)) {
+				if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+				_pieceGrab = false;
 				if (_position.mustPromote(_from, _to)) {
 					if (!_client_timeout) {
 						timers[0].suspend();
@@ -937,9 +939,6 @@ package  {
 					}
 					_to = null;
 				} else {
-//					_hoverBoardCallback("OFF", "");
-					CursorManager.removeCursor(CursorManager.currentCursorID);
-					_pieceGrab = false;
 					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
 					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type][koma_type + Koma.PROMOTE];
 					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
@@ -953,6 +952,8 @@ package  {
 					cancelSquareSelect();
 					_to = null;
 			} else {
+			  if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+			  _pieceGrab = false;
 			  if (!_client_timeout){
 				  timers[0].suspend();
 				  _move_sent = true;
@@ -982,13 +983,12 @@ package  {
 	private function _squareMouseOverHandler(e:MouseEvent):void {
 		if (_pieceGrab) {
 			e.currentTarget.mouseOver();
-//			e.currentTarget.startTimer(); // <<<<<<<======================================== DISABLED
-//			if (isPalyer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
+			if (isPlayer && !post_game && sendHover) e.currentTarget.startTimer();
 		}
 	}
 	
 	private function _squareStayHandler(e:Event):void {
-		if (_pieceGrab && isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
+		if (_pieceGrab && !post_game) _hoverPieceCallback(e.currentTarget.coord_x, e.currentTarget.coord_y);
 	}
 	
     private function _handMouseDownHandler(e:MouseEvent):void {
@@ -1013,7 +1013,6 @@ package  {
 			e.currentTarget.hidePiece();
 			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 		  }
-//		  _hoverBoardCallback(_position.turn == Kyokumen.SENTE ? "+" : "-", e.currentTarget.coord_x - 100);
 		  if (isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
 		  _pieceGrab = true;
           _selected_square = Square(e.currentTarget);
@@ -1028,29 +1027,11 @@ package  {
 	  _arrow_from = null;
     }
 	
-	private function _hover(e:MouseEvent):void {
-		trace("***" + _hoverTimer.delay);
-		if (!_hoverTimer.running) {
-			if (isPlayer && !post_game && _pieceGrab) _hoverBoardCallback(e.stageX, e.stageY);
-			_hoverTimer.reset();
-			_hoverTimer.start();
-		}
-	}
-	
-	public function handleHover(s1:String, s2:String):void {
-		if (s1 == "+" || s1 == "-") {
-			_hoverOwner = s1 == "+" ? Kyokumen.SENTE : Kyokumen.GOTE;
-			_hoverPiece = parseInt(s2);
-			_hoverImage.source = _my_turn == _hoverOwner ? pSrc.koma_images_sente[piece_type][_hoverPiece] : pSrc.koma_images_gote[piece_type][_hoverPiece];
-			addChild(_hoverImage);
-		} else if (s1 == "OFF") {
-			_hoverImage.visible = false;
-			if (contains(_hoverImage)) removeChild(_hoverImage);
-		} else {
-			_hoverImage.x = (_my_turn == _hoverOwner ? parseInt(s1) : (2 * _centerX - parseInt(s1))) - Square.KOMA_WIDTH/2;
-			_hoverImage.y = (_my_turn == _hoverOwner ? parseInt(s2) : (2 * _centerY - parseInt(s2))) - Square.KOMA_HEIGHT / 2;
-			_hoverImage.visible = true;
-		}
+	public function handleHover(x:int, y:int):void {
+		var sq:Square = _cells[y - 1][9 - x];
+		_hoverImage.x = sq.x;
+		_hoverImage.y = sq.y;
+		if (!contains(_hoverImage)) addChild(_hoverImage);
 	}
 	
 	public function handleGrab(x:int, y:int):void {
@@ -1061,31 +1042,22 @@ package  {
 				_oppo_selected_square = null;
 			}
 		} else if (x >= 100) {
-//			_hoverImage.source = _position.turn == Kyokumen.SENTE ? pSrc.koma_images_sente[piece_type][x - 100] : pSrc.koma_images_gote[piece_type][x - 100];
-			if (_oppo_selected_square == null) {
-				for each (var sq:Square in handBoxes[_position.turn == _my_turn ? 0 : 1].getChildren()) {
-					if (sq.coord_x == x) {
+			for each (var sq:Square in handBoxes[_position.turn == _my_turn ? 0 : 1].getChildren()) {
+				if (sq.coord_x == x) {
 //						_hoverImage.x = sq.parent.x + sq.x;
 //						_hoverImage.y = sq.parent.y + sq.y;
 //						if (!contains(_hoverImage)) addChild(_hoverImage);
-						sq.setStyle('backgroundColor', '0x33CCCC');
-						_oppo_selected_square = sq;
-						_hoverImage.source = sq.source;
-						break;
-					}
+					sq.setStyle('backgroundColor', '0x33CCCC');
+					_oppo_selected_square = sq;
+					_hoverImage.source = sq.source;
+					break;
 				}
 			}
 		} else {
 			sq = _cells[y - 1][9 - x];
-			if (_oppo_selected_square != null) {
-				_hoverImage.x = sq.x;
-				_hoverImage.y = sq.y;
-				if (!contains(_hoverImage)) addChild(_hoverImage);
-			} else {
-				sq.setStyle('backgroundColor', '0x33CCCC');
-				_oppo_selected_square = sq;
-				_hoverImage.source = sq.source;
-			}
+			sq.setStyle('backgroundColor', '0x33CCCC');
+			_oppo_selected_square = sq;
+			_hoverImage.source = sq.source;
 		}
 	}
 	

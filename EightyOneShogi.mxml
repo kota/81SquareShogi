@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/26";
+	public const VERSION:String = "ver.2011/02/27";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -115,6 +115,8 @@
     private var _icon_moon:Class
     [Embed(source = "/images/mars.png")]
     private var _icon_mars:Class
+    [Embed(source = "/images/venus.png")]
+    private var _icon_venus:Class
     [Embed(source = "/images/mercury.png")]
     private var _icon_mercury:Class
     private var _sound_challenger:Sound = new Sound_challenger();
@@ -158,7 +160,7 @@
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
 	  board.setAddMyArrowCallback(_addMyArrow);
-	  board.setHoverCallback(_boardHover);
+	  board.setHoverPieceCallback(_hoverPiece);
 	  board.setGrabPieceCallback(_grabPiece);
 	  _api = new ApiClient();
 	  if (this.parameters["kid"]) {
@@ -174,9 +176,11 @@
   serverListGrid.dataProvider = { 'name':"Loading..."};
   var server:Object = { 'name':"EARTH", 'description':"main", 'icon':_icon_earth, 'host':"81dojo.com", 'port':"4081", 'alive':"NO" };
   _servers.push(server);
-  server = { 'name':"MARS", 'description':"back-up", 'icon':_icon_mars, 'host':"81dojo.dyndns.org", 'port':"4081", 'alive':"NO" };
+  server = { 'name':"MARS", 'description':"sub", 'icon':_icon_mars, 'host':"81dojo.dyndns.org", 'port':"4081", 'alive':"NO" };
   _servers.push(server);
-  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
+  server = { 'name':"VENUS", 'description':"sub", 'icon':_icon_venus, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
+  _servers.push(server);
+  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
@@ -1039,7 +1043,6 @@
 
     private function _handleMove(e:ServerMessageEvent):void {
 	  board.clearArrows(Board.ARROWS_PUBLIC);
-	  board.cancelSquareSelect();
 	  if (e.message.match(/%TORYO/)) {
 		  var kifuMove:Object = new Object;
 //		        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
@@ -1089,9 +1092,9 @@
 		if (!_game_name) return;
 		var sender:String = e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1];
 		var match:Array;
-//		if ((match = e.message.match(/\[\#\#HOVER\](.*),(.*)$/))) {
-//			if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
-		if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
+		if ((match = e.message.match(/\[\#\#HOVER\](\d+),(\d+)$/))) {
+			if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
+		} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
 			if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
 		} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			if (!board.studyOn) board.studyOn = true;
@@ -1235,7 +1238,6 @@
 	
 //--------------------------------------------------------------------------------------------------------------------------------- GAME ROOM 
 	private function _handleEnter(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex != 2) return;
 		if (e.message == board.playerInfos[0].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
@@ -1253,6 +1255,7 @@
 			board.name_labels[1 - board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
 		} else {
+			if (mainViewStack.selectedIndex != 2) return;
 			_writeUserMessage(e.message + " entered.\n", 2, "#008800");
 			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_open.play();
 		}
@@ -2184,12 +2187,12 @@
 	}
 	
  	//------------------------------------------------------------------------------------------------------------------------ MOUSE DETECTION
-	private function _boardHover(s1:String, s2:String):void {
-		_client.gameChat(_game_name, "[##HOVER]" + s1 + "," + s2);
+	private function _hoverPiece(x:int, y:int):void {
+		_client.gameChat(_game_name, "[##HOVER]" + x + "," + y);
 	}
 	
 	private function _grabPiece(x:int, y:int):void {
-//		_client.gameChat(_game_name, "[##GRAB]" + x + "," + y);
+		_client.gameChat(_game_name, "[##GRAB]" + x + "," + y);
 	}
 	
 	private function _rollOver(e:MouseEvent):void {
