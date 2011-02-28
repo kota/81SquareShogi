@@ -486,7 +486,7 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.rating >= rank_thresholds[7]) {
+			if (user.wins + user.losses >= 30 && user.rating >= rank_thresholds[7]) {
 				medal = new Image();
 				medal.source = bronze_medal;
 				medal.toolTip = "Low-Dan Holder";

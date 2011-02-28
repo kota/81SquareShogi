@@ -1799,7 +1799,8 @@
 		  if (user.wins + user.losses < 10) {
 			  _playerInfoWindows[user.name].setRateButton.addEventListener(MouseEvent.CLICK, _setRate(user.name));
 			  _playerInfoWindows[user.name].setRateButton.enabled = true;
-			  _playerInfoWindows[user.name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(8, 17);
+			  _playerInfoWindows[user.name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(5, 17);
+			  _playerInfoWindows[user.name].setRateCombo.selectedIndex = 7;
 			  _playerInfoWindows[user.name].setRateCombo.enabled = true;
 		  }
 	  } else {
