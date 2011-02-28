@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/27";
+	public const VERSION:String = "ver.2011/02/29";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -347,17 +347,17 @@
 		  }
 		  if (user.monitor_game != "*") user.status2 = "M ";
           if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
-            var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+            var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
             var total:int = parseInt(game_info[3]) / 60;
-			var hc:String;
-			if (game_info[1] == "r") {
-				hc = "R";
-			} else if (game_info[1].match(/^hc/)) {
-				hc = "HC";
-			} else {
-				hc = "NR";
-			}
-            user.rule = hc + ": " + total + "-" + game_info[4];
+//			var hc:String;
+//			if (game_info[1] == "r") {
+//				hc = "R";
+//			} else if (game_info[1].match(/^hc/)) {
+//				hc = "HC";
+//			} else {
+//				hc = "NR";
+//			}
+//            user.rule = hc + ": " + total + "-" + game_info[4];
             if(user.status == "game_waiting" && !user.game_name.match(/_@/)){
               user.status2 += "W";
             } else if (user.status == "post_game") {
@@ -404,7 +404,7 @@
 				  'rankColor': user_list[i].rankColor
 				  }
 			  if (user_list[i].wins + user_list[i].losses < 10) user.rating = "*" + String(user.rating);
-		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 			  total = parseInt(game_info[3]) / 60;
 			  if (game_info[1] == "r") {
 				  user.rated = "R"
@@ -412,7 +412,12 @@
 				  user.rated = "NR"
 			  }
 			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
-			  user.time = total + "-" + game_info[4];
+			  if (game_info[2].match(/\-\-..$/)) {
+				user.time = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
+				user.timeTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
+			  } else {
+				user.time = total + "-" + game_info[4];
+			  }
 			  userProxy = new ObjectProxy(user);
 			  waiter_list.push(userProxy);
 		  }
@@ -534,7 +539,7 @@
 			  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
 			  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
 		  }
-		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)/);
+		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)$/);
 		  var total:int = parseInt(game_info[3]) / 60;
 		  var hc:String;
 		  if (game_info[1] == "r") {
@@ -550,7 +555,12 @@
 				game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
 			}
 		  }
-		  game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
+		  if (game_info[2].match(/\-\-..$/)) {
+			game.rule = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
+			game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
+		  } else {
+			game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
+		  }
 		  var gameProxy:ObjectProxy = new ObjectProxy(game);
 		  game_list.push(gameProxy);
         }
@@ -791,8 +801,9 @@
 	  } else {
 		  board.superior = Kyokumen.GOTE;
 	  }
-	  var total:int = parseInt(_game_name.split("+")[1].split("-")[1]);
-	  var byoyomi:int = parseInt(_game_name.split("+")[1].split("-")[2]);
+	  match = _game_name.split("+")[1].match(/\-(\d+)\-(\d+)$/);
+	  var total:int = parseInt(match[1]); // parseInt(_game_name.split("+")[1].split("-")[1]);
+	  var byoyomi:int = parseInt(match[2]); //parseInt(_game_name.split("+")[1].split("-")[2]);
 	  var end_game:Boolean = false;
 	  var result:String = "";
 	  var moves:Array = new Array();
@@ -1503,12 +1514,12 @@
 	  _optionWindow.drawArrow();
     }
 
-     private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r"):void {
+     private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r", tournament:String = ""):void {
 	  if (_status_disconnected) {
 		  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
 		  return;
 	  }
-      _client.waitForGame(total,byoyomi,handicap);
+      _client.waitForGame(total,byoyomi,handicap,tournament);
       _refresh();
       stopButton.enabled = true;
     }
@@ -1843,14 +1854,14 @@
 		  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
 			  Alert.show("The opponent is not waiting for a game.", lan.error);
 		  } else {
-			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 			var total:int = parseInt(match[3]) / 60 ;
 			var rule:String = total + "min - " + match[4] + "sec";
 			var hc:String = InfoFetcher.gameType(match[1]);
 			Alert.yesLabel = lan.challenge;
 			Alert.cancelLabel = lan.cancel;
 			Alert.buttonWidth = 140;
-			Alert.show("Opponent: " + match[2] + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL, null,_handleChallengeAlert);
+			Alert.show("Opponent: " + name + "\nTime: " + rule + "\nGame type: " + hc,"Game Setting",Alert.YES|Alert.CANCEL, null,_handleChallengeAlert);
 			//set properties back to default.
 			Alert.yesLabel = "Yes";
 			Alert.cancelLabel = "Cancel";
@@ -2337,18 +2348,32 @@
 		} else {
 		  board.superior = Kyokumen.GOTE;
 		}
+		if (_game_name.split("+")[1].match(/^r_/)) {
+		  board.gameType = "r";
+		} else if (_game_name.split("+")[1].match(/^nr_/)) {
+		  board.gameType = "nr";
+		} else if (_game_name.split("+")[1].match(/^hc/)) {
+		  board.gameType = "hc";
+		} else if (_game_name.split("+")[1].match(/^mini_/)) {
+		  board.gameType = "mini";
+		}
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
 		greetButton.visible = false;
 		rematchButton.visible = false;
 		shareKifuButton2.visible = true;
+		userMessage2.text = "";
+		_writeUserMessage("81-Dojo Kifu Viewer\n", 2, "#008800", true);
 		if (_viewerAlone) {
 			closeButton.enabled = false;
 			checkLobbyButton.enabled = false;
+			_writeUserMessage("Register to 81-Dojo and play shogi with this graphical interface!\n", 2, "#008800");
+			_writeUserMessage("( http://81dojo.com/ )\n", 2, "#008800");
 		} else {
 			closeButton.enabled = true;
 		}
+		_writeUserMessage("\nStarted Time: " + e.target.kifuContents.split("\n")[7].substr(12) + "\n", 2, "#000000");
 		kifuDataGrid.selectable = true;
 		rewindAllButton.enabled = true;
 		rewindOneButton.enabled = true;
@@ -2493,7 +2518,7 @@
 	  _so.data.rule_total = _newGameWindow.nonrated_total.selectedIndex;
 	  _so.data.rule_byoyomi = _newGameWindow.nonrated_byoyomi.selectedIndex;
 	  _so.data.rule_handicap = _newGameWindow.nonrated_handicap.selectedIndex;
-      _waitForGame(e.total, e.byoyomi, e.handicap);
+      _waitForGame(e.total, e.byoyomi, e.handicap, e.tournament);
 	  _waiting = true;
     }
 
@@ -2901,7 +2926,7 @@
 			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{lan.waiter}" width="120" paddingLeft="2" sortable="false" />
 <!--			  <mx:DataGridColumn dataField="country3" headerText="{lan.country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
 			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="35" paddingRight="3" textAlign="right" sortable="false" />
-			  <mx:DataGridColumn dataField="time" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" showDataTips="true" />
 			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="handicap" headerText="{lan.handicap}" width="60" paddingLeft="0" textAlign="center" />
 			 </mx:columns>
@@ -2918,7 +2943,7 @@
 				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
-				  <mx:DataGridColumn dataField="rule" headerText="{lan.rule}" width="78" paddingLeft="3" />
+				  <mx:DataGridColumn dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="78" paddingLeft="3" showDataTips="true" />
 				  <mx:DataGridColumn dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
 				  <mx:DataGridColumn dataField="opening" headerText="{lan.opening_short}" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />

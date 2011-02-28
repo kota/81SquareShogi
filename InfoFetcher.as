@@ -32,6 +32,9 @@
 		public var country_codes:Array;
 		public static var country_names:Array;
 		public static var country_names3:Array;
+		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA');
+		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO');
+		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '暗黒王戦', '香車戦', 'LATINO');
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String
@@ -567,6 +570,21 @@
 			if (i > 8) i = 8;
 			return verticalTextBars[i];
 		}
+		
+		public static function fetchTournamentEn(s:String):String {
+			for (var i:int = 0; i < tournament_codes.length; i++ ) {
+				if (tournament_codes[i] == s) return tournament_name_en[i];
+			}
+			return "";
+		}
+		
+		public static function fetchTournamentJp(s:String):String {
+			for (var i:int = 0; i < tournament_codes.length; i++ ) {
+				if (tournament_codes[i] == s) return tournament_name_jp[i];
+			}
+			return "";
+		}
+		
 	}
 
 }

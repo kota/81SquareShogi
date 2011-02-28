@@ -104,14 +104,14 @@ package{
 		send("LOGOUT");
 	}
 
-    public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r"):void {
+    public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r",tournament:String=""):void {
       _current_state = STATE_GAME_WAITING;
 	  if (handicap.match(/^hc/)) {
-		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -";
+		  _waiting_gamename = handicap + "_" + _login_name + tournament + "-" + total.toString() + "-" + byoyomi.toString() + " -";
 	  } else if (Math.round(Math.random()) == 1) {
-		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " +";
+		  _waiting_gamename = handicap + "_" + _login_name + tournament + "-" + total.toString() + "-" + byoyomi.toString() + " +";
 	  } else {
-		  _waiting_gamename = handicap + "_" + _login_name + "-" + total.toString() + "-" + byoyomi.toString() + " -";
+		  _waiting_gamename = handicap + "_" + _login_name + tournament + "-" + total.toString() + "-" + byoyomi.toString() + " -";
 	  }
 	  send("%%GAME " + _waiting_gamename);
     }

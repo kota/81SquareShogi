@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-					paddingLeft="10" paddingBottom="5" paddingRight="5" paddingTop="5">
+					paddingLeft="10" paddingBottom="8" paddingRight="5" paddingTop="5">
 	    <mx:Script>
         <![CDATA[
           import mx.controls.*;
           import mx.managers.PopUpManager;
           import mx.collections.ArrayCollection;
+		  import InfoFetcher;
           
           [Bindable]
           public var totals:ArrayCollection = new ArrayCollection(
@@ -45,42 +46,67 @@
 			{label:"Naked King", data:"hcnaked" },
 			{label:"Mini-shogi", data:"mini"}]
 		  );
+		  
+		  [Bindable]
+		  public var tournaments:ArrayCollection = new ArrayCollection(
+		  [{label:InfoFetcher.tournament_name_en[0], code:InfoFetcher.tournament_codes[0], type:"r", total:900, byoyomi:60},
+			{label:InfoFetcher.tournament_name_en[1], code:InfoFetcher.tournament_codes[1], type:"r", total:900, byoyomi:60},
+			{label:InfoFetcher.tournament_name_en[2], code:InfoFetcher.tournament_codes[2], type:"r", total:2700, byoyomi:60},
+			{label:InfoFetcher.tournament_name_en[3], code:InfoFetcher.tournament_codes[3], type:"r", total:900, byoyomi:60 },
+			{label:InfoFetcher.tournament_name_en[4], code:InfoFetcher.tournament_codes[4], type:"nr", total:0, byoyomi:10 },
+			{label:InfoFetcher.tournament_name_en[5], code:InfoFetcher.tournament_codes[5], type:"nr", total:300, byoyomi:30 },
+			{label:InfoFetcher.tournament_name_en[6], code:InfoFetcher.tournament_codes[6], type:"r", total:900, byoyomi:60 }]
+//			{label:InfoFetcher.tournament_name_en[7], code:InfoFetcher.tournament_codes[7], type:"r", total:900, byoyomi:60 }]
+		  );
 
           private function submit():void {
             var total:int;
             var byoyomi:int;
 			var handicap:String;
+			var tournament:String;
             trace("Challenge Clicked");
             switch(timeSetting.selectedValue) {
 			  case 0:
 			    total = 2700;
 				byoyomi = 60;
 				handicap = "r";
+				tournament = "";
 				break;
               case 1:
                 total = 900;
                 byoyomi = 60;
 				handicap = "r";
+				tournament = "";
                 break;
               case 2:
                 total = 300;
                 byoyomi = 30;
 				handicap = "r";
+				tournament = "";
                 break;
               case 3:
                 total = 0;
                 byoyomi = 30;
 				handicap = "r";
+				tournament = "";
                 break;
               case 4:
                 total = nonrated_total.selectedItem.data;
                 byoyomi = nonrated_byoyomi.selectedItem.data;
 				handicap = nonrated_handicap.selectedItem.data;
+				tournament = "";
+				break;
+			  case 5:
+				total = tournament_name.selectedItem.total;
+				byoyomi = tournament_name.selectedItem.byoyomi;
+				handicap = tournament_name.selectedItem.type;
+				tournament = "--" + tournament_name.selectedItem.code;
+				break;
               default:
                 break;
             }
             if(total >=0 && byoyomi){
-              var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,handicap);
+              var gameRuleEvent:GameRuleEvent = new GameRuleEvent(GameRuleEvent.RULE_SELECTED,total,byoyomi,handicap,tournament);
               dispatchEvent(gameRuleEvent);
 			  trace("created");
             }
@@ -91,6 +117,7 @@
             nonrated_total.enabled = timeSetting.selectedValue == 4;
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
             nonrated_handicap.enabled = timeSetting.selectedValue == 4;
+			tournament_name.enabled = timeSetting.selectedValue == 5;
           }
 
         ]]>
@@ -107,9 +134,13 @@
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
-  </mx:HBox>
-  <mx:HBox paddingTop="20">
-      <mx:Button id="Submit" click="submit();" label="{parentApplication.lan.wait}"/> 
-      <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
-  </mx:HBox> 
+    </mx:HBox>
+    <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11"/>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
+    </mx:HBox>
+    <mx:HBox paddingTop="15">
+	    <mx:Button id="Submit" click="submit();" label="{parentApplication.lan.wait}"/> 
+	    <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
+    </mx:HBox>
 </mx:TitleWindow>

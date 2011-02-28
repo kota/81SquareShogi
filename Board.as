@@ -162,8 +162,9 @@ package  {
 	public var rematch:Array = new Array(2);
 	public var sendHover:Boolean = false;
 
-		private var _time_sente:int;
-		private var _time_gote:int;
+	private var _time_sente:int;
+	private var _time_gote:int;
+	private const filterTournament:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 10, 0, 1, 0, 0, 0, 0, 0, 1, 0, 70, 0, 0, 0, 1, 0 ]);
     
     //TODO Define the layout with mxml.
     public function Board() {
@@ -178,7 +179,7 @@ package  {
       
       _board_bg_image.source = board_bg;
       _board_bg_image.setStyle('borderStyle','solid');
-      _board_bg_image.setStyle('borderColor',0x888888);
+      _board_bg_image.setStyle('borderColor', 0x888888);
       
       _board_back_image.width = BAN_WIDTH;
       _board_back_image.height = BAN_HEIGHT;
@@ -465,6 +466,7 @@ package  {
 	  _player_infos[0].labelColor = 0x000000;
 	  _player_infos[1].labelColor = 0x000000;
       _my_turn = my_turn;
+	  if (_player_infos[_my_turn].game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
       resetBoard();
 	  initializeKifu();
       _position = new Kyokumen(kyokumen_str);
@@ -623,6 +625,7 @@ package  {
 		  _oppo_selected_square.setStyle('backgroundColor', undefined);
 		  _oppo_selected_square = null;
 	  }
+	  _board_bg_image.filters = null;
     }
 
 		public function timeout():void{
@@ -713,9 +716,10 @@ package  {
         }
       }
 
-	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
+	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 	  total_time = parseInt(match[3]);
 	  byoyomi = parseInt(match[4]);
+	  if (match[2].match(/\-\-..$/)) _board_bg_image.filters = [filterTournament];
 	  
       var kyokumen_str:String = _parsePosition(game_info);
       if(kyokumen_str != ""){
