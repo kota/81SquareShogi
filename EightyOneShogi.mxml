@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/02/29";
+	public const VERSION:String = "ver.2011/03/05";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -107,6 +107,9 @@
     [Embed(source = "/sound/door_close.mp3")]
     private var Sound_door_close:Class;
     private var _sound_door_close:Sound = new Sound_door_close();
+    [Embed(source = "/sound/game_start.mp3")]
+    private var Sound_game_start:Class;
+    private var _sound_game_start:Sound = new Sound_game_start();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     [Embed(source = "/images/earth.png")]
@@ -220,6 +223,9 @@
 	  _client.addEventListener(CsaShogiClient.CHALLENGE, _handleChallenger);
 	  _client.addEventListener(CsaShogiClient.ACCEPT, _handleAccept);
 	  _client.addEventListener(CsaShogiClient.DECLINE, _handleDecline);
+	  _client.addEventListener(CsaShogiClient.LOBBY_IN, _handleLobbyIn);
+	  _client.addEventListener(CsaShogiClient.LOBBY_OUT, _handleLobbyOut);
+	  _client.addEventListener(CsaShogiClient.START, _handleStart);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
@@ -281,7 +287,7 @@
 			  break;
 		  }
 	  }
-	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
+//	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
 	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\n", 1, "#FF0000");
@@ -417,6 +423,7 @@
 				user.timeTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
 			  } else {
 				user.time = total + "-" + game_info[4];
+				user.timeTip = "";
 			  }
 			  userProxy = new ObjectProxy(user);
 			  waiter_list.push(userProxy);
@@ -431,7 +438,8 @@
       for (i = 0; i < user_list.length; i++) {
         if (_user_list[i].name == login_name) {
           userListGrid.selectedIndex = i;
-		  userListGrid.scrollToIndex(i);
+		  userListGrid.callLater(_scrollDownUser);
+//		  userListGrid.scrollToIndex(i);
           break;
         }
       }
@@ -560,6 +568,7 @@
 			game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
 		  } else {
 			game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
+			game.ruleTip = "";
 		  }
 		  var gameProxy:ObjectProxy = new ObjectProxy(game);
 		  game_list.push(gameProxy);
@@ -601,6 +610,47 @@
       watcherListGrid.dataProvider = watcher_list;
 	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
     }
+	
+	private function _handleLobbyIn(e:ServerMessageEvent):void {
+		var tokens:Array = e.message.split(",");
+		var rank:String
+		if (tokens[2] == "true") {
+			rank = "A new player";
+		} else {
+			rank = "A " + InfoFetcher.makeRankFromRating(tokens[1]);
+			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
+			  if (_infoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
+				  rank = "The " + _infoFetcher.titleName[i];
+				  break;
+			  }
+			}
+		}
+		var isFavorite:Boolean = _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0;
+		_writeUserMessage(tokens[0] + " logged in. " + rank + " from " + InfoFetcher.country_names[tokens[3]] + ".\n", 1, "#008800", isFavorite);
+		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
+			if (isFavorite) _sound_door_open.play();
+			else _sound_chat4.play();
+		}
+	}
+	
+	private function _handleLobbyOut(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex == 1) {
+			var isFavorite:Boolean = _favorite_list.indexOf(e.message.toLowerCase()) >= 0;
+			_writeUserMessage("  -  " + e.message + " left.\n", 1, "#008800", isFavorite);
+			if (_chat_sound1_play && isFavorite) _sound_door_close.play();
+		}
+	}
+	
+	private function _handleStart(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex == 1) {
+			var tokens:Array = e.message.split(",");
+			_writeUserMessage("GAME STARTED: ▲" + tokens[0] + " vs △" + tokens[3] + "\n", 1, "#008800");
+			if (_chat_sound1_play) {
+				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
+				else _sound_chat1.play();
+			}	
+		}
+	}
 	
 	//----------------------------------------------------------------------------------------------------------------------------- MATCH MAKING
 
@@ -1080,6 +1130,7 @@
     private function _handleChat(e:ServerMessageEvent):void {
 		var sender:String = e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1];
 		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+		if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 		if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) {
 			_writeUserMessage(e.message.substr(8), 1, "#DD7700");
 		} else if (e.message.match(/\[auto\-chat\]/)) {
@@ -1090,12 +1141,12 @@
 			_writeUserMessage(e.message.substr(8), 1, "#000000");
 		}
 		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
-			if (e.message.match(/\[auto\-chat\]/)) {
-				if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) _sound_door_open.play();
-				else _sound_chat4.play();
-			} else {
+//			if (e.message.match(/\[auto\-chat\]/)) {
+//				if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) _sound_door_open.play();
+//				else _sound_chat4.play();
+//			} else {
 				_sound_chat1.play();
-			}
+//			}
 		}
 	}
 	
@@ -1193,6 +1244,7 @@
 			}
 		} else {
 			if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
+			if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 			if (sender == board.playerInfos[0].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#000000");
 			} else if (sender == board.playerInfos[1].name) {
@@ -1214,6 +1266,7 @@
 		var name:String = match[1];
 		var message:String = match[2];
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
+		if (_infoFetcher.banned.indexOf(name.toLowerCase()) >= 0) return;
 		if (_pmAutoOpen) _openPlayerInfo(_findPlayerFromList(name));
 		_writePmLog(name, message, "#FF0000");
 		if (_playerInfoWindows[name]) {
@@ -1727,8 +1780,10 @@
 		  } else if (_game_name.split("+")[1].match(/^mini_/)) {
 			  board.gameType = "mini";
 		  }
-		 if (board.gameType == "hc") {
+		 if (board.gameType == "hc" || String(_watch_game.blackRating).match(/^\*/)) {
 			 board.superior = Kyokumen.GOTE;
+		 } else if (String(_watch_game.whiteRating).match(/^\*/)) {
+			 board.superior = Kyokumen.SENTE;
 		 } else if (_watch_game.blackRating > _watch_game.whiteRating) {
 			 board.superior = Kyokumen.SENTE;
 		 } else {
@@ -1742,11 +1797,10 @@
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
 		  if (board.gameType == "r") {
-			  _writeUserMessage("This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\n", 2, "#008800", true);
+			  _writeUserMessage("This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\nWatcher can PM to players, but it will be notified to others.\n", 2, "#008800", true);
 		  } else {
 			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see watcher's chat even during game.\n", 2, "#008800", true);
 		  }
-		  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
@@ -1917,8 +1971,12 @@
 	
 	private function _setRate(name:String):Function {
 		return function(e:MouseEvent):void {
-			_client.setRate(InfoFetcher.rank_thresholds[_playerInfoWindows[name].setRateCombo.selectedIndex + 8]);
+			_client.setRate(InfoFetcher.rank_thresholds[_playerInfoWindows[name].setRateCombo.selectedIndex + 5]);
 		}
+	}
+	
+	private function _scrollDownUser():void {
+		if (userListGrid.selectedItem) userListGrid.scrollToIndex(userListGrid.selectedIndex);
 	}
 	
 	//=========================================================

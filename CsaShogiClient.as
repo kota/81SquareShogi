@@ -35,6 +35,9 @@ package{
 	public static var CHALLENGE:String = 'challenge';
 	public static var ACCEPT:String = 'accept';
 	public static var DECLINE:String = 'decline';
+	public static var LOBBY_IN:String = 'lobby_in';
+	public static var LOBBY_OUT:String = 'lobby_out';
+	public static var START:String = 'start';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -351,6 +354,12 @@ package{
 					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) _current_state = STATE_CONNECTED;
 			        _dispatchServerMessageEvent(RECONNECT);
                 }
+			  } else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
+			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
+			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(START, match[1]));
 			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
 			  } else if ((match = line.match(/^##\[DECLINE\](.*)$/))) {
@@ -379,6 +388,12 @@ package{
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
+			  } else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
+			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
+			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(START, match[1]));
 			  } else if ((match = line.match(/^##\[CHALLENGE\](.+)$/))) {
 				  dispatchEvent(new ServerMessageEvent(CHALLENGE, match[1]));
 			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {

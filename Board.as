@@ -408,6 +408,10 @@ package  {
 			_position.move(mv);
 			if (piece_sound_play && withSound) isSoundDouble = _position.isSoundDouble(mv.to);
 		}
+		if (_oppo_selected_square) {
+			_oppo_selected_square.setStyle('backgroundColor', undefined);
+			_oppo_selected_square = null;
+		}
 		if (!actual || onListen){
 			if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
 			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor', undefined);
@@ -431,10 +435,6 @@ package  {
 //		_pieceGrab = false;
 		if (contains(_hoverImage)) removeChild(_hoverImage);
 		_from = null;
-		if (_oppo_selected_square) {
-			_oppo_selected_square.setStyle('backgroundColor', undefined);
-			_oppo_selected_square = null;
-		}
 	  }
 
     public function setMoveCallback(callback:Function):void{
@@ -1039,6 +1039,10 @@ package  {
 	}
 	
 	public function handleGrab(x:int, y:int):void {
+		 if (_last_from_square != null) {
+			_last_from_square.setStyle('backgroundColor', undefined);
+			_last_from_square = null;
+		}
 		if (x == 0) {
 			if (contains(_hoverImage)) removeChild(_hoverImage);
 			if (_oppo_selected_square) {
