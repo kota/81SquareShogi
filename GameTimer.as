@@ -13,6 +13,7 @@ package {
 	public class GameTimer extends Canvas{
 
 		public static var CHECK_TIMEOUT:String = 'check_timeout';
+		public static var TIMER_LAG:String = 'timer_lag';
 
 		private var _label:Label;
 		private var _box:Canvas;
@@ -26,6 +27,9 @@ package {
 		private var _timeout_flag:Boolean;
 
 		private var _timer:Timer;
+		private var _startTime:Number;
+		private var _thisCount:int;
+		private var _lagging:Boolean;
 		
 		public static var soundType:int = 1;
 
@@ -113,6 +117,9 @@ package {
 			if(!_timer.running){
 				_timer.start();
 				_arrows.visible = true;
+				_lagging = false;
+				_thisCount = 0;
+				_startTime = Number(new Date());
 			}
 		}
 
@@ -155,6 +162,9 @@ package {
 		public function resume():void{
 			if(!_timer.running){
 				_timer.start();
+				_lagging = false;
+				_thisCount = 0;
+				_startTime = Number(new Date());
 			}
 			_arrows.visible = true;
 			_display();
@@ -182,8 +192,14 @@ package {
 			_display();
 		}
 
-		private function _tickHandler(e:TimerEvent):void{
+		private function _tickHandler(e:TimerEvent):void {
 			_time_left--;
+			if (++_thisCount % 5 == 0 && _time_left <= 60) {
+				if (!_lagging && Number(new Date()) - _startTime > (_thisCount + 5) * 1000) {
+					dispatchEvent(new Event(TIMER_LAG));
+					_lagging = true;
+				}
+			}
 			if(_time_left <= 0){
 //				_time_left = 0;
 				if(_byoyomi > 0 && !_byoyomi_flag){
