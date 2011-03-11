@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/03/10";
+	public const VERSION:String = "ver.2011/03/11";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -110,6 +110,9 @@
     [Embed(source = "/sound/game_start.mp3")]
     private var Sound_game_start:Class;
     private var _sound_game_start:Sound = new Sound_game_start();
+    [Embed(source = "/sound/madoka_kitao/timeup.mp3")]
+    private var Sound_timeup:Class;
+    private var _sound_timeup:Sound = new Sound_timeup();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
     [Embed(source = "/images/earth.png")]
@@ -922,7 +925,7 @@
 
 	  if (end_game) {
 		  var kifuMove:Object = new Object();
-		  if(e.message.indexOf("#TIME_UP") >= 0){
+		  if (e.message.indexOf("#TIME_UP") >= 0) {
 			board.timeout();
 			_writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
 			kifuMove.num = board.kifu_list.length;
@@ -1018,7 +1021,8 @@
 	  }
 	  board.post_game = true;
       kifuMove.num = board.kifu_list.length;
-      if(e.message.indexOf("TIME_UP") >= 0){
+      if (e.message.indexOf("TIME_UP") >= 0) {
+		if (GameTimer.soundType == 2) _sound_timeup.play();
         board.timeout();
         //_writeUserMessage("Time up.\n",2);
 		if (board.position.turn == board.my_turn) _sendAutoChat("Time out.");

@@ -67,10 +67,12 @@
 			</mx:HBox>
 			<mx:HBox>
 				<mx:Label text="byoyomi sound"/>
-				<mx:RadioButtonGroup id="RadioGroup1"/>
-				<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
-				<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
-				<mx:RadioButton label="Japanese Voice" groupName="RadioGroup1" value="2"/>
+				<mx:VBox>
+					<mx:RadioButtonGroup id="RadioGroup1"/>
+					<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
+					<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
+					<mx:RadioButton label="Japanese (by Madoka KITAO)" groupName="RadioGroup1" value="2"/>
+				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
 		<mx:VBox label="Communication">

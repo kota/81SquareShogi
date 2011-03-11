@@ -38,49 +38,49 @@ package {
 		[Embed(source = "/sound/timer.mp3")]
 		private static var sound_timer:Class;
 		private static var _sound_timer:Sound = new sound_timer();
-		[Embed(source = "/sound/jp_voice/01.mp3")]
+		[Embed(source = "/sound/madoka_kitao/01.mp3")]
 		private static var Voice01:Class;
 		private static var _voice01:Sound = new Voice01();
-		[Embed(source = "/sound/jp_voice/02.mp3")]
+		[Embed(source = "/sound/madoka_kitao/02.mp3")]
 		private static var Voice02:Class;
 		private static var _voice02:Sound = new Voice02();
-		[Embed(source = "/sound/jp_voice/03.mp3")]
+		[Embed(source = "/sound/madoka_kitao/03.mp3")]
 		private static var Voice03:Class;
 		private static var _voice03:Sound = new Voice03();
-		[Embed(source = "/sound/jp_voice/04.mp3")]
+		[Embed(source = "/sound/madoka_kitao/04.mp3")]
 		private static var Voice04:Class;
 		private static var _voice04:Sound = new Voice04();
-		[Embed(source = "/sound/jp_voice/05.mp3")]
+		[Embed(source = "/sound/madoka_kitao/05.mp3")]
 		private static var Voice05:Class;
 		private static var _voice05:Sound = new Voice05();
-		[Embed(source = "/sound/jp_voice/06.mp3")]
+		[Embed(source = "/sound/madoka_kitao/06.mp3")]
 		private static var Voice06:Class;
 		private static var _voice06:Sound = new Voice06();
-		[Embed(source = "/sound/jp_voice/07.mp3")]
+		[Embed(source = "/sound/madoka_kitao/07.mp3")]
 		private static var Voice07:Class;
 		private static var _voice07:Sound = new Voice07();
-		[Embed(source = "/sound/jp_voice/08.mp3")]
+		[Embed(source = "/sound/madoka_kitao/08.mp3")]
 		private static var Voice08:Class;
 		private static var _voice08:Sound = new Voice08();
-		[Embed(source = "/sound/jp_voice/09.mp3")]
+		[Embed(source = "/sound/madoka_kitao/09.mp3")]
 		private static var Voice09:Class;
 		private static var _voice09:Sound = new Voice09();
-		[Embed(source = "/sound/jp_voice/10.mp3")]
+		[Embed(source = "/sound/madoka_kitao/10.mp3")]
 		private static var Voice10:Class;
 		private static var _voice10:Sound = new Voice10();
-		[Embed(source = "/sound/jp_voice/20.mp3")]
+		[Embed(source = "/sound/madoka_kitao/20.mp3")]
 		private static var Voice20:Class;
 		private static var _voice20:Sound = new Voice20();
-		[Embed(source = "/sound/jp_voice/30.mp3")]
+		[Embed(source = "/sound/madoka_kitao/30.mp3")]
 		private static var Voice30:Class;
 		private static var _voice30:Sound = new Voice30();
-		[Embed(source = "/sound/jp_voice/40.mp3")]
+		[Embed(source = "/sound/madoka_kitao/40.mp3")]
 		private static var Voice40:Class;
 		private static var _voice40:Sound = new Voice40();
-		[Embed(source = "/sound/jp_voice/50.mp3")]
+		[Embed(source = "/sound/madoka_kitao/50.mp3")]
 		private static var Voice50:Class;
 		private static var _voice50:Sound = new Voice50();
-		[Embed(source = "/sound/jp_voice/byoyomi.mp3")]
+		[Embed(source = "/sound/madoka_kitao/byoyomi.mp3")]
 		private static var VoiceByoyomi:Class;
 		private static var _voiceByoyomi:Sound = new VoiceByoyomi();
 		private static var _voices:Array;
