@@ -54,7 +54,7 @@
 			{label:InfoFetcher.tournament_name_en[2], code:InfoFetcher.tournament_codes[2], type:"r", total:2700, byoyomi:60},
 			{label:InfoFetcher.tournament_name_en[3], code:InfoFetcher.tournament_codes[3], type:"r", total:2700, byoyomi:60 },
 			{label:InfoFetcher.tournament_name_en[4], code:InfoFetcher.tournament_codes[4], type:"nr", total:0, byoyomi:10 },
-			{label:InfoFetcher.tournament_name_en[5], code:InfoFetcher.tournament_codes[5], type:"nr", total:300, byoyomi:30 },
+			{label:InfoFetcher.tournament_name_en[5], code:InfoFetcher.tournament_codes[5], type:"r", total:300, byoyomi:30 },
 			{label:InfoFetcher.tournament_name_en[6], code:InfoFetcher.tournament_codes[6], type:"r", total:900, byoyomi:30 }]
 //			{label:InfoFetcher.tournament_name_en[7], code:InfoFetcher.tournament_codes[7], type:"r", total:900, byoyomi:60 }]
 		  );

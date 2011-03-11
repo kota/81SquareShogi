@@ -21,6 +21,8 @@
 		  [Bindable]
 		  private var _rank:String;
 		  [Bindable]
+		  private var _avatar:String;
+		  [Bindable]
 		  private var _title:String;
 		  [Bindable]
 		  private var _status:String;
@@ -50,6 +52,7 @@
 				_rating = user.rating;
 			  }
 			  _rank = user.rank;
+			  _avatar = user.avatar ? user.avatar : _rank;
 			  _title = user.titleName;
 			  _wins = user.wins;
 			  _losses = user.losses;
@@ -125,7 +128,7 @@
 	<mx:Move id="hideMove" yFrom="0" yTo="103" duration="150" />
 	<mx:HBox>
 		<mx:Canvas id="avatarCanvas" width="128" height="128">
-			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_rank}.jpg"/>
+			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_avatar}.jpg"/>
 		</mx:Canvas>
 		<mx:VBox>
 			<mx:HBox verticalAlign="middle">
@@ -138,7 +141,7 @@
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:VBox width="260" height="73" horizontalScrollPolicy="off">
+			<mx:VBox height="73" horizontalScrollPolicy="off">
 				<mx:Label text="{parentApplication.lan.rate}:  {_rating}  ({_rank})"/>
 				<mx:HBox>
 					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>

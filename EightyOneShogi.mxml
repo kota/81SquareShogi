@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/03/05";
+	public const VERSION:String = "ver.2011/03/10";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -162,6 +162,7 @@
 	  _infoFetcher = new InfoFetcher();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
+	  board.setTimerLagCallback(_checkTimerLag);
 	  board.setAddMyArrowCallback(_addMyArrow);
 	  board.setHoverPieceCallback(_hoverPiece);
 	  board.setGrabPieceCallback(_grabPiece);
@@ -290,7 +291,7 @@
 //	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
-	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\n", 1, "#FF0000");
+	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\nIDにハイフンが含まれているとバグが発生することが判明しています。管理者にID変更を依頼して下さい。\n", 1, "#FF0000", true);
     }
 
     private function _handleLoginFailed(e:ServerMessageEvent):void{
@@ -382,8 +383,8 @@
 		  for (var i:int = 0; i < user_list.length; i++) {
 			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
-				  if (_infoFetcher.titleRate[j] != "*") {
-					  user_list[i].rating = _infoFetcher.titleRate[j];
+				  if (_infoFetcher.titleAvatar[j] != "*") {
+					  user_list[i].avatar = _infoFetcher.titleAvatar[j];
 				  }
 				  break;
 			  }
@@ -397,7 +398,7 @@
 			  user_list[i].rank = "-";
 			  user_list[i].rankColor = 0xCCCCCC;
 		  }
-		  if (user_list[i].rank == "PRO" && user_list[i].titleName == "") user_list[i].titleName = "livebot";
+//		  if (user_list[i].rank == "PRO" && user_list[i].titleName == "") user_list[i].titleName = "livebot";
 		  if (user_list[i].status2.match(/W/)) {
 			  user = {
 				  'name':user_list[i].name,
@@ -510,11 +511,11 @@
 		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
 				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
 					game.blackTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleRate[i] != "*") game.blackRating = _infoFetcher.titleRate[i];
+					if (_infoFetcher.titleAvatar[i] != "*") game.blackAvatar = _infoFetcher.titleAvatar[i];
 				}
 				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
 					game.whiteTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleRate[i] != "*") game.whiteRating = _infoFetcher.titleRate[i];
+					if (_infoFetcher.titleAvatar[i] != "*") game.whiteAvatar = _infoFetcher.titleAvatar[i];
 				}
 		  }
 		  if (game.watchers > 0) {
@@ -636,8 +637,12 @@
 	private function _handleLobbyOut(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex == 1) {
 			var isFavorite:Boolean = _favorite_list.indexOf(e.message.toLowerCase()) >= 0;
-			_writeUserMessage("  -  " + e.message + " left.\n", 1, "#008800", isFavorite);
-			if (_chat_sound1_play && isFavorite) _sound_door_close.play();
+//			_writeUserMessage("  -  " + e.message + " left.\n", 1, "#008800", isFavorite);
+//			if (_chat_sound1_play && isFavorite) _sound_door_close.play();
+			if (isFavorite) {
+				_writeUserMessage("  -  " + e.message + " left.\n", 1, "#008800", true);
+				if (_chat_sound1_play) _sound_door_close.play();
+			}
 		}
 	}
 	
@@ -2778,6 +2783,11 @@
 		}
     }
 	
+	private function _checkTimerLag():void {
+		_writeUserMessage("Your timer is lagging by more than 5 sec due to CPU load. Time-up loss can occur earlier than your timer hits zero.", 2, "#FF0000", true);
+		_sound_chat3.play();
+	}
+	
 	private function _findPlayerFromList(str:String):Object {
 		for (var i:int = 0; i < _user_list.length; i++) {
 			if (_user_list[i].name == str) return _user_list[i];
@@ -3018,7 +3028,7 @@
 		</mx:VBox>
 	  </mx:HBox>
       </mx:Panel>
-	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold" width="975" horizontalAlign="center">
+<!--	  <mx:HBox paddingTop="5" fontSize="14" fontWeight="bold" width="975" horizontalAlign="center">
 		  <mx:VBox horizontalAlign="center">
 			  <mx:Label text="Los Angeles"/>
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-blue.swf?TimeZone=USA_LosAngeles" width="300" height="25"/>
@@ -3031,10 +3041,11 @@
 			  <mx:Label text="Tokyo"/>
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
-	  </mx:HBox>
+	  </mx:HBox> -->
 <!--	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_client.send('SCRATCH');"/>
 		<mx:Label text="MAINTENANCE" doubleClickEnabled="true" doubleClick="_client.send('%%MAINTENANCE ' + chatMessage1.text);"/>
 	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_client.send('%%GHOST ' + chatMessage1.text);"/> -->
+<!--	  <eightyOneSquare:WorldClockGadget id="clock" width="975" height="65"/> -->
     </mx:VBox>
 	<eightyOneSquare:BulletinGadget id="bulletin" paddingLeft="8" />
 	</mx:HBox>

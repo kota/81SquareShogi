@@ -110,6 +110,7 @@ package  {
 
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
+	private var _timerLagCallback:Function;
 	private var _addMyArrowCallback:Function;
 	private var _hoverPieceCallback:Function;
 	private var _grabPieceCallback:Function;
@@ -227,7 +228,8 @@ package  {
         addChild(hand);
         
  		var timer:GameTimer = new GameTimer();
-		timer.addEventListener(GameTimer.CHECK_TIMEOUT,_checkTimeout);
+		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
+		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
 		timer.x = i == 0 ? hand.x + 6 : hand.x + KOMADAI_WIDTH / 2 - 19;
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
 		timers[i] = timer;
@@ -445,6 +447,10 @@ package  {
       _timeoutCallback = callback;
     }
 	
+    public function setTimerLagCallback(callback:Function):void{
+      _timerLagCallback = callback;
+    }
+	
 	public function setAddMyArrowCallback(callback:Function):void {
 		_addMyArrowCallback = callback;
 	}
@@ -506,11 +512,11 @@ package  {
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[_my_turn].rank + ".jpg";
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[_my_turn].avatar ? _player_infos[_my_turn].avatar : _player_infos[_my_turn].rank) + ".jpg";
 	  _avatar_images[0].addChild(avatar);
 	  if (!viewing) _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + _player_infos[1 - _my_turn].rank + ".jpg";
+	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[1 - _my_turn].avatar ? _player_infos[1 - _my_turn].avatar : _player_infos[1 - _my_turn].rank) + ".jpg";
 	  _avatar_images[1].addChild(avatar);
 	  if (!viewing) _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
@@ -737,6 +743,7 @@ package  {
 		  'name':watch_game.blackName,
 		  'rating':watch_game.blackRating,
 		  'rank':watch_game.blackRank,
+		  'avatar':watch_game.blackAvatar,
 		  'titleName':watch_game.blackTitle,
 		  'country_code':watch_game.blackCountryCode,
 		  'labelColor':watch_game.blackColor,
@@ -748,6 +755,7 @@ package  {
 		  'name':watch_game.whiteName,
 		  'rating':watch_game.whiteRating,
 		  'rank':watch_game.whiteRank,
+		  'avatar':watch_game.whiteAvatar,
 		  'titleName':watch_game.whiteTitle,
 		  'country_code':watch_game.whiteCountryCode,
 		  'labelColor':watch_game.whiteColor,
@@ -1121,6 +1129,10 @@ package  {
 
 		private function _checkTimeout(e:Event):void {
 			if (_in_game) _timeoutCallback();
+		}
+
+		private function _checkTimerLag(e:Event):void {
+			if (_in_game && e.target == timers[0]) _timerLagCallback();
 		}
 		
 	  public function replayMoves(n:int, actual:Boolean = true):void {
