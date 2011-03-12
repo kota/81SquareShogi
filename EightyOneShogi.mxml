@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/03/11";
+	public const VERSION:String = "ver.2011/03/12";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -271,6 +271,7 @@
 		  _so.flush();
 	  }
       loginMessage.text = "Logged in Successfully";
+	  clock.start();
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
@@ -3049,7 +3050,7 @@
 <!--	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_client.send('SCRATCH');"/>
 		<mx:Label text="MAINTENANCE" doubleClickEnabled="true" doubleClick="_client.send('%%MAINTENANCE ' + chatMessage1.text);"/>
 	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_client.send('%%GHOST ' + chatMessage1.text);"/> -->
-<!--	  <eightyOneSquare:WorldClockGadget id="clock" width="975" height="65"/> -->
+	  <eightyOneSquare:WorldClockGadget id="clock" width="975" height="59"/>
     </mx:VBox>
 	<eightyOneSquare:BulletinGadget id="bulletin" paddingLeft="8" />
 	</mx:HBox>

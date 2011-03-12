@@ -37,9 +37,10 @@
 		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '暗黒王戦', '香車戦', 'LATINO');
 		public var cheaters:Array;
 		public var banned:Array;
-		public var initMessage:String
-		public var gameMessage:String
+		public var initMessage:String = "";
+		public var gameMessage:String = "";
 		public var serverMaintenanceTime:Date;
+		public static var clock_differences:Array;
 		private var _urlRequest:URLRequest = new URLRequest();
 		private var _httpService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
@@ -73,44 +74,58 @@
 			country_names3 = new Array();
 			cheaters = new Array();
 			banned = new Array();
+			clock_differences = new Array();
 			var nowDate:Date = new Date(); 
 			_urlLoader.load(new URLRequest(SOURCE + "infoData.txt?" + nowDate.getTime().toString()));
 		}
 		
 		private function _parseInfo(e:Event):void {
 			var response:String = _urlLoader.data
-			var match:Array = response.match(/^###NEWEST_VERSION\n(.+)\n###INITIAL_MESSAGE\n(.+)\n###GAME_MESSAGE\n(.+)\n###TITLE_HOLDERS\n(.+)\n###RANK_THRESHOLDS\n(.+)\n###COUNTRY_NAMES\n(.+)\n###CHEAT\n(.+)\n###BANNED\n(.+)\n###MAINTENANCE\n(.+)\n###/s);
-			newestVer = match[1];
-			initMessage = match[2];
-			gameMessage = match[3];
-			var lines:Array = match[4].split("\n");
-			for each(var line:String in lines) {
-				titleUser.push(line.split("\t")[0]);
-				titleName.push(line.split("\t")[1]);
-				titleAvatar.push(line.split("\t")[2]);
-			}
-//			lines = match[5].split("\n");
-//			for each(line in lines) {
-//				rank_thresholds.push(line.split("\t")[0]);
-//				rank_names.push(line.split("\t")[1]);
-//			}
-			lines = match[6].split("\n");
-			for each(line in lines) {
-				country_codes.push(parseInt(line.split("\t")[0]));
-				country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
-				country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
-			}
-			lines = match[7].split("\n");
-			for each(line in lines) {
-				cheaters.push(line);
-			}
-			lines = match[8].split("\n");
-			for each(line in lines) {
-				banned.push(line);
-			}
-			if (match[9] != "*") {
-				serverMaintenanceTime = new Date();
-				serverMaintenanceTime.setTime(Date.parse(match[9]));
+			var filter:String;
+			for each(var line:String in response.split("\n")) {
+				if (line.match(/^###/)) {
+					filter = line.substr(3);
+				} else {
+					switch(filter) {
+						case "NEWEST_VERSION":
+							newestVer = line;
+							break;
+						case "INITIAL_MESSAGE":
+							initMessage += line + "\n";
+							break;
+						case "GAME_MESSAGE":
+							gameMessage += line + "\n";
+							break;
+						case "TITLE_HOLDERS":
+							titleUser.push(line.split("\t")[0]);
+							titleName.push(line.split("\t")[1]);
+							titleAvatar.push(line.split("\t")[2]);
+							break;
+						case "COUNTRY_NAMES":
+							country_codes.push(parseInt(line.split("\t")[0]));
+							country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
+							country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
+							break;
+						case "CHEAT":
+							cheaters.push(line);
+							break;
+						case "BANNED":
+							banned.push(line);
+							break;
+						case "MAINTENANCE":
+							if (line != "*") {
+								serverMaintenanceTime = new Date();
+								serverMaintenanceTime.setTime(Date.parse(line));
+							}
+							break;
+						case "CLOCK_DIFFERENCE":
+							for each (var diff:String in line.split(",")) {
+								clock_differences.push(parseInt(diff));
+							}
+							break;
+						default:
+					}
+				}
 			}
 		}
 		
