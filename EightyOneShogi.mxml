@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/03/20";
+	public const VERSION:String = "ver.2011/04/01";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -147,6 +147,7 @@
 	private var _leaveMessage:String;
 	private var _infoFetcher:InfoFetcher;
 	private var _pmLog:Object = new Object();
+	private var _allowWatcherChat:Boolean = false;
 	
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
@@ -763,6 +764,13 @@
 	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
 		  board.gameType = "mini";
 	  }
+	  if (board.gameType == "r") {
+		  allowWatcherChatCheckbox.visible = false;
+	  } else {
+		  _allowWatcherChat = true;
+		  allowWatcherChatCheckbox.selected = true;
+		  allowWatcherChatCheckbox.visible = true;
+	  }
 	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
 		  board.superior = Kyokumen.GOTE;
 	  } else if (String(_player_infos[1].rating).match(/^\*/)) {
@@ -852,6 +860,13 @@
 		  board.gameType = "hc";
 	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
 		  board.gameType = "mini";
+	  }
+	  if (board.gameType == "r") {
+		  allowWatcherChatCheckbox.visible = false;
+	  } else {
+		  _allowWatcherChat = true;
+		  allowWatcherChatCheckbox.selected = true;
+		  allowWatcherChatCheckbox.visible = true;
 	  }
 	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
 		  board.superior = Kyokumen.GOTE;
@@ -1089,6 +1104,7 @@
 		radioKifuListen.enabled = false;
 		sidePanel.setStyle('borderColor', _panelReplayColor);
 	  }
+	  allowWatcherChatCheckbox.visible = false;
       closeButton.enabled = true;
       resignButton.enabled = false;
 	  rematchButton.visible = true;
@@ -1258,17 +1274,17 @@
 			if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 			if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 			if (sender == board.playerInfos[0].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#000000");
+				_writeUserMessage(e.message.substr(12), 2, "#000000"); if (_chat_sound2_play) _sound_chat2.play();
 			} else if (sender == board.playerInfos[1].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#666666");
-			} else if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) {
-				_writeUserMessage(e.message.substr(12), 2, "#DD7700");
+				_writeUserMessage(e.message.substr(12), 2, "#666666"); if (_chat_sound2_play) _sound_chat2.play();
 			} else if (sender == login_name) {
-				_writeUserMessage(e.message.substr(12), 2, "#0033DD");
+				_writeUserMessage(e.message.substr(12), 2, "#0033DD"); if (_chat_sound2_play) _sound_chat2.play();
+			} else if (_isDuringMyGame() && !_allowWatcherChat) {
+			} else if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) {
+				_writeUserMessage(e.message.substr(12), 2, "#DD7700"); if (_chat_sound2_play) _sound_chat2.play();
 			} else {
-				_writeUserMessage(e.message.substr(12), 2, "#660000");
+				_writeUserMessage(e.message.substr(12), 2, "#660000"); if (_chat_sound2_play) _sound_chat2.play();
 			}
-			if (_chat_sound2_play) _sound_chat2.play();
 		}
     }
 	
@@ -1789,6 +1805,7 @@
 		  } else {
 			  board.gameType = game_info[1];
 		  }
+		 allowWatcherChatCheckbox.visible = false;
 		 if (board.gameType == "hc" || String(_watch_game.blackRating).match(/^\*/)) {
 			 board.superior = Kyokumen.GOTE;
 		 } else if (String(_watch_game.whiteRating).match(/^\*/)) {
@@ -2427,6 +2444,7 @@
 		} else if (_game_name.split("+")[1].match(/^mini_/)) {
 		  board.gameType = "mini";
 		}
+		allowWatcherChatCheckbox.visible = false;
 		board.startView(e.target.kifuContents);
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
@@ -3117,9 +3135,10 @@
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
-		  <mx:HBox paddingBottom="-2">
+		  <mx:HBox paddingBottom="-2" horizontalGap="2">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
 			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
+			<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
 		  </mx:HBox>
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
