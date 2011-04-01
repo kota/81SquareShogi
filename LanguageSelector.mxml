@@ -132,6 +132,10 @@
 		  
 			private var _urlLoader:URLLoader = new URLLoader();
 			
+			public function readDefault():void {
+				parentApplication.lan = new ObjectProxy(_words);
+			}
+			
 			private function _readLanguage(e:Event):void {
 				for each (var line:String in e.target.data.split("\n")) {
 					var match:Array;

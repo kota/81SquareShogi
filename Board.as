@@ -417,15 +417,22 @@ package  {
 		if (!actual || onListen){
 			if (_last_to_square != null) _last_to_square.setStyle('backgroundColor', undefined);
 			if (_last_from_square != null) _last_from_square.setStyle('backgroundColor', undefined);
-			if (_selected_square != null) _selected_square.showPiece();
 			setPosition(_position);
+			if (_selected_square != null) _selected_square.showPiece();
 			_last_to_square = _cells[mv.to.y][mv.to.x];
 			_last_to_square.setStyle('backgroundColor', '0xFF5555');
 			if (mv.from.x < Kyokumen.HAND) {
 				_last_from_square = _cells[mv.from.y][mv.from.x];
 				_last_from_square.setStyle('backgroundColor', '0xFF5555'); 
 			}
+			if (contains(_hoverImage)) removeChild(_hoverImage);
+			_from = null;
 		}
+//		if (_pieceGrab) {
+//			_pieceGrab = false;
+//			if (_selected_square != null) _selected_square.setStyle('backgroundColor', undefined);
+//			if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+//		}
         if (piece_sound_play && withSound) {
 			if (isSoundDouble) {
 				_sound_piece_double.play();
@@ -433,10 +440,6 @@ package  {
 				_sound_piece.play();
 			}
 		}
-//		if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
-//		_pieceGrab = false;
-		if (contains(_hoverImage)) removeChild(_hoverImage);
-		_from = null;
 	  }
 
     public function setMoveCallback(callback:Function):void{
@@ -945,7 +948,7 @@ package  {
 				_pieceGrab = false;
 				if (_position.mustPromote(_from, _to)) {
 					if (!_client_timeout) {
-						timers[0].suspend();
+						if (isPlayer) timers[0].suspend();
 						_move_sent = true;
 						_playerMoveCallback(_from, _to, true);
 					}
@@ -967,7 +970,7 @@ package  {
 			  if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
 			  _pieceGrab = false;
 			  if (!_client_timeout){
-				  timers[0].suspend();
+				  if (isPlayer) timers[0].suspend();
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
 			  }
@@ -1156,6 +1159,7 @@ package  {
 				  mvtmp = actual ? _position.generateMovementFromString(kifu_list[i].moveStr) : _position.generateMovementFromString(kifu_list_self[i].moveStr);
 				  if (!mvtmp) continue;
 				  mv = mvtmp;
+				  if (i == n) _position.generateWesternNotationFromMovement(mv);
 			      _position.move(mv);
 			  }
 			  if (mv) {

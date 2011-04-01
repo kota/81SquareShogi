@@ -47,7 +47,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/03/12";
+	public const VERSION:String = "ver.2011/03/20";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	private var _server: String;
@@ -171,6 +171,7 @@
 	  board.setGrabPieceCallback(_grabPiece);
 	  _api = new ApiClient();
 	  if (this.parameters["kid"]) {
+		languageSelector.readDefault()
 		login_name = "guest";
 		mainViewStack.selectedIndex = 2;
 		_viewerAlone = true;
@@ -279,7 +280,7 @@
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
 	  _refresh();
 	  if (_infoFetcher.initMessage != null) {
-		_writeUserMessage(_infoFetcher.initMessage + "\n\n", 1, "#008800");
+		_writeUserMessage(_infoFetcher.initMessage + "\n", 1, "#008800");
 		if (VERSION != _infoFetcher.newestVer) _writeUserMessage("CAUTION: This version is old! The newest is " + _infoFetcher.newestVer + ". Please reload!\n", 1, "#FF0000");
 	  } else {
 		  _writeUserMessage("Couldn't load initial condition file. Please refresh.\n", 1, "#008800");
@@ -773,8 +774,9 @@
 	  }
       board.startGame(_initPositionStr, _client.myTurn, _player_infos,match[3], match[4]);
 	  _client.watchers(_game_name);
-      userMessage2.htmlText = "";
-	  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
+	  userMessage2.htmlText = "";
+	  _writeUserMessage(_infoFetcher.gameMessage + "\n", 2, "#008800");
+	  if (match[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + match[2].substr(match[2].length - 2, 2) + ".jpg", 2);
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Black " + (board.gameType == "hc" ? "(Handicap taker).\n" : "(Sente).\n"), 2, "#008800");
       } else {
@@ -902,7 +904,7 @@
 	  
 	  _client.watchers(_game_name);
 	  userMessage2.htmlText = "";
-	  _writeUserMessage(_infoFetcher.gameMessage + "\n\n", 2, "#008800");
+	  _writeUserMessage(_infoFetcher.gameMessage + "\n", 2, "#008800");
 	  _writeUserMessage("Reconnected to game.\n", 2, "#008800", true);
 	  startButton.enabled = false;
       stopButton.enabled = false;
@@ -1781,14 +1783,11 @@
 //			 board.my_turn = Kyokumen.GOTE;
 		 }
 		 _game_name = _watch_game.id;
-		  if (_game_name.split("+")[1].match(/^r_/)) {
-			  board.gameType = "r";
-		  } else if (_game_name.split("+")[1].match(/^nr_/)) {
-			  board.gameType = "nr";
-		  } else if (_game_name.split("+")[1].match(/^hc/)) {
+		 var game_info:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+		  if (game_info[1].match(/^hc/)) {
 			  board.gameType = "hc";
-		  } else if (_game_name.split("+")[1].match(/^mini_/)) {
-			  board.gameType = "mini";
+		  } else {
+			  board.gameType = game_info[1];
 		  }
 		 if (board.gameType == "hc" || String(_watch_game.blackRating).match(/^\*/)) {
 			 board.superior = Kyokumen.GOTE;
@@ -1811,6 +1810,7 @@
 		  } else {
 			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see watcher's chat even during game.\n", 2, "#008800", true);
 		  }
+		  if (game_info[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + game_info[2].substr(game_info[2].length - 2, 2) + ".jpg", 2);
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
@@ -2133,6 +2133,7 @@
 	
   //------------------------------------------------------------------------------------------------------------------------ KIFU
   private function _toggleListen():void {
+	  board.cancelSquareSelect();
 	  if (radioKifuListen.selected) {
 		  board.onListen = true;
 		  sidePanel.setStyle('borderColor', undefined);
@@ -2432,7 +2433,7 @@
 		greetButton.visible = false;
 		rematchButton.visible = false;
 		shareKifuButton2.visible = true;
-		userMessage2.text = "";
+		userMessage2.htmlText = "";
 		_writeUserMessage("81-Dojo Kifu Viewer\n", 2, "#008800", true);
 		if (_viewerAlone) {
 			closeButton.enabled = false;
@@ -2705,6 +2706,17 @@
 				break;		
 		}
     }
+	
+	private function _imgUserMessage(src:String, n:int):void {
+		switch (n) {
+			case 1:
+				userMessage1.htmlText += "<img src=\"" + src + "\" align=\"right\">";
+				break;
+			case 2:
+				userMessage2.htmlText += "<img src=\"" + src + "\" align=\"right\">";
+				break;
+		}
+	}
 	
     private function _writePmLog(name:String, message:String, colorCode:String, bold:Boolean = false):void {
 		var match:Array;

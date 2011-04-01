@@ -42,6 +42,7 @@ package  {
 				vbox.addChild(label);
 				var hbox:HBox = new HBox();
 				hbox.width = 90;
+				hbox.horizontalScrollPolicy = 'off';
 				hbox.setStyle('borderStyle', 'solid');
 				hbox.setStyle('borderColor', 0x555555);
 				hbox.setStyle('horizontalAlign', 'center');
@@ -76,9 +77,11 @@ package  {
 					 hours += 1;
 				 }
 				 if (hours < 0) {
-					 _clocks[i].text = days[(UTCDay - 1) % 7] + " " + (hours + 24 + 100).toString().substring(1) + ":" + (minutes + 100).toString().substring(1);
+					 hours += 24;
+					 _clocks[i].text = days[(UTCDay - 1 + 7) % 7] + " " + (hours + 100).toString().substring(1) + ":" + (minutes + 100).toString().substring(1);
 				 } else if (hours >= 24) {
-					 _clocks[i].text = days[(UTCDay + 1) % 7] + " " + (hours - 24 + 100).toString().substring(1) + ":" + (minutes + 100).toString().substring(1);
+					 hours -= 24;
+					 _clocks[i].text = days[(UTCDay + 1 + 7) % 7] + " " + (hours + 100).toString().substring(1) + ":" + (minutes + 100).toString().substring(1);
 				 } else {
 					 _clocks[i].text = days[UTCDay] + " " + (hours + 100).toString().substring(1) + ":" + (minutes + 100).toString().substring(1);
 				 }
