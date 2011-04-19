@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
 	<mx:Style>
+		global{ 
+		 layoutDirection: "ltr";
+		}
 		Alert {
 			fontSize: 13px;
 			color: Black;
@@ -11,6 +14,11 @@
 			font-size: 13px;
 			font-weight: "bold";
 			backgroundColor: "0xFFDD00";
+		}
+		.header81 {
+			fontFamily: "Meiryo UI";
+			leading: 0;
+			font-weight: "bold";
 		}
 	</mx:Style>
 	<mx:Script>
@@ -1295,7 +1303,7 @@
 		var message:String = match[2];
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
 		if (_infoFetcher.banned.indexOf(name.toLowerCase()) >= 0) return;
-		if (_pmAutoOpen) _openPlayerInfo(_findPlayerFromList(name));
+		if (_pmAutoOpen && !_playerInfoWindows[name]) _openPlayerInfo(_findPlayerFromList(name));
 		_writePmLog(name, message, "#FF0000");
 		if (_playerInfoWindows[name]) {
 			_playerInfoWindows[name].maximize();
@@ -1371,7 +1379,7 @@
 	}
 	
 	private function _handleDisconnect(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex != 2) return;
+//		if (mainViewStack.selectedIndex != 2) return;
 		if (board.playerInfos[0] == null) return;
 		if (e.message == board.playerInfos[0].name) {
 			_writeUserMessage(e.message + " disconnected.\n", 2, "#000000", true);
@@ -2999,7 +3007,7 @@
 ================================================================== -->
 	<mx:HBox paddingTop="10" paddingLeft="10">
     <mx:VBox fontSize="11">
-      <mx:Panel id="userListPanel" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
+      <mx:Panel id="userListPanel" titleStyleName="header81" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_refresh();"/>
 		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
@@ -3017,22 +3025,22 @@
 		<mx:VDividedBox liveDragging="true">
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="titleName" headerText="{lan.title}" width="53" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
-			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
-			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="49" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" width="53" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="{lan.rate}" width="49" paddingRight="3" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="360" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn itemRenderer="{waiterListNameRenderer}" headerText="{lan.waiter}" width="120" paddingLeft="2" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{waiterListNameRenderer}" headerText="{lan.waiter}" width="120" paddingLeft="2" sortable="false" />
 <!--			  <mx:DataGridColumn dataField="country3" headerText="{lan.country_short}" width="30" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="country" /> -->
-			  <mx:DataGridColumn dataField="rating" headerText="{lan.rate}" width="35" paddingRight="3" textAlign="right" sortable="false" />
-			  <mx:DataGridColumn dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" showDataTips="true" />
-			  <mx:DataGridColumn dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="handicap" headerText="{lan.handicap}" width="60" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="{lan.rate}" width="35" paddingRight="3" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" showDataTips="true" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="rated" headerText="R?" width="25" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="handicap" headerText="{lan.handicap}" width="60" paddingLeft="0" textAlign="center" />
 			 </mx:columns>
 			</mx:DataGrid>
 		</mx:VDividedBox>
@@ -3040,17 +3048,17 @@
 			<mx:VDividedBox dividerRelease="userMessage1.callLater(_scrollDown1);" liveDragging="true">
 				<mx:DataGrid id="gameListGrid" width="570" height="220" headerHeight="21" change="_gameSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_watchDialog();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 				 <mx:columns>
-				  <mx:DataGridColumn dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
 <!--				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
-				  <mx:DataGridColumn itemRenderer="{gameListBlackRenderer}" headerText="{lan.black}(▲)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
-				  <mx:DataGridColumn itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{gameListBlackRenderer}" headerText="{lan.black}(▲)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
-				  <mx:DataGridColumn dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="78" paddingLeft="3" showDataTips="true" />
-				  <mx:DataGridColumn dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
-				  <mx:DataGridColumn dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
-				  <mx:DataGridColumn dataField="opening" headerText="{lan.opening_short}" fontSize="12" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="78" paddingLeft="3" showDataTips="true" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
+				  <mx:DataGridColumn fontFamily="Meiryo UI" dataField="opening" headerText="{lan.opening_short}" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
 				 </mx:columns>
 				</mx:DataGrid>
 				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" />

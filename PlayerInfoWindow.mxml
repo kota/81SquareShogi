@@ -113,6 +113,7 @@
 			  if (this.height == MINIMIZED_HEIGHT) {
 				  this.height = undefined;
 				  this.title = "Player Info";
+				  this.setStyle('borderColor', undefined);
 				  this.setStyle('borderAlpha', undefined);
 			  }
 		  }

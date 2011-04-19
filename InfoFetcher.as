@@ -34,7 +34,7 @@
 		public static var country_names3:Array;
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA');
 		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO');
-		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '暗黒王戦', '香車戦', 'LATINO');
+		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', 'LATINO');
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String = "";

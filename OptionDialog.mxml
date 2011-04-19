@@ -82,7 +82,7 @@
 			</mx:HBox>
 			<mx:Label text="Arrow Drawing" fontWeight="bold" paddingLeft="10" />
 			<mx:CheckBox label="Accept arrows from others" id="acceptArrowsCheckBox" paddingLeft="30" />
-			<mx:HBox paddingLeft="30" verticalAlign="center">
+			<mx:HBox paddingLeft="30" verticalAlign="middle">
 				<mx:Label text = "Your Color"/>
 				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" change="drawArrow();" />
 				<mx:Label text="" paddingRight="0" />
