@@ -10,6 +10,7 @@ package {
     private var _coord_y:int;
     private var _img:Image;
 	private var _stayTimer:Timer = new Timer(150, 1);
+	private var _dead:Boolean = false;
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
@@ -76,6 +77,14 @@ package {
 	
 	public function get source():Object {
 		return _img.source;
+	}
+
+    public function set dead(dead:Boolean):void{
+      _dead = dead;
+    }
+	
+	public function get dead():Boolean {
+		return _dead;
 	}
 	
   }

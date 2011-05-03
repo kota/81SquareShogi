@@ -34,7 +34,7 @@
 		public static var country_names3:Array;
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA');
 		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO');
-		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', 'LATINO');
+		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦');
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String = "";
@@ -186,8 +186,10 @@
 				return "Three Pawns Handicap (Non-rated)";
 			case "hcnaked":
 				return "Naked King Handicap (Non-rated)";
-			case "mini":
+			case "vamini":
 				return "Mini Shogi";
+			case "va5656":
+				return "Goro-Goro Shogi";
 			}
 			return "";
 		}
@@ -225,7 +227,10 @@
 			case "hcnaked":
 				return "Naked King";
 			case "mini":
+			case "vamini":
 				return "Mini Shogi";
+			case "va5656":
+				return "Goro-Goro";
 			}
 			return "";
 		}
@@ -258,8 +263,10 @@
 				return "歩三兵";
 			case "hcnaked":
 				return "裸玉";
-			case "mini":
+			case "vamini":
 				return "5五将棋";
+			case "va5656":
+				return "ゴロゴロ";
 			}
 			return "";
 		}

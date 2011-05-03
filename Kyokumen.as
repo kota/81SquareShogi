@@ -18,6 +18,8 @@ package  {
 		private var _superior:int;
 		private var _impasseStatus:Array;
 		private var _last_to:Point;
+		private var _promoteY1:int;
+		private var _promoteY2:int;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
     private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
@@ -54,8 +56,10 @@ package  {
     public static const HAND_KY:int = HAND+6;
     public static const HAND_FU:int = HAND+7;
 
-		public function Kyokumen(kyokumen_str:String):void {
+		public function Kyokumen(kyokumen_str:String, promoteY1:int = 2, promoteY2:int = 6):void {
 			initialPositionStr = kyokumen_str;
+			_promoteY1 = promoteY1;
+			_promoteY2 = promoteY2;
 			this._turn = SENTE;
 			this._ban = new Array(9);
 			for (var i:int; i < 9; i++ ) {
@@ -207,11 +211,11 @@ package  {
 			if(koma.isPromoted()) return false;
 			if (koma.type == Koma.OU || koma.type == Koma.KI) return false;
 			if(koma.ownerPlayer == SENTE){
-				if(from.y <= 2 || to.y <= 2){
+				if(from.y <= _promoteY1 || to.y <= _promoteY1){
 					return true;
 				}
 			} else {
-				if(from.y >= 6 || to.y >= 6){
+				if(from.y >= _promoteY2 || to.y >= _promoteY2){
 					return true;
 				}
 			}
@@ -427,9 +431,9 @@ package  {
 				for (var x:int = 0; x < 9; x++) {
 					if (_ban[x][y]) {
 						total_points += koma_impasse_points[_ban[x][y].type];
-						if (y <= 2) {
+						if (y <= _promoteY1) {
 							turn = SENTE;
-						} else if (y >= 6) {
+						} else if (y >= _promoteY2) {
 							turn = GOTE;
 						} else {
 							continue;
@@ -455,9 +459,9 @@ package  {
 //			var n:int = 0;
 //			for (var y:int = 0; y < 9; y++) {
 //				if (turn == SENTE) {
-//					if (y > 2) continue;
+//					if (y > _promoteY1) continue;
 //				} else {
-//					if (y < 6) continue;
+//					if (y < _promoteY2) continue;
 //				}
 //				for (var x:int = 0; x < 9; x++) {
 //						if (_ban[x][y] && _ban[x][y].ownerPlayer == turn) n += koma_impasse_points[_ban[x][y].type];

@@ -314,6 +314,16 @@ package  {
             square = new Square(10-(9-j),10-(i+1));
             _cells[8-i][8-j] = square;
           }
+		  if (gameType.match(/mini$/)) {
+			  if (i <= 1 || i >= 7 || j <= 1 || j >= 7) square.dead = true;
+		  } else if (gameType == "va5656") {
+			  if (i == 0 || i == 8 || j <= 1 || j >= 7) square.dead = true;
+			  if (_my_turn == Kyokumen.SENTE) {
+				if (i == 1) square.dead = true;
+			  } else {
+				if (i == 7) square.dead = true;
+			  }
+		  }
           square.x = BAN_LEFT_MARGIN + BAN_EDGE_PADDING + j * KOMA_WIDTH + 1;
           square.y = BAN_TOP_MARGIN + BAN_EDGE_PADDING + i * KOMA_HEIGHT + 1;
 		  square.addEventListener(MouseEvent.MOUSE_DOWN, _squareMouseDownHandler);
@@ -336,6 +346,16 @@ package  {
 	  study_list = new Array();
 	}
 
+	private function _initializeKyokumen(str:String):void {
+	  if (gameType == "va5656") {
+		  _position = new Kyokumen(str, 3, 6);
+		  _last_pos = new Kyokumen(str, 3, 6);
+	  } else {
+		_position = new Kyokumen(str);
+		_last_pos = new Kyokumen(str);
+	  }
+	}
+
     public function setPosition(pos:Kyokumen):void {
       _position = pos
       for(var y:int=0;y<9;y++){
@@ -349,9 +369,10 @@ package  {
           } else {
             _cells[y][x].source = emptyImage;
           }
-		  if (gameType == "mini") {
-			if (x <= 1 || x >=7 || y <= 1 || y >= 7) _cells[y][x].source = deadSquare;
-		  }
+		  if (_cells[y][x].dead) _cells[y][x].source = deadSquare;
+//		  if (gameType == "mini") {
+//			if (x <= 1 || x >=7 || y <= 1 || y >= 7) _cells[y][x].source = deadSquare;
+//		  }
         }
       }
       handBoxes[0].removeAllChildren();
@@ -478,8 +499,7 @@ package  {
 	  if (_player_infos[_my_turn].game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
       resetBoard();
 	  initializeKifu();
-      _position = new Kyokumen(kyokumen_str);
-	  _last_pos = new Kyokumen(kyokumen_str);
+      _initializeKyokumen(kyokumen_str);
       setPosition(_position);
 	  _arrangeInfos();
 	  timers[0].reset(time_total,time_byoyomi);
@@ -734,8 +754,7 @@ package  {
       if(kyokumen_str != ""){
         resetBoard();
 		initializeKifu();
-		_position = new Kyokumen(kyokumen_str);
-		_last_pos = new Kyokumen(kyokumen_str);
+		_initializeKyokumen(kyokumen_str);
         setPosition(_position);
       }
 	  rematch[0] = false;
@@ -846,8 +865,7 @@ package  {
 		trace(kyokumen_str);
         resetBoard();
 		initializeKifu();
-		_position = new Kyokumen(kyokumen_str);
-		_last_pos = new Kyokumen(kyokumen_str);
+		_initializeKyokumen(kyokumen_str);
         setPosition(_position);
       }
 
@@ -913,9 +931,10 @@ package  {
       if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
-		if (gameType == "mini") {
-			if (x <= 2 || x >= 8 || y <= 2 || y >= 8) return;
-		}
+		if (e.currentTarget.dead) return;
+//		if (gameType == "mini") {
+//			if (x <= 2 || x >= 8 || y <= 2 || y >= 8) return;
+//		}
         if(_from == null){
 		  if (_last_from_square != null) {
 			  _last_from_square.setStyle('backgroundColor', undefined);
@@ -962,7 +981,7 @@ package  {
 					alt.x = mouseX - alt.width / 2 + 5;
 					alt.y = mouseY - 90;
 				}
-            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^(nr|mini)_/) || ((_player_infos[_my_turn].game_name.match(/^hc/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
+            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^(nr)_/) || ((_player_infos[_my_turn].game_name.match(/^(hc|va)/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
 					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
 					cancelSquareSelect();
 					_to = null;

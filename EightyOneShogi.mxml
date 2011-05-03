@@ -55,10 +55,10 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/04/01";
+	public const VERSION:String = "ver.2011/05/03";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
-	private var _server: String;
+	public var serverName: String;
 	[Bindable]
 	public var lan:ObjectProxy;
 	private var _so:SharedObject = SharedObject.getLocal("81dojo");
@@ -458,7 +458,7 @@
           break;
         }
       }
-	  userListPanel.title = _server + " : " + lan.lobby + " (" + _user_list.length + " players)";
+	  userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
@@ -769,8 +769,8 @@
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
-	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
-		  board.gameType = "mini";
+	  } else if (_game_name.split("+")[1].match(/^(va.+?)_/)) {
+		  board.gameType = _game_name.split("+")[1].match(/^(va.+?)_/)[1];
 	  }
 	  if (board.gameType == "r") {
 		  allowWatcherChatCheckbox.visible = false;
@@ -866,8 +866,8 @@
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
-	  } else if (_game_name.split("+")[1].match(/^mini_/)) {
-		  board.gameType = "mini";
+	  } else if (_game_name.split("+")[1].match(/^(va.+?)_/)) {
+		  board.gameType = _game_name.split("+")[1].match(/^(va.+?)_/)[1];
 	  }
 	  if (board.gameType == "r") {
 		  allowWatcherChatCheckbox.visible = false;
@@ -1500,8 +1500,8 @@
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
 	  _client.setServer(serverObj.host, parseInt(serverObj.port));
-	  _server = serverObj.name;
-	  if (_server == "MOON") _api.setHostToLocal();
+	  serverName = serverObj.name;
+	  if (serverName == "MOON") _api.setHostToLocal();
       _client.connect();
     }
 	
@@ -2365,7 +2365,7 @@
 				hc = "R";
 			} else if (match[1] == "nr") {
 				hc = "NR";
-			} else if (match[1].match(/^(hc|mini)/)) {
+			} else if (match[1].match(/^(hc|va|mini)/)) {
 				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
 			}
 			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
@@ -2449,8 +2449,8 @@
 		  board.gameType = "nr";
 		} else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
-		} else if (_game_name.split("+")[1].match(/^mini_/)) {
-		  board.gameType = "mini";
+		} else if (_game_name.split("+")[1].match(/^(mini|va.+?)_/)) {
+		  board.gameType = _game_name.split("+")[1].match(/^(mini|va.+?)_/)[1];
 		}
 		allowWatcherChatCheckbox.visible = false;
 		board.startView(e.target.kifuContents);
