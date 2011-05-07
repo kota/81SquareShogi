@@ -1554,7 +1554,7 @@
 		_newGameWindow.x = mouseX;
 		_newGameWindow.y = mouseY + 50;
         title = "Create new game";
-		if (_so.data.rule_base) {
+		if (_so.data.rule_base != null) {
 			timeSetting.selectedValue = _so.data.rule_base;
 		} else {
 			timeSetting.selectedValue = 1;
@@ -2956,7 +2956,7 @@
     <mx:Image id="titleBanner" source="{DIRECTORY}images/81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
-      <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
+      <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
 	  <mx:HBox verticalAlign="middle" horizontalGap="35" >
 		  <mx:Form paddingBottom="0">
 			<mx:FormItem label="{lan.language}" paddingTop="-2">
@@ -2987,11 +2987,11 @@
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
       <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
-      <mx:Label paddingTop="5" text="Chief Programmer: Kota" fontSize="13" />
-	  <mx:HBox>
+      <mx:Label paddingTop="5" text="(c) Chief Programmer: Kota" fontSize="14" />
+	  <mx:HBox paddingTop="-3">
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/>
-		  <mx:Label text="Assistant: Hidetchi"/>
+		  <mx:Label text="(c) Administrative Co-programmer: Hidetchi" fontSize="12"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
 	  </mx:HBox>
