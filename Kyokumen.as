@@ -21,11 +21,11 @@ package  {
 		private var _promoteY1:int;
 		private var _promoteY2:int;
 
-    public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
-    private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
-    private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
-	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
-    private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
+    public static const koma_names:Array = new Array('OU', 'ZG', 'ZE', 'ZC', '', '', '', 'TO');
+    private static const koma_western_names:Array = new Array('L','G','E','C','','','','H');
+    private static const koma_japanese_names:Array = new Array('ら', 'ひ', 'ゾ', 'キ', '', '', '', 'ニ');
+	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 0, 0, 0, 1);
+    private static const file_names:Array = new Array('A','B','C','','','','','','');
     private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
     private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
 	private static const ALL_POINTS:int = 2 * (koma_impasse_points[0] + 27);
@@ -56,7 +56,7 @@ package  {
     public static const HAND_KY:int = HAND+6;
     public static const HAND_FU:int = HAND+7;
 
-		public function Kyokumen(kyokumen_str:String, promoteY1:int = 2, promoteY2:int = 6):void {
+		public function Kyokumen(kyokumen_str:String, promoteY1:int = 0, promoteY2:int = 3):void {
 			initialPositionStr = kyokumen_str;
 			_promoteY1 = promoteY1;
 			_promoteY2 = promoteY2;
@@ -139,7 +139,7 @@ package  {
 		}
 		for (y = 0; y < 2; y++) {
 			line = "P" + (y == SENTE ? "+" : "-");
-			for (x = 0; x < 8; x++) {
+			for (x = 0; x < 4; x++) {
 				if (_komadai[y].getNumOfKoma(x) > 0) {
 					for (var i:int = 0; i < _komadai[y].getNumOfKoma(x); i++) {
 						line += "00" + koma_names[x];
@@ -209,7 +209,7 @@ package  {
 			from = translateHumanCoordinates(from);
 			koma = getKomaAt(from);
 			if(koma.isPromoted()) return false;
-			if (koma.type == Koma.OU || koma.type == Koma.KI) return false;
+			if (koma.type != Koma.ZC) return false;
 			if(koma.ownerPlayer == SENTE){
 				if(from.y <= _promoteY1 || to.y <= _promoteY1){
 					return true;
@@ -226,28 +226,10 @@ package  {
 			from = translateHumanCoordinates(from);
 			to = translateHumanCoordinates(to);
 			var koma:Koma = getKomaAt(from);
-			if (koma.type == Koma.FU || koma.type == Koma.KY) {
-				if (koma.ownerPlayer == SENTE && to.y == 0) return true;
-				if (koma.ownerPlayer == GOTE && to.y == 8) return true;
-			} else if (koma.type == Koma.KE) {
-				if (koma.ownerPlayer == SENTE && to.y <= 1) return true;
-				if (koma.ownerPlayer == GOTE && to.y >= 7) return true;
-			}
 			return false;
 		}
 		
 		public function isNifu(from:Point, to:Point):Boolean {
-			if (from.x == HAND_FU) {
-				to = translateHumanCoordinates(to);
-				for (var i:int = 0; i < 9; i++) {
-					var koma:Koma;
-					if ((koma = getKomaAt(new Point(to.x, i)))) {
-						if (koma.type == Koma.FU && koma.ownerPlayer == _turn) {
-							return true;
-						}
-					}
-				}
-			}
 			return false;
 		}
 		
@@ -264,77 +246,26 @@ package  {
 				case Koma.OU+Koma.PROMOTE:
 	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        		break;
-	        	case Koma.KI:
-	        	case Koma.GI+Koma.PROMOTE:
-	        	case Koma.KE+Koma.PROMOTE:
-	        	case Koma.KY+Koma.PROMOTE:
-	        	case Koma.FU+Koma.PROMOTE:
+	        	case Koma.ZC+Koma.PROMOTE:
 	        		if (Math.abs(dx) == 1 && dy == 1) return true;
 	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        		break;
-	        	case Koma.GI:
-	        		if (Math.abs(dx) == 1 && dy == 0) return true;
-	        		if (dx == 0 && dy == 1) return true;
-	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        	case Koma.ZG:
+	        		if (Math.abs(dx) == 1 && dy == 0) return false;
+	        		if (dx == 0 && Math.abs(dy) == 1) return false;
+	        		break;
+	        	case Koma.ZE:
+	        		if (Math.abs(dx) == 1 && Math.abs(dy) == 1) return false;
 					break;
-				case Koma.HI+Koma.PROMOTE:
-					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-	        	case Koma.HI:
-					if (dx == 0) {
-						if (Math.abs(dy) == 1) return false;
-						for (var i:int = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
-							if (getKomaAt(new Point(from.x, i))) return true;
-						}
-						return false;
-					} else if (dy == 0) {
-						if (Math.abs(dx) == 1) return false;
-						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
-							if (getKomaAt(new Point(i, from.y))) return true;
-						}
-						return false;
-					}
-	        		break;
-				case Koma.KA + Koma.PROMOTE:
-					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-	        	case Koma.KA:
-	        		if (Math.abs(dx) == Math.abs(dy)) {
-						if (Math.abs(dx) == 1) return false;
-						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
-							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
-						}
-						return false;
-					}
-	        		break;
-	        	case Koma.FU:
+	        	case Koma.ZC:
 	        		if (dx == 0 && dy == -1) return false;
 	        		break;
-	        	case Koma.KY:
-	        		if (dx == 0 && dy < 0) {
-						if (dy == -1) return false;
-						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
-							if (getKomaAt(new Point(from.x, i))) return true;
-						}
-						return false;
-					}
-	        		break;
-	        	case Koma.KE:
-	        		if (Math.abs(dx) == 1 && dy == -2) return false;
 				default:
 	        }
 	        return true;
 		}
 		
 		public function isSoundDouble(to:Point):Boolean {
-			var koma:Koma;
-			if (getKomaAt(to).ownerPlayer == SENTE && to.y <= 7) {
-				if ((koma = getKomaAt(new Point(to.x, to.y + 1)))) {
-					if (koma.ownerPlayer == SENTE) return true;
-				}
-			} else if (getKomaAt(to).ownerPlayer == GOTE && to.y >= 1) {
-				if ((koma = getKomaAt(new Point(to.x, to.y - 1)))) {
-					if (koma.ownerPlayer == GOTE) return true;
-				}
-			}
 			return false;
 		}
 
@@ -455,24 +386,6 @@ package  {
 			}
 		}
 		
-//		public function calcImpasse(turn:int):int {
-//			var n:int = 0;
-//			for (var y:int = 0; y < 9; y++) {
-//				if (turn == SENTE) {
-//					if (y > _promoteY1) continue;
-//				} else {
-//					if (y < _promoteY2) continue;
-//				}
-//				for (var x:int = 0; x < 9; x++) {
-//						if (_ban[x][y] && _ban[x][y].ownerPlayer == turn) n += koma_impasse_points[_ban[x][y].type];
-//				}
-//			}
-//			for (var i:int = 0; i < 8; i++) {
-//				n += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
-//			}
-//			return n;
-//		}
-		
 	public function generateWesternNotationFromMovement(mv:Movement):String {
 	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
 	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
@@ -485,14 +398,14 @@ package  {
 	  	notationStr += "-";
 	  }
 	  if (mv.to.x != _last_to.x || mv.to.y != _last_to.y) {
-		notationStr += 9 - mv.to.x
-		notationStr += rank_western_names[mv.to.y];
+		notationStr += file_names[mv.to.x];
+		notationStr += mv.to.y + 1;
 	  }
 	  _last_to = mv.to;
 	  if (mv.promote) {
 	  	notationStr += "+";
-	  } else if (mv.from.x != HAND && !mv.koma.isPromoted() && mv.koma.type != Koma.OU && mv.koma.type != Koma.KI){
-	  	if ( (1-mv.turn)*mv.from.y + mv.turn*(8-mv.from.y) <= 2 || (1-mv.turn)*mv.to.y + mv.turn*(8-mv.to.y) <=2 ) notationStr += "=";
+	  } else if (mv.from.x != HAND && !mv.koma.isPromoted() && mv.koma.type == Koma.ZC){
+	  	if ( mv.turn == Kyokumen.SENTE && mv.to.y == 0 || mv.turn == Kyokumen.GOTE && mv.to.y == 3) notationStr += "=";
 	  } 
 	  do {
 		  notationStr += " ";

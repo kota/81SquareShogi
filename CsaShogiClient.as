@@ -109,7 +109,7 @@ package{
 
     public function waitForGame(total:int=1500,byoyomi:int=30,handicap:String="r",tournament:String=""):void {
       _current_state = STATE_GAME_WAITING;
-	  if (handicap.match(/^hc/)) {
+	  if (handicap.match(/^(hc)/)) {
 		  _waiting_gamename = handicap + "_" + _login_name + tournament + "-" + total.toString() + "-" + byoyomi.toString() + " -";
 	  } else if (Math.round(Math.random()) == 1) {
 		  _waiting_gamename = handicap + "_" + _login_name + tournament + "-" + total.toString() + "-" + byoyomi.toString() + " +";
@@ -416,7 +416,7 @@ package{
             case STATE_START_WAITING:
               break;
             case STATE_GAME:
-              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/))){
+              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|CATCH|TRY)/))){
                 _buffer_response(GAME_END,line);
                 if(match[1] == "WIN" || match[1] == "LOSE" || match[1] == "DRAW"){
                   trace("state change to connected");

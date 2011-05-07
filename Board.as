@@ -29,27 +29,27 @@ package  {
 
   public class Board extends Canvas {
     
-    public static const BAN_WIDTH:int = 410;
-    public static const BAN_HEIGHT:int = 454;
-    public static const BAN_LEFT_MARGIN:int = 185;
-	public static const BAN_TOP_MARGIN:int = 10;
-	public static const BAN_EDGE_PADDING:int = 10;
-    public static const KOMA_WIDTH:int = 43;
-    public static const KOMA_HEIGHT:int = 48;
-    public static const KOMADAI_WIDTH:int = 170;
-    public static const KOMADAI_HEIGHT:int = 200;
-	public static const MY_HAND_X:int = BAN_LEFT_MARGIN + BAN_WIDTH + 5;
-	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT;
-	public static const HIS_HAND_X:int = 10;
-	public static const HIS_HAND_Y:int = 10;
+    public static const BAN_WIDTH:int = 300;
+    public static const BAN_HEIGHT:int = 400;
+    public static const BAN_LEFT_MARGIN:int = 200;
+	public static const BAN_TOP_MARGIN:int = 130;
+	public static const BAN_EDGE_PADDING:int = 0;
+    public static const KOMA_WIDTH:int = 100;
+    public static const KOMA_HEIGHT:int = 100;
+    public static const KOMADAI_WIDTH:int = 700;
+    public static const KOMADAI_HEIGHT:int = 100;
+	public static const MY_HAND_X:int = 0;
+	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT + (BAN_TOP_MARGIN - KOMA_HEIGHT)/2;
+	public static const HIS_HAND_X:int = 0;
+	public static const HIS_HAND_Y:int = (BAN_TOP_MARGIN - KOMA_HEIGHT)/2;
 	public static const MAX_ARROWS:int = 8;
 	public static const ARROWS_SELF:int = 0;
 	public static const ARROWS_PUBLIC:int = 1;
 	public static const HOVER:String = "hover";
     
     [Bindable]
-    [Embed(source = "/images/ban_kaya_a.png")]
-    private var board_back:Class
+//    [Embed(source = "/images/ban_kaya_a.png")]
+//    private var board_back:Class
     [Bindable]
     [Embed(source = "/images/masu_dot.png")]
     private var board_masu:Class
@@ -61,13 +61,14 @@ package  {
     private var board_scoord_e:Class
     [Embed(source = "/images/Gcoord_e.png")]
     private var board_gcoord_e:Class
-    [Embed(source = "/images/Shand.png")]
-    private var board_shand:Class
-    [Embed(source = "/images/Ghand.png")]
-    private var board_ghand:Class
-    [Embed(source = "/images/bg_tatami.png")]
-	private var board_bg:Class
-    
+//    [Embed(source = "/images/Shand.png")]
+//    private var board_shand:Class
+//    [Embed(source = "/images/Ghand.png")]
+//    private var board_ghand:Class
+    [Embed(source = "/images/dobutsu_ban_s.png")]
+	private var board_bg_s:Class
+    [Embed(source = "/images/dobutsu_ban_g.png")]
+	private var board_bg_g:Class
     [Embed(source = "/images/white.png")]
     private var white:Class
     [Embed(source = "/images/white_r.png")]
@@ -161,7 +162,7 @@ package  {
 	public var since_last_move:int = 0;
 	public var studyOn:Boolean = false;
 	public var rematch:Array = new Array(2);
-	public var sendHover:Boolean = false;
+	public var sendHover:Boolean = true;
 
 	private var _time_sente:int;
 	private var _time_gote:int;
@@ -170,44 +171,44 @@ package  {
     //TODO Define the layout with mxml.
     public function Board() {
       super();
-      _cells = new Array(9);
-      for (var i:int; i < 9; i++ ) {
-        _cells[i] = new Array(9);
+      _cells = new Array(4);
+      for (var i:int; i < 4; i++ ) {
+        _cells[i] = new Array(3);
       }
       
       this.width = BAN_WIDTH;
       this.height = BAN_HEIGHT;
-      
-      _board_bg_image.source = board_bg;
-      _board_bg_image.setStyle('borderStyle','solid');
-      _board_bg_image.setStyle('borderColor', 0x888888);
-      
-      _board_back_image.width = BAN_WIDTH;
-      _board_back_image.height = BAN_HEIGHT;
-      _board_back_image.source = board_back;
-      _board_back_image.x = BAN_LEFT_MARGIN;
-      _board_back_image.y = BAN_TOP_MARGIN;
-      
-      _board_masu_image.source = board_masu;
-      _board_masu_image.width = BAN_WIDTH;
-      _board_masu_image.height = BAN_HEIGHT;
 
-      _board_coord_image.width = BAN_WIDTH;
-      _board_coord_image.height = BAN_HEIGHT;
+//      _board_bg_image.source = board_bg;
+//      _board_bg_image.setStyle('borderStyle','solid');
+//      _board_bg_image.setStyle('borderColor', 0x888888);
       
-      _board_shand_image.source = board_shand;
-      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
-      _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
-      _board_ghand_image.source = board_ghand;
-      _board_ghand_image.x = 10
-      _board_ghand_image.y = 10
+//      _board_back_image.width = _board_bg_image.width;
+//      _board_back_image.height = _board_bg_image.height;
+
+      _board_back_image.width = 700;
+      _board_back_image.height = 660;
+      
+//      _board_masu_image.source = board_masu;
+//      _board_masu_image.width = _board_back_image.width;
+//      _board_masu_image.height = _board_back_image.height;
+
+      _board_coord_image.width = 700;
+      _board_coord_image.height = 660;
+      
+//      _board_shand_image.source = board_shand;
+//      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
+//      _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
+//      _board_ghand_image.source = board_ghand;
+//      _board_ghand_image.x = 10
+//      _board_ghand_image.y = 10
       
       addChild(_board_bg_image);
       addChild(_board_back_image);
-      _board_back_image.addChild(_board_masu_image);
-      _board_back_image.addChild(_board_coord_image);
-      addChild(_board_shand_image);
-      addChild(_board_ghand_image);
+//      _board_back_image.addChild(_board_masu_image);
+      addChild(_board_coord_image);
+//      addChild(_board_shand_image);
+//      addChild(_board_ghand_image);
 	
       handBoxes = new Array(2);
 	  infoBoxes = new Array(2);
@@ -225,30 +226,28 @@ package  {
         hand.x = i == 0 ? MY_HAND_X : HIS_HAND_X;
         hand.y = i == 0 ? MY_HAND_Y : HIS_HAND_Y;
         handBoxes[i] = hand;
-        addChild(hand);
         
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
 		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
-		timer.x = i == 0 ? hand.x + 6 : hand.x + KOMADAI_WIDTH / 2 - 19;
-		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
+		timer.x = BAN_LEFT_MARGIN + BAN_WIDTH + 20;
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -40 : 10);
 		timers[i] = timer;
 		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
 		flag_loader.height = 44;
-		flag_loader.x = hand.x + (i == 0 ? KOMADAI_WIDTH / 2 +28 : 3);
-		flag_loader.y = timer.y - (i == 0 ? 8 : 5);
+		flag_loader.x = BAN_LEFT_MARGIN + BAN_WIDTH + 130;
+		flag_loader.y = timer.y - (i == 0 ? 0 : 13);
 		_player_flags[i] = flag_loader;
-		addChild(flag_loader);
 
         var turn_symbol:Image = new Image();
         turn_symbol.x = 2;
-        turn_symbol.y = i == 0 ? 142 : 4;
+        turn_symbol.y = i == 1 ? 137 : 10;
         _turn_symbols[i] = turn_symbol;
 		var avatar_image:Canvas = new Canvas();
-		avatar_image.x = 14;
-		avatar_image.y = i == 0 ? 6 : 52;
+		avatar_image.x = 0;
+		avatar_image.y = i == 1 ? 6 : 52;
 		avatar_image.width = KOMADAI_WIDTH - 42
 		avatar_image.height = avatar_image.width
 		_avatar_images[i] = avatar_image;
@@ -266,21 +265,24 @@ package  {
         _info_labels[i] = info_label;
 
         var i_box:Canvas = new Canvas();
-        i_box.setStyle('backgroundColor',0xddee88);
-        i_box.setStyle('borderStyle', 'solid');
-		i_box.setStyle('borderThickness', 2);
+//        i_box.setStyle('backgroundColor',0xddee88);
+//        i_box.setStyle('borderStyle', 'solid');
+//		i_box.setStyle('borderThickness', 2);
 		i_box.horizontalScrollPolicy = "off";
 		i_box.verticalScrollPolicy = "off";
-        i_box.width = KOMADAI_WIDTH - 10
-        i_box.height = KOMADAI_HEIGHT - 10
-        i_box.x = i == 0 ? hand.x + 10 : hand.x
-        i_box.y = i == 0 ? BAN_TOP_MARGIN + 6 : BAN_TOP_MARGIN + hand.height + 57 ;
+        i_box.width = 170;
+        i_box.height = 190;
+        i_box.x = BAN_LEFT_MARGIN + BAN_WIDTH + 30;
+        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 160 : BAN_TOP_MARGIN - 30;
         i_box.addChild(turn_symbol);
         i_box.addChild(name_label);
         i_box.addChild(info_label);
 		i_box.addChild(avatar_image);
 		infoBoxes[i] = i_box;
         addChild(i_box);
+		
+        addChild(hand);
+		addChild(flag_loader);
       }
 	  _arrows[ARROWS_SELF] = new Array();
 	  _arrows[ARROWS_PUBLIC] = new Array();
@@ -291,39 +293,38 @@ package  {
     }
 
     public function resetBoard():void{
-     if(_my_turn == Kyokumen.SENTE){
-        _board_coord_image.source = board_scoord_e
+     if (_my_turn == Kyokumen.SENTE) {
+		_board_back_image.source = board_bg_s;
+        _board_coord_image.source = board_scoord_e;
       } else {
-        _board_coord_image.source = board_gcoord_e
+		_board_back_image.source = board_bg_g;
+        _board_coord_image.source = board_gcoord_e;
       }
 
-      for (var i:int = 0; i < 9; i++ ) {
-        for (var j:int = 0; j < 9;j++ ){
+      for (var i:int = 0; i < 4; i++ ) {
+        for (var j:int = 0; j < 3;j++ ){
           if(_cells[i][j] != null){
             removeChild(_cells[i][j]);
           }
         }
       }
-      for (i = 0; i < 9; i++ ) {
-        for (j = 0; j < 9;j++ ){
+      for (i = 0; i < 4; i++ ) {
+        for (j = 0; j < 3;j++ ){
           var square:Square;
           if(_my_turn == Kyokumen.SENTE){
             square = new Square(9-j,i+1);
             _cells[i][j] = square;
           } else {
-            square = new Square(10-(9-j),10-(i+1));
-            _cells[8-i][8-j] = square;
+            square = new Square(7 + j,4 - i);
+            _cells[3-i][2-j] = square;
           }
-		  if (gameType.match(/mini$/)) {
-			  if (i <= 1 || i >= 7 || j <= 1 || j >= 7) square.dead = true;
-		  } else if (gameType == "va5656") {
-			  if (i == 0 || i == 8 || j <= 1 || j >= 7) square.dead = true;
-			  if (_my_turn == Kyokumen.SENTE) {
-				if (i == 1) square.dead = true;
-			  } else {
-				if (i == 7) square.dead = true;
-			  }
-		  }
+
+//		  if (_my_turn == Kyokumen.SENTE) {
+//			  if (i >= 4 || j >= 3) square.dead = true;
+//		  } else {
+//			  if (i <= 4 || j <= 5) square.dead = true;
+//		  }
+
           square.x = BAN_LEFT_MARGIN + BAN_EDGE_PADDING + j * KOMA_WIDTH + 1;
           square.y = BAN_TOP_MARGIN + BAN_EDGE_PADDING + i * KOMA_HEIGHT + 1;
 		  square.addEventListener(MouseEvent.MOUSE_DOWN, _squareMouseDownHandler);
@@ -347,39 +348,33 @@ package  {
 	}
 
 	private function _initializeKyokumen(str:String):void {
-	  if (gameType == "va5656") {
-		  _position = new Kyokumen(str, 3, 6);
-		  _last_pos = new Kyokumen(str, 3, 6);
-	  } else {
 		_position = new Kyokumen(str);
 		_last_pos = new Kyokumen(str);
-	  }
 	}
 
     public function setPosition(pos:Kyokumen):void {
       _position = pos
-      for(var y:int=0;y<9;y++){
-        for(var x:int=0;x<9;x++){
+      for(var y:int=0;y<4;y++){
+        for(var x:int=0;x<3;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
             var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
-			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
+//			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
             _cells[y][x].source = images[image_index];
           } else {
             _cells[y][x].source = emptyImage;
           }
 		  if (_cells[y][x].dead) _cells[y][x].source = deadSquare;
-//		  if (gameType == "mini") {
-//			if (x <= 1 || x >=7 || y <= 1 || y >= 7) _cells[y][x].source = deadSquare;
-//		  }
         }
       }
       handBoxes[0].removeAllChildren();
       handBoxes[1].removeAllChildren();
       for(var i:int=0;i<2;i++){
         var hand:Komadai = _position.getKomadai(i);
-        for(var j:int=0;j<8;j++){
+		var hand_sum:int = hand.getNumOfKoma(0) + hand.getNumOfKoma(1) + hand.getNumOfKoma(2) + hand.getNumOfKoma(3);
+		var hand_count:int = 0;
+        for(var j:int=0;j<4;j++){
           if(hand.getNumOfKoma(j) > 0){
             for(var k:int=0;k<hand.getNumOfKoma(j);k++){
               var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
@@ -387,9 +382,10 @@ package  {
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
               images = i == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
               handPiece.source = images[j];
-              handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
-              handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
+              handPiece.x = KOMADAI_WIDTH / 2 - KOMA_WIDTH / 2 * hand_sum + KOMA_WIDTH * hand_count;
+              handPiece.y = 0;
               handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
+			  hand_count += 1;
             }
           }
         }
@@ -498,6 +494,7 @@ package  {
       _my_turn = my_turn;
 	  if (_player_infos[_my_turn].game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
       resetBoard();
+	  trace("OK");
 	  initializeKifu();
       _initializeKyokumen(kyokumen_str);
       setPosition(_position);
@@ -567,7 +564,7 @@ package  {
 		timers[0] = timers[1];
 		timers[1] = timer_tmp;
 		for (i = 0; i < 2; i++) {
-			timers[i].x = i == 0 ?  handBoxes[i].x + 6 : handBoxes[i].x + KOMADAI_WIDTH / 2 - 19;
+			timers[i].y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -40 : 10);
 		}
 		_my_turn = 1 - _my_turn;
 		_arrangeInfos();
@@ -917,6 +914,8 @@ package  {
 	}
 
     private function _squareMouseUpHandler(e:MouseEvent):void {
+	trace("###" + Square(e.currentTarget).coord_x);
+	trace("###" + Square(e.currentTarget).coord_y);
 	  if (_pieceGrab) e.currentTarget.mouseOut();
 	  if (_arrow_from == null) return;
 	  _arrow_to.x = Square(e.currentTarget).coord_x;

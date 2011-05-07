@@ -12,8 +12,8 @@ package {
 	private var _stayTimer:Timer = new Timer(150, 1);
 	private var _dead:Boolean = false;
 
-    public static const KOMA_WIDTH:int = 43;
-    public static const KOMA_HEIGHT:int = 48;
+    public static const KOMA_WIDTH:int = 100;
+    public static const KOMA_HEIGHT:int = 100;
 	public static const STAY:String = "stay";
 
     public function Square(x:int,y:int):void{

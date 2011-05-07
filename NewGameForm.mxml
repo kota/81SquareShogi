@@ -30,7 +30,8 @@
 		  
 		  [Bindable]
 		  public var handicaps:ArrayCollection = new ArrayCollection(
-		   [{label:"Even Game", data:"nr"},
+//		   [{label:"Even Game", data:"nr"},
+			[{label:"-", data:"nr"},
 			{label:"Lance Down", data:"hclance"},
 			{label:"Bishop Down", data:"hcbishop" },
 			{label:"Rook Down", data:"hcrook" },
@@ -45,7 +46,8 @@
 			{label:"Three Pawns", data:"hcfu3" },
 			{label:"Naked King", data:"hcnaked" },
 			{label:"Mini-shogi", data:"vamini" },
-			{label:"GoroGoro-shogi", data:"va5656" }]
+			{label:"GoroGoro-shogi", data:"va5656" },
+			{label:"Dobutsu-shogi", data:"vazoo"}]
 		  );
 		  
 		  [Bindable]
@@ -70,32 +72,31 @@
 			  case 0:
 			    total = 2700;
 				byoyomi = 60;
-				handicap = "r";
+				handicap = "vazoo";
 				tournament = "";
 				break;
               case 1:
                 total = 900;
                 byoyomi = 60;
-				handicap = "r";
+				handicap = "vazoo";
 				tournament = "";
                 break;
               case 2:
                 total = 300;
                 byoyomi = 30;
-				handicap = "r";
+				handicap = "vazoo";
 				tournament = "";
                 break;
               case 3:
                 total = 0;
                 byoyomi = 30;
-				handicap = "r";
+				handicap = "vazoo";
 				tournament = "";
                 break;
               case 4:
                 total = nonrated_total.selectedItem.data;
                 byoyomi = nonrated_byoyomi.selectedItem.data;
-				handicap = nonrated_handicap.selectedItem.data;
-//				if (parentApplication.serverName != "VENUS" && nonrated_handicap.selectedItem.data.match(/^va/)) return;
+				handicap = "vazoo";
 				tournament = "";
 				break;
 			  case 5:
@@ -118,8 +119,8 @@
           public function toggleTimeSelection():void{
             nonrated_total.enabled = timeSetting.selectedValue == 4;
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
-            nonrated_handicap.enabled = timeSetting.selectedValue == 4;
-			tournament_name.enabled = timeSetting.selectedValue == 5;
+//            nonrated_handicap.enabled = timeSetting.selectedValue == 4;
+//			tournament_name.enabled = timeSetting.selectedValue == 5;
           }
 
         ]]>
@@ -137,7 +138,7 @@
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
     </mx:HBox>
-    <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11"/>
+    <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11" enabled="false" />
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
     </mx:HBox>

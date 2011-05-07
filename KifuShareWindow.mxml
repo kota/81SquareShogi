@@ -10,7 +10,7 @@
 			public var kifu:Object;
 
 			private function _copyURL():void {
-				var str:String = DIRECTORY + "kifuviewer.html?kid=" + kifu.id;
+				var str:String = DIRECTORY + "kifuviewer34.html?kid=" + kifu.id;
 				System.setClipboard(str);
 				Alert.show("Kifuview-URL is set to clipboard.");
 			}

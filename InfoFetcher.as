@@ -190,6 +190,8 @@
 				return "Mini Shogi";
 			case "va5656":
 				return "Goro-Goro Shogi";
+			case "vazoo":
+				return "Dobutsu Shogi";
 			}
 			return "";
 		}
@@ -231,6 +233,8 @@
 				return "Mini Shogi";
 			case "va5656":
 				return "Goro-Goro";
+			case "vazoo":
+				return "Dobutsu";
 			}
 			return "";
 		}
@@ -267,6 +271,8 @@
 				return "5五将棋";
 			case "va5656":
 				return "ゴロゴロ";
+			case "vazoo":
+				return "どうぶつ";
 			}
 			return "";
 		}

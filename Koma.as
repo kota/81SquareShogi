@@ -9,18 +9,14 @@ package  {
 	
 	public class Koma {
 		
-		public static const KOMA_WIDTH:int = 43;
-		public static const KOMA_HEIGHT:int = 48;
+		public static const KOMA_WIDTH:int = 110;
+		public static const KOMA_HEIGHT:int = 110;
 		
 		public static const OU:int = 0;
-		public static const HI:int = 1;
-		public static const KA:int = 2;
-		public static const KI:int = 3;
-		public static const GI:int = 4;
-		public static const KE:int = 5;
-		public static const KY:int = 6;
-		public static const FU:int = 7;
-		public static const PROMOTE:int = 8;
+		public static const ZG:int = 1;
+		public static const ZE:int = 2;
+		public static const ZC:int = 3;
+		public static const PROMOTE:int = 4;
 		
 		private var _ownerPlayer:int;
 		private var _type:int;
