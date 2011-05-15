@@ -2484,6 +2484,17 @@
 		kifuDataGrid.dataProvider = board.kifu_list;
 		kifuDataGrid.selectedIndex = 0;
 		board.replayMoves(0, true);
+		if (_viewerAlone) {
+			if (this.parameters["moves"]) {
+				kifuDataGrid.selectedIndex = this.parameters["moves"];
+				board.replayMoves(this.parameters["moves"], true);
+				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+			}
+			if (this.parameters["turn"]) {
+				if (this.parameters["turn"] == 1) board.flipBoard();
+			}
+			if (this.parameters["piece"]) board.setPieceType(this.parameters["piece"]);
+		}
 	}
 	
 	private function _handlePlayerSearchEnter(e:FlexEvent):void {
