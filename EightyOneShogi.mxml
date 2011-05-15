@@ -2163,13 +2163,16 @@
 				}
 			}
 		}
-		_openKifuShareWindow(kifu);
+		_openKifuShareWindow(kifu, board.piece_type, board.my_turn, kifuDataGrid.selectedIndex);
 	}
 	
-	private function _openKifuShareWindow(kifu:Object):void {
+	private function _openKifuShareWindow(kifu:Object, pieceType:int = 0,  turn:int = 0, moves:int = 0):void {
 		_kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(this, KifuShareWindow, true));
 		PopUpManager.centerPopUp(_kifuShareWindow);
 		_kifuShareWindow.kifu = kifu;
+		_kifuShareWindow.moves = moves;
+		_kifuShareWindow.turn = turn;
+		_kifuShareWindow.pieceType = pieceType;
 	}
 
 	private function _gamePlayerInfo(e:MouseEvent):void {
@@ -2509,6 +2512,7 @@
 				kifuDataGrid.selectedIndex = this.parameters["moves"];
 				board.replayMoves(this.parameters["moves"], true);
 				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+				kifuDataGrid.callLater(_scrollDownKifu);
 			}
 			if (this.parameters["turn"]) {
 				if (this.parameters["turn"] == 1) board.flipBoard();
