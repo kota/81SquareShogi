@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xbbffff" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
 	<mx:Style>
 		global{ 
 		 layoutDirection: "ltr";
@@ -34,6 +34,7 @@
 	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLVariables;
+	import flash.ui.ContextMenu;
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
 	import mx.utils.ObjectProxy;
@@ -55,7 +56,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/05/08";
+	public const VERSION:String = "ver.2011/05/03";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -191,13 +192,7 @@
 	  }
       _client = new CsaShogiClient();
   serverListGrid.dataProvider = { 'name':"Loading..."};
-  var server:Object = { 'name':"EARTH", 'description':"main", 'icon':_icon_earth, 'host':"81dojo.com", 'port':"4081", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"MARS", 'description':"sub", 'icon':_icon_mars, 'host':"81dojo.dyndns.org", 'port':"4081", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"VENUS", 'description':"sub", 'icon':_icon_venus, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
+  var server:Object = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
@@ -1468,7 +1463,21 @@
 		  kifuMove.move = "Repetition Draw";
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
-      }
+      } else if (e.message.indexOf("#CATCH") >= 0) {
+		  end_game = true;
+		  _writeUserMessage("CATCH\n", 2, "#DD0088", true);
+		  kifuMove.num = board.kifu_list.length;
+		  kifuMove.move = "End with Catch";
+		  kifuMove.moveKIF = "キャッチ";
+		  board.kifu_list.push(kifuMove);
+      } else if (e.message.indexOf("#TRY") >= 0) {
+		  end_game = true;
+		  _writeUserMessage("TRY\n", 2, "#DD0088", true);
+		  kifuMove.num = board.kifu_list.length;
+		  kifuMove.move = "End with Try";
+		  kifuMove.moveKIF = "トライ";
+		  board.kifu_list.push(kifuMove);
+	  }
 	  if (board.onListen || !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
 		  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
 		  kifuDataGrid.scrollToIndex(0);
@@ -2998,11 +3007,11 @@
       <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
       <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
-      <mx:Label paddingTop="5" text="Chief Programmer: Kota" fontSize="13" />
+      <mx:Label paddingTop="5" text="Game Design: Madoka" fontSize="13" />
 	  <mx:HBox>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/>
-		  <mx:Label text="Assistant: Hidetchi"/>
+		  <mx:Label text="(c) Program Design: Hidetchi"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
 	  </mx:HBox>
@@ -3021,7 +3030,7 @@
       <mx:Panel id="userListPanel" titleStyleName="header81" width="975" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_refresh();"/>
-		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
+		<mx:Button id="searchViewButton" enabled="false" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
         <mx:Button id="startButton" label="{lan.wait}" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="{lan.stop}" click="_stopWaiting()" enabled="false" />
 <!--        <mx:Button id="challengeButton" label="{lan.challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" /> -->
@@ -3108,48 +3117,53 @@
 	<mx:HBox paddingLeft="3" paddingTop="3" horizontalGap="2">
 
       <eightyOneSquare:Board id="board" width="700" height="660"/> 
-      <mx:VBox verticalGap="3">
-        <mx:Panel id="messagePanel" horizontalScrollPolicy="off" verticalScrollPolicy="off" fontSize="11" title="Message Panel" width="394" height="265" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
-			<mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="378" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
-			<mx:HBox horizontalGap="5">
-				<mx:Label text="{lan.chat}"/>
-				<mx:TextInput id="chatMessage2" width="330"/>
-			</mx:HBox>
-			<mx:HBox horizontalGap="5">
-				<mx:CheckBox id="autoScrollCheck2" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll2();" />
-				<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="{lan.greet}" click="_greetMenu();"/>
-			</mx:HBox>
-        </mx:Panel>
+      <mx:VBox verticalGap="2">
 		<mx:HBox horizontalGap="0">
-			<mx:Panel id="controlPanel" verticalGap="20" fontSize="11" title="Control Panel" status="{VERSION}" width="215" height="390" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
-			  <mx:HBox>			
-				<mx:Button id="resignButton" label="{lan.resign}" click="_resignAlert();"/>
-				<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="{lan.rematch}" click="_rematch();"/>
-				<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{lan.close_game}" click="_closeGame();" enabled="false"/>
-			  </mx:HBox>
-			  <mx:HBox>
-				<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="{lan.flip}" click="board.flipBoard();"/>
-				<mx:Button label="{lan.clear_arrows}" click="_clearArrows();"/>
-			  </mx:HBox>
-				<mx:HBox horizontalGap="2">
-					<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
-					<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
-					<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
-					<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
-				</mx:HBox>
-				<mx:Button id="impasseButton" label="{lan.impasse}" click="_showImpasse();" visible="false" />
-			  <mx:HBox>
-				<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
-			  </mx:HBox>
-			  <mx:HBox>
-				<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();"/>
-				<mx:CheckBox id="muteCheck2" paddingRight="-8" toolTip="{lan.mute}" click="_mute(muteCheck2.selected)"/>
-				<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck2.selected)" toolTip="{lan.mute}"/>
-			  </mx:HBox>
-			  <mx:Button id="checkLobbyButton" label="{lan.check_lobby}" enabled="true" click="_checkLobby();" />
-			</mx:Panel>
+			<mx:VBox verticalGap="2">
+				<mx:Panel id="controlPanel" verticalGap="3" fontSize="11" title="Control Panel" status="{VERSION}" width="215" height="230" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+				  <mx:HBox>			
+					<mx:Button id="resignButton" label="{lan.resign}" click="_resignAlert();"/>
+					<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="{lan.rematch}" click="_rematch();"/>
+					<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{lan.close_game}" click="_closeGame();" enabled="false"/>
+				  </mx:HBox>
+				  <mx:HBox>
+					<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="{lan.flip}" click="board.flipBoard();"/>
+					<mx:Button label="{lan.clear_arrows}" click="_clearArrows();"/>
+				  </mx:HBox>
+					<mx:HBox horizontalGap="2">
+						<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
+						<mx:Button id="rewindOneButton" label="&lt;" enabled="false" click="replayByButton(-1);"/>    
+						<mx:Button id="forwardOneButton" label=">" enabled="false" click="replayByButton(1);"/>
+						<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
+					</mx:HBox>
+					<mx:Button id="impasseButton" label="{lan.impasse}" click="_showImpasse();" visible="false" />
+				  <mx:HBox>
+					<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
+				  </mx:HBox>
+				  <mx:HBox>
+					<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();"/>
+					<mx:CheckBox id="muteCheck2" paddingRight="-8" toolTip="{lan.mute}" click="_mute(muteCheck2.selected)"/>
+					<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck2.selected)" toolTip="{lan.mute}"/>
+				  </mx:HBox>
+				  <mx:Button id="checkLobbyButton" label="{lan.check_lobby}" enabled="true" click="_checkLobby();" />
+				</mx:Panel>
+				
+				<mx:Panel id="watchersPanel" title="{lan.watchers}" width="215" height="162" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+				  <mx:HBox paddingBottom="-2" horizontalGap="2">
+					<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
+					<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
+				  </mx:HBox>
+					<mx:DataGrid id="watcherListGrid" width="160" height="145" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+					 <mx:columns>
+					  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="72" paddingLeft="2" sortCompareFunction="_sortName" />
+					  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />
+					  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+					 </mx:columns>
+					</mx:DataGrid>
+				</mx:Panel>
+			</mx:VBox>
 
-			<mx:Panel id="sidePanel" title="{lan.kifu}" width="180" height="390" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+			<mx:Panel id="sidePanel" title="{lan.kifu}" width="180" height="392" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 				<mx:HBox>
 					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
 					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
@@ -3168,25 +3182,22 @@
 			</mx:Panel>
 			
 		</mx:HBox>
+
+        <mx:Panel id="messagePanel" horizontalScrollPolicy="off" verticalScrollPolicy="off" fontSize="11" title="Message Panel" width="394" height="265" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
+			<mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="378" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
+			<mx:HBox horizontalGap="5">
+				<mx:Label text="{lan.chat}"/>
+				<mx:TextInput id="chatMessage2" width="330"/>
+			</mx:HBox>
+			<mx:HBox horizontalGap="5">
+				<mx:CheckBox id="autoScrollCheck2" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll2();" />
+				<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="{lan.greet}" click="_greetMenu();"/>
+			</mx:HBox>
+        </mx:Panel>
       </mx:VBox>
 	</mx:HBox>
 	
-			<mx:Panel x="10" y="200" id="watchersPanel" title="{lan.watchers}" width="160" height="230" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="0" borderThicknessRight="0">
-			  <mx:HBox paddingBottom="-2" horizontalGap="2">
-				<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
-				<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
-			  </mx:HBox>
 
-				<mx:DataGrid id="watcherListGrid" width="160" height="165" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
-				 <mx:columns>
-				  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="72" paddingLeft="2" sortCompareFunction="_sortName" />
-				  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />
-				  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
-				 </mx:columns>
-				</mx:DataGrid>
-
-
-			</mx:Panel>
 	
 	</mx:Panel>
     </mx:HBox>

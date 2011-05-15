@@ -22,7 +22,7 @@ package  {
 		private var _promoteY2:int;
 
     public static const koma_names:Array = new Array('OU', 'ZG', 'ZE', 'ZC', '', '', '', 'TO');
-    private static const koma_western_names:Array = new Array('L','G','E','C','','','','H');
+    private static const koma_western_names:Array = new Array('K','R','B','P','','','','T');
     private static const koma_japanese_names:Array = new Array('ら', 'ひ', 'ゾ', 'キ', '', '', '', 'ニ');
 	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 0, 0, 0, 1);
     private static const file_names:Array = new Array('A','B','C','','','','','','');

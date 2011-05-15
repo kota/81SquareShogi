@@ -18,24 +18,27 @@
 			
         ]]>
     </mx:Script>
-	<mx:TabNavigator id="optionTab" width="370" height="300" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
+	<mx:TabNavigator id="optionTab" width="370" height="320" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
 		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
-			<mx:HBox>
-				<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup2" value="0"/>
-<!--				<mx:Image source="@Embed('images/pieces_ryoko1/Sou.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_ryoko1/Suma.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_ryoko1/Sfu.png')" width="31" height="36"/> -->
+			<mx:RadioButton label="Designed by KITAO" paddingRight="20" groupName="RadioGroup2" value="0"/>
+			<mx:HBox paddingLeft="20">
+				<mx:Image source="@Embed('images/kitao/Sra.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/kitao/Szo.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/kitao/Ski.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/kitao/Shi.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/kitao/Sni.png')" width="35" height="35"/>
 			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup2"  value="1"/>
+			<mx:RadioButton label="Designed by KITAO (coming up soon!)" enabled="false" paddingRight="50" groupName="RadioGroup2"  value="1"/>
+			<mx:RadioButton label="Designed by HIDETCHI" groupName="RadioGroup2"  value="2" />
+			<mx:HBox paddingLeft="20">
+				<mx:Image source="@Embed('images/hidetchi/Sra.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/hidetchi/Szo.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/hidetchi/Ski.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/hidetchi/Shi.png')" width="35" height="35"/>
+				<mx:Image source="@Embed('images/hidetchi/Sni.png')" width="35" height="35"/>
 			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Hidetchi's Internationalized" groupName="RadioGroup2"  value="2"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup2"  value="3"/>
-			</mx:HBox>
+			<mx:RadioButton label="Design 4" groupName="RadioGroup2"  value="3" enabled="false" />
 			<mx:HBox>
 				<mx:Label text="{parentApplication.lan.blind_piece}"/>
 				<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>

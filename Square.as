@@ -20,7 +20,7 @@ package {
       super();
       this.width = KOMA_WIDTH;
       this.height = KOMA_HEIGHT;
-      this.setStyle('backgroundAlpha', 0.25);
+      this.setStyle('backgroundAlpha', 0.15);
 	  this.horizontalScrollPolicy = 'off';
 	  this.verticalScrollPolicy = 'off';
 	  this.setStyle('borderStyle', 'outSet');
@@ -29,8 +29,8 @@ package {
       _img = new Image();
       _img.width = KOMA_WIDTH;
       _img.height = KOMA_HEIGHT;
-	  _img.x = -1;
-	  _img.y = -1;
+//	  _img.x = -1;
+//	  _img.y = -1;
       this.addChild(_img);
       _coord_x = x;
       _coord_y = y;

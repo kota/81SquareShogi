@@ -57,18 +57,22 @@ package  {
     private var emptyImage:Class
     [Embed(source = "/images/dead.png")]
     private var deadSquare:Class
-    [Embed(source = "/images/Scoord_e.png")]
-    private var board_scoord_e:Class
-    [Embed(source = "/images/Gcoord_e.png")]
-    private var board_gcoord_e:Class
+    [Embed(source = "/images/kitao/Scoord.png")]
+    private var scoord1:Class
+    [Embed(source = "/images/kitao/Gcoord.png")]
+    private var gcoord1:Class
+    [Embed(source = "/images/hidetchi/Scoord.png")]
+    private var scoord3:Class
+    [Embed(source = "/images/hidetchi/Gcoord.png")]
+    private var gcoord3:Class
 //    [Embed(source = "/images/Shand.png")]
 //    private var board_shand:Class
 //    [Embed(source = "/images/Ghand.png")]
 //    private var board_ghand:Class
-    [Embed(source = "/images/dobutsu_ban_s.png")]
-	private var board_bg_s:Class
-    [Embed(source = "/images/dobutsu_ban_g.png")]
-	private var board_bg_g:Class
+    [Embed(source = "/images/kitao/ban.png")]
+	private var board_bg1:Class
+    [Embed(source = "/images/hidetchi/ban.png")]
+	private var board_bg3:Class
     [Embed(source = "/images/white.png")]
     private var white:Class
     [Embed(source = "/images/white_r.png")]
@@ -80,6 +84,9 @@ package  {
     [Embed(source = "/images/gold_medal.png")]
 	private var Medal:Class;
 
+	private var _bg_images:Array = new Array(board_bg1, board_bg1, board_bg3, board_bg1, board_bg1, board_bg1, board_bg1);
+	private var _scoord_images:Array = new Array(scoord1, scoord1, scoord3, scoord1, scoord1, scoord1, scoord1);
+	private var _gcoord_images:Array = new Array(gcoord1, gcoord1, gcoord3, gcoord1, gcoord1, gcoord1, gcoord1);
 	private var pSrc:PieceSource = new PieceSource();
 
 	[Embed(source = "/sound/piece.mp3")]
@@ -179,7 +186,7 @@ package  {
       this.width = BAN_WIDTH;
       this.height = BAN_HEIGHT;
 
-//      _board_bg_image.source = board_bg;
+      _board_bg_image.source = _bg_images[piece_type];
 //      _board_bg_image.setStyle('borderStyle','solid');
 //      _board_bg_image.setStyle('borderColor', 0x888888);
       
@@ -294,11 +301,9 @@ package  {
 
     public function resetBoard():void{
      if (_my_turn == Kyokumen.SENTE) {
-		_board_back_image.source = board_bg_s;
-        _board_coord_image.source = board_scoord_e;
+        _board_coord_image.source = _scoord_images[piece_type];
       } else {
-		_board_back_image.source = board_bg_g;
-        _board_coord_image.source = board_gcoord_e;
+        _board_coord_image.source = _gcoord_images[piece_type];
       }
 
       for (var i:int = 0; i < 4; i++ ) {
@@ -689,6 +694,12 @@ package  {
 	
     public function setPieceType(i:int):void{
     	piece_type = i;
+		_board_bg_image.source = _bg_images[i];
+		 if (_my_turn == Kyokumen.SENTE) {
+			_board_coord_image.source = _scoord_images[piece_type];
+		  } else {
+			_board_coord_image.source = _gcoord_images[piece_type];
+		  }
     	if (_position != null) setPosition(_position);
     }
 

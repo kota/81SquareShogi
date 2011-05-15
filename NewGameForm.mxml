@@ -126,10 +126,10 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="toggleTimeSelection();"/>
-	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
+	<mx:RadioButton enabled="false" groupName="timeSetting" label="45min - 60sec , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
+	<mx:RadioButton enabled="false" groupName="timeSetting" label="15min - 60sec , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
+	<mx:RadioButton enabled="false" groupName="timeSetting" label=" 5min - 30sec , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
+	<mx:RadioButton enabled="false" groupName="timeSetting" label=" 0min - 30sec , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false" selectedIndex="3" />

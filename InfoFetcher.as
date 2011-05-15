@@ -191,7 +191,7 @@
 			case "va5656":
 				return "Goro-Goro Shogi";
 			case "vazoo":
-				return "Dobutsu Shogi";
+				return "3x4 Shogi";
 			}
 			return "";
 		}
@@ -234,7 +234,7 @@
 			case "va5656":
 				return "Goro-Goro";
 			case "vazoo":
-				return "Dobutsu";
+				return "3x4 Shogi";
 			}
 			return "";
 		}
@@ -272,7 +272,7 @@
 			case "va5656":
 				return "ゴロゴロ";
 			case "vazoo":
-				return "どうぶつ";
+				return "３×４";
 			}
 			return "";
 		}
