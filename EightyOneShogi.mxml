@@ -197,8 +197,8 @@
   _servers.push(server);
   server = { 'name':"VENUS", 'description':"sub", 'icon':_icon_venus, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
   _servers.push(server);
-  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
-  _servers.push(server);
+//  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
+//  _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
 	  if (_so.data.savelogin) {
