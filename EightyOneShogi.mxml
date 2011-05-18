@@ -461,7 +461,7 @@
         }
       }
 	  userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
-	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+//	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  _waiter_list = waiter_list;
 	  waiterListGrid.dataProvider = _waiter_list;
     }
