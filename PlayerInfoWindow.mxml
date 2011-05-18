@@ -25,6 +25,8 @@
 		  [Bindable]
 		  private var _title:String;
 		  [Bindable]
+		  private var _subTitle:String;
+		  [Bindable]
 		  private var _status:String;
 		  [Bindable]
 		  private var _wins:int;
@@ -54,6 +56,7 @@
 			  _rank = user.rank;
 			  _avatar = user.avatar ? user.avatar : _rank;
 			  _title = user.titleName;
+			  _subTitle = user.titleSubName;
 			  _wins = user.wins;
 			  _losses = user.losses;
 			  _streak = Math.max(0, user.streak);
@@ -136,7 +139,7 @@
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
-						<mx:Label text="{_title}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
+						<mx:Label text="{_title}" toolTip="{_subTitle}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
 					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}"/>
 				</mx:VBox>
