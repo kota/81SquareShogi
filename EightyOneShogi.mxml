@@ -345,6 +345,7 @@
 			  'rating':parseInt(match[2].split(" ")[3]),
 			  'country_code':parseInt(match[2].split(" ")[4]),
 			  'titleName':"",
+			  'titleSubName':"",
 			  'monitor_game':match[2].split(" ")[6],
 			  'moves':parseInt(match[2].split(" ")[7]),
 			  'wins':parseInt(match[2].split(" ")[8]),
@@ -397,6 +398,7 @@
 		  for (var i:int = 0; i < user_list.length; i++) {
 			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
 				  user_list[i].titleName = _infoFetcher.titleName[j];
+				  user_list[i].titleSubName = _infoFetcher.titleSubName[j];
 				  if (_infoFetcher.titleAvatar[j] != "*") {
 					  user_list[i].avatar = _infoFetcher.titleAvatar[j];
 				  }
@@ -3041,7 +3043,7 @@
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
 			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
-			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" width="53" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />

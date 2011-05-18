@@ -25,6 +25,7 @@
 		public var newestVer:String;
 		public var titleUser:Array;
 		public var titleName:Array;
+		public var titleSubName:Array;
 		public var titleAvatar:Array;
 //		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_thresholds:Array = new Array(2900, 1900, 1480, 1420, 1360, 1300, 1240, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
@@ -66,6 +67,7 @@
 		public function refresh():void {
 			titleUser = new Array();
 			titleName = new Array();
+			titleSubName = new Array();
 			titleAvatar = new Array();
 //			rank_thresholds = new Array();
 //			rank_names = new Array();
@@ -99,7 +101,8 @@
 						case "TITLE_HOLDERS":
 							titleUser.push(line.split("\t")[0]);
 							titleName.push(line.split("\t")[1]);
-							titleAvatar.push(line.split("\t")[2]);
+							titleSubName.push(line.split("\t")[2]);
+							titleAvatar.push(line.split("\t")[3]);
 							break;
 						case "COUNTRY_NAMES":
 							country_codes.push(parseInt(line.split("\t")[0]));
