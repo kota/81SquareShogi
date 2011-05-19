@@ -29,8 +29,6 @@ package {
       _img = new Image();
       _img.width = KOMA_WIDTH;
       _img.height = KOMA_HEIGHT;
-	  _img.x = -1;
-	  _img.y = -1;
       this.addChild(_img);
       _coord_x = x;
       _coord_y = y;

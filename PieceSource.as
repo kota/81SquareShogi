@@ -251,6 +251,68 @@ package
     public var gto4:Class
 	
     [Bindable]
+    [Embed(source = "/images/pieces_dobutsu/Sou.png")]
+    public var sou7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sgyoku.png")]
+    public var sgyoku7:Class
+    [Embed(source = "/images/pieces_dobutsu/Shi.png")]
+    public var shi7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sryu.png")]
+    public var sryu7:Class
+    [Embed(source = "/images/pieces_dobutsu/Skaku.png")]
+    public var skaku7:Class
+    [Embed(source = "/images/pieces_dobutsu/Suma.png")]
+    public var suma7:Class
+    [Embed(source = "/images/pieces_dobutsu/Skin.png")]
+    public var skin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sgin.png")]
+    public var sgin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sngin.png")]
+    public var sngin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Skei.png")]
+    public var skei7:Class
+    [Embed(source = "/images/pieces_dobutsu/Snkei.png")]
+    public var snkei7:Class
+    [Embed(source = "/images/pieces_dobutsu/Skyo.png")]
+    public var skyo7:Class
+    [Embed(source = "/images/pieces_dobutsu/Snkyo.png")]
+    public var snkyo7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sfu.png")]
+    public var sfu7:Class
+    [Embed(source = "/images/pieces_dobutsu/Sto.png")]
+    public var sto7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gou.png")]
+    public var gou7:Class
+    [Embed(source = "/images/pieces_dobutsu/Ggyoku.png")]
+    public var ggyoku7:Class
+    [Embed(source = "/images/pieces_dobutsu/Ghi.png")]
+    public var ghi7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gryu.png")]
+    public var gryu7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gkaku.png")]
+    public var gkaku7:Class
+    [Embed(source = "/images/pieces_dobutsu/Guma.png")]
+    public var guma7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gkin.png")]
+    public var gkin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Ggin.png")]
+    public var ggin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gngin.png")]
+    public var gngin7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gkei.png")]
+    public var gkei7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gnkei.png")]
+    public var gnkei7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gkyo.png")]
+    public var gkyo7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gnkyo.png")]
+    public var gnkyo7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gfu.png")]
+    public var gfu7:Class
+    [Embed(source = "/images/pieces_dobutsu/Gto.png")]
+    public var gto7:Class
+	
+    [Bindable]
     [Embed(source = "/images/pieces_blind/Ssemi.png")]
     public var ssemi:Class
     [Embed(source = "/images/pieces_blind/Gsemi.png")]
@@ -285,6 +347,8 @@ package
 			koma_images_gote[5] = new Array(hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, hard, null, hard, hard, hard, hard);
 			koma_images_sente[6] = new Array(extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, null, extreme, extreme, extreme, extreme);
 			koma_images_gote[6] = new Array(extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, extreme, null, extreme, extreme, extreme, extreme);
+			koma_images_sente[7] = new Array(sgyoku7,shi7,skaku7,skin7,sgin7,skei7,skyo7,sfu7,sou7,sryu7,suma7,null,sngin7,snkei7,snkyo7,sto7);
+    		koma_images_gote[7] = new Array(ggyoku7,ghi7,gkaku7,gkin7,ggin7,gkei7,gkyo7,gfu7,gou7,gryu7,guma7,null,gngin7,gnkei7,gnkyo7,gto7);
   		}
 
 	}
