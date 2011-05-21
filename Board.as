@@ -65,6 +65,10 @@ package  {
     private var scoord3:Class
     [Embed(source = "/images/hidetchi/Gcoord.png")]
     private var gcoord3:Class
+    [Embed(source = "/images/fujita/Scoord.png")]
+    private var scoord4:Class
+    [Embed(source = "/images/fujita/Gcoord.png")]
+    private var gcoord4:Class
 //    [Embed(source = "/images/Shand.png")]
 //    private var board_shand:Class
 //    [Embed(source = "/images/Ghand.png")]
@@ -73,6 +77,8 @@ package  {
 	private var board_bg1:Class
     [Embed(source = "/images/hidetchi/ban.png")]
 	private var board_bg3:Class
+    [Embed(source = "/images/fujita/ban.png")]
+	private var board_bg4:Class
     [Embed(source = "/images/white.png")]
     private var white:Class
     [Embed(source = "/images/white_r.png")]
@@ -84,9 +90,9 @@ package  {
     [Embed(source = "/images/gold_medal.png")]
 	private var Medal:Class;
 
-	private var _bg_images:Array = new Array(board_bg1, board_bg1, board_bg3, board_bg1, board_bg1, board_bg1, board_bg1);
-	private var _scoord_images:Array = new Array(scoord1, scoord1, scoord3, scoord1, scoord1, scoord1, scoord1);
-	private var _gcoord_images:Array = new Array(gcoord1, gcoord1, gcoord3, gcoord1, gcoord1, gcoord1, gcoord1);
+	private var _bg_images:Array = new Array(board_bg1, board_bg1, board_bg3, board_bg4, board_bg1, board_bg1, board_bg1);
+	private var _scoord_images:Array = new Array(scoord1, scoord1, scoord3, scoord4, scoord1, scoord1, scoord1);
+	private var _gcoord_images:Array = new Array(gcoord1, gcoord1, gcoord3, gcoord4, gcoord1, gcoord1, gcoord1);
 	private var pSrc:PieceSource = new PieceSource();
 
 	[Embed(source = "/sound/piece.mp3")]
