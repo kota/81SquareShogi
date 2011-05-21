@@ -856,14 +856,17 @@ package  {
 				  _player_infos[1].rank = InfoFetcher.makeRankFromRating(_player_infos[1].rating);
 			  }
 			  _player_infos[1].country_code = parseInt(line.substring(2).split(",")[1]);
-		  } else if(line.match(/([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
+		  } else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
             var move_and_time:Object = new Object();
             move_and_time.move = line;
+			move_and_time.comment = "";
             moves.push(move_and_time);
           } else if (line.match(/^(T.*)$/)) {
             Object(moves[moves.length - 1]).time = line;
 //          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
 //			  break;
+		  } else if (line.match(/^'\*/)) {
+			  Object(moves[moves.length - 1]).comment += line + "\n";
 		  } else if (line.match(/summary/)) {
 			  opening = line.split(":")[5] ? InfoFetcher.openingNameEn(line.split(":")[5]) : "";
 		  }
@@ -897,9 +900,10 @@ package  {
 			  var kifuMove:Object = new Object();
 			  kifuMove.num = kifu_list.length
 			  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
-			  kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";
+			  kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1) / 60) + ":" + move.time.substr(1) % 60 + "/)";
 			  kifu_list.push(kifuMove);
 		  }
+		  Object(kifu_list[kifu_list.length - 1]).comment = move.comment;
         }
       }
     }
@@ -1200,7 +1204,11 @@ package  {
 				  }
 			  }
 		  }
-      setPosition(_position);
+		  setPosition(_position);
+		  if (viewing && actual) {
+			  if (kifu_list[n].comment) parentApplication.userMessage2.htmlText = kifu_list[n].comment;
+			  else parentApplication.userMessage2.htmlText = "";
+		  }
 	  }
   }
 }
