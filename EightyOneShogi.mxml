@@ -2465,16 +2465,6 @@
 		rematchButton.visible = false;
 		shareKifuButton2.visible = true;
 		userMessage2.htmlText = "";
-		_writeUserMessage("81-Dojo Kifu Viewer\n", 2, "#008800", true);
-		if (_viewerAlone) {
-			closeButton.enabled = false;
-			checkLobbyButton.enabled = false;
-			_writeUserMessage("Register to 81-Dojo and play shogi with this graphical interface!\n", 2, "#008800");
-			_writeUserMessage("( http://81dojo.com/ )\n", 2, "#008800");
-		} else {
-			closeButton.enabled = true;
-		}
-		_writeUserMessage("\nStarted Time: " + e.target.kifuContents.split("\n")[7].substr(12) + "\n", 2, "#000000");
 		kifuDataGrid.selectable = true;
 		rewindAllButton.enabled = true;
 		rewindOneButton.enabled = true;
@@ -2501,6 +2491,16 @@
 			}
 			if (this.parameters["piece"]) board.setPieceType(this.parameters["piece"]);
 		}
+		_writeUserMessage("81-Dojo Kifu Viewer\n", 2, "#008800", true);
+		if (_viewerAlone) {
+			closeButton.enabled = false;
+			checkLobbyButton.enabled = false;
+			_writeUserMessage("Register to 81-Dojo and play shogi with this graphical interface!\n", 2, "#008800");
+			_writeUserMessage("( http://81dojo.com/ )\n", 2, "#008800");
+		} else {
+			closeButton.enabled = true;
+		}
+		_writeUserMessage("\nStarted Time: " + e.target.kifuContents.split("\n")[7].substr(12) + "\n", 2, "#000000");
 	}
 	
 	private function _handlePlayerSearchEnter(e:FlexEvent):void {
