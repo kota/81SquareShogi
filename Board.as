@@ -631,7 +631,7 @@ package  {
 //		_hoverBoardCallback("OFF", "");
 		if (isPlayer && !post_game) _grabPieceCallback(0, 0);
 		CursorManager.removeCursor(CursorManager.currentCursorID);
-		if (highlight_movable) _hideMovableSquares();
+		if (highlight_movable) hideMovableSquares();
 		_pieceGrab = false;
         _from = null;
         _selected_square = null;
@@ -1180,7 +1180,7 @@ package  {
 		}
 	}
 	
-	private function _hideMovableSquares():void {
+	public function hideMovableSquares():void {
 		for (var i:int = 0; i < 4; i++) {
 			for (var j:int = 0; j < 3; j++) {
 				_cells[i][j].hideMovable();

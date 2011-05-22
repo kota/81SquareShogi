@@ -2829,6 +2829,7 @@
 		  kifuDataGrid.scrollToIndex(board.kifu_list_self.length - 1);
 		  if (board.isStudyHost) _sendStudy();
 	  } else {
+		  if (board.highlight_movable) board.hideMovableSquares();
 		  _client.move(str);
 	  }
     }
