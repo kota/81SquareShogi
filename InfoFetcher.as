@@ -469,6 +469,8 @@
 			userSettings.grabPiece = true;
 			userSettings.endSound = true;
 			userSettings.pieceType = 0;
+			userSettings.pieceType34 = 0;
+			userSettings.highlightMovable = true;
 			userSettings.byoyomi = 1;
 			userSettings.acceptArrow = true;
 			userSettings.arrowColor = 0x00CC00;
@@ -484,6 +486,8 @@
 					if (userData[i].favoriteList == null) userSettings.favoriteList = "";
 					if (userData[i].pmAutoOpen == null) userSettings.pmAutoOpen = false;
 					if (userData[i].grabPiece == null) userSettings.grabPiece = true;
+					if (userData[i].pieceType34 == null) userSettings.pieceType34 = 0;
+					if (userData[i].highlightMovable == null) userSettings.highlightMovable = true;
 					break;
 				}
 			}

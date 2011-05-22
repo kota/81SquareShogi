@@ -147,7 +147,9 @@ package  {
 	public var kid:int;
 	public var opening:String = "";
     public var piece_type:int = 0;
+	public var piece_type34:int = 0;
 	public var hold_piece:Boolean = true;
+	public var highlight_movable:Boolean = false;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -621,6 +623,7 @@ package  {
 //		_hoverBoardCallback("OFF", "");
 		if (isPlayer && !post_game) _grabPieceCallback(0, 0);
 		CursorManager.removeCursor(CursorManager.currentCursorID);
+//		if (highlight_movable) _hideMovableSquares();
 		_pieceGrab = false;
         _from = null;
         _selected_square = null;
@@ -956,6 +959,7 @@ package  {
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
             _from = new Point(x, y);
+//			if (highlight_movable) _showMovableSquares(_from);
           }
         } else {
           koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
@@ -963,7 +967,7 @@ package  {
 			cancelSquareSelect();
           } else {
             _to = new Point(x,y);
-            if (_position.cantMove(_from, _to)) {
+            if (_from.x < Kyokumen.HAND && _position.cantMove(_position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)), _from, _to)) {
 				cancelSquareSelect();
 			    _to = null;
             } else if (_position.canPromote(_from, _to)) {
@@ -1149,6 +1153,23 @@ package  {
 				if (!arrow.isDrawn) {
 					arrow.drawArrow(_my_turn);
 				}
+			}
+		}
+	}
+
+	private function _showMovableSquares(from:Point):void {
+		var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(from));
+		for (var i:int = 0; i < 9; i++) {
+			for (var j:int = 0; j < 9; j++) {
+				if (!_position.cantMove(koma, from, new Point(_cells[i][j].coord_x, _cells[i][j].coord_y))) _cells[i][j].showMovable();
+			}
+		}
+	}
+	
+	private function _hideMovableSquares():void {
+		for (var i:int = 0; i < 9; i++) {
+			for (var j:int = 0; j < 9; j++) {
+				_cells[i][j].hideMovable();
 			}
 		}
 	}

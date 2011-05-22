@@ -1590,6 +1590,7 @@
         chatSound2CheckBox.selected = _chat_sound2_play;
 		chatSound3CheckBox.selected = _chat_sound3_play;
 		grabPieceCheckBox.selected = board.hold_piece;
+		highlightMovableCheckBox.selected = board.highlight_movable;
 		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
@@ -2645,6 +2646,7 @@
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
 	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
 	  board.hold_piece = _optionWindow.grabPieceCheckBox.selected;
+	  board.highlight_movable = _optionWindow.highlightMovableCheckBox.selected;
 	  _pmAutoOpen = _optionWindow.pmAutoOpenCheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
@@ -2677,6 +2679,8 @@
 		urlVariables.favoriteList = _favorite_list.join("/");
 		urlVariables.byoyomi = GameTimer.soundType;
 		urlVariables.pieceType = board.piece_type;
+		urlVariables.pieceType34 = board.piece_type34;
+		urlVariables.highlightMovable = board.highlight_movable;
 		_infoFetcher.writeSettings(urlVariables);
 	}
 	
@@ -2710,6 +2714,8 @@
 		if (_infoFetcher.userSettings.favoriteList != "") _favorite_list = _infoFetcher.userSettings.favoriteList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
 		board.setPieceType(_infoFetcher.userSettings.pieceType);
+		board.piece_type34 = _infoFetcher.userSettings.pieceType34;
+		board.highlight_movable = _infoFetcher.userSettings.highlightMovable;
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------------------------- PLAYER INFO WINDOW
@@ -3173,12 +3179,17 @@
 			  <mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:VBox height="428">
-				<mx:HBox paddingBottom="-2">
+			<mx:VBox height="453">
+				<mx:HBox paddingBottom="3">
 					<mx:Label text="{lan.kifu}" fontWeight="bold"/>
 					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
 					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
 				</mx:HBox>
+				  <mx:HBox paddingLeft="2" paddingTop="-3">
+						<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
+						<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
+						<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
+				  </mx:HBox>
 				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
 				 <mx:columns>
 				  <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
@@ -3187,11 +3198,6 @@
 				</mx:DataGrid>
 			</mx:VBox>
 		  </mx:VDividedBox>
-		  <mx:HBox paddingTop="-3">
-				<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
-				<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
-				<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
-		  </mx:HBox>
         </mx:Panel>
 	</mx:HBox>
 	</mx:Panel>
