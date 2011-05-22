@@ -160,7 +160,8 @@ package  {
 	private var _hoverTimer:Timer = new Timer(100, 1);
 	public var kid:int;
 	public var opening:String = "";
-    public var piece_type:int = 0;
+	public var piece_type:int = 0;
+    public var piece_type34:int = 0;
 	public var hold_piece:Boolean = true;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
@@ -192,7 +193,7 @@ package  {
       this.width = BAN_WIDTH;
       this.height = BAN_HEIGHT;
 
-      _board_bg_image.source = _bg_images[piece_type];
+      _board_bg_image.source = _bg_images[piece_type34];
 //      _board_bg_image.setStyle('borderStyle','solid');
 //      _board_bg_image.setStyle('borderColor', 0x888888);
       
@@ -307,9 +308,9 @@ package  {
 
     public function resetBoard():void{
      if (_my_turn == Kyokumen.SENTE) {
-        _board_coord_image.source = _scoord_images[piece_type];
+        _board_coord_image.source = _scoord_images[piece_type34];
       } else {
-        _board_coord_image.source = _gcoord_images[piece_type];
+        _board_coord_image.source = _gcoord_images[piece_type34];
       }
 
       for (var i:int = 0; i < 4; i++ ) {
@@ -369,7 +370,7 @@ package  {
         for(var x:int=0;x<3;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
-            var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
+            var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type34] : pSrc.koma_images_gote[piece_type34];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
 //			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
             _cells[y][x].source = images[image_index];
@@ -391,7 +392,7 @@ package  {
               var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
 			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-              images = i == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
+              images = i == _my_turn ? pSrc.koma_images_sente[piece_type34] : pSrc.koma_images_gote[piece_type34];
               handPiece.source = images[j];
               handPiece.x = KOMADAI_WIDTH / 2 - KOMA_WIDTH / 2 * hand_sum + KOMA_WIDTH * hand_count;
               handPiece.y = 0;
@@ -607,7 +608,7 @@ package  {
 			arrow.drawArrow(_my_turn);
 			addChild(arrow);
 		}
-//		if (_hoverImage.visible) _hoverImage.source = _my_turn == _hoverOwner ? pSrc.koma_images_sente[piece_type][_hoverPiece] : pSrc.koma_images_gote[piece_type][_hoverPiece];
+//		if (_hoverImage.visible) _hoverImage.source = _my_turn == _hoverOwner ? pSrc.koma_images_sente[piece_type34][_hoverPiece] : pSrc.koma_images_gote[piece_type34][_hoverPiece];
 		if (contains(_hoverImage)) _hoverImage.source = null;
 	}
 
@@ -699,12 +700,12 @@ package  {
 	}
 	
     public function setPieceType(i:int):void{
-    	piece_type = i;
+    	piece_type34 = i;
 		_board_bg_image.source = _bg_images[i];
 		 if (_my_turn == Kyokumen.SENTE) {
-			_board_coord_image.source = _scoord_images[piece_type];
+			_board_coord_image.source = _scoord_images[piece_type34];
 		  } else {
-			_board_coord_image.source = _gcoord_images[piece_type];
+			_board_coord_image.source = _gcoord_images[piece_type34];
 		  }
     	if (_position != null) setPosition(_position);
     }
@@ -994,7 +995,7 @@ package  {
 					_to = null;
 				} else {
 					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
-					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type][koma_type + Koma.PROMOTE];
+					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type34][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type34][koma_type + Koma.PROMOTE];
 					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
 					alt.validateNow();
 					alt.width *= 0.8;

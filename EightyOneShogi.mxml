@@ -817,9 +817,9 @@
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
-	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+	  if (board.piece_type34 == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type34 == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type34 == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
     }
 
     private function _handleReconnect(e:ServerMessageEvent):void {
@@ -943,9 +943,9 @@
 	  logoutButton.enabled = false;
       kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
-	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+	  if (board.piece_type34 == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type34 == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type34 == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
 
 	  if (end_game) {
 		  var kifuMove:Object = new Object();
@@ -1597,13 +1597,13 @@
     }
 
 	private function _showOptions():void {
-	  _prev_piece_type = board.piece_type;
+	  _prev_piece_type = board.piece_type34;
       _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, true));
       PopUpManager.centerPopUp(_optionWindow);
       with (_optionWindow) {
         title = "Options";
 		RadioGroup1.selectedValue = GameTimer.soundType;
-        RadioGroup2.selectedValue = board.piece_type;
+        RadioGroup2.selectedValue = board.piece_type34;
         pieceSoundCheckBox.selected = board.piece_sound_play;
         gameEndSoundCheckBox.selected = _end_sound_play;
         chatSound1CheckBox.selected = _chat_sound1_play;
@@ -2165,7 +2165,7 @@
 				}
 			}
 		}
-		_openKifuShareWindow(kifu, board.piece_type, board.my_turn, kifuDataGrid.selectedIndex);
+		_openKifuShareWindow(kifu, board.piece_type34, board.my_turn, kifuDataGrid.selectedIndex);
 	}
 	
 	private function _openKifuShareWindow(kifu:Object, pieceType:int = 0,  turn:int = 0, moves:int = 0):void {
@@ -2670,11 +2670,11 @@
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
 	  if (_isDuringMyGame()) {
-		  if (board.piece_type >= 4 && board.piece_type != _prev_piece_type) {
-			  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-			  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-			  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
-		  } else if (board.piece_type <= 3 && _prev_piece_type >= 4) {
+		  if (board.piece_type34 >= 4 && board.piece_type34 != _prev_piece_type) {
+			  if (board.piece_type34 == 4) _sendAutoChat("Pieces set to Blind, Middle.");
+			  else if (board.piece_type34 == 5) _sendAutoChat("Pieces set to Blind, Hard.");
+			  else if (board.piece_type34 == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+		  } else if (board.piece_type34 <= 3 && _prev_piece_type >= 4) {
 			  _sendAutoChat("Pieces set to Normal.");
 		  }
 	  }
@@ -2697,6 +2697,7 @@
 		urlVariables.favoriteList = _favorite_list.join("/");
 		urlVariables.byoyomi = GameTimer.soundType;
 		urlVariables.pieceType = board.piece_type;
+		urlVariables.pieceType34 = board.piece_type34;
 		_infoFetcher.writeSettings(urlVariables);
 	}
 	
@@ -2729,7 +2730,7 @@
 		if (_infoFetcher.userSettings.ignoreList != "") _ignore_list = _infoFetcher.userSettings.ignoreList.split("/");
 		if (_infoFetcher.userSettings.favoriteList != "") _favorite_list = _infoFetcher.userSettings.favoriteList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
-		board.setPieceType(_infoFetcher.userSettings.pieceType);
+		board.setPieceType(_infoFetcher.userSettings.pieceType34);
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------------------------- PLAYER INFO WINDOW
