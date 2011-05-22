@@ -89,13 +89,13 @@
 					filter = line.substr(3);
 				} else {
 					switch(filter) {
-						case "NEWEST_VERSION":
+						case "NEWEST_VERSION34":
 							newestVer = line;
 							break;
-						case "INITIAL_MESSAGE":
+						case "INITIAL_MESSAGE34":
 							initMessage += line + "\n";
 							break;
-						case "GAME_MESSAGE":
+						case "GAME_MESSAGE34":
 							gameMessage += line + "\n";
 							break;
 						case "TITLE_HOLDERS":

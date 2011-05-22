@@ -244,24 +244,24 @@ package  {
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
 		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
-		timer.x = BAN_LEFT_MARGIN + BAN_WIDTH + 20;
+		timer.x = 50;
 		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -40 : 10);
 		timers[i] = timer;
 		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
 		flag_loader.height = 44;
-		flag_loader.x = BAN_LEFT_MARGIN + BAN_WIDTH + 130;
-		flag_loader.y = timer.y - (i == 0 ? 0 : 13);
+		flag_loader.x = 85;
+		flag_loader.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -220 : 180);
 		_player_flags[i] = flag_loader;
 
         var turn_symbol:Image = new Image();
         turn_symbol.x = 2;
-        turn_symbol.y = i == 1 ? 137 : 10;
+        turn_symbol.y = i == 1 ? 137 : 0;
         _turn_symbols[i] = turn_symbol;
 		var avatar_image:Canvas = new Canvas();
-		avatar_image.x = 0;
-		avatar_image.y = i == 1 ? 6 : 52;
+		avatar_image.x = 9;
+		avatar_image.y = i == 1 ? 6 : 47;
 		avatar_image.width = KOMADAI_WIDTH - 42
 		avatar_image.height = avatar_image.width
 		_avatar_images[i] = avatar_image;
@@ -279,15 +279,15 @@ package  {
         _info_labels[i] = info_label;
 
         var i_box:Canvas = new Canvas();
-//        i_box.setStyle('backgroundColor',0xddee88);
-//        i_box.setStyle('borderStyle', 'solid');
+        i_box.setStyle('backgroundColor',0xdddd88);
+        i_box.setStyle('borderStyle', 'solid');
 //		i_box.setStyle('borderThickness', 2);
 		i_box.horizontalScrollPolicy = "off";
 		i_box.verticalScrollPolicy = "off";
-        i_box.width = 170;
-        i_box.height = 190;
-        i_box.x = BAN_LEFT_MARGIN + BAN_WIDTH + 30;
-        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 160 : BAN_TOP_MARGIN - 30;
+        i_box.width = 152;
+        i_box.height = 185;
+        i_box.x = BAN_LEFT_MARGIN + BAN_WIDTH + 45;
+        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 152 : BAN_TOP_MARGIN - 33;
         i_box.addChild(turn_symbol);
         i_box.addChild(name_label);
         i_box.addChild(info_label);
