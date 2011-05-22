@@ -406,6 +406,7 @@
 			  }
 		  }
 	  }
+      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  for (i = 0; i < user_list.length; i++) {
 		  if (user_list[i].wins + user_list[i].losses >= 10 || user_list[i].titleName != "") {
 			  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
@@ -446,7 +447,6 @@
 			  waiter_list.push(userProxy);
 		  }
 	  }
-      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 	  for (i = 0; i < user_list.length; i++) {
 		  if (user_list[i].wins + user_list[i].losses < 10 && user_list[i].rating < InfoFetcher.rank_thresholds[1]) user_list[i].rating = "*" + String(user_list[i].rating);
 	  }
