@@ -246,13 +246,13 @@ package  {
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
 		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
 		timer.x = 50;
-		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -40 : 10);
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -70 : 40);
 		timers[i] = timer;
 		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
 		flag_loader.height = 44;
-		flag_loader.x = 85;
+		flag_loader.x = 65;
 		flag_loader.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -220 : 180);
 		_player_flags[i] = flag_loader;
 
@@ -280,7 +280,7 @@ package  {
         _info_labels[i] = info_label;
 
         var i_box:Canvas = new Canvas();
-        i_box.setStyle('backgroundColor',0xdddd88);
+        i_box.setStyle('backgroundColor',0xffeeaa);
         i_box.setStyle('borderStyle', 'solid');
 //		i_box.setStyle('borderThickness', 2);
 		i_box.horizontalScrollPolicy = "off";
