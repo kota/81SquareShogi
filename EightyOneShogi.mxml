@@ -1610,6 +1610,7 @@
         chatSound2CheckBox.selected = _chat_sound2_play;
 		chatSound3CheckBox.selected = _chat_sound3_play;
 		grabPieceCheckBox.selected = board.hold_piece;
+		highlightMovableCheckBox.selected = board.highlight_movable;
 		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
@@ -2665,6 +2666,7 @@
       _chat_sound2_play = _optionWindow.chatSound2CheckBox.selected;
 	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
 	  board.hold_piece = _optionWindow.grabPieceCheckBox.selected;
+	  board.highlight_movable = _optionWindow.highlightMovableCheckBox.selected;
 	  _pmAutoOpen = _optionWindow.pmAutoOpenCheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
@@ -2698,6 +2700,7 @@
 		urlVariables.byoyomi = GameTimer.soundType;
 		urlVariables.pieceType = board.piece_type;
 		urlVariables.pieceType34 = board.piece_type34;
+		urlVariables.highlightMovable = board.highlight_movable;
 		_infoFetcher.writeSettings(urlVariables);
 	}
 	
@@ -2731,6 +2734,7 @@
 		if (_infoFetcher.userSettings.favoriteList != "") _favorite_list = _infoFetcher.userSettings.favoriteList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
 		board.setPieceType(_infoFetcher.userSettings.pieceType34);
+		board.highlight_movable = _infoFetcher.userSettings.highlightMovable;
 	}
 	
 	//--------------------------------------------------------------------------------------------------------------------------------- PLAYER INFO WINDOW

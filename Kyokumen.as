@@ -233,12 +233,12 @@ package  {
 			return false;
 		}
 		
-		public function cantMove(from:Point,to:Point):Boolean {
+		public function cantMove(koma:Koma, from:Point,to:Point):Boolean {
 			if(from.x > HAND) return false;
 			from = translateHumanCoordinates(from);
 			to = translateHumanCoordinates(to);
-			var koma:Koma; 
-	        koma = getKomaAt(from);
+//			var koma:Koma; 
+//	        koma = getKomaAt(from);
 	        var dx:Number = to.x - from.x;
 	        var dy:Number = koma.ownerPlayer == SENTE ? to.y - from.y : from.y - to.y;
 	        switch (koma.type){

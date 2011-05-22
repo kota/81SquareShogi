@@ -18,7 +18,7 @@
 			
         ]]>
     </mx:Script>
-	<mx:TabNavigator id="optionTab" width="370" height="320" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
+	<mx:TabNavigator id="optionTab" width="370" height="370" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
 		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
 			<mx:RadioButton label="Designed by Madoka" paddingRight="20" groupName="RadioGroup2" value="0"/>
@@ -54,6 +54,7 @@
 			</mx:HBox>
 			<mx:Spacer height="10"/>
 			<mx:CheckBox id="grabPieceCheckBox" label="Grab piece when moving"/>
+			<mx:CheckBox id="highlightMovableCheckBox" label="Highlight movable squares"/>
 		</mx:VBox>
 		<mx:VBox label="{parentApplication.lan.sound}" paddingLeft="20" paddingTop="10">
 			<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>

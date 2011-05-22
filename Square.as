@@ -1,9 +1,11 @@
 package {
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
 	import mx.containers.Canvas;
 	import mx.controls.Image;
+	import mx.core.UIComponent;
 
   public class Square extends Canvas {
     private var _coord_x:int;
@@ -11,6 +13,7 @@ package {
     private var _img:Image;
 	private var _stayTimer:Timer = new Timer(150, 1);
 	private var _dead:Boolean = false;
+	private var _movableMarker:UIComponent = new UIComponent();
 
     public static const KOMA_WIDTH:int = 100;
     public static const KOMA_HEIGHT:int = 100;
@@ -32,6 +35,11 @@ package {
 //	  _img.x = -1;
 //	  _img.y = -1;
       this.addChild(_img);
+	  var spr:Sprite = new Sprite();
+	  spr.graphics.beginFill(0x00ff00, 0.3);
+	  spr.graphics.drawCircle(KOMA_WIDTH / 2, KOMA_HEIGHT / 2, KOMA_WIDTH / 4);
+	  spr.graphics.endFill();
+	  _movableMarker.addChild(spr);
       _coord_x = x;
       _coord_y = y;
 	  _stayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleStay);
@@ -43,6 +51,14 @@ package {
 	
 	public function showPiece():void {
 		_img.visible = true;
+	}
+	
+	public function showMovable():void {
+		if (!contains(_movableMarker)) addChild(_movableMarker);
+	}
+	
+	public function hideMovable():void {
+		if (contains(_movableMarker)) removeChild(_movableMarker);
 	}
 	
 	public function mouseOver():void {
