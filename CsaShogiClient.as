@@ -192,7 +192,7 @@ package{
 	}
 
     public function who():void{
-      send("%%WHO");
+      send("%%WHO34");
     }
 
     public function chat(message:String):void{
@@ -224,7 +224,7 @@ package{
 	}
 
     public function list():void{
-      send("%%LIST");
+      send("%%LIST34");
     }
 	
 	public function setRate(n:int):void {
@@ -240,7 +240,7 @@ package{
     }
 
     public function watchers(game_name:String):void{
-      send("%%%WATCHERS " + game_name);
+      send("%%%WATCHERS34 " + game_name);
     }
 
 		private function _handleConnect(e:Event):void{
@@ -263,7 +263,7 @@ package{
 			_buffer = _buffer + response;
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
-			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\]|^##\[RECONNECT\])/)) {
+			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST34\]|^##\[WHO34\]|^##\[RECONNECT\])/)) {
 				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
 					trace("buffer doesn't deserve dispatching.");
 					return;
@@ -305,19 +305,19 @@ package{
 			dispatchEvent(new ServerMessageEvent(LEAVE, match[1]));
 		} else if ((match = line.match(/^##\[DISCONNECT\]\[(.+)\]/))) {
 			dispatchEvent(new ServerMessageEvent(DISCONNECT, match[1]));
-        } else if(line.match(/^##\[WHO\]/) != null){
+        } else if(line.match(/^##\[WHO34\]/) != null){
           _buffer_response(WHO,line);
-          if(line.match(/^##\[WHO\] \+OK$/)){
+          if(line.match(/^##\[WHO34\] \+OK$/)){
 			      _dispatchServerMessageEvent(WHO);
           }
-        } else if(line.match(/^##\[LIST\]/) != null){
+        } else if(line.match(/^##\[LIST34\]/) != null){
           _buffer_response(LIST,line);
-          if(line == "##[LIST] +OK"){
+          if(line == "##[LIST34] +OK"){
 			      _dispatchServerMessageEvent(LIST);
           }
-        } else if(line.match(/^##\[WATCHERS\]/) != null){
+        } else if(line.match(/^##\[WATCHERS34\]/) != null){
           _buffer_response(WATCHERS,line);
-          if(line.match(/^##\[WATCHERS\] \+OK$/)){
+          if(line.match(/^##\[WATCHERS34\] \+OK$/)){
 			      _dispatchServerMessageEvent(WATCHERS);
           }
         } else {

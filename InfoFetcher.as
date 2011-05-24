@@ -28,8 +28,8 @@
 		public var titleSubName:Array;
 		public var titleAvatar:Array;
 //		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
-		public static const rank_thresholds:Array = new Array(2900, 1900, 1480, 1420, 1360, 1300, 1240, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
-		public static const rank_names:Array = new Array('PRO', '7-Dan', '6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan', '1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu', '6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu', '11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu');
+		public static const rank_thresholds:Array = new Array(15000, 10000, 7000, 5000, 4000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 0);
+		public static const rank_names:Array = new Array('GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT','KID', 'INFANT', 'BABY', 'EGG')
 		public var country_codes:Array;
 		public static var country_names:Array;
 		public static var country_names3:Array;
@@ -142,15 +142,15 @@
 		public static function makeColorFromRating(i:int):uint {
 			if (i >= rank_thresholds[1]) {
 				return 0x000000;
-			} else if (i >= rank_thresholds[4]) {
+			} else if (i >= rank_thresholds[3]) {
 				return 0xFF0000;
-			} else if (i >= rank_thresholds[7]) {
+			} else if (i >= rank_thresholds[5]) {
 				return 0xEE8800;
-			} else if (i >= rank_thresholds[10]) {
+			} else if (i >= rank_thresholds[8]) {
 				return 0x009300;
-			} else if (i >= rank_thresholds[13]) {
+			} else if (i >= rank_thresholds[10]) {
 				return 0x1166FF;
-			} else if (i >= rank_thresholds[16]) {
+			} else if (i >= rank_thresholds[12]) {
 				return 0xAA55FF;
 			} else {
 				return 0x777777;
@@ -493,7 +493,7 @@
 					if (userData[i].pmAutoOpen == null) userSettings.pmAutoOpen = false;
 					if (userData[i].grabPiece == null) userSettings.grabPiece = true;
 					if (userData[i].pieceType34 == null) userSettings.pieceType34 = 0;
-					if (userData[i].highlightMovable == null) userSettings.highlightMovable = true;
+					if (userData[i].highlightMovable == null) userSettings.highlightMovable = false;
 					break;
 				}
 			}

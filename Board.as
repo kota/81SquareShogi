@@ -163,7 +163,7 @@ package  {
 	public var piece_type:int = 0;
     public var piece_type34:int = 0;
 	public var hold_piece:Boolean = true;
-	public var highlight_movable:Boolean = true;
+	public var highlight_movable:Boolean = false;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -545,11 +545,11 @@ package  {
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[_my_turn].avatar ? _player_infos[_my_turn].avatar : _player_infos[_my_turn].rank) + ".jpg";
+	  avatar.source =  IMAGE_DIRECTORY + "avatars34/" + (_player_infos[_my_turn].avatar ? _player_infos[_my_turn].avatar : _player_infos[_my_turn].rank) + ".jpg";
 	  _avatar_images[0].addChild(avatar);
 	  if (!viewing) _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[1 - _my_turn].avatar ? _player_infos[1 - _my_turn].avatar : _player_infos[1 - _my_turn].rank) + ".jpg";
+	  avatar.source =  IMAGE_DIRECTORY + "avatars34/" + (_player_infos[1 - _my_turn].avatar ? _player_infos[1 - _my_turn].avatar : _player_infos[1 - _my_turn].rank) + ".jpg";
 	  _avatar_images[1].addChild(avatar);
 	  if (!viewing) _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";

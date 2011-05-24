@@ -132,7 +132,7 @@
 	<mx:Move id="hideMove" yFrom="0" yTo="103" duration="150" />
 	<mx:HBox>
 		<mx:Canvas id="avatarCanvas" width="128" height="128">
-			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_avatar}.jpg"/>
+			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars34/{_avatar}.jpg"/>
 		</mx:Canvas>
 		<mx:VBox>
 			<mx:HBox verticalAlign="middle">
@@ -141,22 +141,22 @@
 						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
 						<mx:Label text="{_title}" toolTip="{_subTitle}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
-					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}"/>
+					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}" fontSize="14" />
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
 			<mx:VBox height="73" horizontalScrollPolicy="off">
-				<mx:Label text="{parentApplication.lan.rate}:  {_rating}  ({_rank})"/>
+				<mx:Label text="{_rank}  (EXP: {_rating})" fontSize="14" />
 				<mx:HBox>
 					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>
 					<mx:Label text="{_losses} {parentApplication.lan.loss_small}"/>
 					<mx:Label text="({_percentage.toFixed(1)}%)"/>
 					<mx:Label text="{parentApplication.lan.total}: {_wins + _losses}"/>
 				</mx:HBox>
-				<mx:HBox>
+<!--				<mx:HBox>
 					<mx:Label text="{parentApplication.lan.streak}: {_streak_best}"/>
 					<mx:Label text="({parentApplication.lan.current}: {_streak})"/>
-				</mx:HBox>
+				</mx:HBox> -->
 			</mx:VBox>
 		</mx:VBox>
 	</mx:HBox>
@@ -177,8 +177,8 @@
 			<mx:Button id="invite" label="{parentApplication.lan.invite}" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
-			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
-			<mx:Button id="setRateButton" label="Set Rate" enabled="false" />
+<!--			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
+			<mx:Button id="setRateButton" label="Set Rate" enabled="false" /> -->
 		</mx:HBox>
 		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" toolTip="Open PM window" />
 		<mx:Image source="@Embed('images/icon_greet.png')" click="pmCheckBox.selected = !pmCheckBox.selected; togglePM();" toolTip="Open PM window" />

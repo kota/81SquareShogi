@@ -73,7 +73,7 @@
 			</mx:VBox>
 			<mx:SWFLoader width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{countryCode}.swf" ioError="_swfError();" />
 		</mx:HBox>
-		<mx:Label text="  {parentApplication.lan.rate}: {rate}, ({rank})"/>
+		<mx:Label text="  {rank} (EXP: {rate})" fontSize="14" />
 	</mx:VBox>
 	<mx:VBox width="100%" horizontalAlign="center" paddingTop="5">
 		<mx:HBox>
