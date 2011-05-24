@@ -238,6 +238,10 @@ package{
     public function keepAlive():void{
       send("\n");
     }
+	
+	public function idle(onoff:Boolean):void {
+		send("%%IDLE " + (onoff ? 1 : 0));
+	}
 
     public function watchers(game_name:String):void{
       send("%%%WATCHERS34 " + game_name);
