@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1180" height="690" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
 	<mx:Style>
 		global{ 
 		 layoutDirection: "ltr";
