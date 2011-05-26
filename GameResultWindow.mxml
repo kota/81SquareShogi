@@ -52,29 +52,27 @@
 				  _dy = -2;
 				  _main = "YOU WIN!";
 				  mainLabel.setStyle('color', 0xFF0000);
-				  var difL:int = v > 1 ? Math.round(dif / 2.0) : dif;
-				  _you_after = "-> " + (you.rating + dif) + " (+" + dif +")";
-				  _opponent_after = "-> " + (opponent.rating - difL) + " (-" + difL + ")";
-				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + dif)) {
+				  _you_after = "-> " + (you.rating + 3) + " (+3)";
+				  _opponent_after = "-> " + (opponent.rating + 1) + " (+1)";
+				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + 3)) {
 					  _you_rank = "Rank Up!";
 					  youRank.setStyle('color', 0xFF0000);
 				  }
-				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating - difL)) {
-					  _opponent_rank = "Rank Down";
+				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + 1)) {
+					  _opponent_rank = "Rank Up!";
 					  opponentRank.setStyle('color', 0x0000FF);
 				  }
 			  } else if (v < 0) {
 				  _dy = 2;
 				  _main = "YOU LOST";
 				  mainLabel.setStyle('color', 0x0000FF);
-				  difL = v < -1 ? Math.round(dif / 2.0) : dif;
-				  _you_after = "-> " + (you.rating - difL) + " (-" + difL +")";
-				  _opponent_after = "-> " + (opponent.rating + dif) + " (+" + dif + ")";
-				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating - difL)) {
-					  _you_rank = "Rank Down!";
+				  _you_after = "-> " + (you.rating + 1) + " (+1)";
+				  _opponent_after = "-> " + (opponent.rating + 3) + " (+3)";
+				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + 1)) {
+					  _you_rank = "Rank Up!";
 					  youRank.setStyle('color', 0x0000FF);
 				  }
-				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + dif)) {
+				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + 3)) {
 					  _opponent_rank = "Rank Up!";
 					  opponentRank.setStyle('color', 0xFF0000);
 				  }

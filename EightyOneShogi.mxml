@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xbbffff" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xbbffff" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
 	<mx:Style>
 		global{ 
 		 layoutDirection: "ltr";
@@ -414,7 +414,7 @@
 				  'game_name': user_list[i].game_name,
 				  'country': user_list[i].country,
 				  'country3':InfoFetcher.country_names3[user_list[i].country_code],
-				  'flagURL': DIRECTORY + "images/flags_s/" + String(user_list[i].country_code + 1000).substring(1) + ".gif",
+				  'flagURL': user_list[i].flagURL,
 				  'rankColor': user_list[i].rankColor,
 				  'rank': user_list[i].rank
 				  }
@@ -430,7 +430,7 @@
 				user.time = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
 				user.timeTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
 			  } else {
-				user.time = total + "-" + game_info[4];
+				user.time = total + " min + " + game_info[4] + " sec";
 				user.timeTip = "";
 			  }
 			  userProxy = new ObjectProxy(user);
@@ -615,16 +615,13 @@
 	private function _handleLobbyIn(e:ServerMessageEvent):void {
 		var tokens:Array = e.message.split(",");
 		var rank:String
-		if (tokens[2] == "true") {
-			rank = "A new player";
-		} else {
-			rank = "A " + InfoFetcher.makeRankFromRating(tokens[1]);
-			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
-			  if (_infoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
-				  rank = "The " + _infoFetcher.titleName[i];
-				  break;
-			  }
-			}
+		rank = InfoFetcher.makeRankFromRating(tokens[8]);
+		rank = (rank.match(/^(A|E|I|O|U)/) ? "An " : "A ") + rank;
+		for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
+		  if (_infoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
+			  rank = "The " + _infoFetcher.titleName[i];
+			  break;
+		  }
 		}
 		var isFavorite:Boolean = _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0;
 		_writeUserMessage(tokens[0] + " logged in. " + rank + " from " + InfoFetcher.country_names[tokens[3]] + ".\n", 1, "#008800", isFavorite);
@@ -1074,16 +1071,14 @@
 	  radioKifuReplay.enabled = true;
 	  radioKifuListen.enabled = true;
       if (e.message.indexOf("LOSE") >= 0) {
-		if (board.playerInfos[0].rank != "-" && board.playerInfos[1].rank == "-") _openGameResultWindow(-2);
-		else _openGameResultWindow(-1);
+		_openGameResultWindow(-1);
 		board.infoBoxes[1].setStyle('borderThickness', 2);
 		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isStudyHost = true;
-		if (board.playerInfos[0].rank == "-" && board.playerInfos[1].rank != "-") _openGameResultWindow(2);
-		else _openGameResultWindow(1);
+		_openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
 		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
@@ -1570,9 +1565,9 @@
 			timeSetting.selectedValue = 1;
 		}
 		toggleTimeSelection();
-		if (_so.data.rule_total) nonrated_total.selectedIndex = _so.data.rule_total;
-		if (_so.data.rule_byoyomi) nonrated_byoyomi.selectedIndex = _so.data.rule_byoyomi;
-		if (_so.data.rule_handicap) nonrated_handicap.selectedIndex = _so.data.rule_handicap;
+//		if (_so.data.rule_total) nonrated_total.selectedIndex = _so.data.rule_total;
+//		if (_so.data.rule_byoyomi) nonrated_byoyomi.selectedIndex = _so.data.rule_byoyomi;
+//		if (_so.data.rule_handicap) nonrated_handicap.selectedIndex = _so.data.rule_handicap;
 		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
       }
     }
@@ -2630,9 +2625,9 @@
 	//--------------------------------------------------------------------------------------------------------------------------------- CREATE GAME
     private function _handleRuleSelected(e:GameRuleEvent):void {
 	  _so.data.rule_base = _newGameWindow.timeSetting.selectedValue;
-	  _so.data.rule_total = _newGameWindow.nonrated_total.selectedIndex;
-	  _so.data.rule_byoyomi = _newGameWindow.nonrated_byoyomi.selectedIndex;
-	  _so.data.rule_handicap = _newGameWindow.nonrated_handicap.selectedIndex;
+//	  _so.data.rule_total = _newGameWindow.nonrated_total.selectedIndex;
+//	  _so.data.rule_byoyomi = _newGameWindow.nonrated_byoyomi.selectedIndex;
+//	  _so.data.rule_handicap = _newGameWindow.nonrated_handicap.selectedIndex;
       _waitForGame(e.total, e.byoyomi, e.handicap, e.tournament);
 	  _waiting = true;
     }
@@ -2977,10 +2972,10 @@
                   VIEWSTACK INDEX = 0
 ================================================================== -->
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
-    <mx:Image id="titleBanner" source="{DIRECTORY}images/81Dojo.jpg"/>
+    <mx:Image id="titleBanner" source="{DIRECTORY}images/3X4.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
-      <mx:Label paddingTop="-3" text="(powered by ShogiServer and 81SquareUniverse.com)"/>
+      <mx:Label paddingTop="-3" text="(Collaboration by 81Dojo and Nekomado)"/>
 	  <mx:HBox verticalAlign="middle" horizontalGap="35" >
 		  <mx:Form paddingBottom="0">
 			<mx:FormItem label="{lan.language}" paddingTop="-2">
@@ -3059,8 +3054,8 @@
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn headerStyleName="header81" dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="40" paddingLeft="0" textAlign="center" showDataTips="true" />
-			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="100" paddingLeft="0" textAlign="center" showDataTips="true" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="50" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
 <!--			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{waiterListNameRenderer}" headerText="{lan.waiter}" width="120" paddingLeft="2" sortable="false" />

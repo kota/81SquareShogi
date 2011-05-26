@@ -69,41 +69,41 @@
 			var tournament:String;
             trace("Challenge Clicked");
             switch(timeSetting.selectedValue) {
-			  case 0:
-			    total = 2700;
-				byoyomi = 60;
-				handicap = "vazoo";
-				tournament = "";
-				break;
-              case 1:
-                total = 900;
+              case 0:
+                total = 600;
                 byoyomi = 60;
 				handicap = "vazoo";
 				tournament = "";
                 break;
-              case 2:
+              case 1:
                 total = 300;
                 byoyomi = 30;
 				handicap = "vazoo";
 				tournament = "";
                 break;
+              case 2:
+                total = 180;
+                byoyomi = 20;
+				handicap = "vazoo";
+				tournament = "";
+                break;
               case 3:
-                total = 0;
-                byoyomi = 30;
+                total = 60;
+                byoyomi = 10;
 				handicap = "vazoo";
 				tournament = "";
                 break;
               case 4:
-                total = nonrated_total.selectedItem.data;
-                byoyomi = nonrated_byoyomi.selectedItem.data;
-				handicap = "vazoo";
-				tournament = "";
+//                total = nonrated_total.selectedItem.data;
+//                byoyomi = nonrated_byoyomi.selectedItem.data;
+//				handicap = "vazoo";
+//				tournament = "";
 				break;
 			  case 5:
-				total = tournament_name.selectedItem.total;
-				byoyomi = tournament_name.selectedItem.byoyomi;
-				handicap = tournament_name.selectedItem.type;
-				tournament = "--" + tournament_name.selectedItem.code;
+//				total = tournament_name.selectedItem.total;
+//				byoyomi = tournament_name.selectedItem.byoyomi;
+//				handicap = tournament_name.selectedItem.type;
+//				tournament = "--" + tournament_name.selectedItem.code;
 				break;
               default:
                 break;
@@ -117,8 +117,8 @@
           }
 
           public function toggleTimeSelection():void{
-            nonrated_total.enabled = timeSetting.selectedValue == 4;
-            nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
+//            nonrated_total.enabled = timeSetting.selectedValue == 4;
+//            nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
 //            nonrated_handicap.enabled = timeSetting.selectedValue == 4;
 //			tournament_name.enabled = timeSetting.selectedValue == 5;
           }
@@ -126,11 +126,11 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="toggleTimeSelection();"/>
-	<mx:RadioButton enabled="false" groupName="timeSetting" label="45min - 60sec , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
-	<mx:RadioButton enabled="false" groupName="timeSetting" label="15min - 60sec , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
-	<mx:RadioButton enabled="false" groupName="timeSetting" label=" 5min - 30sec , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
-	<mx:RadioButton enabled="false" groupName="timeSetting" label=" 0min - 30sec , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.nonrated}" value="4" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="10min - 60sec" value="0" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec" value="1" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 3min - 20sec" value="2" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 1min - 10sec" value="3" fontSize="11"/>
+<!--	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false" selectedIndex="3" />
 		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false" selectedIndex="4" />
@@ -141,7 +141,7 @@
     <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11" enabled="false" />
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
-    </mx:HBox>
+    </mx:HBox> -->
     <mx:HBox paddingTop="15">
 	    <mx:Button id="Submit" click="submit();" label="{parentApplication.lan.wait}"/> 
 	    <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
