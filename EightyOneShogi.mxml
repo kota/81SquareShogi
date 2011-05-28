@@ -124,16 +124,8 @@
     private var _sound_timeup:Sound = new Sound_timeup();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
-    [Embed(source = "/images/earth.png")]
-    private var _icon_earth:Class
     [Embed(source = "/images/moon.png")]
     private var _icon_moon:Class
-    [Embed(source = "/images/mars.png")]
-    private var _icon_mars:Class
-    [Embed(source = "/images/venus.png")]
-    private var _icon_venus:Class
-    [Embed(source = "/images/mercury.png")]
-    private var _icon_mercury:Class
 	[Embed(source = "/images/saturn.png")]
 	private var _icon_saturn:Class
     private var _sound_challenger:Sound = new Sound_challenger();

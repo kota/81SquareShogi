@@ -245,27 +245,27 @@ package  {
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
 		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
-		timer.x = 50;
-		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -70 : 40);
+		timer.x = 32;
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -110 : 80);
 		timers[i] = timer;
-		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
 		flag_loader.height = 44;
-		flag_loader.x = 65;
-		flag_loader.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -220 : 180);
+		flag_loader.x = 50;
+		flag_loader.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -225 : 180);
 		_player_flags[i] = flag_loader;
 
         var turn_symbol:Image = new Image();
         turn_symbol.x = 2;
-        turn_symbol.y = i == 1 ? 137 : 0;
+        turn_symbol.y = 60; // i == 1 ? 137 : 0;
         _turn_symbols[i] = turn_symbol;
 		var avatar_image:Canvas = new Canvas();
-		avatar_image.x = 9;
-		avatar_image.y = i == 1 ? 6 : 47;
-		avatar_image.width = KOMADAI_WIDTH - 42
+		avatar_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 55; //9;
+		avatar_image.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 100 : BAN_TOP_MARGIN - 30; //i == 1 ? 6 : 47;
+		avatar_image.width = 128; // KOMADAI_WIDTH - 42
 		avatar_image.height = avatar_image.width
 		_avatar_images[i] = avatar_image;
+		addChild(avatar_image);
         var name_label:Label = new Label();
         name_label.setStyle('fontSize', 12);
         name_label.setStyle('fontWeight', 'bold');
@@ -280,25 +280,26 @@ package  {
         _info_labels[i] = info_label;
 
         var i_box:Canvas = new Canvas();
-        i_box.setStyle('backgroundColor',0xffeeaa);
+        i_box.setStyle('backgroundColor',0xeeeeff);
         i_box.setStyle('borderStyle', 'solid');
-//		i_box.setStyle('borderThickness', 2);
+		i_box.setStyle('borderThickness', 2);
 		i_box.horizontalScrollPolicy = "off";
 		i_box.verticalScrollPolicy = "off";
         i_box.width = 152;
-        i_box.height = 185;
-        i_box.x = BAN_LEFT_MARGIN + BAN_WIDTH + 45;
-        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 152 : BAN_TOP_MARGIN - 33;
+        i_box.height = 165;
+        i_box.x = 5; // BAN_LEFT_MARGIN + BAN_WIDTH + 45;
+        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 132 : BAN_TOP_MARGIN - 33;
         i_box.addChild(turn_symbol);
         i_box.addChild(name_label);
         i_box.addChild(info_label);
-		i_box.addChild(avatar_image);
+//		i_box.addChild(avatar_image);
 		infoBoxes[i] = i_box;
         addChild(i_box);
-		
         addChild(hand);
 		addChild(flag_loader);
       }
+	  addChild(timers[0]);
+	  addChild(timers[1]);
 	  _arrows[ARROWS_SELF] = new Array();
 	  _arrows[ARROWS_PUBLIC] = new Array();
 	  _hoverImage.alpha = 0.3;
@@ -542,8 +543,8 @@ package  {
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       name_labels[0].text = _player_infos[_my_turn].name;
       name_labels[1].text = _player_infos[1 - _my_turn].name;
-      _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
-      _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
+      _info_labels[0].text = (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName) + "  (EXP: " + _player_infos[_my_turn].rating + ")";
+      _info_labels[1].text = (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName) + "  (EXP: " + _player_infos[1 - _my_turn].rating + ")";
 	  var avatar:Image = new Image();
 	  avatar.source =  IMAGE_DIRECTORY + "avatars34/" + (_player_infos[_my_turn].avatar ? _player_infos[_my_turn].avatar : _player_infos[_my_turn].rank) + ".jpg";
 	  _avatar_images[0].addChild(avatar);
@@ -577,7 +578,7 @@ package  {
 		timers[0] = timers[1];
 		timers[1] = timer_tmp;
 		for (i = 0; i < 2; i++) {
-			timers[i].y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -40 : 10);
+			timers[i].y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -110 : 80);// (i == 1 ? -40 : 10);
 		}
 		_my_turn = 1 - _my_turn;
 		_arrangeInfos();
