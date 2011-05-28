@@ -133,6 +133,8 @@
     private var _icon_venus:Class
     [Embed(source = "/images/mercury.png")]
     private var _icon_mercury:Class
+	[Embed(source = "/images/saturn.png")]
+	private var _icon_saturn:Class
     private var _sound_challenger:Sound = new Sound_challenger();
     private var _end_sound_play:Boolean = true;
     private var _chat_sound1_play:Boolean = true;
@@ -198,8 +200,10 @@
   _servers.push(server);
   server = { 'name':"VENUS", 'description':"sub", 'icon':_icon_venus, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
   _servers.push(server);
-//  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
-//  _servers.push(server);
+  server = { 'name':"SATURN", 'description':"3X4", 'icon':_icon_saturn, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
+  _servers.push(server);
+  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4084", 'alive':"NO" };
+  _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
 	  if (_so.data.savelogin) {
@@ -1499,12 +1503,16 @@
     private function _connectAndLogin():void {
 	  var serverObj:Object = serverListGrid.selectedItem;
 	  if (serverObj.alive == "NO") return;
+	  serverName = serverObj.name;
+	  if (serverName == "SATURN") {
+		  Alert.show("SATURN is 3X4 server.\nUse 3X4 applet to enter.");
+		  return;
+	  }
 	  userListPanel.titleIcon = serverObj.icon;
       trace("connecting.");
       loginMessage.text = "Connecting...";
       errorMessage.text = "";
 	  _client.setServer(serverObj.host, parseInt(serverObj.port));
-	  serverName = serverObj.name;
 	  if (serverName == "MOON") _api.setHostToLocal();
       _client.connect();
     }
@@ -2331,7 +2339,7 @@
 	}
 	
 	private function _rollOver(e:MouseEvent):void {
-		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_IN]" + e.stageX + "," + e.stageY);
+		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_IN]" + int(e.stageX) + "," + int(e.stageY));
 	}
 	
 	private function _rollOut(e:MouseEvent):void {
@@ -3024,8 +3032,12 @@
 			<mx:FormItem paddingTop="-2">
 				<mx:Button id="loginButton" label="{lan.login}" y="400" />
 			</mx:FormItem>
+			<mx:FormItem>
+				<mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
+				<mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
+			</mx:FormItem>
 		  </mx:Form>
-		  <mx:DataGrid id="serverListGrid" sortableColumns="false" height="135">
+		  <mx:DataGrid id="serverListGrid" sortableColumns="false" height="155">
 			 <mx:columns>
 			  <mx:DataGridColumn itemRenderer="{serverListRenderer}" headerText="{lan.server}" width="90" paddingLeft="0" />
 			  <mx:DataGridColumn dataField="description" headerText="Description" width="80" paddingLeft="0" />
@@ -3034,8 +3046,6 @@
 			 </mx:columns>
 		  </mx:DataGrid>
 	  </mx:HBox>
-      <mx:Label paddingTop="-2" paddingBottom="0"  id="loginMessage" fontSize="10" />
-      <mx:Label paddingTop="-2" paddingBottom="0"  id="errorMessage" color="#ff6666" fontSize="10" />
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
       <mx:Label paddingTop="5" text="(c) Chief Programmer: Kota" fontSize="14" />
 	  <mx:HBox paddingTop="-3">
