@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" height="700" backgroundColor="0xbbffff" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1100" height="700" backgroundColor="0xbbffff" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
 	<mx:Style>
 		global{ 
 		 layoutDirection: "ltr";
@@ -134,6 +134,8 @@
     private var _icon_venus:Class
     [Embed(source = "/images/mercury.png")]
     private var _icon_mercury:Class
+	[Embed(source = "/images/saturn.png")]
+	private var _icon_saturn:Class
     private var _sound_challenger:Sound = new Sound_challenger();
     private var _end_sound_play:Boolean = true;
     private var _chat_sound1_play:Boolean = true;
@@ -192,7 +194,7 @@
 	  }
       _client = new CsaShogiClient();
   serverListGrid.dataProvider = { 'name':"Loading..."};
-  var server:Object = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
+  var server:Object = { 'name':"SATURN", 'description':"main", 'icon':_icon_saturn, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
@@ -3046,10 +3048,10 @@
 			 <mx:columns>
 			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
-			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="58" paddingLeft="0" textAlign="center" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="125" paddingLeft="1" sortCompareFunction="_sortName" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
-			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="EXP" width="49" paddingRight="5" paddingLeft="0" textAlign="right" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="EXP" width="45" paddingRight="5" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
@@ -3116,7 +3118,7 @@
 ================================================================== -->
     <mx:HBox id="boardBox">
 	<mx:Panel layout="absolute" width="100%" height="100%" headerHeight="0" backgroundColor="#FFcccc" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" paddingLeft="0" paddingRight="0" backgroundAlpha="0">
-	<mx:HBox paddingLeft="3" paddingTop="3" horizontalGap="2">
+	<mx:HBox paddingLeft="0" paddingTop="0" horizontalGap="1">
 
       <eightyOneSquare:Board id="board" width="700" height="660" horizontalScrollPolicy="off" verticalScrollPolicy="off" /> 
       <mx:VBox verticalGap="2">

@@ -28,7 +28,7 @@
 		public var titleSubName:Array;
 		public var titleAvatar:Array;
 //		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
-		public static const rank_thresholds:Array = new Array(15000, 10000, 7000, 5000, 4000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 0);
+		public static const rank_thresholds:Array = new Array(15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0);
 		public static const rank_names:Array = new Array('GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT','KID', 'INFANT', 'BABY', 'EGG')
 		public var country_codes:Array;
 		public static var country_names:Array;
