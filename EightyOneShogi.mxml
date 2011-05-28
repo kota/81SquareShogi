@@ -1929,7 +1929,13 @@
 		  PopUpManager.centerPopUp(_playerDetailWindow);
 		  _api.playerDetail(name);
 		  _playerDetailWindow.login = name;
-		  if (_findPlayerFromList(name)) _playerDetailWindow.connection = "ONLINE";
+		  var user:Object = _findPlayerFromList(name);
+		  if (user) {
+			  _playerDetailWindow.connection = "ONLINE";
+			  _playerDetailWindow.title = user.mainTitle;
+			  _playerDetailWindow.subTitle = user.subTitle;
+			  _playerDetailWindow.avatar = user.avatar;
+		  }
 	}
 	
 	private function _handlePlayerInfoClose(e:Event):void {

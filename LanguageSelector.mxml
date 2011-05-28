@@ -29,7 +29,8 @@
 			 {label:"Беларуская", image:"112", fileName:"belorussian"},
 			 {label:"Русский", image:"643", fileName:"russian"},
 			 {label:"ไทย", image:"764", fileName:"thai"},
-			 {label:"Українська", image:"804", fileName:"ukranian"}]
+			 {label:"Українська", image:"804", fileName:"ukranian" },
+			 {label:"Česky", image:"203", fileName:"czech"}]
           );
 		  
 		  private var _words:Object = {	// Default (ENGLISH)
@@ -149,8 +150,8 @@
 			
 			public function loadLanguage():void {
 				_urlLoader.addEventListener(Event.COMPLETE, _readLanguage);
-				var nowDate:Date = new Date(); 
-				_urlLoader.load(new URLRequest(LANGUAGE_DIRECTORY + this.selectedItem.fileName + ".txt?" + nowDate.getTime().toString()));
+				var nowDate:Date = new Date();  parentApplication.VERSION
+				_urlLoader.load(new URLRequest(LANGUAGE_DIRECTORY + this.selectedItem.fileName + ".txt?" + parentApplication.VERSION));
 			}
 
         ]]>

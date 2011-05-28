@@ -28,11 +28,11 @@
 		  [Bindable]
 		  private var _rank:String = "";
 		  [Bindable]
-		  private var _avatar:String = "";
+		  public var avatar:String = null;
 		  [Bindable]
-		  private var _title:String = "none";
+		  public var mainTitle:String = "none";
 		  [Bindable]
-		  private var _subTitle:String = "無し";
+		  public var subTitle:String = "無し";
 		  [Bindable]
 		  private var _wins:int = 0;
 		  [Bindable]
@@ -66,19 +66,22 @@
 			  _updated = player["updated-at"];
 			  _updated = _updated.substr(0, 10);
 			  _pr = player.pr;
+			  _pr = _pr.replace(/\r\n/g, "\n");
+			  if (_pr.match(/^\[object/)) _pr = "";
 			  _rating = player.rate;
 			  _maxRating = player["max-rate"];
 			  _rank = InfoFetcher.makeRankFromRating(_rating);
 			  _wins = player.wins;
 			  _losses = player.losses;
+			  if (_wins + _losses < 10) _rank = "-";
 			  _wins34 = player.wins34;
 			  _losses34 = player.losses34;
 			  _streak = player.streak;
 			  _streak_best = player["streak-best"];
 			  _exp = _wins34 * 3 + _losses34;
 			  _rank34 = InfoFetcher.makeRank34FromExp(_exp);
-			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses));
-			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34));
+			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses)*100);
+			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34)*100);
 		  }
 		  
 		  private function _switchTab():void {
@@ -99,7 +102,7 @@
 	<mx:HBox>
 		<mx:VBox width="150" height="190" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderStyle="solid">
 			<mx:Canvas id="avatarCanvas" width="133" height="133">
-				<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_rank}.jpg" x="5" y="5" />
+				<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{(avatar ? avatar : _rank)}.jpg" x="5" y="5" />
 			</mx:Canvas>
 			<mx:Label text="{login}" fontSize="15" fontWeight="bold" />
 			<mx:HBox>
@@ -112,7 +115,8 @@
 			<mx:Label text="Joined on: {_joined}"/>
 			<mx:Label text="Updated on: {_updated}" />
 			<mx:Label text="PR:"/>
-			<mx:TextArea width="220" height="85"/>
+			<mx:Spacer height="-15"/>
+			<mx:TextArea width="220" height="95" text="{_pr}" fontSize="10" />
 		</mx:VBox>	
 		<mx:Canvas width="280" height="190" borderStyle="solid" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 			<mx:Image source="{IMAGE_DIRECTORY}test/mapSample.jpg"/>
@@ -139,7 +143,7 @@
 <!--					<mx:Label text="{_title}" toolTip="{_subTitle}" /> -->
 					<mx:Label text="{_rank}"/>
 					<mx:Label text="R: {_rating}"/>
-					<mx:Label text="  (max: {_maxRating})"/>
+					<mx:Label text="  (max:    )"/>
 					<mx:Label text="Win: {_wins}"/>
 					<mx:Label text="Loss: {_losses}"/>
 					<mx:Label text="  (Total: {_wins + _losses})"/>
@@ -157,7 +161,7 @@
 			<mx:Label text="EXP: {_exp}"/>
 			<mx:Label text="Win: {_wins34}"/>
 			<mx:Label text="Loss: {_losses34}"/>
-			<mx:Label text="  (Total: {_wins + _losses})"/>
+			<mx:Label text="  (Total: {_wins34 + _losses34})"/>
 			<mx:Label text="  ({_percentage34.toFixed(1)}% win)"/>
 		</mx:VBox>
 	</mx:HBox>
