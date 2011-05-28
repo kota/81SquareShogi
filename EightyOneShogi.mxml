@@ -2353,18 +2353,11 @@
 	private function _handleKifuSearch(e:Event):void {
 		searchAccordion.enabled = true;
 		_kifu_search_list = new Array();
-		var hc:String;
 		var match:Array;
 		for each (var kifu:Object in e.target.bufferData) {
 			match = kifu.game_id.split("+")[1].match(/^([0-9a-z]+?)_.+\-(\d+)\-(\d+)$/);
-			if (match[1] == "r") {
-				hc = "R";
-			} else if (match[1] == "nr") {
-				hc = "NR";
-			} else if (match[1].match(/^(hc|va|mini)/)) {
-				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
-			}
-			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
+			if (match[1] != "vazoo") continue;
+			kifu.rule = parseInt(match[2]) / 60 + " min + " + parseInt(match[3]) + " sec";
 			kifu.black = kifu.game_id.split("+")[2];
 			kifu.white = kifu.game_id.split("+")[3];
 			kifu.date = kifu.game_id.split("+")[4].substr(0, 4) + "-" + kifu.game_id.split("+")[4].substr(4, 2) + "-" + kifu.game_id.split("+")[4].substr(6, 2);
@@ -2413,7 +2406,7 @@
 	private function _shareKifu3():void {
 		var kifu:Object = kifuSearchGrid.selectedItem;
 		if (kifu) {
-			_openKifuShareWindow(kifu);
+			_openKifuShareWindow(kifu, board.piece_type34);
 		} else {
 			Alert.show("Highlight the kifu first.", lan.error);
 		}
@@ -3023,7 +3016,7 @@
       <mx:Panel id="userListPanel" titleStyleName="header81" width="935" height="560" paddingLeft="10" paddingTop="10" status="{VERSION}" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundColor="#FFFFEE">
       <mx:HBox>
         <mx:Button id="refreshButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_refresh();"/>
-		<mx:Button id="searchViewButton" enabled="false" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
+		<mx:Button id="searchViewButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="mainViewStack.selectedIndex=3;" />
         <mx:Button id="startButton" label="{lan.wait}" click="_newGameForm();"/>
         <mx:Button id="stopButton" label="{lan.stop}" click="_stopWaiting()" enabled="false" />
 <!--        <mx:Button id="challengeButton" label="{lan.challenge}" enabled="false" toolTip="Double Click the Opponent to Challenge!!!" /> -->
@@ -3161,8 +3154,8 @@
 
 			<mx:Panel id="sidePanel" title="{lan.kifu}" width="180" height="394" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 				<mx:HBox>
-					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
-					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
+					<mx:Button id="kifuCopyButton" enabled="false" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
+					<mx:Button id="kifuSaveButton" enabled="false" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
 				</mx:HBox>
 			  <mx:HBox>
 					<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
@@ -3235,8 +3228,8 @@
 			<mx:VBox label="{lan.player_search}" paddingTop="10" paddingLeft="10" width="800" height="530">
 				<mx:HBox>
 					<mx:Label text="{lan.name}"/>
-					<mx:TextInput id="playerSearchNameText"/>
-					<mx:Button id="searchPlayerButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendPlayerSearch();" />
+					<mx:TextInput id="playerSearchNameText" enabled="false" />
+					<mx:Button id="searchPlayerButton" enabled="false" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendPlayerSearch();" />
 					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:HBox>
 				<mx:DataGrid id="playerSearchGrid" width="755" height="440" rowHeight="21">
@@ -3260,7 +3253,7 @@
 			<mx:HBox label="{lan.view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox horizontalAlign="center" paddingRight="20">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
-					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
+					<mx:Button id="searchRankingButton" enabled="false" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
 					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">

@@ -22,11 +22,11 @@
 			}
 			
 			private function _sendTwitter():void {
-				var str:String = "http://twitter.com/share?text=81Dojo Kifu: [";
-				str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ", " + kifu.blackRank + ") vs ";
-				str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ", " + kifu.whiteRank +")]";
+				var str:String = "http://twitter.com/share?text=3X4 Shogi Kifu: [";
+				str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ") vs ";
+				str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ")]";
 				if (kifu.opening != "") str += ", " + kifu.opening;
-				str += ". %2381dojo";
+				str += " %2381dojo";
 				str += "&url=" + DIRECTORY + "kifuviewer34.html%3fkid%3d" + kifu.id;
 				if (pieceType != 0) str += "%26piece%3d" + pieceType;
 				if (turn != 0) str += "%26turn%3d" + turn;

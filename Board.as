@@ -849,22 +849,22 @@ package  {
 			  _player_infos[1].name = line.substring(2);
 			  _player_infos[1].titleName = "";
 		  } else if (line.match(/^I\+.+$/)) {
-			  _player_infos[0].rating = line.substring(2).split(",")[0];
-			  if (_player_infos[0].rating.match(/^\*/)) {
-				  _player_infos[0].rank = "-";
-			  } else {
-				  _player_infos[0].rating = parseInt(_player_infos[0].rating);
+//			  _player_infos[0].rating = line.substring(2).split(",")[0];
+//			  if (_player_infos[0].rating.match(/^\*/)) {
+//				  _player_infos[0].rank = "-";
+//			  } else {
+				  _player_infos[0].rating = 0; //parseInt(_player_infos[0].rating);
 				  _player_infos[0].rank = InfoFetcher.makeRankFromRating(_player_infos[0].rating);
-			  }
+//			  }
 			  _player_infos[0].country_code = parseInt(line.substring(2).split(",")[1]);
 		  } else if (line.match(/^I\-.+$/)) {
-			  _player_infos[1].rating = line.substring(2).split(",")[0];
-			  if (_player_infos[1].rating.match(/^\*/)) {
-				  _player_infos[1].rank = "-";
-			  } else {
-				  _player_infos[1].rating = parseInt(_player_infos[1].rating);
+//			  _player_infos[1].rating = line.substring(2).split(",")[0];
+//			  if (_player_infos[1].rating.match(/^\*/)) {
+//				  _player_infos[1].rank = "-";
+//			  } else {
+				  _player_infos[1].rating = 0; //parseInt(_player_infos[1].rating);
 				  _player_infos[1].rank = InfoFetcher.makeRankFromRating(_player_infos[1].rating);
-			  }
+//			  }
 			  _player_infos[1].country_code = parseInt(line.substring(2).split(",")[1]);
 		  } else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
             var move_and_time:Object = new Object();
