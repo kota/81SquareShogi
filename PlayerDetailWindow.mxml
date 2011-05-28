@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();">
+	    <mx:Script>
+        <![CDATA[
+		  import flash.events.Event;
+          import mx.controls.*;
+		  import mx.effects.Effect;
+		  import mx.effects.Move;
+          import mx.managers.PopUpManager;
+
+		  [Bindable]
+		  public var login:String;
+		  [Bindable]
+		  public var connection:String = "offline";
+		  [Bindable]
+		  private var _country:String = "";
+		  [Bindable]
+		  private var _country_code:String = "";
+		  [Bindable]
+		  private var _updated:String = "";
+		  [Bindable]
+		  private var _joined:String = "";
+		  [Bindable]
+		  private var _rating:int = 0;
+		  [Bindable]
+		  private var _maxRating:int = 0;
+		  [Bindable]
+		  private var _rank:String = "";
+		  [Bindable]
+		  private var _avatar:String = "";
+		  [Bindable]
+		  private var _title:String = "none";
+		  [Bindable]
+		  private var _subTitle:String = "無し";
+		  [Bindable]
+		  private var _wins:int = 0;
+		  [Bindable]
+		  private var _losses:int = 0;
+		  [Bindable]
+		  private var _wins34:int = 0;
+		  [Bindable]
+		  private var _losses34:int = 0;
+		  [Bindable]
+		  private var _exp:int = 0;
+		  [Bindable]
+		  private var _rank34:String = "";
+		  [Bindable]
+		  private var _percentage:Number = 0;
+		  [Bindable]
+		  private var _percentage34:Number = 0;
+		  [Bindable]
+		  private var _streak:int = 0;
+		  [Bindable]
+		  private var _streak_best:int = 0;
+		  [Bindable]
+		  private var _pr:String = "";
+
+		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
+		  
+		  public function loadPlayerDetail(player:Object):void {
+			  _country_code = String(InfoFetcher.country_codes[parseInt(player["country-id"]) - 1] + 1000).substring(1);
+			  _country = InfoFetcher.country_names[InfoFetcher.country_codes[parseInt(player["country-id"]) - 1]];
+			  _joined = player["created-at"];
+			  _joined = _joined.substr(0, 10);
+			  _updated = player["updated-at"];
+			  _updated = _updated.substr(0, 10);
+			  _pr = player.pr;
+			  _rating = player.rate;
+			  _maxRating = player["max-rate"];
+			  _rank = InfoFetcher.makeRankFromRating(_rating);
+			  _wins = player.wins;
+			  _losses = player.losses;
+			  _wins34 = player.wins34;
+			  _losses34 = player.losses34;
+			  _streak = player.streak;
+			  _streak_best = player["streak-best"];
+			  _exp = _wins34 * 3 + _losses34;
+			  _rank34 = InfoFetcher.makeRank34FromExp(_exp);
+			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses));
+			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34));
+		  }
+		  
+		  private function _switchTab():void {
+			  if (resultViewStack.selectedIndex == 0) {
+				  resultViewStack.selectedIndex = 1;
+			  } else {
+				  resultViewStack.selectedIndex = 0;
+			  }
+		  }
+
+          private function _close():void {
+            PopUpManager.removePopUp(this);
+          }
+
+        ]]>
+    </mx:Script>
+
+	<mx:HBox>
+		<mx:VBox width="150" height="190" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderStyle="solid">
+			<mx:Canvas id="avatarCanvas" width="133" height="133">
+				<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_rank}.jpg" x="5" y="5" />
+			</mx:Canvas>
+			<mx:Label text="{login}" fontSize="15" fontWeight="bold" />
+			<mx:HBox>
+				<mx:Image width="27" height="17"  source="{IMAGE_DIRECTORY}flags_s/{_country_code}.gif"/>
+				<mx:Label text="{_country}"/>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox>
+			<mx:Label text="Status: {connection}"/>
+			<mx:Label text="Joined on: {_joined}"/>
+			<mx:Label text="Updated on: {_updated}" />
+			<mx:Label text="PR:"/>
+			<mx:TextArea width="220" height="85"/>
+		</mx:VBox>	
+		<mx:Canvas width="280" height="190" borderStyle="solid" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:Image source="{IMAGE_DIRECTORY}test/mapSample.jpg"/>
+		</mx:Canvas>
+	</mx:HBox>
+	
+	<mx:HBox>
+		<mx:VBox borderStyle="solid">
+			<mx:HBox>
+				<mx:Label text="Shogi" fontWeight="bold" fontSize="13" />
+				<mx:Spacer width="100"/>
+				<mx:Button id="changeTabButton" label="switch" click="_switchTab();" />
+			</mx:HBox>
+			<mx:HBox>
+				<mx:ViewStack id="resultViewStack" width="400" height="220">
+					<mx:Canvas width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+						<mx:Image source="{IMAGE_DIRECTORY}test/rateSample.jpg"/>
+					</mx:Canvas>
+					<mx:Canvas width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+						<mx:Image source="{IMAGE_DIRECTORY}test/openingSample.jpg"/>
+					</mx:Canvas>
+				</mx:ViewStack>
+				<mx:VBox width="125" verticalGap="3">
+<!--					<mx:Label text="{_title}" toolTip="{_subTitle}" /> -->
+					<mx:Label text="{_rank}"/>
+					<mx:Label text="R: {_rating}"/>
+					<mx:Label text="  (max: {_maxRating})"/>
+					<mx:Label text="Win: {_wins}"/>
+					<mx:Label text="Loss: {_losses}"/>
+					<mx:Label text="  (Total: {_wins + _losses})"/>
+					<mx:Label text="  ({_percentage.toFixed(1)}% win)"/>
+					<mx:Label text="Streak: {_streak_best}"/>
+				</mx:VBox>
+			</mx:HBox>
+		</mx:VBox>
+		<mx:VBox borderStyle="solid" width="125" height="250" verticalGap="3">
+			<mx:Label text="3X4" fontWeight="bold" fontSize="13" />
+			<mx:Canvas id="avatar34Canvas" width="85" height="80">
+				<mx:Image width="80" height="80"  source="{IMAGE_DIRECTORY}avatars34/{_rank34}.jpg" x="5" />
+			</mx:Canvas>
+			<mx:Label text="{_rank34}"/>
+			<mx:Label text="EXP: {_exp}"/>
+			<mx:Label text="Win: {_wins34}"/>
+			<mx:Label text="Loss: {_losses34}"/>
+			<mx:Label text="  (Total: {_wins + _losses})"/>
+			<mx:Label text="  ({_percentage34.toFixed(1)}% win)"/>
+		</mx:VBox>
+	</mx:HBox>
+
+</mx:TitleWindow>

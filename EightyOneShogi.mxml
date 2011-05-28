@@ -55,7 +55,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/05/03";
+	public const VERSION:String = "ver.2011/05/28";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -160,6 +160,7 @@
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
 	private var _playerInfoWindows:Object = new Object();
+	private var _playerDetailWindow:PlayerDetailWindow;
 	private var _challengerAlertWindow:ChallengerAlertWindow;
 	private var _greetMenuWindow:GreetMenuWindow;
 	private var _gameResultWindow:GameResultWindow;
@@ -243,6 +244,7 @@
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
+	  _api.addEventListener(ApiClient.PLAYER_DETAIL, _handlePlayerDetail);
 	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
 	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
@@ -1876,6 +1878,7 @@
 	  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
 	  PopUpManager.addPopUp(_playerInfoWindows[user.name], this, false);
 	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
+	  _playerInfoWindows[user.name].addEventListener("open_detail", _handlePlayerDetailOpen(user.name));
 	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
 	  _playerInfoWindows[user.name].readUser(user);
 	  if (_isDuringMyGame()) {
@@ -1913,6 +1916,20 @@
 		  }
 	  }
 	  _playerInfoWindows[user.name].callLater(_playerInfoWindows[user.name].scrollDown);
+	}
+	
+	private function _handlePlayerDetailOpen(name:String):Function {
+		return function(e:Event):void {
+			_openPlayerDetail(name);
+		}
+	}
+	
+	private function _openPlayerDetail(name:String):void {
+		  _playerDetailWindow = PlayerDetailWindow(PopUpManager.createPopUp(this, PlayerDetailWindow, true));
+		  PopUpManager.centerPopUp(_playerDetailWindow);
+		  _api.playerDetail(name);
+		  _playerDetailWindow.login = name;
+		  if (_findPlayerFromList(name)) _playerDetailWindow.connection = "ONLINE";
 	}
 	
 	private function _handlePlayerInfoClose(e:Event):void {
@@ -2520,10 +2537,10 @@
 		searchAccordion.enabled = true;
 		_player_search_list = new Array();
 		for each (var player:Object in e.target.bufferData) {
-			player.country = InfoFetcher.country_names[_infoFetcher.country_codes[player.country_id - 1]];
+			player.country = InfoFetcher.country_names[InfoFetcher.country_codes[player.country_id - 1]];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
-			player.flagURL = DIRECTORY + "images/flags_s/" + String(_infoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
+			player.flagURL = DIRECTORY + "images/flags_s/" + String(InfoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			player.created_at = player.created_at.split(" ")[0];
 			player.updated_at = player.updated_at.split(" ")[0];
@@ -2536,6 +2553,10 @@
 			_player_search_list.push(player);
 		}
 		playerSearchGrid.dataProvider = _player_search_list;
+	}
+
+	private function _handlePlayerDetail(e:Event):void {
+		if (_playerDetailWindow) _playerDetailWindow.loadPlayerDetail(e.target.bufferData[0]);
 	}
 	
 	private function _sendRankingSearch():void {
@@ -2577,8 +2598,8 @@
 			var player:Object = {
 				'number':num,
 				'login':String(playerXML.login),
-				'country_code':String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
-				'country':InfoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
+				'country_code':String(InfoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
+				'country':InfoFetcher.country_names[InfoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
 				'wins':parseInt(playerXML.wins),
 				'losses':parseInt(playerXML.losses),
 				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),

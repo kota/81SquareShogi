@@ -120,6 +120,10 @@
 				  this.setStyle('borderAlpha', undefined);
 			  }
 		  }
+		  
+		  private function _openDetail():void {
+			  dispatchEvent(new Event("open_detail"));
+		  }
 
           private function _close():void {
 			dispatchEvent(new Event("close_window"));
@@ -170,6 +174,7 @@
 		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" />
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
+		<mx:Button id="detail" label="Detail" click="_openDetail();" />
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
 			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="Favorite" />
 			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{parentApplication.lan.ignore}" enabled="false"/>

@@ -13,6 +13,7 @@ package{
 		public static var KIFU_SEARCH:String = 'kifu_search';
 		public static var KIFU_DETAIL:String = 'kifu_detail';
 		public static var PLAYER_SEARCH:String = 'player_search';
+		public static var PLAYER_DETAIL:String = 'player_detail';
 		public static var RANKING_SEARCH:String = 'ranking_search';
 		public static var READ_SERVER:String = 'read_server';
 		public static var NOT_FOUND:String = 'not_found';
@@ -24,6 +25,7 @@ package{
 		private var _kifuSearchService:HTTPService = new HTTPService();
 		private var _kifuDetailService:HTTPService = new HTTPService();
 		private var _playerSearchService:HTTPService = new HTTPService();
+		private var _playerDetailService:HTTPService = new HTTPService();
 		private var _rankingService:HTTPService = new HTTPService();
 		private var _readServerService:HTTPService = new HTTPService();
 		
@@ -37,6 +39,7 @@ package{
 			_kifuSearchService.addEventListener(ResultEvent.RESULT, _handleKifuSearch);
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);
+			_playerDetailService.addEventListener(ResultEvent.RESULT, _handlePlayerDetail);
 			_rankingService.addEventListener(ResultEvent.RESULT, _handleRanking);
 			_readServerService.addEventListener(ResultEvent.RESULT, _handleReadServer);
 		}
@@ -119,6 +122,26 @@ package{
 					bufferData = new ArrayCollection(players);
 				}
 				dispatchEvent(new Event(PLAYER_SEARCH));
+				trace("dispatch api response");
+			}
+		}
+		
+		public function playerDetail(name:String):void {
+			_playerDetailService.url = "http://" + _host + ":" + _port + "/api/players/detail/" + name;
+			trace("send: " + _playerDetailService.url);
+			_playerDetailService.send();
+		}
+		
+		private function _handlePlayerDetail(e:ResultEvent):void {
+			if (!e.result.players) {
+				Alert.show("Data not found.");
+				dispatchEvent(new Event(NOT_FOUND));
+				return;
+			} else {
+				var players:Array = new Array();
+				players.push(e.result.players.player);
+				bufferData = new ArrayCollection(players);
+				dispatchEvent(new Event(PLAYER_DETAIL));
 				trace("dispatch api response");
 			}
 		}
