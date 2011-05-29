@@ -3,11 +3,21 @@
 					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();">
 	    <mx:Script>
         <![CDATA[
+		  import com.google.maps.LatLng;
+		  import com.google.maps.styles.FillStyle;
+		  import com.google.maps.styles.StrokeStyle;
 		  import flash.events.Event;
           import mx.controls.*;
 		  import mx.effects.Effect;
 		  import mx.effects.Move;
           import mx.managers.PopUpManager;
+		  
+		  import com.google.maps.LatLng;
+		  import com.google.maps.Map;
+		  import com.google.maps.MapEvent;
+		  import com.google.maps.MapType;
+		  import com.google.maps.overlays.Marker;
+		  import com.google.maps.overlays.MarkerOptions;
 
 		  [Bindable]
 		  public var login:String;
@@ -57,10 +67,15 @@
 		  private var _pr:String = "";
 
 		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
+		  private var _mapLoaded:Boolean = false;
+		  private var _detailLoaded:Boolean = false;
+		  private var _countryMapInfo:String;
 		  
 		  public function loadPlayerDetail(player:Object):void {
+			  _detailLoaded = true;
 			  _country_code = String(InfoFetcher.country_codes[parseInt(player["country-id"]) - 1] + 1000).substring(1);
 			  _country = InfoFetcher.country_names[InfoFetcher.country_codes[parseInt(player["country-id"]) - 1]];
+			  _countryMapInfo = InfoFetcher.country_maps[parseInt(player["country-id"]) - 1]
 			  _joined = player["created-at"];
 			  _joined = _joined.substr(0, 10);
 			  _updated = player["updated-at"];
@@ -81,7 +96,8 @@
 			  _exp = _wins34 * 3 + _losses34;
 			  _rank34 = InfoFetcher.makeRank34FromExp(_exp);
 			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses)*100);
-			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34)*100);
+			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34) * 100);
+			  if (_mapLoaded) _drawMap();
 		  }
 		  
 		  private function _switchTab():void {
@@ -95,10 +111,32 @@
           private function _close():void {
             PopUpManager.removePopUp(this);
           }
+		  
+		  private function _onMapReady(event:MapEvent):void {
+			_mapLoaded = true;
+			if (_detailLoaded) _drawMap();
+		  }
+		  
+		  private function _drawMap():void {
+			  if (_countryMapInfo == null) {
+				  map.setCenter(new LatLng(0, 0), 1, MapType.NORMAL_MAP_TYPE);
+			  } else if (_countryMapInfo && _countryMapInfo == "*") {
+				  map.setCenter(new LatLng(0, 0), 1, MapType.NORMAL_MAP_TYPE);
+			  } else {
+				  var tokens:Array = _countryMapInfo.split(",");
+				  trace(_countryMapInfo + ":::::::::::::::::::::");
+				  map.setCenter(new LatLng(tokens[0], tokens[1]), tokens[2], MapType.PHYSICAL_MAP_TYPE);
+				  map.enableScrollWheelZoom();
+				   var marker:Marker = new Marker(
+					   new LatLng(tokens[3],tokens[4]),
+					   new MarkerOptions({ fillStyle: new FillStyle({color: 0x00ff00}), radius: 5, tooltip: tokens[5], strokeStyle: new StrokeStyle({thickness: 1.5, color: 0x008800})}));
+				   map.addOverlay(marker);
+			  }
+		  }
 
         ]]>
     </mx:Script>
-
+	
 	<mx:HBox>
 		<mx:VBox width="150" height="190" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderStyle="solid">
 			<mx:Canvas id="avatarCanvas" width="133" height="133">
@@ -116,11 +154,15 @@
 			<mx:Label text="Updated on: {_updated}" />
 			<mx:Label text="PR:"/>
 			<mx:Spacer height="-15"/>
-			<mx:TextArea width="220" height="95" text="{_pr}" fontSize="10" />
-		</mx:VBox>	
+			<mx:TextArea width="220" height="95" text="{_pr}" fontSize="10" editable="false" />
+		</mx:VBox>
+
+<maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="_onMapReady(event)" width="280" height="190"
+key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yiabjGLW6ebu0g" sensor="false" />
+<!--
 		<mx:Canvas width="280" height="190" borderStyle="solid" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 			<mx:Image source="{IMAGE_DIRECTORY}test/mapSample.jpg"/>
-		</mx:Canvas>
+		</mx:Canvas> -->
 	</mx:HBox>
 	
 	<mx:HBox>

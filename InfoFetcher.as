@@ -35,6 +35,7 @@
 		public static var country_codes:Array;
 		public static var country_names:Array;
 		public static var country_names3:Array;
+		public static var country_maps:Array;
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA');
 		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO');
 		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦');
@@ -76,6 +77,7 @@
 			country_codes = new Array();
 			country_names = new Array();
 			country_names3 = new Array();
+			country_maps = new Array();
 			cheaters = new Array();
 			banned = new Array();
 			clock_differences = new Array();
@@ -110,6 +112,7 @@
 							country_codes.push(parseInt(line.split("\t")[0]));
 							country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
 							country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
+							country_maps.push(line.split("\t")[3]);
 							break;
 						case "CHEAT":
 							cheaters.push(line);
@@ -515,7 +518,7 @@
 				medal.toolTip = "Non-major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "八一王" || user.titleName == "宇宙王") {
+				if (user.titleName == "八一王" || user.titleName == "宇宙王" || user.titleName == "二冠") {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
 				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {
