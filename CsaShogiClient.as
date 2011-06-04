@@ -38,6 +38,7 @@ package{
 	public static var LOBBY_IN:String = 'lobby_in';
 	public static var LOBBY_OUT:String = 'lobby_out';
 	public static var START:String = 'start';
+	public static var ADMIN_MONITOR:String = 'admin_monitor';
     
     public static var STATE_CONNECTED:int     = 0;
     public static var STATE_GAME_WAITING:int  = 1;
@@ -52,6 +53,7 @@ package{
 		private var _host:String = '81dojo.com';
 		private var _port:int = 4081;
 
+		private var _isAdmin:Boolean = false;
     private var _current_state:int;
     private var _my_turn:int;
     private var _player_names:Array;
@@ -96,6 +98,7 @@ package{
 		  _socket.writeUTFBytes(message + "\n");
 		  _socket.flush();
 		  trace ("message sent: " + message);
+		  if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + message + "\n"));
 		}
 
     public function login(login_name:String,password:String):void {
@@ -264,6 +267,7 @@ package{
 
 		private function _handleSocketData(e:ProgressEvent):void{
 			var response:String = e.target.readUTFBytes(e.target.bytesAvailable);
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, response));
 			_buffer = _buffer + response;
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
@@ -478,6 +482,10 @@ package{
 	public function setServer(host:String, port:int):void {
 		_host = host;
 		_port = port;
+	}
+	
+	public function adminOn():void {
+		_isAdmin = true;
 	}
 
 	}

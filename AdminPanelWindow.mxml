@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationComplete="_initWindow();"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" borderAlpha="0.85" showCloseButton="true" close="_close();" >
+	    <mx:Script>
+        <![CDATA[
+		  import flash.events.Event;
+          import mx.controls.*;
+		  import mx.events.MoveEvent;
+          import mx.managers.PopUpManager;
+		  
+		  private var _scrollPos:int;
+		  
+		  private function _initWindow():void {
+			  this.addEventListener("move", _checkMove);
+		  }
+		  
+		  private function _checkMove(e:Event):void {
+			  if (this.y < 0) this.y = 0;
+		  }
+		  
+		  public function showLog(str:String):void {
+			  _scrollPos = logTextArea.verticalScrollPosition;
+			  logTextArea.text = str;
+			  logTextArea.callLater(_scrollDown);
+		  }
+		  
+		private function _scrollDown():void{
+			if (scrollCheck.selected) logTextArea.verticalScrollPosition = logTextArea.maxVerticalScrollPosition;
+			else logTextArea.verticalScrollPosition = _scrollPos;
+		}
+		  
+		  private function _close():void {
+			  PopUpManager.removePopUp(this);
+		  }
+
+        ]]>
+		
+    </mx:Script>
+	<mx:HBox>
+		<mx:TextInput id="adminCommandInput" width="300"/>
+		<mx:Button id="sendButton" label="Send" />
+		<mx:Button label="Close" click="_close();"/>
+		<mx:CheckBox id="scrollCheck" selected="true" />
+	</mx:HBox>
+	<mx:TextArea id="logTextArea" width="800" height="500" fontFamily="Lucida console" fontSize="11" wordWrap="false" backgroundColor="0x000000" color="0xbbbbbb" />
+
+</mx:TitleWindow>
