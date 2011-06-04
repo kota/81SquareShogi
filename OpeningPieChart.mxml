@@ -181,7 +181,7 @@
         ]]>
     </mx:Script>
 	<mx:VBox horizontalAlign="center" width="210" height="220" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0">
-		<mx:Label id="typeLabel" paddingTop="0" paddingBottom="0" fontWeight="bold" fontSize="13" />
+		<mx:Label id="typeLabel" paddingTop="-3" paddingBottom="-2" fontWeight="bold" fontSize="15" fontFamily="Meiryo UI" textDecoration="underline" />
 		<mx:Canvas id="pieChartCanvas" width="200" height="200" verticalScrollPolicy="off" horizontalScrollPolicy="off"/>
 	</mx:VBox>
 	<mx:VBox id="listVBox" width="180" height="220" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0" />

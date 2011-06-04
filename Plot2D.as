@@ -58,9 +58,36 @@
 			_lineSprite.graphics.lineTo(width * 2*_margin, height * (1 - _margin));
 			_lineSprite.graphics.lineTo(width * (1 - _margin), height * (1 - _margin));
 			
+			var tick:int;
+			if (_ymax - _ymin > 300) tick = 100;
+			else if (_ymax - _ymin > 120) tick = 50;
+			else if (_ymax - _ymin > 60) tick = 20;
+			else if (_ymax - _ymin > 30) tick = 10;
+			else if (_ymax - _ymin > 12) tick = 5;
+			else if (_ymax - _ymin > 6) tick = 2;
+			else tick = 1;
+			for (var i:int = int(_ymin) - 1; i < _ymax; i++) {
+				if (i > _ymin && i % tick == 0) break;
+			}
+			_lineSprite.graphics.lineStyle(1, 0x000000, 0.2, true, "normal", null, JointStyle.MITER);
+			while (i < _ymax) {
+				var pt:Point = _trans(new Point(_xmin, i));
+				_lineSprite.graphics.moveTo(pt.x, pt.y);
+				_lineSprite.graphics.lineTo(width * (1 - _margin), pt.y);
+				var tickLabel:TextField = new TextField();
+				tickLabel.autoSize = "right";
+				tickLabel.defaultTextFormat = new TextFormat("Meiryo UI", 11, 0x000000, true);
+				tickLabel.selectable = false;
+				tickLabel.text = String(i);
+				tickLabel.x = 8;
+				tickLabel.y = pt.y - 11;
+				_lineSprite.addChild(tickLabel);
+				i += tick;
+			}
+			
 			_lineSprite.graphics.lineStyle(1, 0xff0000, 1, true, "normal", null, JointStyle.MITER);
 			
-			var pt:Point = _trans(_points[0]);
+			pt = _trans(_points[0]);
 			_lineSprite.graphics.moveTo(pt.x, pt.y);
 			for each (p in _points) {
 				pt = _trans(p);
@@ -73,16 +100,15 @@
 				pSprite.addEventListener(MouseEvent.MOUSE_OUT, _handleMouseOut);
 				addChild(pSprite);
 			}
-			_label.textColor = 0x00aa00;
 			_label.autoSize = "left";
-			_label.defaultTextFormat = new TextFormat("", 15, 0x00aa00, true);
+			_label.defaultTextFormat = new TextFormat("Meiryo UI", 14, 0x00aa00, true);
 			_label.selectable = false;
 			addChild(_label);
 		}
 		
 		private function _handleMouseOver(e:MouseEvent):void {
-			_label.x = e.localX - 10;
-			_label.y = e.localY - 35;
+			_label.x = e.localX - 18;
+			_label.y = e.localY - 25;
 			for (var i:int = 0; i < numChildren; i++) {
 				if (getChildAt(i) == e.target) {
 					_label.text = String(_points[i - 1].y);

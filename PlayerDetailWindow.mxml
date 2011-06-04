@@ -278,7 +278,8 @@
 			<mx:Canvas id="avatarCanvas" width="133" height="133">
 				<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{(avatar ? avatar : _rank)}.jpg" x="5" y="5" />
 			</mx:Canvas>
-			<mx:Label text="{login}" fontSize="15" fontWeight="bold" />
+			<mx:Label text="{login}" fontSize="15" fontWeight="bold"/>
+			<mx:Spacer height="-10"/>
 			<mx:HBox>
 				<mx:Image width="27" height="17"  source="{IMAGE_DIRECTORY}flags_s/{_country_code}.gif"/>
 				<mx:Label text="{_country}"/>
@@ -323,21 +324,21 @@ key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yia
 							<mx:groupedColumns>
 								<mx:AdvancedDataGridColumn headerText="Openings" width="76" dataField="name" textAlign="center" showDataTips="true" dataTipField="tip" />
 								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.total}">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="wins" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="percent" paddingLeft="2" />
 								</mx:AdvancedDataGridColumnGroup>
-								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}">
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}(▲)">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="black_wins" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="black_losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="black_percent" paddingLeft="2" />
 								</mx:AdvancedDataGridColumnGroup>
-								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}">
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}(△)">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="white_wins" />
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="white_losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="white_percent" paddingLeft="2"/>
 								</mx:AdvancedDataGridColumnGroup>
 							</mx:groupedColumns>
@@ -348,21 +349,21 @@ key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yia
 							<mx:groupedColumns>
 								<mx:AdvancedDataGridColumn headerText="Openings" width="76" dataField="name" textAlign="center" showDataTips="true" dataTipField="tip" />
 								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.total}">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="wins" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="percent" paddingLeft="2" />
 								</mx:AdvancedDataGridColumnGroup>
-								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}">
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}(▲)">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="black_wins" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="black_losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="black_percent" paddingLeft="2" />
 								</mx:AdvancedDataGridColumnGroup>
-								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}">
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}(△)">
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="white_wins" />
 									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="white_losses" paddingLeft="2"/>
-									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
 									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="white_percent" paddingLeft="2"/>
 								</mx:AdvancedDataGridColumnGroup>
 							</mx:groupedColumns>

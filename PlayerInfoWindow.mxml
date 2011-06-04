@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg"
 					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" showCloseButton="true" doubleClickEnabled="true" doubleClick="_minmax();" close="_close();"
-					headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5" title="Player Info">
+					headerHeight="22" borderThicknessLeft="5" borderThicknessRight="5" title="Player Info" creationComplete="_initWindow();">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
@@ -43,6 +43,14 @@
 		  public var pmText:String = "";
 		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private const MINIMIZED_HEIGHT:int = 29;
+		  
+		  private function _initWindow():void {
+			  this.addEventListener("move", _handleMove);
+		  }
+		  
+		  private function _handleMove(e:Event):void {
+			  if (this.y < 0) this.y = 0;
+		  }
 		  
 		  public function readUser(user:Object):void {
 			  _name = user.name;
