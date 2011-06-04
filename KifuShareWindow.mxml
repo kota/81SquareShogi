@@ -26,7 +26,7 @@
 				str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ") vs ";
 				str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ")]";
 				if (kifu.opening != "") str += ", " + kifu.opening;
-				str += " %2381dojo";
+				str += " %233x4shogi";
 				str += "&url=" + DIRECTORY + "kifuviewer34.html%3fkid%3d" + kifu.id;
 				if (pieceType != 0) str += "%26piece%3d" + pieceType;
 				if (turn != 0) str += "%26turn%3d" + turn;

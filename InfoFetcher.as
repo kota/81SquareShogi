@@ -102,7 +102,8 @@
 							titleUser.push(line.split("\t")[0]);
 							titleName.push(line.split("\t")[1]);
 							titleSubName.push(line.split("\t")[2]);
-							titleAvatar.push(line.split("\t")[3]);
+							titleAvatar.push("*");
+//							titleAvatar.push(line.split("\t")[3]);
 							break;
 						case "COUNTRY_NAMES":
 							country_codes.push(parseInt(line.split("\t")[0]));

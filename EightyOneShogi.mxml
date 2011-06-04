@@ -543,25 +543,11 @@
 		  }
 		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)$/);
 		  var total:int = parseInt(game_info[3]) / 60;
-		  var hc:String;
-		  if (game_info[1] == "r") {
-			hc = "R";
-		  } else if (game_info[1].match(/^hc/)) {
-			hc = "HC";
-			game.opening = InfoFetcher.gameTypeJp(game_info[1]);
-			game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
-		  } else {
-			hc = "NR";
-			if (game_info[1] != "nr") {
-				game.opening = InfoFetcher.gameTypeJp(game_info[1]);
-				game.opening_en = InfoFetcher.gameTypeShort(game_info[1]);
-			}
-		  }
 		  if (game_info[2].match(/\-\-..$/)) {
 			game.rule = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
 			game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
 		  } else {
-			game.rule = hc + ": " + ((total < 10) ? " " : "") + total + "-" + game_info[4];
+			game.rule = ((total < 10) ? " " : "") + total + " min + " + game_info[4] + " sec";
 			game.ruleTip = "";
 		  }
 		  var gameProxy:ObjectProxy = new ObjectProxy(game);
@@ -1268,8 +1254,10 @@
 			if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 			if (sender == board.playerInfos[0].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#000000"); if (_chat_sound2_play) _sound_chat2.play();
+				board.updateBaloon(0, e.message.substr(12));
 			} else if (sender == board.playerInfos[1].name) {
 				_writeUserMessage(e.message.substr(12), 2, "#666666"); if (_chat_sound2_play) _sound_chat2.play();
+				board.updateBaloon(1, e.message.substr(12));
 			} else if (sender == login_name) {
 				_writeUserMessage(e.message.substr(12), 2, "#0033DD"); if (_chat_sound2_play) _sound_chat2.play();
 			} else if (_isDuringMyGame() && !_allowWatcherChat) {
@@ -3033,8 +3021,8 @@
 			 <mx:columns>
 			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="58" paddingLeft="0" textAlign="center" sortable="false" />
-			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="125" paddingLeft="1" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="64" paddingLeft="0" textAlign="center" sortable="false" />
+			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="119" paddingLeft="1" sortCompareFunction="_sortName" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="EXP" width="45" paddingRight="5" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
@@ -3064,7 +3052,7 @@
 				  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
-				  <mx:DataGridColumn headerStyleName="header81" dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="78" paddingLeft="3" showDataTips="true" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="100" paddingLeft="3" showDataTips="true" />
 				  <mx:DataGridColumn headerStyleName="header81" dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn headerStyleName="header81" dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
 <!--				  <mx:DataGridColumn fontFamily="Meiryo UI" dataField="opening" headerText="{lan.opening_short}" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" /> -->
@@ -3142,7 +3130,7 @@
 					<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
 					<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
 				  </mx:HBox>
-					<mx:DataGrid id="watcherListGrid" width="195" height="145" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+					<mx:DataGrid id="watcherListGrid" width="195" height="105" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 					 <mx:columns>
 					  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="102" paddingLeft="2" sortCompareFunction="_sortName" />
 					  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />

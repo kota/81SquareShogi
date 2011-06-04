@@ -111,6 +111,7 @@ package  {
 	public var timers:Array;
 	private var _avatar_images:Array;
 	private var _player_flags:Array;
+	private var _chat_baloons:Array;
 
     private var _cells:Array;
     private var _board_bg_image:Image = new Image();
@@ -233,6 +234,7 @@ package  {
       timers = new Array(2);
 	  _avatar_images = new Array(2);
 	  _player_flags = new Array(2);
+	  _chat_baloons = new Array(2);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
         
@@ -261,11 +263,18 @@ package  {
         _turn_symbols[i] = turn_symbol;
 		var avatar_image:Canvas = new Canvas();
 		avatar_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 55; //9;
-		avatar_image.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 100 : BAN_TOP_MARGIN - 30; //i == 1 ? 6 : 47;
+		avatar_image.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - 97 : BAN_TOP_MARGIN - 30; //i == 1 ? 6 : 47;
 		avatar_image.width = 128; // KOMADAI_WIDTH - 42
 		avatar_image.height = avatar_image.width
 		_avatar_images[i] = avatar_image;
 		addChild(avatar_image);
+		var chat_baloon:ChatBaloon = new ChatBaloon();
+		chat_baloon.x = avatar_image.x -20;
+		chat_baloon.y = avatar_image.y + (i == 0 ? - 100 : 120);
+		chat_baloon.width = 163;
+		chat_baloon.height = 105;
+		_chat_baloons[i] = chat_baloon;
+		addChild(chat_baloon);
         var name_label:Label = new Label();
         name_label.setStyle('fontSize', 12);
         name_label.setStyle('fontWeight', 'bold');
@@ -580,6 +589,8 @@ package  {
 		for (i = 0; i < 2; i++) {
 			timers[i].y = BAN_TOP_MARGIN + BAN_HEIGHT/2 + (i == 1 ? -110 : 80);// (i == 1 ? -40 : 10);
 		}
+		_chat_baloons[0].hide();
+		_chat_baloons[1].hide();
 		_my_turn = 1 - _my_turn;
 		_arrangeInfos();
 		for (i = 0; i < 2; i++) {
@@ -1170,6 +1181,11 @@ package  {
 				}
 			}
 		}
+	}
+	
+	public function updateBaloon(turn:int, message:String):void {
+		message = message.match(/^\[.+?\]\s(.*)$/)[1];
+		_chat_baloons[turn == _my_turn ? 0 : 1].update(message);
 	}
 
 	private function _showMovableSquares(from:Point):void {
