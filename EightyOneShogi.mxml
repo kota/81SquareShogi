@@ -56,7 +56,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/05/22";
+	public const VERSION:String = "ver.2011/06/04";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -2270,10 +2270,20 @@
 		if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
         break;
       case 1:
-		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) kifuDataGrid.selectedIndex++;
+		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
+			kifuDataGrid.selectedIndex++;
+		} else {
+			radioKifuListen.selected = true;
+			_toggleListen();
+		}
         break;
       case 2:
-		kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
+			kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+		} else {
+			radioKifuListen.selected = true;
+			_toggleListen();
+		}
     }
 	var n:int = kifuDataGrid.selectedIndex;
 	if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
@@ -3015,8 +3025,6 @@
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
-	  <mx:LinkButton paddingTop="-2" paddingBottom="0" label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
-	  <mx:Spacer height="-10"/>
       <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="www.otosozai.com - ONGAKUSITU" click="navigateToURL(new URLRequest('http://www.otosozai.com/'), 'quote')"/>
 	  <mx:Spacer height="-10"/>
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
