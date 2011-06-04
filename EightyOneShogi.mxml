@@ -3081,11 +3081,11 @@
 <!--				  <mx:DataGridColumn fontFamily="Meiryo UI" dataField="opening" headerText="{lan.opening_short}" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" /> -->
 				 </mx:columns>
 				</mx:DataGrid>
-				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="540" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" />
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="540" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" fontFamily="Meiryo UI" leading="1" />
 			</mx:VDividedBox>
 			<mx:HBox>
 				<mx:Label text="{lan.chat}"/>
-				<mx:TextInput id="chatMessage1" width="400"/>
+				<mx:TextInput id="chatMessage1" width="400" fontFamily="Meiryo UI" />
 				<mx:CheckBox id="autoScrollCheck1" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll1();" />
 			</mx:HBox>
 		</mx:VBox>
@@ -3184,10 +3184,10 @@
 		</mx:HBox>
 
         <mx:Panel id="messagePanel" horizontalScrollPolicy="off" verticalScrollPolicy="off" fontSize="11" title="Message Panel" width="394" height="265" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
-			<mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="378" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
+			<mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="378" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" fontFamily="Meiryo UI" leading="1" />
 			<mx:HBox horizontalGap="5">
 				<mx:Label text="{lan.chat}"/>
-				<mx:TextInput id="chatMessage2" width="330"/>
+				<mx:TextInput id="chatMessage2" width="330" fontFamily="Meiryo UI" />
 			</mx:HBox>
 			<mx:HBox horizontalGap="5">
 				<mx:CheckBox id="autoScrollCheck2" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll2();" />
