@@ -31,11 +31,13 @@
 			this.setStyle('paddingRight', 10);
 			this.setStyle('paddingTop', 10);
 			this.setStyle('paddingBottom', 10);
-			this.setStyle('fontSize', 12);
+			this.setStyle('fontSize', 13);
 			this.setStyle('borderThicknes', 2);
 			this.setStyle('backgroundColor', 0xffffee);
 			this.selectable = false;
 			this.editable = false;
+			this.setStyle('fontFamily', 'Meiryo UI');
+			this.setStyle('leading', 3);
 			_holdTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleHoldTimer);
 			_fadeTimer.addEventListener(TimerEvent.TIMER, _handleFadeTimer);
 		}
