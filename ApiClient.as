@@ -18,6 +18,8 @@ package{
 		public static var READ_SERVER:String = 'read_server';
 		public static var LOAD_HISTORY:String = 'load_history';
 		public static var NOT_FOUND:String = 'not_found';
+		public static var ADMIN_MONITOR:String = 'admin_monitor';
+		private var _isAdmin:Boolean = false;
 		
 		public var bufferData:ArrayCollection;
 		public var kifuContents:String;
@@ -51,6 +53,7 @@ package{
 			_readServerService.url = "http://" + _host + ":" + _port + "/api/servers.xml";
 			trace("send: " + _readServerService.url);
 			_readServerService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _readServerService.url +"\n"));
 		}
 		
 		private function _handleReadServer(e:ResultEvent):void {
@@ -66,6 +69,8 @@ package{
 			_kifuSearchService.url = "http://" + _host + ":" + _port + "/api/kifus/search/" + name + "/" + fromStr + "/" + toStr;
 			trace("send: " + _kifuSearchService.url);
 			_kifuSearchService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _kifuSearchService.url +"\n"));
+			
 		}
 		
 		private function _handleKifuSearch(e:ResultEvent):void {
@@ -90,6 +95,7 @@ package{
 			_kifuDetailService.url = "http://" + _host + ":" + _port + "/api/kifus/" + id + ".xml";
 			trace("send: " + _kifuDetailService.url);
 			_kifuDetailService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _kifuDetailService.url +"\n"));
 		}
 		
 		private function _handleKifuDetail(e:ResultEvent):void {
@@ -109,6 +115,7 @@ package{
 			_playerSearchService.url = "http://" + _host + ":" + _port + "/api/players/search/" + name;
 			trace("send: " + _playerSearchService.url);
 			_playerSearchService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _playerSearchService.url +"\n"));
 		}
 		
 		private function _handlePlayerSearch(e:ResultEvent):void {
@@ -133,6 +140,7 @@ package{
 			_playerDetailService.url = "http://" + _host + ":" + _port + "/api/players/detail/" + name;
 			trace("send: " + _playerDetailService.url);
 			_playerDetailService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _playerDetailService.url +"\n"));
 		}
 		
 		private function _handlePlayerDetail(e:ResultEvent):void {
@@ -154,6 +162,7 @@ package{
 			_rankingService.resultFormat = "e4x";
 			trace("send: " + _rankingService.url);
 			_rankingService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _rankingService.url +"\n"));
 		}
 
 		private function _handleRanking(e:ResultEvent):void {
@@ -173,6 +182,7 @@ package{
 			_loadHistoryService.url = "http://" + _host + ":" + _port + "/api/rate_change_histories/search/" + name;
 			trace("send: " + _loadHistoryService.url);
 			_loadHistoryService.send();
+			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _loadHistoryService.url +"\n"));
 		}
 
 		private function _handleLoadHistory(e:ResultEvent):void {
@@ -196,6 +206,10 @@ package{
 	public function setHostToLocal():void {
 		_host = '127.0.0.1';
 		_port = 3000;
+	}
+	
+	public function adminOn():void {
+		_isAdmin = true;
 	}
 
 	}

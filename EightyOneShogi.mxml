@@ -159,6 +159,7 @@
 	private var _infoFetcher:InfoFetcher;
 	private var _pmLog:Object = new Object();
 	private var _allowWatcherChat:Boolean = false;
+	private var _adminLog:String = "";
 	
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
@@ -171,6 +172,7 @@
 	private var _kifuShareWindow:KifuShareWindow;
 	private var _impasseStatusWindow:ImpasseStatusWindow;
 	private var _disconnectAlertWindow:DisconnectAlertWindow;
+	private var _adminPanelWindow:AdminPanelWindow;
 
     private function initApp():void
     {
@@ -246,6 +248,7 @@
 	  _client.addEventListener(CsaShogiClient.LOBBY_IN, _handleLobbyIn);
 	  _client.addEventListener(CsaShogiClient.LOBBY_OUT, _handleLobbyOut);
 	  _client.addEventListener(CsaShogiClient.START, _handleStart);
+	  _client.addEventListener(CsaShogiClient.ADMIN_MONITOR, _handleAdminMonitor);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
@@ -253,6 +256,7 @@
 	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
 	  _api.addEventListener(ApiClient.LOAD_HISTORY, _handleLoadHistory);
 	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
+	  _api.addEventListener(ApiClient.ADMIN_MONITOR, _handleAdminMonitor);
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
       chatMessage1.addEventListener(FlexEvent.ENTER,_handleSendChat1);
@@ -290,6 +294,7 @@
 	  }
       loginMessage.text = "Logged in Successfully";
 	  clock.start();
+	  if (["kota", "hidetchi", "test1"].indexOf(login_name.toLowerCase()) >= 0) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
@@ -679,6 +684,12 @@
 				else _sound_chat1.play();
 			}	
 		}
+	}
+	
+	private function _handleAdminMonitor(e:ServerMessageEvent):void {
+		_adminLog += e.message;
+		if (_adminLog.length > 10000) _adminLog = _adminLog.substr(1000);
+		if (_adminPanelWindow) _adminPanelWindow.showLog(_adminLog);
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------------- MATCH MAKING
@@ -2065,6 +2076,17 @@
 		if (userListGrid.selectedItem) userListGrid.scrollToIndex(userListGrid.selectedIndex);
 	}
 	
+	private function _openAdminPanel():void {
+		  _adminPanelWindow = AdminPanelWindow(PopUpManager.createPopUp(this, AdminPanelWindow, false));
+		  PopUpManager.centerPopUp(_adminPanelWindow);
+		  _adminPanelWindow.sendButton.addEventListener(MouseEvent.CLICK, _handleAdminSendCommand);
+		  _adminPanelWindow.showLog(_adminLog);
+	}
+	
+	private function _handleAdminSendCommand(e:MouseEvent):void {
+		_client.send(e.target.parent.parent.adminCommandInput.text);
+	}
+	
 	//=========================================================
 	//                       CONTROLS for VIEWSTACK INDEX = 2
 	//=========================================================
@@ -3097,6 +3119,7 @@
 		<mx:Button id="leaveButton" label="{lan.leave}" click="_leavePC();"/>
 		<mx:Button id="logoutButton" label="{lan.logout}" click="_logout()"/>
 		<mx:Button id="backToGameButton" label="{lan.back_to_game}" click="_backToGame();" visible="false" color="#FF0000" />
+		<mx:Button id="adminButton" label="" click="_openAdminPanel();" visible="false"/>
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox liveDragging="true">
