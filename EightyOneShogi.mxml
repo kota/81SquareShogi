@@ -3161,11 +3161,11 @@
 				  <mx:DataGridColumn fontFamily="Meiryo UI" dataField="opening" headerText="{lan.opening_short}" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" />
 				 </mx:columns>
 				</mx:DataGrid>
-				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" />
+				<mx:TextArea id="userMessage1" wordWrap="true" editable="false" width="570" height="215" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage1);" fontFamily="Meiryo UI" leading="0" />
 			</mx:VDividedBox>
 			<mx:HBox>
 				<mx:Label text="{lan.chat}"/>
-				<mx:TextInput id="chatMessage1" width="430"/>
+				<mx:TextInput id="chatMessage1" width="430" fontFamily="Meiryo UI" />
 				<mx:CheckBox id="autoScrollCheck1" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll1();" />
 			</mx:HBox>
 		</mx:VBox>
@@ -3203,7 +3203,7 @@
       <eightyOneSquare:Board id="board" width="782" height="474"/> 
       <mx:HBox horizontalGap="2">
         <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="444" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
-        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="428" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" />
+        <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="428" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" fontFamily="Meiryo UI" leading="0" />
         </mx:Panel>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
@@ -3232,7 +3232,7 @@
 			<mx:Label text="{lan.chat}"/>
 			<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="{lan.greet}" click="_greetMenu();"/>
 		 </mx:HBox>
-		 <mx:TextInput id="chatMessage2" width="300"/>
+		 <mx:TextInput id="chatMessage2" width="300" fontFamily="Meiryo UI" />
 		 <mx:HBox>
 			<mx:CheckBox id="autoScrollCheck2" label="{lan.auto_scroll}" selected="true" click="_change_auto_scroll2();" />
 			<mx:Button id="optionButton2" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();"/>

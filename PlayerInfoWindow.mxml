@@ -167,11 +167,11 @@
 	<mx:Spacer height="-115"/>
 	<mx:HBox>
 		<mx:Spacer width="50"/>
-		<mx:TextArea id="pmTextArea" htmlText="{pmText}" wordWrap="true" editable="false" width="339" height="103" backgroundAlpha="0.93" showEffect="{showMove}" hideEffect="{hideMove}" visible="false" cornerRadius="5" />
+		<mx:TextArea id="pmTextArea" htmlText="{pmText}" wordWrap="true" editable="false" width="339" height="103" backgroundAlpha="0.93" showEffect="{showMove}" hideEffect="{hideMove}" visible="false" cornerRadius="5" fontFamily="Meiryo UI" leading="0" />
 	</mx:HBox>
 	<mx:HBox>
 		<mx:Label text="PM:"/>
-		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" />
+		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" fontFamily="Meiryo UI" fontSize="11" />
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:Button id="detail" label="Detail" click="_openDetail();" />
