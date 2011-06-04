@@ -55,7 +55,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/05/29";
+	public const VERSION:String = "ver.2011/06/04";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -2340,10 +2340,20 @@
 		if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
         break;
       case 1:
-		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) kifuDataGrid.selectedIndex++;
+		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
+			kifuDataGrid.selectedIndex++;
+		} else {
+			radioKifuListen.selected = true;
+			_toggleListen();
+		}
         break;
       case 2:
-		kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
+			kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+		} else {
+			radioKifuListen.selected = true;
+			_toggleListen();
+		}
     }
 	var n:int = kifuDataGrid.selectedIndex;
 	if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
