@@ -16,6 +16,7 @@ package{
 		public static var PLAYER_DETAIL:String = 'player_detail';
 		public static var RANKING_SEARCH:String = 'ranking_search';
 		public static var READ_SERVER:String = 'read_server';
+		public static var LOAD_HISTORY:String = 'load_history';
 		public static var NOT_FOUND:String = 'not_found';
 		
 		public var bufferData:ArrayCollection;
@@ -28,6 +29,7 @@ package{
 		private var _playerDetailService:HTTPService = new HTTPService();
 		private var _rankingService:HTTPService = new HTTPService();
 		private var _readServerService:HTTPService = new HTTPService();
+		private var _loadHistoryService:HTTPService = new HTTPService();
 		
 		//private var _host:String = '127.0.0.1';
 		//private var _host:String = '81dojo.dyndns.org';
@@ -42,6 +44,7 @@ package{
 			_playerDetailService.addEventListener(ResultEvent.RESULT, _handlePlayerDetail);
 			_rankingService.addEventListener(ResultEvent.RESULT, _handleRanking);
 			_readServerService.addEventListener(ResultEvent.RESULT, _handleReadServer);
+			_loadHistoryService.addEventListener(ResultEvent.RESULT, _handleLoadHistory);
 		}
 		
 		public function readServer():void {
@@ -162,6 +165,30 @@ package{
 			} else {
 				bufferXML = new XML(e.result);
 				dispatchEvent(new Event(RANKING_SEARCH));
+				trace("dispatch api response");
+			}
+		}
+
+		public function loadHistory(name:String):void {
+			_loadHistoryService.url = "http://" + _host + ":" + _port + "/api/rate_change_histories/search/" + name;
+			trace("send: " + _loadHistoryService.url);
+			_loadHistoryService.send();
+		}
+
+		private function _handleLoadHistory(e:ResultEvent):void {
+			bufferData = new ArrayCollection();
+			if (!e.result.rate_change_histories) {
+//				Alert.show("Data not found.");
+//				dispatchEvent(new Event(NOT_FOUND));
+				return;
+			} else {
+				bufferData = e.result.rate_change_histories.rate_change_history as ArrayCollection;
+				if (!bufferData) {
+					var rate_change_histories:Array = new Array();
+					rate_change_histories.push(e.result.rate_change_histories.rate_change_history);
+					bufferData = new ArrayCollection(rate_change_histories);
+				}
+				dispatchEvent(new Event(LOAD_HISTORY));
 				trace("dispatch api response");
 			}
 		}

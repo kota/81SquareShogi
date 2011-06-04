@@ -77,6 +77,7 @@
 	private var _ranking_total_list:Array;
 	private var _ranking_percentage_list:Array;
 	private var _ranking_streak_list:Array;
+	private var _gameHistories:Array;
     public var login_name:String;
 	private var _player_infos:Array = new Array;
 	private var _watch_game:Object;
@@ -250,6 +251,7 @@
 	  _api.addEventListener(ApiClient.PLAYER_SEARCH, _handlePlayerSearch);
 	  _api.addEventListener(ApiClient.PLAYER_DETAIL, _handlePlayerDetail);
 	  _api.addEventListener(ApiClient.RANKING_SEARCH, _handleRankingSearch);
+	  _api.addEventListener(ApiClient.LOAD_HISTORY, _handleLoadHistory);
 	  _api.addEventListener(ApiClient.NOT_FOUND, _handleSearchNotFound);
 	  boardBox.addEventListener(MouseEvent.ROLL_OUT, _rollOut);
 	  boardBox.addEventListener(MouseEvent.ROLL_OVER, _rollOver);
@@ -703,7 +705,7 @@
 	}
   
 	private function _handleChallengerRejectButton(e:Event):void {
-		_client.decline();
+		_client.decline(e.target.declineComment);
 		_challengerAlertWindow = null;
 	}
 	
@@ -1936,6 +1938,8 @@
 		  _playerDetailWindow = PlayerDetailWindow(PopUpManager.createPopUp(this, PlayerDetailWindow, true));
 		  PopUpManager.centerPopUp(_playerDetailWindow);
 		  _api.playerDetail(name);
+		  _api.loadHistory(name);
+		  _playerDetailWindow.addEventListener("close_window", _handlePlayerDetailClose);
 		  _playerDetailWindow.login = name;
 		  var user:Object = _findPlayerFromList(name);
 		  if (user) {
@@ -1946,8 +1950,21 @@
 		  }
 	}
 	
+	private function _handleLoadHistory(e:Event):void {
+		if (!_playerDetailWindow) return;
+		_gameHistories = new Array();
+		for each (var history:Object in e.target.bufferData) {
+			_gameHistories.push(history);
+		}
+		_playerDetailWindow.showHistory(_gameHistories);
+	}
+	
 	private function _handlePlayerInfoClose(e:Event):void {
 		_playerInfoWindows[e.target.nameLabel.text] = null;
+	}
+
+	private function _handlePlayerDetailClose(e:Event):void {
+		_playerDetailWindow = null;
 	}
 
     private function _handleSendChat1(e:FlexEvent):void {
@@ -3145,7 +3162,8 @@
 			  <mx:SWFLoader source="http://www.clocklink.com/clocks/5003-red.swf?TimeZone=GMT0900" width="300" height="25"/>
 		  </mx:VBox>
 	  </mx:HBox> -->
-<!--	  <mx:Label text="SCRATCH" doubleClickEnabled="true" doubleClick="_client.send('SCRATCH');"/>
+<!--	  <mx:Label text="BAN" doubleClickEnabled="true" doubleClick="_client.send('%%BAN ' + chatMessage1.text);"/>
+	  <mx:Label text="DEBAN" doubleClickEnabled="true" doubleClick="_client.send('%%DEBAN ' + chatMessage1.text);"/>
 		<mx:Label text="MAINTENANCE" doubleClickEnabled="true" doubleClick="_client.send('%%MAINTENANCE ' + chatMessage1.text);"/>
 	  <mx:Label text="GHOST" doubleClickEnabled="true" doubleClick="_client.send('%%GHOST ' + chatMessage1.text);"/> -->
 	  <eightyOneSquare:WorldClockGadget id="clock" width="975" height="59"/>

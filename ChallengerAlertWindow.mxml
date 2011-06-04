@@ -23,6 +23,7 @@
 		  public var _timer:Timer = new Timer(1000, 20);
 		  [Bindable]
 		  public var remainTime:int = 20;
+		  public var declineComment:String = null;
 		  
 		  public function startTimer():void {
 			_timer.addEventListener(TimerEvent.TIMER, _handleTick);
@@ -35,7 +36,7 @@
 		  }
 		  
 		  private function _handleTimerComplete(e:TimerEvent):void {
-			  _decline();
+			  _decline("Declined due to time-up.");
 		  }
 		  
 		  public function terminate():void {
@@ -43,8 +44,9 @@
             PopUpManager.removePopUp(this);
 		  }
 
-          private function _decline():void {
+          private function _decline(comment:String):void {
 			_timer.stop();
+			declineComment = comment;
 			dispatchEvent(new Event("decline"));
             PopUpManager.removePopUp(this);
           }
@@ -78,7 +80,7 @@
 	<mx:VBox width="100%" horizontalAlign="center" paddingTop="5">
 		<mx:HBox>
 			<mx:Button id="acceptButton" click="_accept();" label="{parentApplication.lan.accept}"/>
-			<mx:Button id="rejectButton" click="_decline();" label="{parentApplication.lan.reject}"/>
+			<mx:Button id="rejectButton" click="_decline('Declined by opponent.');" label="{parentApplication.lan.reject}"/>
 			<mx:Label text="{remainTime}" fontSize="16" fontWeight="bold" />
 		</mx:HBox>
 	</mx:VBox>

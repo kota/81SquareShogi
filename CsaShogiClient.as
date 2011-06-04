@@ -126,12 +126,13 @@ package{
 		}
 	}
 	
+	
 	public function accept():void {
 		send("ACCEPT");
 	}
 	
-	public function decline():void {
-		send("DECLINE");
+	public function decline(comment:String = null):void {
+		send("DECLINE" + (comment ? (" " + comment) : ""));
 	}
 
 	public function challenge(name:String):void {

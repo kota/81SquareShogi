@@ -31,7 +31,7 @@
 		public static const rank_thresholds:Array = new Array(2900, 1900, 1480, 1420, 1360, 1300, 1240, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_names:Array = new Array('PRO', '7-Dan', '6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan', '1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu', '6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu', '11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu');
 		public static const rank_thresholds34:Array = new Array(15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0);
-		public static const rank_names34:Array = new Array('GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT','KID', 'INFANT', 'BABY', 'EGG')
+		public static const rank_names34:Array = new Array('GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT', 'KID', 'INFANT', 'BABY', 'EGG');
 		public static var country_codes:Array;
 		public static var country_names:Array;
 		public static var country_names3:Array;
@@ -39,6 +39,8 @@
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA');
 		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO');
 		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦');
+		public static const pie_chart_order:Array = new Array("opposition_static", "yagura", "bishop_exchange", "side_pawn", "double_wing", "unknown", "double_ranging", "opposing_rook", "3rd_file_rook", "4th_file_rook", "central_rook");
+		public static const radar_chart_order:Array = new Array("opposition_static","yagura_and_bishop","side_and_wing","unknown","double_ranging","opposition_ranging");
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String = "";
@@ -414,6 +416,16 @@
 					return "矢倉";
 				case "double_ranging":
 					return "相振り";
+				case "opposition_static":
+					return "居飛車(対抗)";
+				case "central_rook":
+					return "中飛車";
+				case "4th_file_rook":
+					return "四間飛車";
+				case "3rd_file_rook":
+					return "三間飛車";
+				case "opposing_rook":
+					return "向かい飛車";
 				}
 			}
 			return "";
@@ -454,9 +466,47 @@
 					return "Yagura";
 				case "double_ranging":
 					return "Double Ranging Rook";
+				case "opposition_static":
+					return "Static Rook, Opposition";
+				case "central_rook":
+					return "Central Rook";
+				case "4th_file_rook":
+					return "4th-file Rook";
+				case "3rd_file_rook":
+					return "3rd-file Rook";
+				case "opposing_rook":
+					return "Opposing Rook";
 				}
 			}
 			return "";
+		}
+
+		public static function infoOpeningColor(str:String):uint {
+			switch (str) {
+			case "opposition_static":
+				return 0xff0000;
+			case "yagura":
+				return 0xff6600;
+			case "bishop_exchange":
+				return 0x990000;
+			case "double_wing":
+				return 0xff66ff;
+			case "side_pawn":
+				return 0x9900cc;
+			case "unknown":
+				return 0xffff00;
+			case "double_ranging":
+				return 0x669933;
+			case "opposing_rook":
+				return 0x000066;
+			case "3rd_file_rook":
+				return 0x00ffcc;
+			case "4th_file_rook":
+				return 0x0000ff;
+			case "central_rook":
+				return 0x3399cc;
+			}
+			return 0x000000;
 		}
 		
 		public function writeSettings(v:URLVariables):void {
@@ -521,7 +571,7 @@
 				if (user.titleName == "八一王" || user.titleName == "宇宙王" || user.titleName == "二冠") {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
-				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {
+				} else if (user.titleName == "admin" || user.titleName.match(/bot/) || user.titleName == "師範" || user.titleName == "プロ") {
 					medal.source = bronze_medal;
 					medal.toolTip = "admin status";
 				}

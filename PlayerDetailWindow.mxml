@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:eightyOneSquare="*"  fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off"
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();" creationPolicy="all">
 	    <mx:Script>
         <![CDATA[
 		  import com.google.maps.LatLng;
 		  import com.google.maps.styles.FillStyle;
 		  import com.google.maps.styles.StrokeStyle;
 		  import flash.events.Event;
+		  import flash.geom.Point;
           import mx.controls.*;
 		  import mx.effects.Effect;
 		  import mx.effects.Move;
@@ -70,6 +71,11 @@
 		  private var _mapLoaded:Boolean = false;
 		  private var _detailLoaded:Boolean = false;
 		  private var _countryMapInfo:String;
+		  private var _ratings:Array = new Array();
+		  private var _openingData:Object = new Object();
+		  
+		  private const opening_names:Array = ["double_wing","side_pawn","yagura","bishop_exchange","opposition_static","opposing_rook","3rd_file_rook","4th_file_rook","central_rook","double_ranging","unknown","*"];
+		  private const group_names:Array = ["side_and_wing","side_and_wing","yagura_and_bishop","yagura_and_bishop","opposition_static","opposition_ranging","opposition_ranging","opposition_ranging","opposition_ranging","double_ranging","unknown","*"];
 		  
 		  public function loadPlayerDetail(player:Object):void {
 			  _detailLoaded = true;
@@ -99,16 +105,9 @@
 			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34) * 100);
 			  if (_mapLoaded) _drawMap();
 		  }
-		  
-		  private function _switchTab():void {
-			  if (resultViewStack.selectedIndex == 0) {
-				  resultViewStack.selectedIndex = 1;
-			  } else {
-				  resultViewStack.selectedIndex = 0;
-			  }
-		  }
 
           private function _close():void {
+			dispatchEvent(new Event("close_window"));
             PopUpManager.removePopUp(this);
           }
 		  
@@ -124,7 +123,6 @@
 				  map.setCenter(new LatLng(0, 0), 1, MapType.NORMAL_MAP_TYPE);
 			  } else {
 				  var tokens:Array = _countryMapInfo.split(",");
-				  trace(_countryMapInfo + ":::::::::::::::::::::");
 				  map.setCenter(new LatLng(tokens[0], tokens[1]), tokens[2], MapType.PHYSICAL_MAP_TYPE);
 				  map.enableScrollWheelZoom();
 				   var marker:Marker = new Marker(
@@ -133,6 +131,87 @@
 				   map.addOverlay(marker);
 			  }
 		  }
+		  
+		  public function showHistory(histories:Array):void {
+			  var n:int = 0;
+			  for (var i:int = histories.length - 1; i >= 0; i--) {
+				  n++;
+				  _ratings.push(new Point(n, Math.abs(histories[i].change)));
+			  }
+			  ratePlot2D.loadData(_ratings);
+////////////////////
+			for (i = 0; i < opening_names.length; i++) _openingData[opening_names[i]] = _openingDatum(group_names[i]);
+			var match:Array;
+			var openingName:String;
+			for each (var history:Object in histories){
+				if ((match = history.opening.match(/^opposition_(black|white)(\d)$/))) {
+					if (history.sente && match[1] == "white" || !history.sente && match[1] == "black") {
+						openingName = "opposition_static";
+					} else {
+						switch (parseInt(match[2])) {
+							case 2:
+								openingName = "opposing_rook"; break;
+							case 3:
+								openingName = "3rd_file_rook"; break;
+							case 4:
+								openingName = "4th_file_rook"; break;
+							case 5:
+								openingName = "central_rook";
+						}
+					}
+				} else {
+					openingName = history.opening
+				}
+				if (parseInt(history.change) > 0) {
+					if (history.sente) _openingData[openingName].black_wins += 1;
+					else _openingData[openingName].white_wins += 1;
+				} else {
+					if (history.sente) _openingData[openingName].black_losses += 1;
+					else _openingData[openingName].white_losses += 1;
+				}
+			}
+			openingPieChart.loadData(_pieDataArray());
+/////////////////////////////
+			openingRadarChart.loadData(_radarDataArray());
+		  }
+
+			private function _pieDataArray():Array{
+				var arr:Array = new Array();
+				for each (var str:String in InfoFetcher.pie_chart_order) {
+					var datum:Object = new Object();
+					datum.name = str;
+					datum.black = _openingData[str].black_wins + _openingData[str].black_losses;
+					datum.white = _openingData[str].white_wins + _openingData[str].white_losses;
+					datum.color = InfoFetcher.infoOpeningColor(str);
+					datum.group = _openingData[str].group;
+					arr.push(datum);
+				}
+				return arr;
+			}
+
+			private function _radarDataArray():Array{
+				var arr:Array = new Array();
+				for each (var str:String in InfoFetcher.radar_chart_order) arr.push(_openingDatum(str));
+				for (var i:int = 0; i < opening_names.length; i++) {
+					if (group_names[i] == "*") continue;
+					var j:int = InfoFetcher.radar_chart_order.indexOf(group_names[i]);
+					arr[j].black_wins += _openingData[opening_names[i]].black_wins
+					arr[j].black_losses += _openingData[opening_names[i]].black_losses
+					arr[j].white_wins += _openingData[opening_names[i]].white_wins
+					arr[j].white_losses += _openingData[opening_names[i]].white_losses
+				}
+				return arr;
+			}
+				
+			private function _openingDatum(group:String):Object {
+				var obj:Object = new Object();
+				obj.black_wins = 0;
+				obj.black_losses = 0;
+				obj.white_wins = 0;
+				obj.white_losses = 0;
+				obj.group = group;
+				return obj;
+			}
 
         ]]>
     </mx:Script>
@@ -169,16 +248,27 @@ key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yia
 		<mx:VBox borderStyle="solid">
 			<mx:HBox>
 				<mx:Label text="Shogi" fontWeight="bold" fontSize="13" />
-				<mx:Spacer width="100"/>
-				<mx:Button id="changeTabButton" label="switch" click="_switchTab();" />
+				<mx:Spacer width="20"/>
+				<mx:Button label="Tendencies" click="resultViewStack.selectedIndex = 0;" fontSize="10" />
+				<mx:Button label="Winning %" click="resultViewStack.selectedIndex = 1;" fontSize="10"/>
+				<mx:Button label="Data Table" click="resultViewStack.selectedIndex = 2;" fontSize="10"/>
+				<mx:Button label="Rate History" click="resultViewStack.selectedIndex = 3;" fontSize="10"/>
 			</mx:HBox>
 			<mx:HBox>
 				<mx:ViewStack id="resultViewStack" width="400" height="220">
+					<eightyOneSquare:OpeningPieChart id="openingPieChart" width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" />
+					<eightyOneSquare:OpeningRadarChart id="openingRadarChart" width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" />
+					<mx:HBox width="400" height="220" horizontalAlign="center">
+						<mx:DataGrid id="dataGrid" width="250" height="180">
+							<mx:columns>
+								<mx:DataGridColumn/>
+								<mx:DataGridColumn/>
+								<mx:DataGridColumn/>
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:HBox>
 					<mx:Canvas width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off">
-						<mx:Image source="{IMAGE_DIRECTORY}test/rateSample.jpg"/>
-					</mx:Canvas>
-					<mx:Canvas width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off">
-						<mx:Image source="{IMAGE_DIRECTORY}test/openingSample.jpg"/>
+						<eightyOneSquare:Plot2D id="ratePlot2D" width="400" height="220"/>
 					</mx:Canvas>
 				</mx:ViewStack>
 				<mx:VBox width="125" verticalGap="3">

@@ -149,7 +149,7 @@
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:VBox height="73" horizontalScrollPolicy="off">
+			<mx:VBox height="73" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 				<mx:Label text="{parentApplication.lan.rate}:  {_rating}  ({_rank})"/>
 				<mx:HBox>
 					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>

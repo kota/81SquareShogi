@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml">
+	    <mx:Script>
+        <![CDATA[
+			import flash.display.Sprite;
+        	import mx.controls.*;
+			import mx.containers.HBox;
+			import mx.containers.VBox;
+			import mx.core.UIComponent;
+			
+			private var _n:int = 0;
+			private var _nStatic:int = 0;
+			private var _nRanging:int = 0;
+			private var _nOpposition:int = 0;
+			private var _ui:UIComponent = new UIComponent();
+			private var _pieSprite:Sprite = new Sprite();
+			private var _percents:Object = new Object();
+			private static const RIGHT_ANGLE : Number = Math.PI / 2;
+            
+			public function loadData(openingData:Array):void {
+				for each (var datum:Object in openingData) {
+					_n += (datum.black + datum.white);
+					if (["opposition_ranging", "double_ranging"].indexOf(datum.group) >= 0) _nRanging += (datum.black + datum.white);
+					if (["yagura_and_bishop", "side_and_wing", "opposition_static"].indexOf(datum.group) >= 0) _nStatic += (datum.black + datum.white);
+					if (["opposition_ranging", "opposition_static"].indexOf(datum.group) >= 0) _nOpposition += (datum.black + datum.white);
+				}
+				if (_n == 0) return;
+				
+				_ui.width = pieChartCanvas.width;
+				_ui.height = pieChartCanvas.height;
+				pieChartCanvas.addChild(_ui);
+				
+				var thetaOut:Number = - Math.PI / 2;
+				var thetaIn:Number = thetaOut;
+				var thetaBorder1:Number = thetaOut;
+				var thetaBorder2:Number = thetaOut;
+				var cx:Number = _ui.width / 2;
+				var cy:Number = _ui.height / 2;
+				var rOut:Number = _ui.width * 0.45;
+				var rIn:Number = rOut * 0.4;
+				
+				_pieSprite.graphics.lineStyle();
+				_pieSprite.graphics.beginFill(0xcccccc, 1);
+				_pieSprite.graphics.drawCircle(cx + 2, cy + 2, rOut+2);
+				_pieSprite.graphics.endFill();
+				_pieSprite.graphics.moveTo(cx, cy);
+				
+				for each (datum in openingData) {
+					listVBox.addChild(_listItem(datum));
+					
+					if (datum.name == "unknown") thetaBorder1 = thetaOut;
+					if (datum.black + datum.white > 0) {
+						_pieSprite.graphics.beginFill(datum.color, 1);
+						drawPie(_pieSprite.graphics, cx, cy, rOut, thetaOut, thetaOut += 2 * Math.PI * (datum.black + datum.white) / _n, true);
+						_pieSprite.graphics.lineTo(cx, cy);
+						_pieSprite.graphics.endFill();
+
+						//_pieSprite.graphics.lineStyle(0.5, 0x000000, 1, true, "normal", null, JointStyle.MITER);
+						if (datum.black > 0) {
+							_pieSprite.graphics.beginFill(0x000000, 1);
+							drawPie(_pieSprite.graphics, cx, cy, rIn, thetaIn, thetaIn += 2 * Math.PI * datum.black / _n, true);
+							_pieSprite.graphics.lineTo(cx, cy);
+							_pieSprite.graphics.endFill();
+						}
+						if (datum.white > 0){
+							_pieSprite.graphics.beginFill(0xffffff, 1);
+							drawPie(_pieSprite.graphics, cx, cy, rIn, thetaIn, thetaIn += 2 * Math.PI * datum.white / _n, true);
+							_pieSprite.graphics.lineTo(cx, cy);
+							_pieSprite.graphics.endFill();
+						}
+					}
+					if (datum.name == "unknown") thetaBorder2 = thetaIn;
+				}
+				_pieSprite.graphics.lineStyle(3, 0x00ee00, 0.7, true);
+				_pieSprite.graphics.lineTo(cx , cy - rOut * 1.08);
+				_pieSprite.graphics.moveTo(cx + rOut * 1.08 * Math.cos(thetaBorder1), cy + rOut * 1.08 * Math.sin(thetaBorder1));
+				_pieSprite.graphics.lineTo(cx, cy);
+				_pieSprite.graphics.lineTo(cx + rOut * 1.08 * Math.cos(thetaBorder2), cy + rOut * 1.08 * Math.sin(thetaBorder2));
+				_ui.addChild(_pieSprite);
+				
+				if (_n < 5) {
+					typeLabel.text = "データ不足"; typeLabel.toolTip = "Lack Data!";
+				} else if (_nStatic >= 2.0/3.0*_n) {
+					typeLabel.text = "居飛車党"; typeLabel.toolTip = "Static Rook Player";
+					if (_nRanging <= 0.05 * _n) {
+						typeLabel.text = "純粋居飛車党"; typeLabel.toolTip = "Pure Static Rook Player";
+					}
+				} else if (_nRanging >= 2.0 / 3.0 * _n) {
+					typeLabel.text = "振り飛車党"; typeLabel.toolTip = "Ranging Rook Player";
+					if (_nStatic <= 0.05 * _n) {
+						typeLabel.text = "純粋振り飛車党"; typeLabel.toolTip = "Pure Ranging Rook Player";
+					}
+					if (_percents["3rd_file_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0) {
+						typeLabel.text = "三間飛車党"; typeLabel.toolTip = "3rd-file Rook Player";
+					} else if (_percents["4th_file_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0) {
+						typeLabel.text = "四間飛車党"; typeLabel.toolTip = "4th-file Rook Player";
+					} else if (_percents["central_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0) {
+						typeLabel.text = "中飛車党"; typeLabel.toolTip = "Central Rook Player";
+					}
+				} else if (_nOpposition >= 2.0 / 3.0 * _n) {
+					typeLabel.text = "対抗型志向"; typeLabel.toolTip = "Opposition Seeker";
+				} else if (_percents["unknown"] > 2.0 / 3.0 * 100) {
+					typeLabel.text = "力戦派"; typeLabel.toolTip = "Free-style Seeker";
+				} else {
+					typeLabel.text = "オールラウンダー"; typeLabel.toolTip = "All-rounder";
+				}
+			}
+			
+			private function _listItem(datum:Object):HBox {
+				var hbox:HBox = new HBox();
+				hbox.setStyle('horizontalGap', 0);
+				hbox.setStyle('paddingBottom', 0);
+				var label:Label = new Label();
+				label.text = "■";
+				label.setStyle('color', datum.color);
+				hbox.addChild(label);
+				label = new Label();
+				label.width = 90;
+				label.text = InfoFetcher.openingNameJp(datum.name);
+				label.toolTip = InfoFetcher.openingNameEn(datum.name);
+				hbox.addChild(label);
+				label = new Label();
+				label.width = 60;
+				label.setStyle('textAlign', 'right');
+				_percents[datum.name] = (datum.black + datum.white) / _n * 100;
+				label.text = _percents[datum.name].toFixed(1) + " %";
+				hbox.addChild(label);
+				return hbox;
+			}
+			
+			public static function drawPie(g : Graphics, x : Number, y : Number, r : Number, t1 : Number, t2 : Number, lineTo : Boolean = false) : void {
+
+				var div : int = Math.max(1, Math.floor(Math.abs(t1 - t2) / 0.4) );
+
+				var lx : Number;
+				var ly : Number;
+				var lt : Number;
+
+				for (var i : int = 0; i <= div; i++) {
+
+					var ct : Number = t1 + (t2 - t1) * i / div;
+					var cx : Number = Math.cos(ct) * r + x;    
+					var cy : Number = Math.sin(ct) * r + y;    
+
+					if (i == 0) {
+						if (lineTo) {
+							g.lineTo(cx, cy);            
+						} else {
+							g.moveTo(cx, cy);
+						}
+					} else {
+						var cp : Point = getControlPoint(lx, ly, lt + RIGHT_ANGLE, cx, cy, ct + RIGHT_ANGLE); 
+						g.curveTo(cp.x, cp.y, cx, cy);            
+					}
+
+					lx = cx;
+					ly = cy;
+					lt = ct;
+				}
+			}
+			
+			public static function getControlPoint(
+				x1 : Number, y1 : Number, t1 : Number,
+				x2 : Number, y2 : Number, t2 : Number
+			) : Point {
+
+				var x12 : Number = x2 - x1;
+				var y12 : Number = y2 - y1;
+				
+				var l12 : Number = Math.sqrt(x12 * x12 + y12 * y12);
+				var t12 : Number = Math.atan2(y12, x12);
+
+				var l13 : Number = l12 * Math.sin(t2 - t12) / Math.sin(t2 - t1);
+
+				var x3 : Number = x1 + l13 * Math.cos(t1);
+				var y3 : Number = y1 + l13 * Math.sin(t1);
+
+				return new Point(x3, y3);
+			}     
+			
+        ]]>
+    </mx:Script>
+	<mx:VBox horizontalAlign="center" width="210" height="220" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0">
+		<mx:Label id="typeLabel" paddingTop="0" paddingBottom="0" fontWeight="bold" fontSize="13" />
+		<mx:Canvas id="pieChartCanvas" width="200" height="200" verticalScrollPolicy="off" horizontalScrollPolicy="off"/>
+	</mx:VBox>
+	<mx:VBox id="listVBox" width="180" height="220" borderStyle="solid" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0" />
+</mx:HBox>
