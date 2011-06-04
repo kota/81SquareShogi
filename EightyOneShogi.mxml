@@ -279,7 +279,7 @@
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
-      _keepAliveTimer = new Timer(30000);
+      _keepAliveTimer = new Timer(81000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
 	  _refresh();
 	  if (_infoFetcher.initMessage != null) {
@@ -1538,11 +1538,11 @@
 	//=========================================================
 	//                   CONTROLS for VIEWSTACK INDEX = 1
 	//=========================================================
-    private function _refresh():void {
+    private function _refresh(loadList:Boolean = true):void {
 	  _keepAliveTimer.reset();
 	  _keepAliveTimer.start();
       _client.who();
-	  _client.list();
+	  if (loadList) _client.list();
 	  if (_game_name) _client.watchers(_game_name);
     }
 	
@@ -1568,7 +1568,7 @@
     private function _stopWaiting():void {
 	  _waiting = false;
       _client.stopWaiting();
-      _refresh();
+      _refresh(false);
       stopButton.enabled = false;
     }
 
@@ -1608,7 +1608,7 @@
 		  return;
 	  }
       _client.waitForGame(total,byoyomi,handicap,tournament);
-      _refresh();
+      _refresh(false);
       stopButton.enabled = true;
     }
 
@@ -1715,8 +1715,6 @@
     }
 	
     private function _gameSelected():void {
-	  _keepAliveTimer.reset();
-	  _keepAliveTimer.start();
       var game:Object = gameListGrid.selectedItem;
 	  for (var i:int = 0; i < _user_list.length; i++) {
 		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
@@ -1728,6 +1726,11 @@
 	  }
 	  waiterListGrid.selectedIndex = -1;
     }
+	
+	private function _holdRefresh():void {
+	  _keepAliveTimer.reset();
+	  _keepAliveTimer.start();
+	}
 
 	//------------------------------------------------------------------------------------------------------------------------ LIST SORT FUNCTIONS
 	 private function _sortName(obj1:Object, obj2:Object):int {
@@ -3040,7 +3043,7 @@
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox liveDragging="true">
-			<mx:DataGrid id="userListGrid" width="345" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+			<mx:DataGrid id="userListGrid" width="345" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 			 <mx:columns>
 			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
@@ -3050,7 +3053,7 @@
 			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="EXP" width="45" paddingRight="5" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 			 <mx:columns>
 			  <mx:DataGridColumn headerStyleName="header81" dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="100" paddingLeft="0" textAlign="center" showDataTips="true" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="50" paddingLeft="0" textAlign="center" sortable="false" />
@@ -3066,7 +3069,7 @@
 		</mx:VDividedBox>
 		<mx:VBox>
 			<mx:VDividedBox dividerRelease="userMessage1.callLater(_scrollDown1);" liveDragging="true">
-				<mx:DataGrid id="gameListGrid" width="540" height="220" headerHeight="21" change="_gameSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_watchDialog();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+				<mx:DataGrid id="gameListGrid" width="540" height="220" headerHeight="21" change="_gameSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_watchDialog();" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 				 <mx:columns>
 				  <mx:DataGridColumn headerStyleName="header81" dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
