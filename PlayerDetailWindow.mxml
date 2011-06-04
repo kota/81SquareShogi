@@ -173,6 +173,9 @@
 			openingPieChart.loadData(_pieDataArray());
 /////////////////////////////
 			openingRadarChart.loadData(_radarDataArray());
+/////////////////////////////
+			dataGrid1.dataProvider = _gridDataArray(["yagura", "bishop_exchange", "double_wing", "side_pawn", "opposition_static", "blank", "total"]);
+			dataGrid2.dataProvider = _gridDataArray(["central_rook","4th_file_rook","3rd_file_rook","opposing_rook","double_ranging", "blank", "total","blank","unknown"]);
 		  }
 
 			private function _pieDataArray():Array{
@@ -199,6 +202,60 @@
 					arr[j].black_losses += _openingData[opening_names[i]].black_losses
 					arr[j].white_wins += _openingData[opening_names[i]].white_wins
 					arr[j].white_losses += _openingData[opening_names[i]].white_losses
+				}
+				return arr;
+			}
+			
+			private function _gridDataArray(orderArray:Array):Array{
+				var arr:Array = new Array();
+				var doSum:Boolean = true;
+				var black_wins_sum:int = 0;
+				var black_losses_sum:int = 0;
+				var white_wins_sum:int = 0;
+				var white_losses_sum:int = 0;
+				for each (var str:String in orderArray) {
+					if (str == "blank") {
+						var datum:Object = new Object();
+						datum.tip = "";
+					} else if (str == "total") {
+						datum = new Object();
+						datum.name = parentApplication.lan.total;
+						datum.tip = ""
+						datum.black_wins = black_wins_sum;
+						datum.black_losses = black_losses_sum;
+						datum.black_total = datum.black_wins + datum.black_losses;
+						datum.black_percent = datum.black_total == 0 ? 0 : (datum.black_wins / datum.black_total * 100).toFixed(0);
+						datum.white_wins = white_wins_sum;
+						datum.white_losses = white_losses_sum;
+						datum.white_total = datum.white_wins + datum.white_losses;
+						datum.white_percent = datum.white_total == 0 ? 0 : (datum.white_wins / datum.white_total * 100).toFixed(0);
+						datum.wins = datum.black_wins + datum.white_wins;
+						datum.losses = datum.black_losses + datum.white_losses;
+						datum.total = datum.wins + datum.losses;
+						datum.percent = datum.total == 0 ? 0 : (datum.wins / datum.total * 100).toFixed(0);
+						doSum = false;
+					} else {
+						datum = new Object();
+						datum.name = InfoFetcher.openingNameJp(str);
+						datum.tip = InfoFetcher.openingNameEn(str);
+						datum.black_wins = _openingData[str].black_wins;
+						if (doSum) black_wins_sum += datum.black_wins;
+						datum.black_losses = _openingData[str].black_losses;
+						if (doSum) black_losses_sum += datum.black_losses;
+						datum.black_total = datum.black_wins + datum.black_losses;
+						datum.black_percent = datum.black_total == 0 ? 0 : (datum.black_wins / datum.black_total * 100).toFixed(0);
+						datum.white_wins = _openingData[str].white_wins;
+						if (doSum) white_wins_sum += datum.white_wins;
+						datum.white_losses = _openingData[str].white_losses;
+						if (doSum) white_losses_sum += datum.white_losses;
+						datum.white_total = datum.white_wins + datum.white_losses;
+						datum.white_percent = datum.white_total == 0 ? 0 : (datum.white_wins / datum.white_total * 100).toFixed(0);
+						datum.wins = datum.black_wins + datum.white_wins;
+						datum.losses = datum.black_losses + datum.white_losses;
+						datum.total = datum.wins + datum.losses;
+						datum.percent = datum.total == 0 ? 0 : (datum.wins / datum.total * 100).toFixed(0);
+					}
+					arr.push(datum);
 				}
 				return arr;
 			}
@@ -251,25 +308,66 @@ key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yia
 				<mx:Spacer width="20"/>
 				<mx:Button label="Tendencies" click="resultViewStack.selectedIndex = 0;" fontSize="10" />
 				<mx:Button label="Winning %" click="resultViewStack.selectedIndex = 1;" fontSize="10"/>
-				<mx:Button label="Data Table" click="resultViewStack.selectedIndex = 2;" fontSize="10"/>
-				<mx:Button label="Rate History" click="resultViewStack.selectedIndex = 3;" fontSize="10"/>
+				<mx:Button label="Rate History" click="resultViewStack.selectedIndex = 2;" fontSize="10"/>
+				<mx:Button label="Data Table" click="resultViewStack.selectedIndex = resultViewStack.selectedIndex == 3 ? 4 : 3;" fontSize="10"/>
 			</mx:HBox>
 			<mx:HBox>
 				<mx:ViewStack id="resultViewStack" width="400" height="220">
 					<eightyOneSquare:OpeningPieChart id="openingPieChart" width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" />
 					<eightyOneSquare:OpeningRadarChart id="openingRadarChart" width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off" />
-					<mx:HBox width="400" height="220" horizontalAlign="center">
-						<mx:DataGrid id="dataGrid" width="250" height="180">
-							<mx:columns>
-								<mx:DataGridColumn/>
-								<mx:DataGridColumn/>
-								<mx:DataGridColumn/>
-							</mx:columns>
-						</mx:DataGrid>
-					</mx:HBox>
 					<mx:Canvas width="400" height="220" horizontalScrollPolicy="off" verticalScrollPolicy="off">
 						<eightyOneSquare:Plot2D id="ratePlot2D" width="400" height="220"/>
 					</mx:Canvas>
+					<mx:HBox width="400" height="220" horizontalAlign="center">
+						<mx:AdvancedDataGrid id="dataGrid1" width="400" height="215" sortableColumns="false" sortExpertMode="true" fontSize="10" textAlign="right" paddingLeft="0" paddingTop="0" rowHeight="19">
+							<mx:groupedColumns>
+								<mx:AdvancedDataGridColumn headerText="Openings" width="76" dataField="name" textAlign="center" showDataTips="true" dataTipField="tip" />
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.total}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="wins" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="percent" paddingLeft="2" />
+								</mx:AdvancedDataGridColumnGroup>
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="black_wins" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="black_losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="black_percent" paddingLeft="2" />
+								</mx:AdvancedDataGridColumnGroup>
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="white_wins" />
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="white_losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="white_percent" paddingLeft="2"/>
+								</mx:AdvancedDataGridColumnGroup>
+							</mx:groupedColumns>
+						</mx:AdvancedDataGrid>
+					</mx:HBox>
+					<mx:HBox width="400" height="220" horizontalAlign="center">
+						<mx:AdvancedDataGrid id="dataGrid2" width="400" height="215" sortableColumns="false" sortExpertMode="true" fontSize="10" textAlign="right" paddingLeft="0" paddingTop="0" rowHeight="19" verticalScrollPolicy="off">
+							<mx:groupedColumns>
+								<mx:AdvancedDataGridColumn headerText="Openings" width="76" dataField="name" textAlign="center" showDataTips="true" dataTipField="tip" />
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.total}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="wins" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="percent" paddingLeft="2" />
+								</mx:AdvancedDataGridColumnGroup>
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.black}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="black_wins" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="black_losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="black_total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="black_percent" paddingLeft="2" />
+								</mx:AdvancedDataGridColumnGroup>
+								<mx:AdvancedDataGridColumnGroup headerText="{parentApplication.lan.white}">
+									<mx:AdvancedDataGridColumn width="27" headerText="W" dataField="white_wins" />
+									<mx:AdvancedDataGridColumn width="27" headerText="L" dataField="white_losses" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="T" dataField="white_total" paddingLeft="2"/>
+									<mx:AdvancedDataGridColumn width="27" headerText="%" dataField="white_percent" paddingLeft="2"/>
+								</mx:AdvancedDataGridColumnGroup>
+							</mx:groupedColumns>
+						</mx:AdvancedDataGrid>
+					</mx:HBox>
 				</mx:ViewStack>
 				<mx:VBox width="125" verticalGap="3">
 <!--					<mx:Label text="{_title}" toolTip="{_subTitle}" /> -->

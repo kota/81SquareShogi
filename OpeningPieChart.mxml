@@ -41,7 +41,7 @@
 				
 				_pieSprite.graphics.lineStyle();
 				_pieSprite.graphics.beginFill(0xcccccc, 1);
-				_pieSprite.graphics.drawCircle(cx + 2, cy + 2, rOut+2);
+				_pieSprite.graphics.drawCircle(cx + 2, cy + 2, rOut+1);
 				_pieSprite.graphics.endFill();
 				_pieSprite.graphics.moveTo(cx, cy);
 				
@@ -99,8 +99,8 @@
 					}
 				} else if (_nOpposition >= 2.0 / 3.0 * _n) {
 					typeLabel.text = "対抗型志向"; typeLabel.toolTip = "Opposition Seeker";
-				} else if (_percents["unknown"] > 2.0 / 3.0 * 100) {
-					typeLabel.text = "力戦派"; typeLabel.toolTip = "Free-style Seeker";
+				} else if (_percents["unknown"] > 1.0 / 2.0 * 100) {
+					typeLabel.text = "力戦派"; typeLabel.toolTip = "Free-style Player";
 				} else {
 					typeLabel.text = "オールラウンダー"; typeLabel.toolTip = "All-rounder";
 				}

@@ -417,7 +417,7 @@
 				case "double_ranging":
 					return "相振り";
 				case "opposition_static":
-					return "居飛車(対抗)";
+					return "居飛車 対抗";
 				case "central_rook":
 					return "中飛車";
 				case "4th_file_rook":
