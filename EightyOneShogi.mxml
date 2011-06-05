@@ -56,7 +56,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/06/04";
+	public const VERSION:String = "ver.2011/06/05";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -337,7 +337,7 @@
 			  'opponent':"",
 			  'game_name':tokens[1],
 			  'turn':tokens[2],
-//			  'rating':tokens[3],
+			  'rating':parseInt(tokens[3]),
 			  'country_code':parseInt(tokens[4]),
 			  'titleName':"",
 			  'titleSubName':"",
@@ -351,7 +351,6 @@
 			  'favorite':"",
 			  'favoriteWidth':0
 			  }
-		  user.rating = user.wins * 3 + user.losses + user.draws;
 		  user.country = InfoFetcher.country_names[user.country_code];
 		  user.country3 = InfoFetcher.country_names3[user.country_code];
 		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";

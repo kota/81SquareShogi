@@ -80,8 +80,8 @@
 				  _dy = 0;
 				  _main = "DRAW";
 				  mainLabel.setStyle('color', 0x008800);
-				  _you_after = "-> " + you.rating;
-				  _opponent_after = "-> " + opponent.rating;
+				  _you_after = "-> " + (you.rating + 1) + " (+1)";
+				  _opponent_after = "-> " +  (opponent.rating + 1) + " (+1)";
 			  }
 			  _closeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _close);
 			  _afterTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _after);
