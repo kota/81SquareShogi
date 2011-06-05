@@ -45,10 +45,10 @@
 				if (p.y < _ymin) _ymin = p.y;
 				if (p.y > _ymax) _ymax = p.y;
 			}
-			var tmp:Number = _xmax == _xmin ? 2 * Math.max(Math.abs(_xmax), 1) : _xmax - _xmin;
-			_xmax += 0.05 * tmp;
+			var tmp:Number = _xmax == _xmin ? 2 * Math.max(Math.abs(_xmax), 1) : (_xmax - _xmin);
+			_xmax += 0.02 * tmp;
 			_xmin -= 0.05 * tmp;
-			tmp = _ymax == _ymin ? 2 * Math.max(Math.abs(_ymax), 1) : _ymax - _ymin;
+			tmp = _ymax == _ymin ? 2 * Math.max(Math.abs(_ymax), 1) : (_ymax - _ymin);
 			_ymax += 0.1 * tmp;
 			_ymin -= 0.1 * tmp;
 
@@ -66,23 +66,37 @@
 			else if (_ymax - _ymin > 12) tick = 5;
 			else if (_ymax - _ymin > 6) tick = 2;
 			else tick = 1;
+			
 			for (var i:int = int(_ymin) - 1; i < _ymax; i++) {
-				if (i > _ymin && i % tick == 0) break;
-			}
-			_lineSprite.graphics.lineStyle(1, 0x000000, 0.2, true, "normal", null, JointStyle.MITER);
-			while (i < _ymax) {
-				var pt:Point = _trans(new Point(_xmin, i));
-				_lineSprite.graphics.moveTo(pt.x, pt.y);
-				_lineSprite.graphics.lineTo(width * (1 - _margin), pt.y);
-				var tickLabel:TextField = new TextField();
-				tickLabel.autoSize = "right";
-				tickLabel.defaultTextFormat = new TextFormat("Meiryo UI", 11, 0x000000, true);
-				tickLabel.selectable = false;
-				tickLabel.text = String(i);
-				tickLabel.x = 8;
-				tickLabel.y = pt.y - 11;
-				_lineSprite.addChild(tickLabel);
-				i += tick;
+				if (i % tick == 0) {
+					_lineSprite.graphics.lineStyle(1, 0xcccccc, 1, true, "normal");
+					var pt:Point = _trans(new Point(_xmin, i));
+					_lineSprite.graphics.moveTo(pt.x, pt.y);
+					_lineSprite.graphics.lineTo(width * (1 - _margin), pt.y);
+					var tickLabel:TextField = new TextField();
+					tickLabel.autoSize = "right";
+					tickLabel.defaultTextFormat = new TextFormat("Meiryo UI", 11, 0x000000, true);
+					tickLabel.selectable = false;
+					tickLabel.text = String(i);
+					tickLabel.x = 8;
+					tickLabel.y = pt.y - 11;
+					_lineSprite.addChild(tickLabel);
+				}
+				var index:int = InfoFetcher.rank_thresholds.indexOf(i);
+				if (index >= 0) {
+					_lineSprite.graphics.lineStyle(3, 0x00aaff, 0.5, true, "normal");
+					pt = _trans(new Point(_xmin, i));
+					_lineSprite.graphics.moveTo(pt.x, pt.y);
+					_lineSprite.graphics.lineTo(width * (1 - _margin), pt.y);
+					tickLabel = new TextField();
+					tickLabel.autoSize = "left";
+					tickLabel.defaultTextFormat = new TextFormat("Meiryo UI", 11, 0x00aaff, true);
+					tickLabel.selectable = false;
+					tickLabel.text = InfoFetcher.rank_names[index];
+					tickLabel.x = pt.x;
+					tickLabel.y = pt.y - 18;
+					_lineSprite.addChild(tickLabel);
+				}
 			}
 			
 			_lineSprite.graphics.lineStyle(1, 0xff0000, 1, true, "normal", null, JointStyle.MITER);
@@ -122,7 +136,7 @@
 		}
 		
 		private function _trans(p:Point):Point {
-			var x:Number = 2*_margin * width + (1 - 2 * _margin) * width * (p.x - _xmin) / (_xmax - _xmin);
+			var x:Number = 2*_margin * width + (1 - 3 * _margin) * width * (p.x - _xmin) / (_xmax - _xmin);
 			var y:Number = _margin * height + (1 - 2 * _margin) * height * (p.y - _ymax) / (_ymin - _ymax);
 			return new Point(x, y);
 		}

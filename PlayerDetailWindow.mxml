@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" xmlns:eightyOneSquare="*"  fontSize="12" horizontalScrollPolicy="off" verticalScrollPolicy="off"
-					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();" creationPolicy="all">
+					paddingLeft="5" paddingBottom="5" paddingRight="5" paddingTop="5" title="Player Detail" showCloseButton="true" close="_close();" creationPolicy="all" creationComplete="_initWindow();">
 	    <mx:Script>
         <![CDATA[
 		  import com.google.maps.LatLng;
@@ -76,6 +76,14 @@
 		  
 		  private const opening_names:Array = ["double_wing","side_pawn","yagura","bishop_exchange","opposition_static","opposing_rook","3rd_file_rook","4th_file_rook","central_rook","double_ranging","unknown","*"];
 		  private const group_names:Array = ["side_and_wing","side_and_wing","yagura_and_bishop","yagura_and_bishop","opposition_static","opposition_ranging","opposition_ranging","opposition_ranging","opposition_ranging","double_ranging","unknown","*"];
+
+		  private function _initWindow():void {
+			  this.addEventListener("move", _handleMove);
+		  }
+		  
+		  private function _handleMove(e:Event):void {
+			  if (this.y < 0) this.y = 0;
+		  }
 		  
 		  public function loadPlayerDetail(player:Object):void {
 			  _detailLoaded = true;
@@ -280,7 +288,7 @@
 			</mx:Canvas>
 			<mx:Label text="{login}" fontSize="15" fontWeight="bold"/>
 			<mx:Spacer height="-10"/>
-			<mx:HBox>
+			<mx:HBox horizontalGap="0">
 				<mx:Image width="27" height="17"  source="{IMAGE_DIRECTORY}flags_s/{_country_code}.gif"/>
 				<mx:Label text="{_country}"/>
 			</mx:HBox>
@@ -294,12 +302,9 @@
 			<mx:TextArea width="220" height="95" text="{_pr}" fontSize="10" editable="false" />
 		</mx:VBox>
 
-<maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="_onMapReady(event)" width="280" height="190"
-key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yiabjGLW6ebu0g" sensor="false" />
-<!--
-		<mx:Canvas width="280" height="190" borderStyle="solid" horizontalScrollPolicy="off" verticalScrollPolicy="off">
-			<mx:Image source="{IMAGE_DIRECTORY}test/mapSample.jpg"/>
-		</mx:Canvas> -->
+		<maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="_onMapReady(event)" width="280" height="190"
+		key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yiabjGLW6ebu0g" sensor="false" />
+
 	</mx:HBox>
 	
 	<mx:HBox>
