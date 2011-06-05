@@ -41,6 +41,8 @@
 		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦');
 		public static const pie_chart_order:Array = new Array("opposition_static", "yagura", "bishop_exchange", "side_pawn", "double_wing", "unknown", "double_ranging", "opposing_rook", "3rd_file_rook", "4th_file_rook", "central_rook");
 		public static const radar_chart_order:Array = new Array("opposition_static","yagura_and_bishop","side_and_wing","unknown","double_ranging","opposition_ranging");
+		public static var admins:Array = new Array('kota', 'hidetchi', 'test1', 'test2', 'test3');
+		
 		public var cheaters:Array;
 		public var banned:Array;
 		public var initMessage:String = "";
