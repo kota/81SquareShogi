@@ -275,7 +275,7 @@
 	  }
       loginMessage.text = "Logged in Successfully";
 	  clock.start();
-	  if (["kota", "hidetchi", "test1"].indexOf(login_name.toLowerCase()) >= 0) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
+	  if (InfoFetcher.admins.indexOf(login_name.toLowerCase()) >= 0) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
@@ -1147,6 +1147,15 @@
 //--------------------------------------------------------------------------------------------------------------------------------- CHAT 
     private function _handleChat(e:ServerMessageEvent):void {
 		var sender:String = e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1];
+		var match:Array;
+		if ((match = e.message.match(/\[\#\#BROADCAST\](.+)$/))) {
+			if (InfoFetcher.admins.indexOf(sender.toLowerCase()) >= 0) {
+				_writeUserMessage("###BROADCAST###\n" + match[1] + "\n", 1, "#FF0000", true);
+				_writeUserMessage("###BROADCAST###\n" + match[1] + "\n", 2, "#FF0000", true);
+				_sound_chat3.play();
+			}
+			return;
+		}
 		if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 		if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 		if (_favorite_list.indexOf(sender.toLowerCase()) >= 0) {
@@ -2013,11 +2022,16 @@
 		  _adminPanelWindow = AdminPanelWindow(PopUpManager.createPopUp(this, AdminPanelWindow, false));
 		  PopUpManager.centerPopUp(_adminPanelWindow);
 		  _adminPanelWindow.sendButton.addEventListener(MouseEvent.CLICK, _handleAdminSendCommand);
+		  _adminPanelWindow.broadcastButton.addEventListener(MouseEvent.CLICK, _handleBroadcast);
 		  _adminPanelWindow.showLog(_adminLog);
 	}
 	
 	private function _handleAdminSendCommand(e:MouseEvent):void {
 		_client.send(e.target.parent.parent.adminCommandInput.text);
+	}
+	
+	private function _handleBroadcast(e:MouseEvent):void {
+		_client.chat("[##BROADCAST]" + e.target.parent.parent.adminCommandInput.text);
 	}
 	
 	//=========================================================
