@@ -33,6 +33,8 @@
 		  [Bindable]
 		  private var _losses:int;
 		  [Bindable]
+		  private var _draws:int;
+		  [Bindable]
 		  private var _percentage:Number;
 		  [Bindable]
 		  private var _streak:int;
@@ -59,12 +61,13 @@
 			  _subTitle = user.titleSubName;
 			  _wins = user.wins;
 			  _losses = user.losses;
+			  _draws = user.draws;
 			  _streak = Math.max(0, user.streak);
 			  _streak_best = user.streak_best;
-			  if (_wins + _losses == 0) {
+			  if (_wins + _losses + _draws == 0) {
 				  _percentage = 0;
 			  } else {
-				  _percentage = _wins / (_wins + _losses) * 100;
+				  _percentage = _wins / (_wins + _losses + _draws) * 100;
 			  }
 			  if (user.monitor_game != "*") {
 				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs " + user.monitor_game.split("+")[1];
@@ -141,22 +144,21 @@
 						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
 						<mx:Label text="{_title}" toolTip="{_subTitle}" fontSize="15" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
-					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}" fontSize="14" />
+					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}"/>
 				</mx:VBox>
 				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
 			</mx:HBox>
-			<mx:VBox height="73" horizontalScrollPolicy="off">
-				<mx:Label text="{_rank}  (EXP: {_rating})" fontSize="14" />
+			<mx:VBox height="73" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="2">
+				<mx:Label text="{_rank}  (EXP: {_rating})" fontSize="13" />
 				<mx:HBox>
 					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>
 					<mx:Label text="{_losses} {parentApplication.lan.loss_small}"/>
-					<mx:Label text="({_percentage.toFixed(1)}%)"/>
-					<mx:Label text="{parentApplication.lan.total}: {_wins + _losses}"/>
+					<mx:Label text="{_draws} draw"/>
 				</mx:HBox>
-<!--				<mx:HBox>
-					<mx:Label text="{parentApplication.lan.streak}: {_streak_best}"/>
-					<mx:Label text="({parentApplication.lan.current}: {_streak})"/>
-				</mx:HBox> -->
+				<mx:HBox>
+					<mx:Label text="{parentApplication.lan.total}: {_wins + _losses + _draws}"/>
+					<mx:Label text="({_percentage.toFixed(1)}% win)"/>
+				</mx:HBox>
 			</mx:VBox>
 		</mx:VBox>
 	</mx:HBox>

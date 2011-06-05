@@ -514,6 +514,8 @@ package  {
 	  _player_infos = player_infos;
 	  _player_infos[0].labelColor = 0x000000;
 	  _player_infos[1].labelColor = 0x000000;
+	  _chat_baloons[0].hide();
+	  _chat_baloons[1].hide();
       _my_turn = my_turn;
 	  if (_player_infos[_my_turn].game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
       resetBoard();
