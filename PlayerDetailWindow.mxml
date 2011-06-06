@@ -53,6 +53,8 @@
 		  [Bindable]
 		  private var _losses34:int = 0;
 		  [Bindable]
+		  private var _draws34:int = 0;
+		  [Bindable]
 		  private var _exp:int = 0;
 		  [Bindable]
 		  private var _rank34:String = "";
@@ -105,9 +107,10 @@
 			  if (_wins + _losses < 10) _rank = "-";
 			  _wins34 = player.wins34;
 			  _losses34 = player.losses34;
+			  _draws34 = player.draws34;
 			  _streak = player.streak;
 			  _streak_best = player["streak-best"];
-			  _exp = _wins34 * 3 + _losses34;
+			  _exp = player.exp34;
 			  _rank34 = InfoFetcher.makeRank34FromExp(_exp);
 			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses)*100);
 			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34) * 100);
@@ -388,7 +391,7 @@
 				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
-		<mx:VBox borderStyle="solid" width="125" height="250" verticalGap="3">
+		<mx:VBox borderStyle="solid" width="125" height="250" verticalGap="1" verticalScrollPolicy="off">
 			<mx:Label text="3X4" fontWeight="bold" fontSize="13" />
 			<mx:Canvas id="avatar34Canvas" width="85" height="80">
 				<mx:Image width="80" height="80"  source="{IMAGE_DIRECTORY}avatars34/{_rank34}.jpg" x="5" />
@@ -397,6 +400,7 @@
 			<mx:Label text="EXP: {_exp}"/>
 			<mx:Label text="Win: {_wins34}"/>
 			<mx:Label text="Loss: {_losses34}"/>
+			<mx:Label text="Draw: {_draws34}"/>
 			<mx:Label text="  (Total: {_wins34 + _losses34})"/>
 			<mx:Label text="  ({_percentage34.toFixed(1)}% win)"/>
 		</mx:VBox>
