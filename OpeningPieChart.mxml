@@ -128,6 +128,10 @@
 					typeLabel.text = "真正オールラウンダー"; typeLabel.toolTip = "Genuine All-rounder";
 				} else if (_percents["opposition_static"] / 100 >= 0.8 * _nStatic / _n) {
 					typeLabel.text = "対抗形志向"; typeLabel.toolTip = "Opposition Seeker";
+				} else if (_nRanging <= 0.05 * _n) {
+					typeLabel.text = "純粋居飛車党"; typeLabel.toolTip = "Pure Static Rook Player";
+				} else if (_nStatic <= 0.05 * _n) {
+					typeLabel.text = "純粋振り飛車党"; typeLabel.toolTip = "Pure Ranging Rook Player";
 				} else {
 					typeLabel.text = "オールラウンダー"; typeLabel.toolTip = "All-rounder";
 				}

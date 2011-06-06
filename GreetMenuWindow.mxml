@@ -8,8 +8,8 @@
 
         ]]>
     </mx:Script>
-	<mx:Button id="greet1" label="&lt;(_ _)> お願いします。(Onegai-shimasu)" click="PopUpManager.removePopUp(this);"/>
-	<mx:Button id="greet2" label="&lt;(_ _)> 有難うございました。(Arigatou-gozaimashita)" click="PopUpManager.removePopUp(this);"/>
+	<mx:Button id="greet1" label="&lt;(_ _)> お願いします。(Onegai-shimasu)" toolTip="Greet to start the game" click="PopUpManager.removePopUp(this);"/>
+	<mx:Button id="greet2" label="&lt;(_ _)> 有難うございました。(Arigatou-gozaimashita)" toolTip="Greet to thank for the game" click="PopUpManager.removePopUp(this);"/>
 	<mx:Label text=""/>
 	<mx:Button label="Cancel" click="PopUpManager.removePopUp(this);" />
 </mx:TitleWindow>
