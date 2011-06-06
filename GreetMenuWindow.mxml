@@ -8,8 +8,20 @@
 
         ]]>
     </mx:Script>
-	<mx:Button id="greet1" label="&lt;(_ _)> お願いします。(Onegai-shimasu)" click="PopUpManager.removePopUp(this);"/>
-	<mx:Button id="greet2" label="&lt;(_ _)> 有難うございました。(Arigatou-gozaimashita)" click="PopUpManager.removePopUp(this);"/>
-	<mx:Label text=""/>
-	<mx:Button label="Cancel" click="PopUpManager.removePopUp(this);" />
+	<mx:Button id="greet1" label="&lt;(_ _)> お願いします。(Onegai-shimasu)" toolTip="Greet to start the game" click="PopUpManager.removePopUp(this);"/>
+	<mx:Button id="greet2" label="&lt;(_ _)> 有難うございました。(Arigatou-gozaimashita)" toolTip="Greet to thank for the game" click="PopUpManager.removePopUp(this);"/>
+	<mx:HBox fontSize="12" horizontalGap="5" color="#0000FF">
+		<mx:Button id="faceHappy" label="(*^-^*)" toolTip="HAPPY" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3" />
+		<mx:Button id="faceSmile" label="(^^;)" toolTip="SMILE" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+		<mx:Button id="facePonder" label="σ(´、｀=)" toolTip="PONDER" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+		<mx:Button id="faceShock" label="(￣□￣||;)!" toolTip="SHOCK" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+	</mx:HBox>
+	<mx:HBox fontSize="12" horizontalGap="5" color="#0000FF">
+		<mx:Button id="faceOTL" label="(_ _;)" toolTip="OTL" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+		<mx:Button id="faceCry" label="o(T△T)o" toolTip="CRY" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+		<mx:Button id="faceSulk" label="..ρ(-ω-､)" toolTip="SULK" click="PopUpManager.removePopUp(this);" paddingLeft="3" paddingRight="3"/>
+	</mx:HBox>
+	<mx:HBox width="100%" horizontalAlign="center">
+		<mx:Button label="Cancel" click="PopUpManager.removePopUp(this);" />
+	</mx:HBox>
 </mx:TitleWindow>

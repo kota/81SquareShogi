@@ -1185,9 +1185,8 @@ package  {
 		}
 	}
 	
-	public function updateBaloon(turn:int, message:String):void {
-		message = message.match(/^\[.+?\]\s(.*)$/)[1];
-		_chat_baloons[turn == _my_turn ? 0 : 1].update(message);
+	public function updateBaloon(turn:int, message:String, face:Boolean = false):void {
+		_chat_baloons[turn == _my_turn ? 0 : 1].update(message, face);
 	}
 
 	private function _showMovableSquares(from:Point):void {

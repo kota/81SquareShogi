@@ -29,10 +29,9 @@
 			this.verticalScrollPolicy = "off";
 			this.setStyle('paddingLeft', 10);
 			this.setStyle('paddingRight', 10);
-			this.setStyle('paddingTop', 10);
 			this.setStyle('paddingBottom', 10);
-			this.setStyle('fontSize', 13);
 			this.setStyle('borderThicknes', 2);
+			this.setStyle('dropShadowEnabled', true);
 			this.setStyle('backgroundColor', 0xffffee);
 			this.selectable = false;
 			this.editable = false;
@@ -42,7 +41,16 @@
 			_fadeTimer.addEventListener(TimerEvent.TIMER, _handleFadeTimer);
 		}
 		
-		public function update(message:String):void {
+		public function update(message:String, face:Boolean):void {
+			if (face) {
+				setStyle('fontSize', 23);
+				setStyle('textAlign', 'center');
+				setStyle('paddingTop', 20);
+			} else {
+				setStyle('fontSize', 13);
+				setStyle('textAlign', 'left');
+				this.setStyle('paddingTop', 10);
+			}
 			text = message;
 			alpha = 1.0;
 			_fadeTimer.reset();

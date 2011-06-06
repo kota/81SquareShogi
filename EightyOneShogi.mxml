@@ -1275,11 +1275,21 @@
 			if (_ignore_list.indexOf(sender.toLowerCase()) >= 0) return;
 			if (_infoFetcher.banned.indexOf(sender.toLowerCase()) >= 0) return;
 			if (sender == board.playerInfos[0].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#000000"); if (_chat_sound2_play) _sound_chat2.play();
-				board.updateBaloon(0, e.message.substr(12));
+				if ((match = e.message.substr(12).match(/^\[.+\]\s\[##FACE\](.*)$/))) {
+					board.updateBaloon(0, match[1], true);
+				} else {
+					_writeUserMessage(e.message.substr(12), 2, "#000000");
+					board.updateBaloon(0, e.message.substr(12).match(/^\[.+?\]\s(.*)$/)[1]);
+				}
+				if (_chat_sound2_play) _sound_chat2.play();
 			} else if (sender == board.playerInfos[1].name) {
-				_writeUserMessage(e.message.substr(12), 2, "#666666"); if (_chat_sound2_play) _sound_chat2.play();
-				board.updateBaloon(1, e.message.substr(12));
+				if ((match = e.message.substr(12).match(/^\[.+\]\s\[##FACE\](.*)$/))) {
+					board.updateBaloon(1, match[1], true);
+				} else {
+					_writeUserMessage(e.message.substr(12), 2, "#666666");
+					board.updateBaloon(1, e.message.substr(12).match(/^\[.+?\]\s(.*)$/)[1]);
+				}
+				if (_chat_sound2_play) _sound_chat2.play();
 			} else if (sender == login_name) {
 				_writeUserMessage(e.message.substr(12), 2, "#0033DD"); if (_chat_sound2_play) _sound_chat2.play();
 			} else if (_isDuringMyGame() && !_allowWatcherChat) {
@@ -2061,11 +2071,22 @@
         title = "Make Japanese Greetings";
 		greet1.addEventListener(MouseEvent.CLICK, _sendGreet);
 		greet2.addEventListener(MouseEvent.CLICK, _sendGreet);
+		faceHappy.addEventListener(MouseEvent.CLICK, _sendFace);
+		faceSmile.addEventListener(MouseEvent.CLICK, _sendFace);
+		facePonder.addEventListener(MouseEvent.CLICK, _sendFace);
+		faceShock.addEventListener(MouseEvent.CLICK, _sendFace);
+		faceOTL.addEventListener(MouseEvent.CLICK, _sendFace);
+		faceCry.addEventListener(MouseEvent.CLICK, _sendFace);
+		faceSulk.addEventListener(MouseEvent.CLICK, _sendFace);
       }
     }
 	
 	private function _sendGreet(e:MouseEvent):void {
 		_client.gameChat(_game_name, e.target.label);
+	}
+	
+	private function _sendFace(e:MouseEvent):void {
+		_client.gameChat(_game_name, "[##FACE]" + e.target.label);
 	}
 	
     private function _showImpasse():void {
