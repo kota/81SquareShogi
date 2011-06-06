@@ -38,9 +38,9 @@
     </mx:Script>
 	<mx:HBox>
 		<mx:TextInput id="adminCommandInput" width="300"/>
-		<mx:Button id="sendButton" label="Send" />
+		<mx:CheckBox id="scrollCheck" label="Auto-scroll" selected="true" />
+		<mx:Spacer width="50"/>
 		<mx:Button id="broadcastButton" label="Broadcast"/>
-		<mx:CheckBox id="scrollCheck" selected="true" />
 	</mx:HBox>
 	<mx:TextArea id="logTextArea" width="800" height="500" fontFamily="Lucida console" fontSize="11" wordWrap="false" backgroundColor="0x000000" color="0xbbbbbb" />
 

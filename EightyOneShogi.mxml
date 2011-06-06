@@ -688,7 +688,7 @@
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
 		_adminLog += e.message;
-		if (_adminLog.length > 10000) _adminLog = _adminLog.substr(1000);
+		if (_adminLog.length > 20000) _adminLog = _adminLog.substr(1000);
 		if (_adminPanelWindow) _adminPanelWindow.showLog(_adminLog);
 	}
 	
@@ -2091,13 +2091,14 @@
 	private function _openAdminPanel():void {
 		  _adminPanelWindow = AdminPanelWindow(PopUpManager.createPopUp(this, AdminPanelWindow, false));
 		  PopUpManager.centerPopUp(_adminPanelWindow);
-		  _adminPanelWindow.sendButton.addEventListener(MouseEvent.CLICK, _handleAdminSendCommand);
+		  _adminPanelWindow.adminCommandInput.addEventListener(FlexEvent.ENTER, _handleAdminSendCommand);
 		  _adminPanelWindow.broadcastButton.addEventListener(MouseEvent.CLICK, _handleBroadcast);
 		  _adminPanelWindow.showLog(_adminLog);
 	}
 	
-	private function _handleAdminSendCommand(e:MouseEvent):void {
-		_client.send(e.target.parent.parent.adminCommandInput.text);
+	private function _handleAdminSendCommand(e:Event):void {
+		_client.send(e.target.text);
+		e.target.text = "";
 	}
 	
 	private function _handleBroadcast(e:MouseEvent):void {
