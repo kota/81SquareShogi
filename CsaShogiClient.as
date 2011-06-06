@@ -98,7 +98,7 @@ package{
 		  _socket.writeUTFBytes(message + "\n");
 		  _socket.flush();
 		  trace ("message sent: " + message);
-		  if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + message + "\n"));
+		  if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "----- SENT> " + message + "\n"));
 		}
 
     public function login(login_name:String,password:String):void {
