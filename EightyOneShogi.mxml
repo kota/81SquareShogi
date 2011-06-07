@@ -3019,8 +3019,15 @@
 <!-- =============================================================
                   VIEWSTACK INDEX = 0
 ================================================================== -->
-    <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}">
-    <mx:Image id="titleBanner" source="{DIRECTORY}images/3X4.jpg"/>
+	<mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}" verticalGap="4">
+	  <mx:HBox width="672" horizontalAlign="right" horizontalGap="0" paddingBottom="0" paddingTop="0" paddingRight="0" paddingLeft="0">
+		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
+		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="My Account" click="navigateToURL(new URLRequest('http://account.81dojo.com/'), 'quote')"/>
+		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
+		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
+		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
+	  </mx:HBox>
+	  <mx:Image id="titleBanner" source="{DIRECTORY}images/3X4.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(Collaboration by 81Dojo and Nekomado)"/>
@@ -3063,6 +3070,8 @@
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
+	  <mx:Label paddingTop="-2" paddingBottom="0"  text="Avatar images designed by Mayakeru" fontWeight="bold" />
+	  <mx:Spacer height="-10"/>
       <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="www.otosozai.com - ONGAKUSITU" click="navigateToURL(new URLRequest('http://www.otosozai.com/'), 'quote')"/>
 	  <mx:Spacer height="-10"/>
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0"  label="National flag and Road sign Mt." click="navigateToURL(new URLRequest('http://nflagrsign.xrea.jp/'), 'quote')"/>
