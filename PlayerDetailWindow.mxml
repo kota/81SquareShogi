@@ -391,7 +391,7 @@
 				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
-		<mx:VBox borderStyle="solid" width="125" height="250" verticalGap="1" verticalScrollPolicy="off">
+		<mx:VBox borderStyle="solid" width="125" height="250" verticalGap="0" verticalScrollPolicy="off">
 			<mx:Label text="3X4" fontWeight="bold" fontSize="13" />
 			<mx:Canvas id="avatar34Canvas" width="85" height="80">
 				<mx:Image width="80" height="80"  source="{IMAGE_DIRECTORY}avatars34/{_rank34}.jpg" x="5" />

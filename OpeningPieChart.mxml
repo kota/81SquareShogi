@@ -81,59 +81,59 @@
 				if (_n < 10) {
 					typeLabel.text = "Unknown (lack data)"; typeLabel.toolTip = "";
 				} else if (_nStatic >= 2.0/3.0*_n) {
-					typeLabel.text = "居飛車党"; typeLabel.toolTip = "Static Rook Player";
+					typeLabel.toolTip = "居飛車党"; typeLabel.text = "Static Rook Player";
 					if (_nRanging <= 0.05 * _n) {
-						typeLabel.text = "純粋居飛車党"; typeLabel.toolTip = "Pure Static Rook Player";
+						typeLabel.toolTip = "純粋居飛車党"; typeLabel.text = "Pure Static Rook Player";
 					}
 					if (_percents["yagura"] / 100 >= _nStatic / _n * 0.6) {
-						typeLabel.text = "矢倉マニア"; typeLabel.toolTip = "Yagura Enthusiast";
+						typeLabel.toolTip = "矢倉マニア"; typeLabel.text = "Yagura Enthusiast";
 					} else if (_percents["bishop_exchange"] / 100 >= _nStatic / _n * 0.6) {
-						typeLabel.text = "角換りマニア"; typeLabel.toolTip = "Bishop Exchange Enthusiast";
+						typeLabel.toolTip = "角換りマニア"; typeLabel.text = "Bishop Exchange Enthusiast";
 					} else if (_percents["side_pawn"] / 100 >= _nStatic / _n * 0.6) {
-						typeLabel.text = "横歩取りマニア"; typeLabel.toolTip = "Side Pawn Picker Enthusiast";
+						typeLabel.toolTip = "横歩取りマニア"; typeLabel.text = "Side Pawn Picker Enthusiast";
 					}
 				} else if (_nRanging >= 2.0 / 3.0 * _n) {
-					typeLabel.text = "振り飛車党"; typeLabel.toolTip = "Ranging Rook Player";
+					typeLabel.toolTip = "振り飛車党"; typeLabel.text = "Ranging Rook Player";
 					if (_percents["3rd_file_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0 ||
 					     _nRanging/_n - (_percents["3rd_file_rook"] + _percents["double_ranging"])/100 <= 0.25*_percents["3rd_file_rook"]/100)  {
-						typeLabel.text = "三間飛車党"; typeLabel.toolTip = "3rd-file Rook Player";
+						typeLabel.toolTip = "三間飛車党"; typeLabel.text = "3rd-file Rook Player";
 					} else if (_percents["4th_file_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0 ||
 					     _nRanging/_n - (_percents["4th_file_rook"] + _percents["double_ranging"])/100 <= 0.25*_percents["4th_file_rook"]/100)  {
-						typeLabel.text = "四間飛車党"; typeLabel.toolTip = "4th-file Rook Player";
+						typeLabel.toolTip = "四間飛車党"; typeLabel.text = "4th-file Rook Player";
 					} else if (_percents["central_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0 ||
 					     _nRanging/_n - (_percents["central_rook"] + _percents["double_ranging"])/100 <= 0.25*_percents["central_rook"]/100)  {
-						typeLabel.text = "中飛車党"; typeLabel.toolTip = "Central Rook Player";
+						typeLabel.toolTip = "中飛車党"; typeLabel.text = "Central Rook Player";
 					}
 					if (_nStatic <= 0.05 * _n) {
-						switch (typeLabel.text) {
+						switch (typeLabel.toolTip) {
 							case "三間飛車党":
-								typeLabel.text = "三間飛車マニア"; typeLabel.toolTip = "3rd-file Rook Enthusiast"; break;
+								typeLabel.toolTip = "三間飛車マニア"; typeLabel.text = "3rd-file Rook Enthusiast"; break;
 							case "四間飛車党":
-								typeLabel.text = "四間飛車マニア"; typeLabel.toolTip = "4th-file Rook Enthusiast"; break;
+								typeLabel.toolTip = "四間飛車マニア"; typeLabel.text = "4th-file Rook Enthusiast"; break;
 							case "中飛車党":
-								typeLabel.text = "中飛車マニア"; typeLabel.toolTip = "Central Rook Enthusiast"; break;
+								typeLabel.toolTip = "中飛車マニア"; typeLabel.text = "Central Rook Enthusiast"; break;
 							default:
-								typeLabel.text = "純粋振り飛車党"; typeLabel.toolTip = "Pure Ranging Rook Player";
+								typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Ranging Rook Player";
 						}
 					}
 				} else if (_nOpposition >= 2.0 / 3.0 * _n && _percents["opposition_static"]/100 >= 0.25* _nOpposition/_n && _percents["oppsition_static"]/100 <= 0.75 *_nOpposition/_n) {
-					typeLabel.text = "対抗形志向"; typeLabel.toolTip = "Opposition Seeker";
+					typeLabel.toolTip = "対抗形志向"; typeLabel.text = "Opposition Seeker";
 					if (_nOpposition >= 0.9 * _n) {
-						typeLabel.text = "対抗形マニア"; typeLabel.toolTip = "Opposition Enthusiast";
+						typeLabel.toolTip = "対抗形マニア"; typeLabel.text = "Opposition Enthusiast";
 					}
 				} else if (_percents["unknown"] > 1.0 / 2.0 * 100) {
-					typeLabel.text = "力戦派"; typeLabel.toolTip = "Free-style Player";
+					typeLabel.toolTip = "力戦派"; typeLabel.text = "Free-style Player";
 				} else if (_percents["double_ranging"] >= 7 && _percents["3rd_file_rook"] >= 7 && _percents["central_rook"] >= 7 &&
 				              _percents["yagura"] >= 7 && _percents["bishop_exchange"] >= 7 && _percents["side_pawn"] >= 7) {
-					typeLabel.text = "真正オールラウンダー"; typeLabel.toolTip = "Genuine All-rounder";
+					typeLabel.toolTip = "真正オールラウンダー"; typeLabel.text = "Genuine All-rounder";
 				} else if (_percents["opposition_static"] / 100 >= 0.8 * _nStatic / _n) {
-					typeLabel.text = "対抗形志向"; typeLabel.toolTip = "Opposition Seeker";
+					typeLabel.toolTip = "対抗形志向"; typeLabel.text = "Opposition Seeker";
 				} else if (_nRanging <= 0.05 * _n) {
-					typeLabel.text = "純粋居飛車党"; typeLabel.toolTip = "Pure Static Rook Player";
+					typeLabel.toolTip = "純粋居飛車党"; typeLabel.text = "Pure Static Rook Player";
 				} else if (_nStatic <= 0.05 * _n) {
-					typeLabel.text = "純粋振り飛車党"; typeLabel.toolTip = "Pure Ranging Rook Player";
+					typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Ranging Rook Player";
 				} else {
-					typeLabel.text = "オールラウンダー"; typeLabel.toolTip = "All-rounder";
+					typeLabel.toolTip = "オールラウンダー"; typeLabel.text = "All-rounder";
 				}
 			}
 			
