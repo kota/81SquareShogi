@@ -4,8 +4,31 @@
 	<mx:Script>
         <![CDATA[
 			import flash.geom.Point;
+			import mx.accessibility.RadioButtonAccImpl;
+			import mx.containers.HBox;
         	import mx.controls.*;
             import mx.managers.PopUpManager;
+			import PieceSet;
+			
+			public function loadPieceSets(sets:Array):void {
+				for (var i:int = 0; i < 5; i++ ) {
+					var hbox:HBox = new HBox();
+					hbox.setStyle('horizontalGap', 0);
+					var radioButton:RadioButton = new RadioButton();
+					radioButton.label = sets[i].getName;
+					radioButton.setStyle('paddingRight', 20);
+					radioButton.groupName = "RadioGroup2";
+					radioButton.value = i;
+					hbox.addChild(radioButton);
+					for each (var j:int in [0, 10, 7]) {
+						var image:Image = new Image();
+						image.source = sets[i].getPieceClass(0, j);
+						image.width = 34;
+						hbox.addChild(image);
+					}
+					pieceSetVBox.addChild(hbox);
+				}
+			}
 			
 			public function drawArrow():void {
 				arrowCanvas.removeAllChildren();
@@ -19,44 +42,15 @@
         ]]>
     </mx:Script>
 	<mx:TabNavigator id="optionTab" width="370" height="370" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
-		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
+		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10" verticalGap="0">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
-			<mx:HBox>
-				<mx:RadioButton label="Ryouko (1-kanji)" paddingRight="20" groupName="RadioGroup2" value="0"/>
-				<mx:Image source="@Embed('images/pieces_ryoko1/Sou.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_ryoko1/Suma.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_ryoko1/Sfu.png')" width="31" height="36"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Kinki (2-kanji)" paddingRight="50" groupName="RadioGroup2"  value="1"/>
-				<mx:Image source="@Embed('images/pieces_kinki/Sou.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_kinki/Suma.png')" width="31" height="36"/>
-				<mx:Image source="@Embed('images/pieces_kinki/Sfu.png')" width="31" height="36"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Hidetchi's Internationalized" groupName="RadioGroup2"  value="2"/>
-				<mx:Image source="@Embed('images/pieces_hidetchi/Sou.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_hidetchi/Suma.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_hidetchi/Sfu.png')" width="34" height="40"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Hidetchi's Alphabet" groupName="RadioGroup2"  value="3"/>
-				<mx:Image source="@Embed('images/pieces_alphabet/Sou.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_alphabet/Suma.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_alphabet/Sfu.png')" width="34" height="40"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:RadioButton label="Dobutsu by pieco" groupName="RadioGroup2"  value="7"/>
-				<mx:Image source="@Embed('images/pieces_dobutsu/Sou.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_dobutsu/Suma.png')" width="34" height="40"/>
-				<mx:Image source="@Embed('images/pieces_dobutsu/Sfu.png')" width="34" height="40"/>
-			</mx:HBox>
-			<mx:HBox>
-				<mx:Label text="{parentApplication.lan.blind_piece}"/>
-				<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
-				<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
-				<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
-			</mx:HBox>
+			<mx:VBox id="pieceSetVBox" verticalGap="0" height="240" width="100%" horizontalScrollPolicy="off" />
+				<mx:HBox>
+					<mx:Label text="{parentApplication.lan.blind_piece}"/>
+					<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="5"/>
+					<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="6"/>
+					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="7"/>
+				</mx:HBox>
 			<mx:Spacer height="10"/>
 			<mx:CheckBox id="grabPieceCheckBox" label="Grab piece when moving"/>
 			<mx:CheckBox id="highlightMovableCheckBox" label="Highlight movable squares"/>

@@ -1612,6 +1612,7 @@
 	  _prev_piece_type = board.piece_type;
       _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, true));
       PopUpManager.centerPopUp(_optionWindow);
+	  _optionWindow.loadPieceSets(board.pieceSets);
       with (_optionWindow) {
         title = "Options";
 		RadioGroup1.selectedValue = GameTimer.soundType;
@@ -2760,11 +2761,11 @@
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
 	  if (_isDuringMyGame()) {
-		  if (board.piece_type >= 4 && board.piece_type != _prev_piece_type) {
-			  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-			  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-			  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
-		  } else if (board.piece_type <= 3 && _prev_piece_type >= 4) {
+		  if (board.piece_type >= 5 && board.piece_type != _prev_piece_type) {
+			  if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Middle.");
+			  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Hard.");
+			  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Extreme.");
+		  } else if (board.piece_type <= 4 && _prev_piece_type >= 5) {
 			  _sendAutoChat("Pieces set to Normal.");
 		  }
 	  }

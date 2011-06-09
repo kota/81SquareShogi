@@ -79,7 +79,16 @@ package  {
     [Embed(source = "/images/gold_medal.png")]
 	private var Medal:Class;
 
-	private var pSrc:PieceSource = new PieceSource();
+	public var pieceSets:Array = new Array(
+		new PieceSet("Ryoko1.swf", "Ryoko (1-kanji)"),
+		new PieceSet("Kinki.swf", "Kinki (2-kanji)"),
+		new PieceSet("Hidetchi.swf", "Hidetchi's Internationalized"),
+		new PieceSet("Alphabet.swf", "Hidetchi's Alphabet"),
+		new PieceSet("Dobutsu.swf", "Dobutsu by pieco"),
+		new PieceSet("BlindMiddle.swf", "Middle"),
+		new PieceSet("BlindHard.swf", "Hard"),
+		new PieceSet("BlindExtreme.swf", "Extreme")
+		);
 
 	[Embed(source = "/sound/piece.mp3")]
 	private var sound_piece:Class;
@@ -364,10 +373,9 @@ package  {
         for(var x:int=0;x<9;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
-            var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
 			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
-            _cells[y][x].source = images[image_index];
+			_cells[y][x].source = pieceSets[piece_type].getPieceClass(koma.ownerPlayer == _my_turn ? 0 : 1, image_index);
           } else {
             _cells[y][x].source = emptyImage;
           }
@@ -387,8 +395,7 @@ package  {
               var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
 			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-              images = i == _my_turn ? pSrc.koma_images_sente[piece_type] : pSrc.koma_images_gote[piece_type];
-              handPiece.source = images[j];
+			  handPiece.source = pieceSets[piece_type].getPieceClass(i == _my_turn ? 0 : 1, image_index);
               handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
               handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
               handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
@@ -601,7 +608,7 @@ package  {
 			arrow.drawArrow(_my_turn);
 			addChild(arrow);
 		}
-//		if (_hoverImage.visible) _hoverImage.source = _my_turn == _hoverOwner ? pSrc.koma_images_sente[piece_type][_hoverPiece] : pSrc.koma_images_gote[piece_type][_hoverPiece];
+//		if (_hoverImage.visible) _hoverImage.source = pieceSets[piece_type].getPieceClass(k_my_turn == _hoverOwner ? 0 : 1, _hoverPiece);
 		if (contains(_hoverImage)) _hoverImage.source = null;
 	}
 
@@ -982,7 +989,7 @@ package  {
 					_to = null;
 				} else {
 					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
-					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type][koma_type + Koma.PROMOTE];
+					var cls:Class = pieceSets[piece_type].getPieceClass(_my_turn == _position.turn ? 0 : 1, koma_type + Koma.PROMOTE);
 					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
 					alt.validateNow();
 					alt.width *= 0.8;
