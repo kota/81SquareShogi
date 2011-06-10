@@ -2358,22 +2358,16 @@
       case -1:
 		if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
         break;
-      case 1:
-		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
-			kifuDataGrid.selectedIndex++;
-		} else {
-			if (!board.post_game && !board.onListen && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
-				radioKifuListen.selected = true;
-				_toggleListen();
-			}
-			return;
-		}
-        break;
+	  case 1:
       case 2:
 		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
-			kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+			if (i == 1) {
+				kifuDataGrid.selectedIndex++;
+			} else {
+				kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+			}
 		} else {
-			if (!board.post_game && !board.onListen && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+			if (!board.post_game && !board.onListen && !board.viewing && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
 				radioKifuListen.selected = true;
 				_toggleListen();
 			}
