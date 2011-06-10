@@ -395,7 +395,7 @@ package  {
               var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
 			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-			  handPiece.source = pieceSets[piece_type].getPieceClass(i == _my_turn ? 0 : 1, image_index);
+			  handPiece.source = pieceSets[piece_type].getPieceClass(i == _my_turn ? 0 : 1, j);
               handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
               handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
               handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
