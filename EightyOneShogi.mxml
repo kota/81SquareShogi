@@ -673,6 +673,20 @@
 				if (_chat_sound1_play) _sound_door_close.play();
 			}
 		}
+		for (var i:int = 0; i < _user_list.length; i++){
+			if (_user_list[i].name == e.message) {
+				_user_list.splice(i, 1);
+				userListGrid.dataProvider = _user_list;
+				break;
+			}
+		}
+		for (i = 0; i < _waiter_list.length; i++){
+			if (_waiter_list[i].name == e.message) {
+				_waiter_list.splice(i, 1);
+				waiterListGrid.dataProvider = _waiter_list;
+				break;
+			}
+		}
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
