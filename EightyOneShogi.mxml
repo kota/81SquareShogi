@@ -2343,7 +2343,7 @@
 				kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
 			}
 		} else {
-			if (!board.post_game && !board.onListen && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+			if (!board.post_game && !board.onListen && !board.viewing && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
 				radioKifuListen.selected = true;
 				_toggleListen();
 			}

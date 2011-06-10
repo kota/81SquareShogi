@@ -302,8 +302,8 @@ package  {
     }
 
     public function resetBoard():void {
+	  _board_bg_image.source = pieceSets[piece_type34].banClass;
 	  _board_coord_image.source = pieceSets[piece_type34].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1);
-
       for (var i:int = 0; i < 4; i++ ) {
         for (var j:int = 0; j < 3;j++ ){
           if(_cells[i][j] != null){
