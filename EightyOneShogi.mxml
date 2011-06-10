@@ -1225,31 +1225,7 @@
 		} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
 			if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
 		} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
-			if (!board.studyOn) board.studyOn = true;
-			board.clearArrows(Board.ARROWS_PUBLIC);
-			if (board.isStudyHost) return;
-			board.studyOrigin = match[1];
-			if (match[2] == "*") {
-				if (board.study_list.length > 0) board.study_list = new Array();
-				if (!(board.post_game && board.onListen)) return;
-				if (board.kifu_list_self.length > 0) {
-					board.kifu_list_self = new Array();
-					kifuDataGrid.dataProvider = board.kifu_list;
-				}
-				kifuDataGrid.selectedIndex = match[1];
-				board.replayMoves(match[1], true);
-				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
-			} else {
-				board.study_list = match[2].split("/");
-				if (!(board.post_game && board.onListen)) return;
-				if (board.kifu_list_self.length > 0) board.kifu_list_self = new Array();
-				for (var i:int = 0; i <= match[1]; i++) board.kifu_list_self.push(board.kifu_list[i]);
-				board.replayMoves(match[1], true);
-				for (i = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false, false);
-				kifuDataGrid.dataProvider = board.kifu_list_self;
-				kifuDataGrid.selectedIndex = board.kifu_list_self.length - 1;
-				kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
-			}
+			_handleStudy(match[1], match[2]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
 			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
@@ -1331,6 +1307,10 @@
 		match = e.message.substr(15).match(/^\[(.+?)\]\s(.+)$/);
 		var name:String = match[1];
 		var message:String = match[2];
+		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
+			_handleStudy(match[1], match[2]);
+			return;
+		}
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
 		if (_infoFetcher.banned.indexOf(name.toLowerCase()) >= 0) return;
 		if (_pmAutoOpen && !_playerInfoWindows[name]) _openPlayerInfo(_findPlayerFromList(name));
@@ -1354,6 +1334,34 @@
 				var minute:int = (_leaveMinutes - _leaveTimer.currentCount) % 60;
 				_sendPrivateChat(name, "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
 			}
+		}
+	}
+	
+	private function _handleStudy(base:int, branch:String):void {
+		if (!board.studyOn) board.studyOn = true;
+		board.clearArrows(Board.ARROWS_PUBLIC);
+		if (board.isStudyHost) return;
+		board.studyOrigin = base;
+		if (branch == "*") {
+			if (board.study_list.length > 0) board.study_list = new Array();
+			if (!(board.post_game && board.onListen)) return;
+			if (board.kifu_list_self.length > 0) {
+				board.kifu_list_self = new Array();
+				kifuDataGrid.dataProvider = board.kifu_list;
+			}
+			kifuDataGrid.selectedIndex = base;
+			board.replayMoves(base, true);
+			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
+		} else {
+			board.study_list = branch.split("/");
+			if (!(board.post_game && board.onListen)) return;
+			if (board.kifu_list_self.length > 0) board.kifu_list_self = new Array();
+			for (var i:int = 0; i <= base; i++) board.kifu_list_self.push(board.kifu_list[i]);
+			board.replayMoves(base, true);
+			for (i = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false, false);
+			kifuDataGrid.dataProvider = board.kifu_list_self;
+			kifuDataGrid.selectedIndex = board.kifu_list_self.length - 1;
+			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 		}
 	}
 	
@@ -1389,6 +1397,7 @@
 			_writeUserMessage(e.message + " entered.\n", 2, "#008800");
 			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_open.play();
 		}
+		if (board.isStudyHost && board.post_game) _sendStudy(e.message);
 	}
 	
 	private function _handleLeave(e:ServerMessageEvent):void {
@@ -2931,7 +2940,7 @@
 		}
 	}
 	
-	private function _sendStudy():void {
+	private function _sendStudy(sendTo:String = null):void {
 		var str:String = "";
 		for (var i:int = kifuDataGrid.selectedIndex; i >= 0; i--) {
 			if (String(kifuDataGrid.dataProvider[i].num).match(/^\*/)) {
@@ -2943,7 +2952,11 @@
 		}
 		if (!str.match(/\//)) str += "/*";
 		str = "[##STUDY]" + str;
-		_client.gameChat(_game_name, str);
+		if (sendTo) {
+			_client.privateChat(sendTo, str);
+		} else {
+			_client.gameChat(_game_name, str);
+		}
 	}
 
     private function _checkTimeout():void {
