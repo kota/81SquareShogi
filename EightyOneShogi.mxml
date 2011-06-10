@@ -696,8 +696,17 @@
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
 				else _sound_chat1.play();
-			}	
+			}
 		}
+		for (var i:int = 0; i < _user_list.length; i++){
+			if (_user_list[i].name == tokens[0] || _user_list[i].name == tokens[3]) {
+				_user_list[i].status2 = "G " + InfoFetcher.textBar(0);
+			}
+		}
+		for (i = _waiter_list.length - 1; i >= 0; i--){
+			if (_waiter_list[i].name == tokens[0] || _waiter_list[i].name == tokens[3]) _waiter_list.splice(i, 1);
+		}
+		waiterListGrid.dataProvider = _waiter_list;
 	}
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
