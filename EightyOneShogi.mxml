@@ -70,6 +70,7 @@
     private var _user_list:Array;
 	private var _waiter_list:Array;
 	private var _game_list:Array;
+	private var _watcher_list:Array;
 	private var _kifu_search_list:Array;
 	private var _player_search_list:Array;
 	private var _ranking_rate_list:Array;
@@ -637,8 +638,9 @@
         }
       }
       watcher_list.sortOn("rate", Array.NUMERIC | Array.DESCENDING);
-      watcherListGrid.dataProvider = watcher_list;
-	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
+	  _watcher_list = watcher_list;
+      watcherListGrid.dataProvider = _watcher_list;
+	  watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
     }
 	
 	private function _handleLobbyIn(e:ServerMessageEvent):void {
@@ -1437,6 +1439,13 @@
 		} else {
 			_writeUserMessage(e.message + " left.\n", 2, "#008800");
 			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_close.play();
+			for (var i:int = 0; i < _watcher_list.length; i++){
+				if (_watcher_list[i].name == e.message) {
+					_watcher_list.splice(i, 1);
+					watcherListGrid.dataProvider = _watcher_list;
+					break;
+				}
+			}
 		}
 	}
 	
