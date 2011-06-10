@@ -2293,12 +2293,6 @@
     
   private function replayByButton(i:int):void {
 	board.cancelSquareSelect();
-	radioKifuReplay.selected = true;
-	if (board.onListen) {
-		board.onListen = false;
-		sidePanel.setStyle('borderColor', _panelReplayColor);
-		board.eraseArrows(Board.ARROWS_PUBLIC);
-	}
 	board.clearArrows(Board.ARROWS_SELF);
     switch (i) {
       case -2:
@@ -2307,22 +2301,28 @@
       case -1:
 		if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
         break;
-      case 1:
-		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
-			kifuDataGrid.selectedIndex++;
-		} else {
-			radioKifuListen.selected = true;
-			_toggleListen();
-		}
-        break;
+	  case 1:
       case 2:
 		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
-			kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+			if (i == 1) {
+				kifuDataGrid.selectedIndex++;
+			} else {
+				kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
+			}
 		} else {
-			radioKifuListen.selected = true;
-			_toggleListen();
+			if (!board.post_game && !board.onListen && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+				radioKifuListen.selected = true;
+				_toggleListen();
+			}
+			return;
 		}
     }
+	radioKifuReplay.selected = true;
+	if (board.onListen) {
+		board.onListen = false;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
+		board.eraseArrows(Board.ARROWS_PUBLIC);
+	}
 	var n:int = kifuDataGrid.selectedIndex;
 	if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
 		board.replayMoves(n, false);
