@@ -57,28 +57,10 @@ package  {
     private var emptyImage:Class
     [Embed(source = "/images/dead.png")]
     private var deadSquare:Class
-    [Embed(source = "/images/kitao/Scoord.png")]
-    private var scoord1:Class
-    [Embed(source = "/images/kitao/Gcoord.png")]
-    private var gcoord1:Class
-    [Embed(source = "/images/hidetchi/Scoord.png")]
-    private var scoord3:Class
-    [Embed(source = "/images/hidetchi/Gcoord.png")]
-    private var gcoord3:Class
-    [Embed(source = "/images/fujita/Scoord.png")]
-    private var scoord4:Class
-    [Embed(source = "/images/fujita/Gcoord.png")]
-    private var gcoord4:Class
 //    [Embed(source = "/images/Shand.png")]
 //    private var board_shand:Class
 //    [Embed(source = "/images/Ghand.png")]
 //    private var board_ghand:Class
-    [Embed(source = "/images/kitao/ban.png")]
-	private var board_bg1:Class
-    [Embed(source = "/images/hidetchi/ban.png")]
-	private var board_bg3:Class
-    [Embed(source = "/images/fujita/ban.png")]
-	private var board_bg4:Class
     [Embed(source = "/images/white.png")]
     private var white:Class
     [Embed(source = "/images/white_r.png")]
@@ -90,10 +72,12 @@ package  {
     [Embed(source = "/images/gold_medal.png")]
 	private var Medal:Class;
 
-	private var _bg_images:Array = new Array(board_bg1, board_bg1, board_bg3, board_bg4, board_bg1, board_bg1, board_bg1);
-	private var _scoord_images:Array = new Array(scoord1, scoord1, scoord3, scoord4, scoord1, scoord1, scoord1);
-	private var _gcoord_images:Array = new Array(gcoord1, gcoord1, gcoord3, gcoord4, gcoord1, gcoord1, gcoord1);
-	private var pSrc:PieceSource = new PieceSource();
+	public var pieceSets:Array = new Array(
+		new PieceSet("Kitao.swf", "Designed by Madoka"),
+		new PieceSet("Kitao.swf", "Designed by Madoka (coming up soon!)"),
+		new PieceSet("Hidetchi34.swf", "Designed by HIDETCHI"),
+		new PieceSet("Dobutsu34.swf", "Designed by Maiko FUJITA")
+		);
 
 	[Embed(source = "/sound/piece.mp3")]
 	private var sound_piece:Class;
@@ -195,7 +179,7 @@ package  {
       this.width = BAN_WIDTH;
       this.height = BAN_HEIGHT;
 
-      _board_bg_image.source = _bg_images[piece_type34];
+      _board_bg_image.source = pieceSets[piece_type34].banClass;// _bg_images[piece_type34];
 //      _board_bg_image.setStyle('borderStyle','solid');
 //      _board_bg_image.setStyle('borderColor', 0x888888);
       
@@ -317,12 +301,8 @@ package  {
       _centerY = BAN_TOP_MARGIN + BAN_EDGE_PADDING + 4.5 * KOMA_HEIGHT + 1;
     }
 
-    public function resetBoard():void{
-     if (_my_turn == Kyokumen.SENTE) {
-        _board_coord_image.source = _scoord_images[piece_type34];
-      } else {
-        _board_coord_image.source = _gcoord_images[piece_type34];
-      }
+    public function resetBoard():void {
+	  _board_coord_image.source = pieceSets[piece_type34].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1);
 
       for (var i:int = 0; i < 4; i++ ) {
         for (var j:int = 0; j < 3;j++ ){
@@ -381,10 +361,9 @@ package  {
         for(var x:int=0;x<3;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
-            var images:Array = koma.ownerPlayer == _my_turn ? pSrc.koma_images_sente[piece_type34] : pSrc.koma_images_gote[piece_type34];
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
 //			if (image_index == Koma.OU && koma.ownerPlayer == superior) image_index += Koma.PROMOTE;
-            _cells[y][x].source = images[image_index];
+			_cells[y][x].source = pieceSets[piece_type34].getPieceClass(koma.ownerPlayer == _my_turn ? 0 : 1, image_index);
           } else {
             _cells[y][x].source = emptyImage;
           }
@@ -403,8 +382,7 @@ package  {
               var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
 			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
               handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-              images = i == _my_turn ? pSrc.koma_images_sente[piece_type34] : pSrc.koma_images_gote[piece_type34];
-              handPiece.source = images[j];
+              handPiece.source = pieceSets[piece_type34].getPieceClass(i == _my_turn ? 0 : 1, j);
               handPiece.x = KOMADAI_WIDTH / 2 - KOMA_WIDTH / 2 * hand_sum + KOMA_WIDTH * hand_count;
               handPiece.y = 0;
               handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
@@ -717,12 +695,8 @@ package  {
 	
     public function setPieceType(i:int):void{
     	piece_type34 = i;
-		_board_bg_image.source = _bg_images[i];
-		 if (_my_turn == Kyokumen.SENTE) {
-			_board_coord_image.source = _scoord_images[piece_type34];
-		  } else {
-			_board_coord_image.source = _gcoord_images[piece_type34];
-		  }
+		_board_bg_image.source = pieceSets[i].banClass;
+		_board_coord_image.source = pieceSets[i].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1);
     	if (_position != null) setPosition(_position);
     }
 
@@ -1010,7 +984,7 @@ package  {
 					_to = null;
 				} else {
 					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
-					var cls:Class = _my_turn == _position.turn ? pSrc.koma_images_sente[piece_type34][koma_type + Koma.PROMOTE] : pSrc.koma_images_gote[piece_type34][koma_type + Koma.PROMOTE];
+					var cls:Class = pieceSets[piece_type34].getPieceClass(my_turn == _position.turn ? 0 : 1, koma_type + Koma.PROMOTE);
 					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
 					alt.validateNow();
 					alt.width *= 0.8;

@@ -1629,6 +1629,7 @@
 	  _prev_piece_type = board.piece_type34;
       _optionWindow = OptionDialog(PopUpManager.createPopUp(this, OptionDialog, true));
       PopUpManager.centerPopUp(_optionWindow);
+	  _optionWindow.loadPieceSets(board.pieceSets);
       with (_optionWindow) {
         title = "Options";
 		RadioGroup1.selectedValue = GameTimer.soundType;

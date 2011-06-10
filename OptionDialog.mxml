@@ -6,6 +6,28 @@
 			import flash.geom.Point;
         	import mx.controls.*;
             import mx.managers.PopUpManager;
+			import PieceSet;
+			
+			public function loadPieceSets(sets:Array):void {
+				for (var i:int = 0; i < 4; i++ ) {
+					var radioButton:RadioButton = new RadioButton();
+					radioButton.label = sets[i].getName;
+					radioButton.setStyle('paddingRight', 20);
+					radioButton.groupName = "RadioGroup2";
+					radioButton.value = i;
+					pieceSetVBox.addChild(radioButton);
+					var hbox:HBox = new HBox();
+					hbox.setStyle('paddingLeft', 50);
+					for each (var j:int in [0, 1, 2, 3, 7]) {
+						var image:Image = new Image();
+						image.source = sets[i].getPieceClass(0, j);
+						image.width = 35;
+						image.height = 35;
+						hbox.addChild(image);
+					}
+					pieceSetVBox.addChild(hbox);
+				}
+			}
 			
 			public function drawArrow():void {
 				arrowCanvas.removeAllChildren();
@@ -19,39 +41,15 @@
         ]]>
     </mx:Script>
 	<mx:TabNavigator id="optionTab" width="370" height="370" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
-		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10">
+		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10" verticalGap="0">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
-			<mx:RadioButton label="Designed by Madoka" paddingRight="20" groupName="RadioGroup2" value="0"/>
-			<mx:HBox paddingLeft="20">
-				<mx:Image source="@Embed('images/kitao/Sra.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/kitao/Szo.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/kitao/Ski.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/kitao/Shi.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/kitao/Sni.png')" width="35" height="35"/>
-			</mx:HBox>
-			<mx:RadioButton label="Designed by Madoka (coming up soon!)" enabled="false" paddingRight="50" groupName="RadioGroup2"  value="1"/>
-			<mx:RadioButton label="Designed by HIDETCHI" groupName="RadioGroup2"  value="2" />
-			<mx:HBox paddingLeft="20">
-				<mx:Image source="@Embed('images/hidetchi/Sra.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/hidetchi/Szo.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/hidetchi/Ski.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/hidetchi/Shi.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/hidetchi/Sni.png')" width="35" height="35"/>
-			</mx:HBox>
-			<mx:RadioButton label="Designed by Maiko FUJITA" groupName="RadioGroup2"  value="3" />
-			<mx:HBox paddingLeft="20">
-				<mx:Image source="@Embed('images/fujita/Sra.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/fujita/Szo.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/fujita/Ski.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/fujita/Shi.png')" width="35" height="35"/>
-				<mx:Image source="@Embed('images/fujita/Sni.png')" width="35" height="35"/>
-			</mx:HBox>
-			<mx:HBox>
+			<mx:VBox id="pieceSetVBox" verticalGap="0" height="240" width="100%" horizontalScrollPolicy="off" />
+<!--			<mx:HBox>
 				<mx:Label text="{parentApplication.lan.blind_piece}"/>
 				<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="4"/>
 				<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="5"/>
 				<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="6"/>
-			</mx:HBox>
+			</mx:HBox> -->
 			<mx:Spacer height="10"/>
 			<mx:CheckBox id="grabPieceCheckBox" label="Grab piece when moving"/>
 			<mx:CheckBox id="highlightMovableCheckBox" label="Highlight movable squares"/>
