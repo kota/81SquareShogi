@@ -658,11 +658,49 @@
 			}
 		}
 		var isFavorite:Boolean = _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0;
-		_writeUserMessage(tokens[0] + " logged in. " + rank + " from " + InfoFetcher.country_names[tokens[3]] + ".\n", 1, "#008800", isFavorite);
+		_writeUserMessage("  -  [" + tokens[0] + "] logged in. " + rank + " from " + InfoFetcher.country_names[tokens[3]] + ".\n", 1, "#008800", isFavorite);
 		if (mainViewStack.selectedIndex == 1 && _chat_sound1_play) {
 			if (isFavorite) _sound_door_open.play();
 			else _sound_chat4.play();
 		}
+		var user:Object = {
+			'name':tokens[0],
+			'status':"", 'status2':"", 'opponent':"", 'game_name':"*", 'turn':0,
+			'rating':(tokens[2] == "true" ? "*" : "") + tokens[1],
+			'country_code':parseInt(tokens[3]),
+			'titleName':"", 'titleSubName':"", 'monitor_game':"*", 'moves':0,
+			'wins':parseInt(tokens[4]),
+			'losses':parseInt(tokens[5]),
+			'streak':parseInt(tokens[6]),
+			'streak_best':parseInt(tokens[7]),
+			'favorite':"",
+			'favoriteWidth':0
+		  }
+		user.country = InfoFetcher.country_names[user.country_code];
+		user.country3 = InfoFetcher.country_names3[user.country_code];
+		user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
+		if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
+			user.favorite = "★";
+			user.favoriteWidth = 11;
+		}
+		for (i = 0; i < _infoFetcher.titleUser.length; i++) {
+			if (user.name.toLowerCase() == _infoFetcher.titleUser[i]) {
+				user.titleName = _infoFetcher.titleName[i];
+				user.titleSubName = _infoFetcher.titleSubName[i];
+				if (_infoFetcher.titleAvatar[i] != "*") user.avatar = _infoFetcher.titleAvatar[i];
+				break;
+			}
+		}
+		if (user.wins + user.losses >= 10 || user.titleName != "") {
+			user.rank = InfoFetcher.makeRankFromRating(user.rating);
+			user.rankColor = InfoFetcher.makeColorFromRating(user.rating);
+		} else {
+			user.rank = "-";
+			user.rankColor = 0xCCCCCC;
+		}
+		_user_list.push(user);
+		userListGrid.dataProvider = _user_list;
+		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	}
 	
 	private function _handleLobbyOut(e:ServerMessageEvent):void {
@@ -689,6 +727,7 @@
 				break;
 			}
 		}
+		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
