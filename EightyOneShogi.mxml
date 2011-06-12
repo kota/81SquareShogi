@@ -701,7 +701,7 @@
 	}
   
 	private function _handleChallengerRejectButton(e:Event):void {
-		_client.decline();
+		_client.decline(e.target.declineComment);
 		_challengerAlertWindow = null;
 	}
 	
