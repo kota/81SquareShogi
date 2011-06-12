@@ -55,7 +55,7 @@
     import GameRuleEvent;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/06/04";
+	public const VERSION:String = "ver.2011/06/12";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -2551,6 +2551,7 @@
 			} else if (match[1] == "nr") {
 				hc = "NR";
 			} else if (match[1].match(/^(hc|va|mini)/)) {
+				if (match[1].match(/^vazoo/)) continue;
 				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
 			}
 			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
