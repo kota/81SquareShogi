@@ -86,6 +86,7 @@
     private var _monitoring:Boolean;
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
+	private var _gameAccepted:Boolean = false;
 	private var _rematching:Boolean = false;
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
@@ -759,7 +760,10 @@
 	//----------------------------------------------------------------------------------------------------------------------------- MATCH MAKING
 
 	private function _handleChallenger(e:ServerMessageEvent):void {
-//	  _refresh();
+	  if (_gameAccepted) {
+		  _client.decline("Already starting a game.");
+		  return;
+	  }
       _sound_challenger.play();
       _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
       PopUpManager.centerPopUp(_challengerAlertWindow);
@@ -776,6 +780,7 @@
 	
 	private function _handleChallengerAcceptButton(e:Event):void {
 		_client.accept();
+		_gameAccepted = true;
 		_challengerAlertWindow = null;
 	}
   
@@ -794,37 +799,19 @@
 	}
 	
 	private function _handleAccept(e:ServerMessageEvent):void {
+		_gameAccepted = true;
 		_writeUserMessage(e.message + "\n", 1, "#008800", true);
 		if (_challengeUser) _client.seek(_challengeUser);
 	}
   
    private function _handleGameSummary(e:ServerMessageEvent):void {
+	  _gameAccepted = false;
 	  _refresh();
 	  _initPositionStr = "";
 	  for each(var line:String in e.message.split("\n")) {
 		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
 	  }
-	  _client.agree(); return;
-    if (_challenging || _rematching) {
-      _client.agree();
-    } else {
-	  var challengerName:String = login_name == e.message.split("\n")[0] ? e.message.split("\n")[1] : e.message.split("\n")[0];
-	  if (_ignore_list.indexOf(challengerName.toLowerCase()) >= 0) {
-		  _client.reject();
-		  return;
-	  }
-      _sound_challenger.play();
-      _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
-      PopUpManager.centerPopUp(_challengerAlertWindow);
-      with (_challengerAlertWindow) {
-        title = "Here comes a new challenger!!";
-		challenger_name = challengerName;
-		user = _findPlayerFromList(challengerName);
-		remainTime = 20;
-        acceptButton.addEventListener("click", _handleChallengerAcceptButton);
-		rejectButton.addEventListener("click", _handleChallengerRejectButton);
-      }
-    }
+	  _client.agree();
   }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {

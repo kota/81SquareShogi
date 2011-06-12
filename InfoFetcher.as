@@ -570,7 +570,7 @@
 				medal.toolTip = "Non-major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "八一王" || user.titleName == "宇宙王" || user.titleName == "二冠") {
+				if (["八一王", "宇宙王", "永聖", "二冠"].indexOf(user.titleName) >= 0) {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
 				} else if (user.titleName == "admin" || user.titleName.match(/bot/) || user.titleName == "師範" || user.titleName == "プロ") {
