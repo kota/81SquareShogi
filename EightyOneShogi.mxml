@@ -252,6 +252,7 @@
 	  _client.addEventListener(CsaShogiClient.LOBBY_IN, _handleLobbyIn);
 	  _client.addEventListener(CsaShogiClient.LOBBY_OUT, _handleLobbyOut);
 	  _client.addEventListener(CsaShogiClient.START, _handleStart);
+	  _client.addEventListener(CsaShogiClient.GAME, _handleGame);
 	  _client.addEventListener(CsaShogiClient.ADMIN_MONITOR, _handleAdminMonitor);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
@@ -622,6 +623,76 @@
 			}
 		}
 		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+	}
+	
+	private function _handleGame(e:ServerMessageEvent):void {
+		return;
+		var stop:Boolean = false;
+		var tokens:Array;
+		var name:String;
+		if ((tokens = e.message.match(/^\[(.+)\]/))) {
+			stop = true;
+			name = tokens[1];
+		} else {
+			var game_info:Array = e.message.split(",")[0].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)$/);
+			if (game_info[2].match(/^@/)) return;
+			var total:int = parseInt(game_info[3]) / 60;
+			if ((tokens = game_info[2].match(/(.+)\-\-..$/))) {
+				name = tokens[1];
+//				game.rule = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
+//				game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
+			} else {
+				name = game_info[2];
+			}
+		}
+		for (var i:int = 0; i < _user_list.length; i++){
+			if (_user_list[i].name == name) {
+				if (stop) {
+					if (_user_list[i].status2 == "W") _user_list[i].status2 = "";
+					else if (_user_list[i].status2 == "M W") _user_list[i].status = "M";
+				} else { /*
+					  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
+					  user_list[i].rankColor = InfoFetcher.makeColorFromRating(user_list[i].rating);
+			//		  if (user_list[i].rank == "PRO" && user_list[i].titleName == "") user_list[i].titleName = "livebot";
+					  if (user_list[i].status2.match(/W/)) {
+						  user = {
+							  'name':user_list[i].name,
+							  'turn':user_list[i].turn,
+							  'rating':user_list[i].rating,
+							  'game_name': user_list[i].game_name,
+							  'country': user_list[i].country,
+							  'country3':InfoFetcher.country_names3[user_list[i].country_code],
+							  'flagURL': user_list[i].flagURL,
+							  'rankColor': user_list[i].rankColor,
+							  'rank': user_list[i].rank
+							  }
+						  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+						  total = parseInt(game_info[3]) / 60;
+						  if (game_info[1] == "r") {
+							  user.rated = "R"
+						  } else {
+							  user.rated = "NR"
+						  }
+						  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
+						  if (game_info[2].match(/\-\-..$/)) {
+							user.time = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
+							user.timeTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
+						  } else {
+							user.time = total + " min + " + game_info[4] + " sec";
+							user.timeTip = "";
+						  }
+						  userProxy = new ObjectProxy(user);
+						  waiter_list.push(userProxy); */
+				}
+				break;
+			}
+		}
+		for (i = 0; i < _waiter_list.length; i++){
+			if (_waiter_list[i].name == name) {
+				_waiter_list.splice(i, 1);
+				break;
+			}
+		}
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {

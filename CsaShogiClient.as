@@ -37,6 +37,7 @@ package{
 	public static var DECLINE:String = 'decline';
 	public static var LOBBY_IN:String = 'lobby_in';
 	public static var LOBBY_OUT:String = 'lobby_out';
+	public static var GAME:String = 'game';
 	public static var START:String = 'start';
 	public static var ADMIN_MONITOR:String = 'admin_monitor';
     
@@ -367,6 +368,8 @@ package{
 				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
 			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
+			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(GAME, match[1]));
 			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(START, match[1]));
 			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
@@ -401,6 +404,8 @@ package{
 				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
 			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
+			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(GAME, match[1]));
 			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(START, match[1]));
 			  } else if ((match = line.match(/^##\[CHALLENGE\](.+)$/))) {
