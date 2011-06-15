@@ -307,7 +307,7 @@ package{
           dispatchEvent(new ServerMessageEvent(CHAT,line + "\n"));
         } else if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO),T/)){
           dispatchEvent(new ServerMessageEvent(MOVE, line));
-		} else if ((match = line.match(/^##\[ENTER\]\[(.+)\]/))) {
+		} else if ((match = line.match(/^##\[ENTER\](.+)$/))) {
 			dispatchEvent(new ServerMessageEvent(ENTER, match[1]));
 		} else if ((match = line.match(/^##\[LEAVE\]\[(.+)\]/))) {
 			dispatchEvent(new ServerMessageEvent(LEAVE, match[1]));

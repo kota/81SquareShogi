@@ -619,6 +619,12 @@
 			if (isFavorite) _sound_door_open.play();
 			else _sound_chat4.play();
 		}
+		for (i = 0; i < _user_list.length; i++){
+			if (_user_list[i].name == tokens[0]) {
+				_user_list.splice(i, 1);
+				break;
+			}
+		}
 		var user:Object = {
 			'name':tokens[0],
 			'status':"", 'status2':"", 'opponent':"", 'game_name':"*", 'turn':0,
@@ -1396,28 +1402,44 @@
 	
 //--------------------------------------------------------------------------------------------------------------------------------- GAME ROOM 
 	private function _handleEnter(e:ServerMessageEvent):void {
-		if (e.message == board.playerInfos[0].name) {
+		var tokens:Array = e.message.split(",");
+		if (tokens[0] == board.playerInfos[0].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(e.message + " entered.\n", 2, "#000000", true);
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#000000", true);
 			board.name_labels[board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
-		} else if (e.message == board.playerInfos[1].name) {
+		} else if (tokens[0] == board.playerInfos[1].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(e.message + " entered.\n", 2, "#666666", true);
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#666666", true);
 			board.name_labels[1 - board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
 		} else {
 			if (mainViewStack.selectedIndex != 2) return;
-			_writeUserMessage(e.message + " entered.\n", 2, "#008800");
-			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_open.play();
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#008800");
+			if (_chat_sound2_play && _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _sound_door_open.play();
+			var user:Object = {
+				'name':tokens[0],
+				'country':InfoFetcher.country_names[parseInt(tokens[1])],
+				'country3':InfoFetcher.country_names3[parseInt(tokens[1])],
+				'flagURL':DIRECTORY + "images/flags_ss/" + String(parseInt(tokens[1]) + 1000).substr(1) + ".png",
+				'rate':parseInt(tokens[4]),
+				'favorite':"",
+				'favoriteWidth':0
+			}
+			if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) {
+				user.favorite = "★";
+				user.favoriteWidth = 11;
+			}
+			_watcher_list.push(user);
+			watcherListGrid.dataProvider = _watcher_list;
 		}
-		if (board.isStudyHost && board.post_game) _sendStudy(e.message);
+		if (board.isStudyHost && board.post_game) _sendStudy(tokens[0]);
 	}
 	
 	private function _handleLeave(e:ServerMessageEvent):void {
