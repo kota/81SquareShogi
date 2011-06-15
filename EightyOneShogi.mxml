@@ -722,12 +722,12 @@
   
    private function _handleGameSummary(e:ServerMessageEvent):void {
 	  _gameAccepted = false;
-	  _refresh();
+//	  _refresh();
 	  _initPositionStr = "";
 	  for each(var line:String in e.message.split("\n")) {
 		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
 	  }
-	  _client.agree();
+//	  _client.agree();
   }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {
@@ -2008,7 +2008,7 @@
     private function _handleChallengeAlert(e:CloseEvent):void{
       if (e.detail == Alert.YES) {
       _challenging = true;
-      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
+      _writeUserMessage("Challenging to " + _challengeUser.name + " ... (Wait for 20 seconds max)\n", 1, "#008800");
       _client.challenge(_challengeUser.name);
       } else if (e.detail == Alert.CANCEL) {
       }
