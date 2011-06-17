@@ -86,6 +86,14 @@ package
 			this.status = STATE_GAME_WAITING;
 		}
 		
+		public function setFromStart(game_name:String, turn:String):void {
+			this.game_name = game_name;
+			this.turn = turn;
+			this.status = STATE_GAME;
+			this.moves = 0;
+			this.idle = false;
+		}
+		
 		public function get country():String {
 			return InfoFetcher.country_names[country_code];
 		}

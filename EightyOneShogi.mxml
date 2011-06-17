@@ -626,22 +626,17 @@
 	
 	private function _handleStart(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex == 1) {
-			var tokens:Array = e.message.split(",");
-			_writeUserMessage("GAME STARTED: ▲" + tokens[0] + " vs △" + tokens[3] + "\n", 1, "#008800");
+			var tokens:Array = e.message.split(",")[0].split("+");
+			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
 				else _sound_chat1.play();
 			}
 		}
-		for (var i:int = 0; i < _user_list.length; i++){
-			if (_user_list[i].name == tokens[0] || _user_list[i].name == tokens[3]) {
-				_user_list[i].status2 = "G " + InfoFetcher.textBar(0);
-			}
-		}
-		for (i = _waiter_list.length - 1; i >= 0; i--){
-			if (_waiter_list[i].name == tokens[0] || _waiter_list[i].name == tokens[3]) _waiter_list.splice(i, 1);
-		}
-		waiterListGrid.dataProvider = _waiter_list;
+		if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
+		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
+		userListGrid.dataProvider = _user_list;
+		_refreshWaiterList();
 	}
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
