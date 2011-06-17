@@ -190,7 +190,7 @@
 	  }
       _client = new CsaShogiClient();
   serverListGrid.dataProvider = { 'name':"Loading..."};
-  var server:Object = { 'name':"SATURN", 'description':"main", 'icon':_icon_saturn, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
+  var server:Object = { 'name':"SATURN", 'description':"main", 'icon':_icon_saturn, 'host':"49.212.52.151", 'port':"4083", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
