@@ -80,7 +80,8 @@ package
 		public function setFromGame(game_name:String, turn:String):void {
 			this.game_name = game_name;
 			this.turn = turn;
-			this.status = STATE_GAME_WAITING;
+			if (game_name == "*") status = STATE_CONNECTED;
+			else status = STATE_GAME_WAITING;
 		}
 		
 		public function setFromStart(game_name:String, turn:String):void {
