@@ -68,11 +68,11 @@
 	private var _viewerAlone:Boolean;
     [Bindable]
     private var _game_name:String;
-    private var _user_list:Array;
+    private var _user_list:Array = new Array();
 	private var _users:Object = new Object();
-	private var _waiter_list:Array;
-	private var _game_list:Array;
-	private var _watcher_list:Array;
+	private var _waiter_list:Array = new Array();
+	private var _game_list:Array = new Array();
+	private var _watcher_list:Array = new Array();
 	private var _kifu_search_list:Array;
 	private var _player_search_list:Array;
 	private var _ranking_rate_list:Array;
@@ -746,7 +746,8 @@
 		  board.superior = Kyokumen.GOTE;
 	  }
       board.startGame(_initPositionStr, _client.myTurn, _player_infos,match[3], match[4]);
-	  _client.watchers(_game_name);
+	  _watcher_list = new Array();
+	  watcherListGrid.dataProvider = _watcher_list;
 	  userMessage2.htmlText = "";
 	  _writeUserMessage(_infoFetcher.gameMessage + "\n", 2, "#008800");
 	  if (match[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + match[2].substr(match[2].length - 2, 2) + ".jpg", 2);
@@ -1312,28 +1313,33 @@
 	
 //--------------------------------------------------------------------------------------------------------------------------------- GAME ROOM 
 	private function _handleEnter(e:ServerMessageEvent):void {
-		if (e.message == board.playerInfos[0].name) {
+		var tokens:Array = e.message.split(",");
+		if (tokens[0] == board.playerInfos[0].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(e.message + " entered.\n", 2, "#000000", true);
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#000000", true);
 			board.name_labels[board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
-		} else if (e.message == board.playerInfos[1].name) {
+		} else if (tokens[0] == board.playerInfos[1].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(e.message + " entered.\n", 2, "#666666", true);
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#666666", true);
 			board.name_labels[1 - board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
 		} else {
 			if (mainViewStack.selectedIndex != 2) return;
-			_writeUserMessage(e.message + " entered.\n", 2, "#008800");
-			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_open.play();
+			_writeUserMessage(tokens[0] + " entered.\n", 2, "#008800");
+			if (_chat_sound2_play && _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _sound_door_open.play();
+			if (_users[tokens[0]]) _watcher_list.push(_users[tokens[0]]);
+			_watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+			watcherListGrid.dataProvider = _watcher_list;
+			watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
 		}
-		if (board.isStudyHost && board.post_game) _sendStudy(e.message);
+		if (board.isStudyHost && board.post_game) _sendStudy(tokens[0]);
 	}
 	
 	private function _handleLeave(e:ServerMessageEvent):void {
@@ -1354,6 +1360,7 @@
 				if (_watcher_list[i].name == e.message) {
 					_watcher_list.splice(i, 1);
 					watcherListGrid.dataProvider = _watcher_list;
+					watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
 					break;
 				}
 			}
@@ -1531,7 +1538,6 @@
 	  _keepAliveTimer.start();
       _client.who();
 	  if (loadList) _client.list();
-	  if (_game_name) _client.watchers(_game_name);
     }
 	
     private function _newGameForm():void{
@@ -1556,7 +1562,7 @@
     private function _stopWaiting():void {
 	  _waiting = false;
       _client.stopWaiting();
-      _refresh(false);
+//      _refresh(false);
       stopButton.enabled = false;
     }
 
@@ -1597,7 +1603,7 @@
 		  return;
 	  }
       _client.waitForGame(total,byoyomi,handicap,tournament);
-      _refresh(false);
+//      _refresh(false);
       stopButton.enabled = true;
     }
 
