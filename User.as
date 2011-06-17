@@ -19,7 +19,7 @@ package
 		public var losses:int;
 		public var streak:int;
 		public var streak_best:int;
-		public var status:String = "connected";
+		public var status:String = STATE_CONNECTED;
 		public var opponent:String = "";
 		public var game_name:String = "*";
 		public var turn:String = "*";
@@ -37,6 +37,21 @@ package
 		
 		public function User(name:String) {
 			this.name = name;
+		}
+		
+		public function initialize():void {
+			status = STATE_CONNECTED;
+			opponent = "";
+			game_name = "*";
+			turn = "*";
+			monitor_game = "*";
+			moves = 0;
+			mark = "";
+			markWidth = 0;
+			idle = false;
+			disconnected = false;
+			cheater = false;
+			labelColor = 0x000000;
 		}
 		
 		public function setFromWho(rating:int, country_code:int, wins:int, losses:int, streak:int, streak_best:int,

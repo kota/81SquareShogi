@@ -580,44 +580,21 @@
 			if (isFavorite) _sound_door_open.play();
 			else _sound_chat4.play();
 		}
-		var user:Object = {
-			'name':tokens[0],
-			'status':"", 'status2':"", 'opponent':"", 'game_name':"*", 'turn':0,
-			'rating':(tokens[2] == "true" ? "*" : "") + tokens[1],
-			'country_code':parseInt(tokens[3]),
-			'titleName':"", 'titleSubName':"", 'monitor_game':"*", 'moves':0,
-			'wins':parseInt(tokens[4]),
-			'losses':parseInt(tokens[5]),
-			'streak':parseInt(tokens[6]),
-			'streak_best':parseInt(tokens[7]),
-			'favorite':"",
-			'favoriteWidth':0
-		  }
-		user.country = InfoFetcher.country_names[user.country_code];
-		user.country3 = InfoFetcher.country_names3[user.country_code];
-		user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
-		if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
-			user.favorite = "★";
-			user.favoriteWidth = 11;
-		}
-		for (i = 0; i < InfoFetcher.titleUser.length; i++) {
-			if (user.name.toLowerCase() == InfoFetcher.titleUser[i]) {
-				user.titleName = InfoFetcher.titleName[i];
-				user.titleSubName = InfoFetcher.titleSubName[i];
-				if (InfoFetcher.titleAvatar[i] != "*") user.avatar = InfoFetcher.titleAvatar[i];
-				break;
-			}
-		}
-		if (user.wins + user.losses >= 10 || user.titleName != "") {
-			user.rank = InfoFetcher.makeRankFromRating(user.rating);
-			user.rankColor = InfoFetcher.makeColorFromRating(user.rating);
+		var add:Boolean = false;
+		if (tokens[0] == login_name) return;
+		if (!_users[tokens[0]]) {
+			_users[tokens[0]] = new User(tokens[0]);
+			add = true;
 		} else {
-			user.rank = "-";
-			user.rankColor = 0xCCCCCC;
+			_users[tokens[0]].initialize();
 		}
-		_user_list.push(user);
+		_users[tokens[0]].setFromLobbyIn(parseInt(tokens[1]), parseInt(tokens[3]),parseInt(tokens[4]),parseInt(tokens[5]),parseInt(tokens[6]),parseInt(tokens[7]))
+		if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _users[tokens[0]].markFavorite();
+		if (add) {
+			_user_list.push(_users[tokens[0]]);
+			userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+		}
 		userListGrid.dataProvider = _user_list;
-		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	}
 	
 	private function _handleLobbyOut(e:ServerMessageEvent):void {
