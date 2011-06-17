@@ -30,7 +30,8 @@ package
 		public var idle:Boolean = false;
 		public var disconnected:Boolean = false;
 		public var cheater:Boolean = false;
-
+		public var labelColor:uint = 0x000000;
+		
 		public var favorite:String = "";
 		public var favoriteWidth:int = 0;
 		
@@ -135,7 +136,7 @@ package
 		}
 		
 		public function get rank():String {
-			if (!_isProvisional() || titleName != "") {
+			if (!isProvisional || titleName != "") {
 				return InfoFetcher.makeRankFromRating(rating);
 			} else {
 				return "-";
@@ -143,7 +144,7 @@ package
 		}
 		
 		public function get rankColor():uint {
-			if (!_isProvisional() || titleName != "") {
+			if (!isProvisional || titleName != "") {
 				return InfoFetcher.makeColorFromRating(rating);
 			} else {
 				return 0xCCCCCC;
@@ -187,7 +188,7 @@ package
 		}
 		
 		public function get rateStr():String {
-			if (_isProvisional() && rating < InfoFetcher.rank_thresholds[1]) return ("*" + String(rating));
+			if (isProvisional && rating < InfoFetcher.rank_thresholds[1]) return ("*" + String(rating));
 			else return String(rating);
 		}
 		
@@ -218,7 +219,7 @@ package
 			markWidth = 0;
 		}
 		
-		private function _isProvisional():Boolean {
+		public function get isProvisional():Boolean {
 			return (total < 10);
 		}
 		
