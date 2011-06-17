@@ -567,6 +567,7 @@
 				if (_chat_sound1_play) _sound_door_close.play();
 			}
 		}
+		
 		for (var i:int = 0; i < _user_list.length; i++){
 			if (_user_list[i].name == e.message) {
 				_user_list.splice(i, 1);
@@ -574,14 +575,9 @@
 				break;
 			}
 		}
-		for (i = 0; i < _waiter_list.length; i++){
-			if (_waiter_list[i].name == e.message) {
-				_waiter_list.splice(i, 1);
-				waiterListGrid.dataProvider = _waiter_list;
-				break;
-			}
-		}
 		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+		_refreshWaiterList();
+		delete _users[e.message];
 	}
 	
 	private function _handleGame(e:ServerMessageEvent):void {
@@ -603,8 +599,8 @@
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
+		var tokens:Array = e.message.split(",")[0].split("+");
 		if (mainViewStack.selectedIndex == 1) {
-			var tokens:Array = e.message.split(",")[0].split("+");
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[2].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
