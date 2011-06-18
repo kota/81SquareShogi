@@ -801,7 +801,8 @@
 		  'wins':_watch_game.blackWins,
 		  'losses':_watch_game.blackLosses,
 		  'streak_best':_watch_game.blackStreakBest,
-		  'game_name':_game_name.split("+")[1]
+		  'game_name':_game_name.split("+")[1],
+		  'avatar':_users[_watch_game.blackName].avatar
 	  }
 	  var whiteInfo:Object = {
 		  'name':_watch_game.whiteName,
@@ -813,7 +814,8 @@
 		  'wins':_watch_game.whiteWins,
 		  'losses':_watch_game.whiteLosses,
 		  'streak_best':_watch_game.whiteStreakBest,
-		  'game_name':_game_name.split("+")[1]
+		  'game_name':_game_name.split("+")[1],
+		  'avatar':_users[_watch_game.blackName].avatar
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;

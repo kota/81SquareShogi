@@ -544,11 +544,11 @@ package  {
       _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
       _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
 	  var avatar:Image = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[_my_turn].avatar ? _player_infos[_my_turn].avatar : _player_infos[_my_turn].rank) + ".jpg";
+	  avatar.source = _player_infos[_my_turn].avatar;
 	  _avatar_images[0].addChild(avatar);
 	  if (!viewing) _avatar_images[0].addChild(InfoFetcher.medalCanvas(_player_infos[_my_turn]));
 	  avatar = new Image();
-	  avatar.source =  IMAGE_DIRECTORY + "avatars/" + (_player_infos[1 - _my_turn].avatar ? _player_infos[1 - _my_turn].avatar : _player_infos[1 - _my_turn].rank) + ".jpg";
+	  avatar.source = _player_infos[1 - _my_turn].avatar; 
 	  _avatar_images[1].addChild(avatar);
 	  if (!viewing) _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
 	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
@@ -775,7 +775,7 @@ package  {
 		  'name':watch_game.blackName,
 		  'rating':watch_game.blackRating,
 		  'rank':watch_game.blackRank,
-		  'avatar':watch_game.blackAvatar,
+		  'avatar':watch_game.black.avatar,
 		  'titleName':watch_game.blackTitle,
 		  'country_code':watch_game.blackCountryCode,
 		  'labelColor':watch_game.blackColor,
@@ -787,7 +787,7 @@ package  {
 		  'name':watch_game.whiteName,
 		  'rating':watch_game.whiteRating,
 		  'rank':watch_game.whiteRank,
-		  'avatar':watch_game.whiteAvatar,
+		  'avatar':watch_game.white.avatar,
 		  'titleName':watch_game.whiteTitle,
 		  'country_code':watch_game.whiteCountryCode,
 		  'labelColor':watch_game.whiteColor,
