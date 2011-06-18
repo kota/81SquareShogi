@@ -153,12 +153,12 @@ package
 
 		public function get avatar():String {
 			var str:String = rank;
-			  for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
-				  if (name.toLowerCase() == InfoFetcher.titleUser[i]) {
-					  if (InfoFetcher.titleAvatar[i] != "*") str = InfoFetcher.titleAvatar[i];
-					  break;
-				  }
-			  }
+//			  for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+//				  if (name.toLowerCase() == InfoFetcher.titleUser[i]) {
+//					  if (InfoFetcher.titleAvatar[i] != "*") str = InfoFetcher.titleAvatar[i];
+//					  break;
+//				  }
+//			  }
 			  return IMAGE_DIRECTORY + "avatars34/" + str + ".jpg";
 		}
 		

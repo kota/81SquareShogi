@@ -84,7 +84,6 @@
 	private var _ranking_percentage_list:Array;
 	private var _ranking_streak_list:Array;
     public var login_name:String;
-	private var _player_infos:Array = new Array;
 	private var _watch_game:Object;
 	private var _challengeUser:Object;
     private var _monitoring:Boolean;
@@ -678,9 +677,6 @@
 	  _rematching = false;
 	  board.post_game = false;
 	  board.isStudyHost = false;
-//	  for (var j:int = 0; j < 2 ; j++) {
-//		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
-//	  }
 
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
@@ -1557,7 +1553,7 @@
     private function _userSelected():void {
       var user:Object = userListGrid.selectedItem;
 	  for (var i:int = 0; i < _game_list.length; i++) {
-		  if (_game_list[i].blackName == user.name || _game_list[i].whiteName == user.name) {
+		  if (_game_list[i].black.name == user.name || _game_list[i].white.name == user.name) {
 			  gameListGrid.selectedIndex = i;
 			  gameListGrid.scrollToIndex(i);
 			  break;
@@ -2023,7 +2019,7 @@
 	private function _shareKifu2():void {
 		var kifu:Object = new Object();
 		kifu.id = board.kid;
-		kifu.opening = board.opening;
+		kifu.opening = board.openingEn;
 		kifu.black = board.playerInfos[0].name;
 		kifu.white = board.playerInfos[1].name;
 		kifu.blackRank = board.playerInfos[0].rank;
@@ -2033,7 +2029,7 @@
 		if (!board.viewing) {
 			for each (var game:Object in _game_list) {
 				if (game.id == _game_name) {
-					kifu.opening = game.opening_en;
+					kifu.opening = game.openingEn;
 					break;
 				}
 			}
@@ -2309,7 +2305,6 @@
 	private function _kifuSearchSelected():void {
 		if (kifuSearchGrid.selectedItem) {
 			searchAccordion.enabled = false;
-			board.opening = kifuSearchGrid.selectedItem.opening;
 			board.kid = kifuSearchGrid.selectedItem.id;
 			_api.kifuDetail(kifuSearchGrid.selectedItem.id);
 		}
@@ -2328,22 +2323,40 @@
 		searchAccordion.enabled = true;
 		board.viewing = true;
 		board.my_turn = Kyokumen.SENTE;
+		var moves:Array = new Array();
+		_initPositionStr = "";
+		
 		_game_name = e.target.kifuContents.split("\n")[4].substring(7);
-		var blackRate:String;
-		var whiteRate:String;
-		if (e.target.kifuContents.split("\n")[5].match(/^I\+(\d+),/)) blackRate = e.target.kifuContents.split("\n")[5].match(/^I\+(\d+),/)[1];
-		else blackRate = "0";
-		if (e.target.kifuContents.split("\n")[6].match(/^I\-(\d+),/)) whiteRate = e.target.kifuContents.split("\n")[6].match(/^I\-(\d+),/)[1];
-		else whiteRate = "0";
-		if (_game_name.split("+")[1].match(/^hc/) || blackRate.match(/^\*/)) {
-		  board.superior = Kyokumen.GOTE;
-		} else if (whiteRate.match(/^\*/)) {
-		  board.superior = Kyokumen.SENTE;
-		} else if (parseInt(blackRate) > parseInt(whiteRate)) {
-		  board.superior = Kyokumen.SENTE;
-		} else {
-		  board.superior = Kyokumen.GOTE;
+		for each(var line:String in e.target.kifuContents.split("\n")) {
+			if (line.match(/^To_Move/)) {
+			  _initPositionStr += "P0" + line.substring(8) + "\n";
+			} else if (line.match(/^P[0-9\+\-]/)) {
+			  _initPositionStr += line + "\n";
+			} else if (line.match(/^N\+.+$/)) {
+			  var black:User = new User(line.substring(2));
+			} else if (line.match(/^N\-.+$/)) {
+			  var white:User = new User(line.substring(2));
+			} else if (line.match(/^I\+.+$/)) {
+			  if (line.substring(2).split(",")[2]) black.setFromList(parseInt(line.substring(2).split(",")[2]), parseInt(line.substring(2).split(",")[1]));
+			} else if (line.match(/^I\-.+$/)) {
+			  if (line.substring(2).split(",")[2]) white.setFromList(parseInt(line.substring(2).split(",")[2]), parseInt(line.substring(2).split(",")[1]));
+			  var game:Game = new Game(_game_name, black, white);
+			} else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
+			var move_and_time:Object = new Object();
+			move_and_time.move = line;
+			move_and_time.comment = "";
+			moves.push(move_and_time);
+			} else if (line.match(/^(T.*)$/)) {
+			Object(moves[moves.length - 1]).time = line;
+			//          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
+			//			  break;
+			} else if (line.match(/^'\*/)) {
+			  Object(moves[moves.length - 1]).comment += line + "\n";
+			} else if (line.match(/summary/)) {
+			  game.opening = line.split(":")[5] ? line.split(":")[5] : "*";
+			}
 		}
+		board.superior = game.superior;
 		if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
 		} else if (_game_name.split("+")[1].match(/^nr_/)) {
@@ -2354,7 +2367,7 @@
 		  board.gameType = _game_name.split("+")[1].match(/^(mini|va.+?)_/)[1];
 		}
 		allowWatcherChatCheckbox.visible = false;
-		board.startView(e.target.kifuContents);
+		board.startView(_initPositionStr, game, moves);
 		resignButton.enabled = false;
 		reverseButton.enabled = true;
 		greetButton.visible = false;
