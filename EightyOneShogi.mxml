@@ -402,8 +402,6 @@
 			  'blackFlagFilter': tokens[8] == "true" ? filterDefault : filterGrey,
 			  'whiteFlagFilter': tokens[9] == "true" ? filterDefault : filterGrey
 			  }
-		  game.black = _users[game.blackName];
-		  game.white = _users[game.whiteName];
 		  if (tokens[7] == "created") {
 			  continue;
 		  } else if (tokens[7] == "game") {
@@ -658,89 +656,17 @@
 	
 	private function _handleStart(e:ServerMessageEvent):void {
 		if (mainViewStack.selectedIndex == 1) {
-			var match:Array = e.message.split(",");
-			var tokens:Array = match[0].split("+");
+			var tokens:Array = e.message.split(",")[0].split("+");
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[2].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
 				else _sound_chat1.play();
 			}
 		}
-		for (var i:int = 0; i < _user_list.length; i++){
-			if (_user_list[i].name == tokens[2] || _user_list[i].name == tokens[3]) {
-				_user_list[i].status2 = "G " + InfoFetcher.textBar(0);
-			}
-		}
-		for (i = _waiter_list.length - 1; i >= 0; i--){
-			if (_waiter_list[i].name == tokens[2] || _waiter_list[i].name == tokens[3]) _waiter_list.splice(i, 1);
-		}
-		waiterListGrid.dataProvider = _waiter_list;
-		var game:Object = {
-			'id':match[0],
-			'blackName':tokens[2],
-			'whiteName':tokens[3],
-			'blackRating':parseInt(match[7]),
-			'whiteRating':parseInt(match[8]),
-			'blackCountryCode':parseInt(match[1]),
-			'whiteCountryCode':parseInt(match[2]),
-			'status':0,
-			'watchers':0,
-			'watcher_names':'',
-			'blackTitle':"",
-			'whiteTitle':"",
-			'blackColor': 0x000000,
-			'whiteColor': 0x000000,
-			'blackDecoration': undefined,
-			'whiteDecoration': undefined,
-			'blackFlagFilter': filterDefault,
-			'whiteFlagFilter': filterDefault,
-			'maxRating':0,
-			'gameNo':"N"
-		}
-		var user:Object;
-		if ((user = _users[game.blackName])) {
-			game.blackWins = user.wins;
-			game.blackLosses = user.losses;
-			game.blackStreakBest = user.streak_best;
-			game.black = user;
-		}
-		if ((user = _users[game.whiteName])) {
-			game.whiteWins = user.wins;
-			game.whiteLosses = user.losses;
-			game.whiteStreakBest = user.streak_best;
-			game.white = user;
-		}
-		game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
-		game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
-		game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
-		game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
-		for (i = 0; i < InfoFetcher.titleName.length; i++) {
-			if (game.blackName.toLowerCase() == InfoFetcher.titleUser[i]) {
-				game.blackTitle = InfoFetcher.titleName[i];
-//				if (_infoFetcher.titleAvatar[i] != "*") game.blackAvatar = _infoFetcher.titleAvatar[i];
-			}
-			if (game.whiteName.toLowerCase() == InfoFetcher.titleUser[i]) {
-				game.whiteTitle = InfoFetcher.titleName[i];
-//				if (_infoFetcher.titleAvatar[i] != "*") game.whiteAvatar = _infoFetcher.titleAvatar[i];
-			}
-		}
-		game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
-		game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
-		game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
-		game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
-
-		var game_info:Array = tokens[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)$/);
-		var total:int = parseInt(game_info[3]) / 60;
-		if (game_info[2].match(/\-\-..$/)) {
-			game.rule = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
-			game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
-		} else {
-			game.rule = ((total < 10) ? " " : "") + total + " min + " + game_info[4] + " sec";
-			game.ruleTip = "";
-		}
-		var gameProxy:ObjectProxy = new ObjectProxy(game);
-		_game_list.unshift(gameProxy);
-		gameListGrid.dataProvider = _game_list;
+		if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
+		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
+		userListGrid.dataProvider = _user_list;
+		_refreshWaiterList();
 	}
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
