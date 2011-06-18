@@ -542,44 +542,21 @@
 			if (isFavorite) _sound_door_open.play();
 			else _sound_chat4.play();
 		}
-		for (i = 0; i < _user_list.length; i++){
-			if (_user_list[i].name == tokens[0]) {
-				_user_list.splice(i, 1);
-				break;
-			}
+		var add:Boolean = false;
+		if (tokens[0] == login_name) return;
+		if (!_users[tokens[0]]) {
+			_users[tokens[0]] = new User(tokens[0]);
+			add = true;
+		} else {
+			_users[tokens[0]].initialize();
 		}
-		var user:Object = {
-			'name':tokens[0],
-			'status':"", 'status2':"", 'opponent':"", 'game_name':"*", 'turn':0,
-			'rating':parseInt(tokens[8]),
-			'country_code':parseInt(tokens[3]),
-			'titleName':"", 'titleSubName':"", 'monitor_game':"*", 'moves':0,
-			'wins':parseInt(tokens[9]),
-			'losses':parseInt(tokens[10]),
-			'draws':parseInt(tokens[11]),
-			'favorite':"",
-			'favoriteWidth':0
-		  }
-		user.country = InfoFetcher.country_names[user.country_code];
-		user.country3 = InfoFetcher.country_names3[user.country_code];
-		user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
-		if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
-			user.favorite = "★";
-			user.favoriteWidth = 11;
+		_users[tokens[0]].setFromLobbyIn(parseInt(tokens[8]), parseInt(tokens[3]), parseInt(tokens[9]), parseInt(tokens[10]), parseInt(tokens[11]));
+		if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _users[tokens[0]].markFavorite();
+		if (add) {
+			_user_list.push(_users[tokens[0]]);
+			userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 		}
-		for (i = 0; i < InfoFetcher.titleUser.length; i++) {
-			if (user.name.toLowerCase() == InfoFetcher.titleUser[i]) {
-				user.titleName = InfoFetcher.titleName[i];
-				user.titleSubName = InfoFetcher.titleSubName[i];
-//				if (_infoFetcher.titleAvatar[i] != "*") user.avatar = _infoFetcher.titleAvatar[i];
-				break;
-			}
-		}
-		user.rank = InfoFetcher.makeRankFromRating(user.rating);
-		user.rankColor = InfoFetcher.makeColorFromRating(user.rating);
-		_user_list.push(user);
 		userListGrid.dataProvider = _user_list;
-		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	}
 	
 	private function _handleLobbyOut(e:ServerMessageEvent):void {
