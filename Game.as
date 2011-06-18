@@ -35,13 +35,12 @@ package
 			this.white = new ObjectProxy(white);
 		}
 		
-		public function setFromList(moves:int, status:String, isInBlack:String, isInWhite:String, watchers:int, opening:String):void {
+		public function setFromList(moves:int, status:String, isInBlack:String, isInWhite:String, watchers:int):void {
 			this.moves = moves;
 			this.status = status;
 			isIn[0] = isInBlack;
 			isIn[1] = isInWhite;
 			this.watchers = watchers;
-			this.opening = opening;
 			exist = true;
 		}
 		
@@ -76,15 +75,7 @@ package
 			if (game_info[2].match(/\-\-..$/)) {
 				return InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
 			} else {
-				var str:String;
-				if (game_info[1] == "r") {
-					str = "R";
-				} else if (game_info[1].match(/^hc/)) {
-					str = "HC";
-				} else {
-					str = "NR";
-				}
-				return str + ": " + (parseInt(game_info[3]) >= 600 ? "" : " ") + (parseInt(game_info[3]) / 60) + "-" + game_info[4];
+				return (parseInt(game_info[3]) >= 600 ? "" : " ") + (parseInt(game_info[3]) / 60) + " min + " + game_info[4] + " sec";
 			  }
 		}
 

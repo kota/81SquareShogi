@@ -55,6 +55,7 @@
     import ChallengeForm;
     import GameRuleEvent;
 	import User;
+	import Game;
     import mx.utils.StringUtil;
 	
 	public const VERSION:String = "ver.2011/06/05";
@@ -73,6 +74,7 @@
 	private var _users:Object = new Object();
 	private var _waiter_list:Array = new Array();
 	private var _game_list:Array = new Array();
+	private var _games:Object = new Object();
 	private var _watcher_list:Array = new Array();
 	private var _kifu_search_list:Array;
 	private var _player_search_list:Array;
@@ -93,8 +95,6 @@
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
 	private var _status_disconnected:Boolean = false;
-	private const filterDefault:ColorMatrixFilter = new ColorMatrixFilter([1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0 ]);
-	private const filterGrey:ColorMatrixFilter = new ColorMatrixFilter([0.5, 0.25, 0.25, 0,120, 0.25, 0.5, 0.25, 0,120, 0.25, 0.25, 0.5, 0,120, 0, 0, 0, 1, 0 ]);
 
     [Embed(source = "/sound/win.mp3")]
     private var Sound_win:Class;
@@ -325,8 +325,6 @@
 
     private function _handleWho(e:ServerMessageEvent):void{                               //<<<<<< Handle WHO response
       var users:Array = e.message.split("\n");
-      var user_list:Array = new Array();
-	  var waiter_list:Array = new Array();
 	  for each(var user:User in _users) user.exist = false;
       for each(var user_data:String in users){
         if(user_data.match("##[WHO] +OK") != null){
@@ -380,116 +378,54 @@
 	  }
 	  waiterListGrid.dataProvider = _waiter_list;
 	}
-
-    private function _handleList(e:ServerMessageEvent):void{                                 //<<<<<< Handle LIST response
-	  var game_list:Array = new Array();
-	  var lines:Array = e.message.split("\n");
+	
+    private function _handleList(e:ServerMessageEvent):void {                                 //<<<<<< Handle LIST response
+		var lines:Array = e.message.split("\n");
+		for each(var game:Game in _games) game.exist = false;
         for each(var line:String in lines) {
-		  if (line.match(/^##\[LIST34\] \+OK$/)) break;
-          var tokens:Array = line.split(" ");
-          var game:Object = {
-			  'id':tokens[1], //line.substr(9),
-			  'blackName':tokens[1].split("+")[2],
-			  'whiteName':tokens[1].split("+")[3],
-			  'blackRating':parseInt(tokens[3]),
-			  'whiteRating':parseInt(tokens[4]),
-			  'blackCountryCode':parseInt(tokens[5]),
-			  'whiteCountryCode':parseInt(tokens[6]),
-			  'watchers':parseInt(tokens[10]),
-			  'watcher_names':'',
-			  'blackTitle':"",
-			  'whiteTitle':"",
-			  'blackColor': tokens[8] == "true" ? 0x000000 : 0x999999,
-			  'whiteColor': tokens[9] == "true" ? 0x000000 : 0x999999,
-			  'blackDecoration': undefined,
-			  'whiteDecoration': undefined,
-			  'blackFlagFilter': tokens[8] == "true" ? filterDefault : filterGrey,
-			  'whiteFlagFilter': tokens[9] == "true" ? filterDefault : filterGrey
-			  }
-		  if (tokens[7] == "created") {
-			  continue;
-		  } else if (tokens[7] == "game") {
-			  game.status = parseInt(tokens[2]);
-			  if (login_name.toLowerCase() == game.blackName && tokens[8] != "true") _status_disconnected = true;
-			  else if (login_name.toLowerCase() == game.whiteName && tokens[9] != "true") _status_disconnected = true;
-		  } else {
-			  game.status = "End";
-			  if (tokens[7] == "win") {
-				  game.blackDecoration = "underline";
-			  } else if (tokens[7] == "lose") {
-				  game.whiteDecoration = "underline";
-			  }
-		  }
-		  var user:Object;
-		  if ((user = _users[game.blackName])) {
-			game.blackWins = user.wins;
-			game.blackLosses = user.losses;
-			game.black = user;
-		  }
-		  if ((user = _users[game.whiteName])) {
-			game.whiteWins = user.wins;
-			game.whiteLosses = user.losses;
-			game.white = user;
-		  }
-		  game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
-		  game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
-		  game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
-		  game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
-		  for (var i:int = 0; i < InfoFetcher.titleName.length; i++) {
-				if (game.blackName.toLowerCase() == InfoFetcher.titleUser[i]) {
-					game.blackTitle = InfoFetcher.titleName[i];
-					if (InfoFetcher.titleAvatar[i] != "*") game.blackAvatar = InfoFetcher.titleAvatar[i];
+			if (line.match(/^##\[LIST34\] \+OK$/)) break;
+			var tokens:Array = line.split(" ");
+			if (!_games[tokens[1]]) {
+				var black:User = _users[tokens[1].split("+")[2]];
+				if (!black) {
+					black = new User(tokens[1].split("+")[2]);
+					black.setFromList(parseInt(tokens[3]), parseInt(tokens[5]));
 				}
-				if (game.whiteName.toLowerCase() == InfoFetcher.titleUser[i]) {
-					game.whiteTitle = InfoFetcher.titleName[i];
-					if (InfoFetcher.titleAvatar[i] != "*") game.whiteAvatar = InfoFetcher.titleAvatar[i];
+				var white:User = _users[tokens[1].split("+")[3]];
+				if (!white) {
+					white = new User(tokens[1].split("+")[3]);
+					white.setFromList(parseInt(tokens[4]), parseInt(tokens[6]));
 				}
-		  }
-		  if (game.watchers > 0) {
-			  i = 0;
-			  for each (user in _user_list) {
-				  if (game.id == user.monitor_game) {
-					  game.watcher_names += (user.name + " (" + InfoFetcher.country_names3[user.country_code] + ")\n");
-					  i += 1;
-					  if (i >= game.watchers) break;
-				  }
-			  }
-		  }
-		  game.maxRating = Math.max(game.blackRating, game.whiteRating);
-		  if (game.blackColor == 0x999999 || game.whiteColor == 0x999999) game.maxRating -= 3000;
-		  if (game.blackRating == 0) {
-			  game.blackRank = "-";
-			  game.blackRankColor = 0x999999;
-			  game.blackRating = 1000;
-			if ((user = _users[game.blackName])) game.blackRating = user.rating;
-		  } else {
-			game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
-			game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
-		  }
-		  if (game.whiteRating == 0) {
-			  game.whiteRank = "-";
-			  game.whiteRankColor = 0x999999;
-			  game.whiteRating = 1000;
-			  if ((user = _users[game.whiteName])) game.whiteRating = user.rating;
-		  } else {
-			  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
-			  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
-		  }
-		  var game_info:Array = game.id.split("+")[1].match(/^([0-9a-z]+)_(.*)-([0-9]*)-([0-9]*)$/);
-		  var total:int = parseInt(game_info[3]) / 60;
-		  if (game_info[2].match(/\-\-..$/)) {
-			game.rule = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
-			game.ruleTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
-		  } else {
-			game.rule = ((total < 10) ? " " : "") + total + " min + " + game_info[4] + " sec";
-			game.ruleTip = "";
-		  }
-		  var gameProxy:ObjectProxy = new ObjectProxy(game);
-		  game_list.push(gameProxy);
-        }
-		game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
-		for (i = 0; i < game_list.length; i++) game_list[i].gameNo = i + 1;
-		_game_list = game_list;
+				_games[tokens[1]] = new Game(tokens[1], black, white);
+			}
+			_games[tokens[1]].setFromList(parseInt(tokens[2]), tokens[7], tokens[8] == "true", tokens[9] == "true", parseInt(tokens[10]));
+			
+			if (_games[tokens[1]].watchers > 0) {
+				_games[tokens[1]].watcher_names = "";
+				var i:int = 0;
+				for each (var user:User in _users) {
+					if (_games[tokens[1]].id == user.monitor_game) {
+						_games[tokens[1]].watcher_names += (user.name + " (" + user.country3 + ")\n");
+						i += 1;
+						if (i >= _games[tokens[1]].watchers) break;
+					}
+				}
+			}
+		}
+		for each(game in _games) {
+			if (!game.exist) delete _games[game.id];
+		}
+		_refreshGameList();
+	}
+
+	private function _refreshGameList():void {
+		_game_list = new Array();
+		for each (var game:Game in _games) {
+			var gameProxy:ObjectProxy = new ObjectProxy(game);
+			_game_list.push(gameProxy);
+		}
+		_game_list.sortOn("maxRating", Array.NUMERIC | Array.DESCENDING);
+		for (var i:int = 0; i < _game_list.length; i++) _game_list[i].tag = String(i + 1);
 		gameListGrid.dataProvider = _game_list;
     }
 
@@ -2932,16 +2868,16 @@
   </mx:Component>
   <mx:Component id="gameListBlackRenderer">
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Label text="{data.blackRank}" textAlign="right" width="40" paddingLeft="-9" paddingRight="-7" color="{data.blackRankColor}"/>
-		<mx:Image filters="{[data.blackFlagFilter]}" source="{data.blackFlagURL}" width="27" height="17" toolTip="{data.blackCountry}"/>
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.blackName}" color="{data.blackColor}" textDecoration="{data.blackDecoration}" width="85" textAlign="left" />
+		<mx:Label text="{data.black.rank}" textAlign="right" width="40" paddingLeft="-9" paddingRight="-7" color="{data.black.rankColor}"/>
+		<mx:Image filters="{[data.flagFilter(0)]}" source="{data.black.flag_s}" width="27" height="17" toolTip="{data.black.country}"/>
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.black.name}" color="{data.nameColor(0)}" textDecoration="{data.nameDecoration(0)}" width="85" textAlign="left" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="gameListWhiteRenderer">
 	  <mx:HBox horizontalAlign="right"  paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.whiteName}" color="{data.whiteColor}" textDecoration="{data.whiteDecoration}" width="85" textAlign="right" />
-		<mx:Image filters="{[data.whiteFlagFilter]}" source="{data.whiteFlagURL}" width="27" height="17" toolTip="{data.whiteCountry}" />
-		<mx:Label text="{data.whiteRank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-9" color="{data.whiteRankColor}" />
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.white.name}" color="{data.nameColor(1)}" textDecoration="{data.nameDecoration(1)}" width="85" textAlign="right" />
+		<mx:Image filters="{[data.flagFilter(1)]}" source="{data.white.flag_s}" width="27" height="17" toolTip="{data.white.country}" />
+		<mx:Label text="{data.white.rank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-9" color="{data.white.rankColor}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListNameRenderer">
@@ -3092,15 +3028,15 @@
 			<mx:VDividedBox dividerRelease="userMessage1.callLater(_scrollDown1);" liveDragging="true">
 				<mx:DataGrid id="gameListGrid" width="540" height="220" headerHeight="21" change="_gameSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_watchDialog();" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 				 <mx:columns>
-				  <mx:DataGridColumn headerStyleName="header81" dataField="gameNo" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="tag" headerText="No." width="23" paddingLeft="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="blackRank" headerText="" width="55" paddingRight="2" textAlign="right" /> -->
 <!--				  <mx:DataGridColumn dataField="blackFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 				  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{gameListBlackRenderer}" headerText="{lan.black}(▲)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 				  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{gameListWhiteRenderer}" headerText="{lan.white}(△)" width="172" paddingLeft="0" paddingRight="0" textAlign="center" sortable="false" />
 <!--				  <mx:DataGridColumn dataField="whiteFlagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" /> -->
 <!--				  <mx:DataGridColumn dataField="whiteRank" headerText="" width="55" paddingLeft="2" /> -->
-				  <mx:DataGridColumn headerStyleName="header81" dataField="rule" dataTipField="ruleTip" headerText="{lan.rule}" width="100" paddingLeft="3" showDataTips="true" />
-				  <mx:DataGridColumn headerStyleName="header81" dataField="status" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="description" dataTipField="descriptionTip" headerText="{lan.rule}" width="100" paddingLeft="3" showDataTips="true" />
+				  <mx:DataGridColumn headerStyleName="header81" dataField="statusMark" headerText="{lan.status_short}" width="35" paddingLeft="0" textAlign="center" />
 				  <mx:DataGridColumn headerStyleName="header81" dataField="watchers" headerText="{lan.monitor}" paddingLeft="0" textAlign="center" showDataTips="true" dataTipField="watcher_names" />
 <!--				  <mx:DataGridColumn fontFamily="Meiryo UI" dataField="opening" headerText="{lan.opening_short}" width="55" showDataTips="true" dataTipField="opening_en" paddingLeft="0" textAlign="center" /> -->
 				 </mx:columns>
