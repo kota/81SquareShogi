@@ -541,7 +541,8 @@
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
-		var tokens:Array = e.message.split(",")[0].split("+");
+		var game_id:String = e.message.split(",")[0];
+		var tokens:Array = game_id.split("+");
 		if (mainViewStack.selectedIndex == 1) {
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
@@ -553,6 +554,9 @@
 		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
 		userListGrid.dataProvider = _user_list;
 		_refreshWaiterList();
+		_games[game_id] = new Game(game_id, _users[tokens[2]], _users[tokens[3]]);
+		_game_list.unshift(new ObjectProxy(_games[game_id]));
+		gameListGrid.dataProvider = _game_list;
 	}
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
