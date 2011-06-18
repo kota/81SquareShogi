@@ -9,37 +9,11 @@
 		  import mx.effects.Effect;
 		  import mx.effects.Move;
           import mx.managers.PopUpManager;
+		  
+		  [Bindable]
+		  private var _user:Object;
 
 		  [Bindable]
-		  private var _name:String;
-		  [Bindable]
-		  private var _country:String;
-		  [Bindable]
-		  private var _country_code:String;
-		  [Bindable]
-		  private var _rating:int;
-		  [Bindable]
-		  private var _rank:String;
-		  [Bindable]
-		  private var _avatar:String;
-		  [Bindable]
-		  private var _title:String;
-		  [Bindable]
-		  private var _subTitle:String;
-		  [Bindable]
-		  private var _status:String;
-		  [Bindable]
-		  private var _wins:int;
-		  [Bindable]
-		  private var _losses:int;
-		  [Bindable]
-		  private var _percentage:Number;
-		  [Bindable]
-		  private var _streak:int;
-		  [Bindable]
-		  private var _streak_best:int;
-		  [Bindable]
-
 		  public var pmText:String = "";
 		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private const MINIMIZED_HEIGHT:int = 29;
@@ -53,34 +27,15 @@
 		  }
 		  
 		  public function readUser(user:Object):void {
-			  _name = user.name;
-			  _country = user.country;
-			  _country_code = String(user.country_code + 1000).substring(1);
-			  if (String(user.rating).match(/^\*/)) {
-				  _rating = user.rating.substr(1);
-			  } else {
-				_rating = user.rating;
-			  }
-			  _rank = user.rank;
-			  _avatar = user.avatar ? user.avatar : _rank;
-			  _title = user.titleName;
-			  _subTitle = user.titleSubName;
-			  _wins = user.wins;
-			  _losses = user.losses;
-			  _streak = Math.max(0, user.streak);
-			  _streak_best = user.streak_best;
-			  if (_wins + _losses == 0) {
-				  _percentage = 0;
-			  } else {
-				  _percentage = _wins / (_wins + _losses) * 100;
-			  }
-			  if (user.monitor_game != "*") {
-				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs " + user.monitor_game.split("+")[1];
-			  } else if (user.opponent != "") {
-				  _status = "Now playing against " + user.opponent;
-			  } else {
-				  _status = "";
-			  }
+			  _user = user;
+
+//			  if (user.monitor_game != "*") {
+//				  _status = "Now monitoring " + user.monitor_game.split("+")[0] + " vs " + user.monitor_game.split("+")[1];
+//			  } else if (user.opponent != "") {
+//				  _status = "Now playing against " + user.opponent;
+//			  } else {
+//				  _status = "";
+//			  }
 			  avatarCanvas.addChild(InfoFetcher.medalCanvas(user));
 		  }
 		  
@@ -114,7 +69,7 @@
 				  this.setStyle('borderAlpha', undefined);
 			  } else {
 				  this.height = MINIMIZED_HEIGHT;
-				  this.title = "Player Info (" + _name + ")";
+				  this.title = "Player Info (" + _user.name + ")";
 				  this.setStyle('borderColor', 0xFFAA33);
 				  this.setStyle('borderAlpha', 0.8);
 			  }
@@ -144,30 +99,30 @@
 	<mx:Move id="hideMove" yFrom="0" yTo="103" duration="150" />
 	<mx:HBox>
 		<mx:Canvas id="avatarCanvas" width="128" height="128">
-			<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{_avatar}.jpg"/>
+			<mx:Image width="128" height="128"  source="{_user.avatar}"/>
 		</mx:Canvas>
 		<mx:VBox>
 			<mx:HBox verticalAlign="middle">
 				<mx:VBox>
 					<mx:HBox>
-						<mx:Label id="nameLabel" text="{_name}" fontSize="15" fontWeight="bold" />
-						<mx:Label text="{_title}" toolTip="{_subTitle}" fontSize="16" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
+						<mx:Label id="nameLabel" text="{_user.name}" fontSize="15" fontWeight="bold" />
+						<mx:Label text="{_user.titleName}" toolTip="{_user.titleSubName}" fontSize="16" fontWeight="bold" color="#FF0000" paddingLeft="-2" paddingRight="-2" />
 					</mx:HBox>
-					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_country}"/>
+					<mx:Label paddingRight="10" text="{parentApplication.lan.country}:  {_user.country}"/>
 				</mx:VBox>
-				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{_country_code}.swf" ioError="_swfError();" />
+				<mx:SWFLoader id="flagLoader" width="56" height="44" source="{_user.flag_m}" ioError="_swfError();" />
 			</mx:HBox>
 			<mx:VBox height="73" horizontalScrollPolicy="off" verticalScrollPolicy="off">
-				<mx:Label text="{parentApplication.lan.rate}:  {_rating}  ({_rank})"/>
+				<mx:Label text="{parentApplication.lan.rate}:  {_user.rating}  ({_user.rank})"/>
 				<mx:HBox>
-					<mx:Label text="{_wins} {parentApplication.lan.win_small}"/>
-					<mx:Label text="{_losses} {parentApplication.lan.loss_small}"/>
-					<mx:Label text="({_percentage.toFixed(1)}%)"/>
-					<mx:Label text="{parentApplication.lan.total}: {_wins + _losses}"/>
+					<mx:Label text="{_user.wins} {parentApplication.lan.win_small}"/>
+					<mx:Label text="{_user.losses} {parentApplication.lan.loss_small}"/>
+					<mx:Label text="({_user.percentage.toFixed(1)}%)"/>
+					<mx:Label text="{parentApplication.lan.total}: {_user.total}"/>
 				</mx:HBox>
 				<mx:HBox>
-					<mx:Label text="{parentApplication.lan.streak}: {_streak_best}"/>
-					<mx:Label text="({parentApplication.lan.current}: {_streak})"/>
+					<mx:Label text="{parentApplication.lan.streak}: {_user.streak_best}"/>
+					<mx:Label text="({parentApplication.lan.current}: {_user.streak})"/>
 				</mx:HBox>
 			</mx:VBox>
 		</mx:VBox>

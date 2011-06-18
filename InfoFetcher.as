@@ -23,10 +23,10 @@
 		private var _urlLoader:URLLoader = new URLLoader();
 		private const SOURCE:String = "http://81dojo.com/dojo/";
 		public var newestVer:String;
-		public var titleUser:Array;
-		public var titleName:Array;
-		public var titleSubName:Array;
-		public var titleAvatar:Array;
+		public static var titleUser:Array;
+		public static var titleName:Array;
+		public static var titleSubName:Array;
+		public static var titleAvatar:Array;
 //		public static const rank_thresholds:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_thresholds:Array = new Array(2900, 1900, 1480, 1420, 1360, 1300, 1240, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_names:Array = new Array('PRO', '7-Dan', '6-Dan', '5-Dan', '4-Dan', '3-Dan', '2-Dan', '1-Dan', '1-kyu', '2-kyu', '3-kyu', '4-kyu', '5-kyu', '6-kyu', '7-kyu', '8-kyu', '9-kyu', '10-kyu', '11-kyu', '12-kyu', '13-kyu', '14-kyu', '15-kyu');
@@ -573,13 +573,13 @@
 				if (["八一王", "宇宙王", "永聖", "二冠"].indexOf(user.titleName) >= 0) {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
-				} else if (user.titleName == "admin" || user.titleName.match(/bot/) || user.titleName == "師範" || user.titleName == "プロ") {
+				} else if (["admin", "livebot", "replaybot", "AI-bot", "師範", "プロ"].indexOf(user.titleName) >= 0) {
 					medal.source = bronze_medal;
 					medal.toolTip = "admin status";
 				}
 				canvas.addChild(medal);
 			}
-			if (user.wins + user.losses >= 30 && user.rating >= rank_thresholds[7]) {
+			if (user.total >= 30 && user.rating >= rank_thresholds[7]) {
 				medal = new Image();
 				medal.source = bronze_medal;
 				medal.toolTip = "Low-Dan Holder";
@@ -624,16 +624,16 @@
 				}
 				canvas.addChild(medal);
 			}
-			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.6)) {
+			if (user.total >= 10 && user.percentage >= 60) {
 				medal = new Image();
 				medal.source = bronze_medal;
 				medal.toolTip = "60% winning percentage";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if ((user.wins/(user.wins + user.losses)) >= 0.8) {
+				if (user.percentage >= 80) {
 					medal.source = gold_medal;
 					medal.toolTip = "80% winning percentage";
-				} else if ((user.wins/(user.wins + user.losses)) >= 0.7) {
+				} else if (user.percentage >= 70) {
 					medal.source = silver_medal;
 					medal.toolTip = "70% winning percentage";
 				}

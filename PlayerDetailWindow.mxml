@@ -41,9 +41,9 @@
 		  [Bindable]
 		  public var avatar:String = null;
 		  [Bindable]
-		  public var mainTitle:String = "none";
+		  public var titleName:String = "none";
 		  [Bindable]
-		  public var subTitle:String = "無し";
+		  public var titleSubName:String = "無し";
 		  [Bindable]
 		  private var _wins:int = 0;
 		  [Bindable]
@@ -287,7 +287,7 @@
 	<mx:HBox>
 		<mx:VBox width="150" height="190" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderStyle="solid">
 			<mx:Canvas id="avatarCanvas" width="133" height="133">
-				<mx:Image width="128" height="128"  source="{IMAGE_DIRECTORY}avatars/{(avatar ? avatar : _rank)}.jpg" x="5" y="5" />
+				<mx:Image width="128" height="128"  source="{avatar}" x="5" y="5" />
 			</mx:Canvas>
 			<mx:Label text="{login}" fontSize="15" fontWeight="bold"/>
 			<mx:Spacer height="-10"/>
