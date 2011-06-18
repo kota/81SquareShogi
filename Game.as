@@ -63,7 +63,7 @@ package
 
 		public function get openingEn():String {
 			if (game_tag.match(/^(hc|va)/)) {
-				return InfoFetcher.gameType(game_tag);
+				return InfoFetcher.gameTypeShort(game_tag);
 			} else {
 				return InfoFetcher.openingNameEn(opening);
 			}
