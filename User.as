@@ -30,7 +30,6 @@ package
 		public var idle:Boolean = false;
 		public var disconnected:Boolean = false;
 		public var cheater:Boolean = false;
-		public var labelColor:uint = 0x000000;
 		
 		public var favorite:String = "";
 		public var favoriteWidth:int = 0;
@@ -53,7 +52,6 @@ package
 			idle = false;
 			disconnected = false;
 			cheater = false;
-			labelColor = 0x000000;
 		}
 		
 		public function setFromWho(rating:int, country_code:int, wins:int, losses:int, streak:int, streak_best:int,
@@ -81,6 +79,11 @@ package
 			this.losses = losses;
 			this.streak = streak;
 			this.streak_best = streak_best;
+		}
+		
+		public function setFromList(rating:int, country_code:int):void {
+			this.rating = rating;
+			this.country_code = country_code;
 		}
 		
 		public function setFromGame(game_name:String, turn:String):void {
