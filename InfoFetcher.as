@@ -23,10 +23,10 @@
 		private var _urlLoader:URLLoader = new URLLoader();
 		private const SOURCE:String = "http://81dojo.com/dojo/";
 		public var newestVer:String;
-		public var titleUser:Array;
-		public var titleName:Array;
-		public var titleSubName:Array;
-		public var titleAvatar:Array;
+		public static var titleUser:Array;
+		public static var titleName:Array;
+		public static var titleSubName:Array;
+		public static var titleAvatar:Array;
 		public static const rank_thresholds81:Array = new Array(2900, 1900, 1380, 1340, 1300, 1260, 1220, 1180, 1140, 1100, 1060, 1020, 980, 940, 900, 860, 820, 780, 740, 700, 660, 620, 0);
 		public static const rank_thresholds:Array = new Array(15000, 10000, 7000, 5000, 3000, 2000, 1000, 500, 200, 100, 50, 20, 5, 0);
 		public static const rank_names:Array = new Array('GOD', 'KING', 'MINISTER', 'SENATOR', 'SAGE', 'MASTER', 'PROFESSOR', 'DOCTOR', 'TEACHER', 'STUDENT', 'KID', 'INFANT', 'BABY', 'EGG')
@@ -514,27 +514,27 @@
 				medal.toolTip = "Non-major Title Holder";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.titleName == "八一王" || user.titleName == "宇宙王") {
+				if (["八一王", "宇宙王", "永聖", "二冠"].indexOf(user.titleName) >= 0) {
 					medal.source = gold_medal;
 					medal.toolTip = "Major Title Holder";
-				} else if (user.titleName == "admin" || user.titleName.match(/bot/)) {
+				} else if (["admin", "livebot", "replaybot", "AI-bot", "師範", "プロ"].indexOf(user.titleName) >= 0) {
 					medal.source = bronze_medal;
 					medal.toolTip = "admin status";
 				}
 				canvas.addChild(medal);
 			}
-			if (user.wins + user.losses >= 30 && user.rating >= rank_thresholds[7]) {
+			if (user.total >= 30 && user.rating >= rank_thresholds[7]) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "Low-Dan Holder";
+				medal.toolTip = "Expert";
 				medal.x = 24 * (i - 1);
 				i += 1;
 				if (user.rating >= rank_thresholds[3]) {
 					medal.source = gold_medal;
-					medal.toolTip = "High-Dan Holder";
+					medal.toolTip = "Dignitary";
 				} else if (user.rating >= rank_thresholds[5]) {
 					medal.source = silver_medal;
-					medal.toolTip = "Mid-Dan Holder";
+					medal.toolTip = "Wisdom";
 				}
 				canvas.addChild(medal);
 			}
@@ -553,33 +553,33 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.streak_best >= 5) {
+			if (user.total >= 200) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "5 streak wins";
+				medal.toolTip = "200 games";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.streak_best >= 15) {
+				if (user.total >= 600) {
 					medal.source = gold_medal;
-					medal.toolTip = "15 streak wins";
-				} else if (user.streak_best >= 10) {
+					medal.toolTip = "600 games";
+				} else if (user.total >= 400) {
 					medal.source = silver_medal;
-					medal.toolTip = "10 streak wins";
+					medal.toolTip = "400 games";
 				}
 				canvas.addChild(medal);
 			}
-			if ((user.wins + user.losses >= 10) && ((user.wins / (user.wins + user.losses)) >= 0.6)) {
+			if (user.total >= 10 && user.percentage >= 60) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "60% winning percentage";
+				medal.toolTip = "50% winning percentage";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if ((user.wins/(user.wins + user.losses)) >= 0.8) {
+				if (user.percentage >= 80) {
 					medal.source = gold_medal;
-					medal.toolTip = "80% winning percentage";
-				} else if ((user.wins/(user.wins + user.losses)) >= 0.7) {
-					medal.source = silver_medal;
 					medal.toolTip = "70% winning percentage";
+				} else if (user.percentage >= 70) {
+					medal.source = silver_medal;
+					medal.toolTip = "60% winning percentage";
 				}
 				canvas.addChild(medal);
 			}	

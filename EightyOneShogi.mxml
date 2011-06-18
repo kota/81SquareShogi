@@ -54,6 +54,7 @@
 	import GameTimer;
     import ChallengeForm;
     import GameRuleEvent;
+	import User;
     import mx.utils.StringUtil;
 	
 	public const VERSION:String = "ver.2011/06/05";
@@ -69,6 +70,7 @@
     [Bindable]
     private var _game_name:String;
     private var _user_list:Array = new Array();
+	private var _users:Object = new Object();
 	private var _waiter_list:Array = new Array();
 	private var _game_list:Array = new Array();
 	private var _watcher_list:Array = new Array();
@@ -293,9 +295,9 @@
 	  }
 	  var rank:String = "a " + InfoFetcher.makeRankFromRating(e.message.split(":")[1]);
 	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 10) rank = "a new player";
-	  for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
-		  if (_infoFetcher.titleUser[i] == login_name.toLowerCase()) {
-			  rank = "the " + _infoFetcher.titleName[i];
+	  for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+		  if (InfoFetcher.titleUser[i] == login_name.toLowerCase()) {
+			  rank = "the " + InfoFetcher.titleName[i];
 			  break;
 		  }
 	  }
@@ -329,133 +331,51 @@
         if(user_data.match("##[WHO] +OK") != null){
           break;
         }
-        trace("user_data:" + user_data);
         var match:Array = user_data.match(/\#\#\[WHO34\] (.*) x1 (.*)/);
         if (match != null) {
-		  var tokens:Array = match[2].split(" ");
-          var user:Object = {
-			  'name':match[1],
-			  'status':StringUtil.trim(tokens[0]),
-			  'status2':"",
-			  'opponent':"",
-			  'game_name':tokens[1],
-			  'turn':tokens[2],
-			  'rating':parseInt(tokens[3]),
-			  'country_code':parseInt(tokens[4]),
-			  'titleName':"",
-			  'titleSubName':"",
-			  'monitor_game':tokens[6],
-			  'moves':parseInt(tokens[7]),
-			  'wins':parseInt(tokens[8]),
-			  'losses':parseInt(tokens[9]), 
-			  'draws':parseInt(tokens[10]),
-			  'streak':0, 
-			  'streak_best':0,
-			  'favorite':"",
-			  'favoriteWidth':0
-			  }
-		  user.country = InfoFetcher.country_names[user.country_code];
-		  user.country3 = InfoFetcher.country_names3[user.country_code];
-		  user.flagURL = DIRECTORY + "images/flags_ss/" + String(user.country_code + 1000).substring(1) + ".png";
-		  user.opponent = match[2].split(" ")[5] == "*" ? "" : match[2].split(" ")[5];
-		  if (user.name == login_name) {
-			  user.favorite = "◆";
-			  user.favoriteWidth = 11;
-			  if (_status_disconnected) user.status2 = "D";
-		  } else if (_favorite_list.indexOf(user.name.toLowerCase()) >= 0) {
-			  user.favorite = "★";
-			  user.favoriteWidth = 11;
-		  }
-		  if (user.monitor_game != "*") user.status2 = "M ";
-          if(user.status == "game_waiting" || user.status == "game" || user.status == "post_game"){
-            var game_info:Array = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
-            var total:int = parseInt(game_info[3]) / 60;
-//			var hc:String;
-//			if (game_info[1] == "r") {
-//				hc = "R";
-//			} else if (game_info[1].match(/^hc/)) {
-//				hc = "HC";
-//			} else {
-//				hc = "NR";
-//			}
-//            user.rule = hc + ": " + total + "-" + game_info[4];
-            if(user.status == "game_waiting" && !user.game_name.match(/_@/)){
-              user.status2 += "W";
-            } else if (user.status == "post_game") {
-				user.status2 = "P "; // + (user.turn == "+" ? "▲" : "△");
-			} else {
-              user.status2 = "G " + InfoFetcher.textBar(user.moves);
-			  //for (var i:int = 1; i <= int(user.moves / 3); i++) user.status2 += "|";// + user.moves; // + (user.turn == "+" ? "▲" : "△");
-            }
-          }
-		  if (user.name != login_name && _infoFetcher.cheaters.indexOf(user.name.toLowerCase()) >= 0) user.titleName = "!!!";
-		  var userProxy:ObjectProxy = new ObjectProxy(user);
-          user_list.push(userProxy);
-        }
+			var tokens:Array = match[2].split(" ");
+			if (!_users[match[1]]) _users[match[1]] = new User(match[1]);
+				_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[11]);
+			if (match[1] == login_name) {
+				  _users[match[1]].markSelf();
+				  if (_status_disconnected) _users[match[1]].disconnected = true;
+			} else if (_favorite_list.indexOf(match[1].toLowerCase()) >= 0) {
+				_users[match[1]].markFavorite();
+			}
+		}
       }
-	  for (var j:int = 0; j < _infoFetcher.titleUser.length; j++) {
-		  for (var i:int = 0; i < user_list.length; i++) {
-			  if (user_list[i].name.toLowerCase() == _infoFetcher.titleUser[j]) {
-				  user_list[i].titleName = _infoFetcher.titleName[j];
-				  user_list[i].titleSubName = _infoFetcher.titleSubName[j];
-				  if (_infoFetcher.titleAvatar[j] != "*") {
-					  user_list[i].avatar = _infoFetcher.titleAvatar[j];
-				  }
-				  break;
-			  }
-		  }
-	  }
-      user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
-	  for (i = 0; i < user_list.length; i++) {
-		  user_list[i].rank = InfoFetcher.makeRankFromRating(user_list[i].rating);
-		  user_list[i].rankColor = InfoFetcher.makeColorFromRating(user_list[i].rating);
-//		  if (user_list[i].rank == "PRO" && user_list[i].titleName == "") user_list[i].titleName = "livebot";
-		  if (user_list[i].status2.match(/W/)) {
-			  user = {
-				  'name':user_list[i].name,
-				  'turn':user_list[i].turn,
-				  'rating':user_list[i].rating,
-				  'game_name': user_list[i].game_name,
-				  'country': user_list[i].country,
-				  'country3':InfoFetcher.country_names3[user_list[i].country_code],
-				  'flagURL': user_list[i].flagURL,
-				  'rankColor': user_list[i].rankColor,
-				  'rank': user_list[i].rank
-				  }
-		  	  game_info = user.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
-			  total = parseInt(game_info[3]) / 60;
-			  if (game_info[1] == "r") {
-				  user.rated = "R"
-			  } else {
-				  user.rated = "NR"
-			  }
-			  user.handicap = InfoFetcher.gameTypeShort(game_info[1]);
-			  if (game_info[2].match(/\-\-..$/)) {
-				user.time = InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
-				user.timeTip = InfoFetcher.fetchTournamentEn(game_info[2].substr(game_info[2].length - 2, 2));
-			  } else {
-				user.time = total + " min + " + game_info[4] + " sec";
-				user.timeTip = "";
-			  }
-			  userProxy = new ObjectProxy(user);
-			  waiter_list.push(userProxy);
-		  }
-	  }
-	  _user_list = user_list;
-      userListGrid.dataProvider = _user_list;
-      for (i = 0; i < user_list.length; i++) {
-        if (_user_list[i].name == login_name) {
-          userListGrid.selectedIndex = i;
-		  userListGrid.callLater(_scrollDownUser);
-//		  userListGrid.scrollToIndex(i);
-          break;
-        }
-      }
-	  userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
-//	  waiter_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
-	  _waiter_list = waiter_list;
-	  waiterListGrid.dataProvider = _waiter_list;
+	  _refreshUserList();
+	  _refreshWaiterList();
     }
+	
+	private function _refreshUserList():void {
+		_user_list = new Array();
+		for each (var user:User in _users) {
+			var userProxy:ObjectProxy = new ObjectProxy(user);
+			_user_list.push(userProxy);
+		}
+		_user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+		userListGrid.dataProvider = _user_list;
+		
+		for (var i:int = 0; i < _user_list.length; i++) {
+			if (_user_list[i].name == login_name) {
+			  userListGrid.selectedIndex = i;
+			  userListGrid.callLater(_scrollDownUser);
+			  break;
+			}
+		}
+		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+	}
+	
+	private function _refreshWaiterList():void {
+	  _waiter_list = new Array();
+	  for (var i:int = 0; i < _user_list.length; i++) {
+		  if (_user_list[i].status == User.STATE_GAME_WAITING ) {
+			_waiter_list.push(_user_list[i]);
+		  }
+	  }
+	  waiterListGrid.dataProvider = _waiter_list;
+	}
 
     private function _handleList(e:ServerMessageEvent):void{                                 //<<<<<< Handle LIST response
 	  var game_list:Array = new Array();
@@ -482,6 +402,8 @@
 			  'blackFlagFilter': tokens[8] == "true" ? filterDefault : filterGrey,
 			  'whiteFlagFilter': tokens[9] == "true" ? filterDefault : filterGrey
 			  }
+		  game.black = _users[game.blackName];
+		  game.white = _users[game.whiteName];
 		  if (tokens[7] == "created") {
 			  continue;
 		  } else if (tokens[7] == "game") {
@@ -497,28 +419,28 @@
 			  }
 		  }
 		  var user:Object;
-		  if ((user = _findPlayerFromList(game.blackName))) {
+		  if ((user = _users[game.blackName])) {
 			game.blackWins = user.wins;
 			game.blackLosses = user.losses;
-			game.blackStreakBest = user.streak_best;
+			game.black = user;
 		  }
-		  if ((user = _findPlayerFromList(game.whiteName))) {
+		  if ((user = _users[game.whiteName])) {
 			game.whiteWins = user.wins;
 			game.whiteLosses = user.losses;
-			game.whiteStreakBest = user.streak_best;
+			game.white = user;
 		  }
 		  game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
 		  game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		  game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
 		  game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
-		  for (var i:int = 0; i < _infoFetcher.titleName.length; i++) {
-				if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
-					game.blackTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleAvatar[i] != "*") game.blackAvatar = _infoFetcher.titleAvatar[i];
+		  for (var i:int = 0; i < InfoFetcher.titleName.length; i++) {
+				if (game.blackName.toLowerCase() == InfoFetcher.titleUser[i]) {
+					game.blackTitle = InfoFetcher.titleName[i];
+					if (InfoFetcher.titleAvatar[i] != "*") game.blackAvatar = InfoFetcher.titleAvatar[i];
 				}
-				if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
-					game.whiteTitle = _infoFetcher.titleName[i];
-					if (_infoFetcher.titleAvatar[i] != "*") game.whiteAvatar = _infoFetcher.titleAvatar[i];
+				if (game.whiteName.toLowerCase() == InfoFetcher.titleUser[i]) {
+					game.whiteTitle = InfoFetcher.titleName[i];
+					if (InfoFetcher.titleAvatar[i] != "*") game.whiteAvatar = InfoFetcher.titleAvatar[i];
 				}
 		  }
 		  if (game.watchers > 0) {
@@ -537,7 +459,7 @@
 			  game.blackRank = "-";
 			  game.blackRankColor = 0x999999;
 			  game.blackRating = 1000;
-			if ((user = _findPlayerFromList(game.blackName))) game.blackRating = user.rating;
+			if ((user = _users[game.blackName])) game.blackRating = user.rating;
 		  } else {
 			game.blackRank = InfoFetcher.makeRankFromRating(game.blackRating);
 			game.blackRankColor = InfoFetcher.makeColorFromRating(game.blackRating);
@@ -546,7 +468,7 @@
 			  game.whiteRank = "-";
 			  game.whiteRankColor = 0x999999;
 			  game.whiteRating = 1000;
-			  if ((user = _findPlayerFromList(game.whiteName))) game.whiteRating = user.rating;
+			  if ((user = _users[game.whiteName])) game.whiteRating = user.rating;
 		  } else {
 			  game.whiteRank = InfoFetcher.makeRankFromRating(game.whiteRating);
 			  game.whiteRankColor = InfoFetcher.makeColorFromRating(game.whiteRating);
@@ -608,9 +530,9 @@
 		var rank:String
 		rank = InfoFetcher.makeRankFromRating(tokens[8]);
 		rank = (rank.match(/^(A|E|I|O|U)/) ? "An " : "A ") + rank;
-		for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
-		  if (_infoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
-			  rank = "The " + _infoFetcher.titleName[i];
+		for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+		  if (InfoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
+			  rank = "The " + InfoFetcher.titleName[i];
 			  break;
 		  }
 		}
@@ -645,10 +567,10 @@
 			user.favorite = "★";
 			user.favoriteWidth = 11;
 		}
-		for (i = 0; i < _infoFetcher.titleUser.length; i++) {
-			if (user.name.toLowerCase() == _infoFetcher.titleUser[i]) {
-				user.titleName = _infoFetcher.titleName[i];
-				user.titleSubName = _infoFetcher.titleSubName[i];
+		for (i = 0; i < InfoFetcher.titleUser.length; i++) {
+			if (user.name.toLowerCase() == InfoFetcher.titleUser[i]) {
+				user.titleName = InfoFetcher.titleName[i];
+				user.titleSubName = InfoFetcher.titleSubName[i];
 //				if (_infoFetcher.titleAvatar[i] != "*") user.avatar = _infoFetcher.titleAvatar[i];
 				break;
 			}
@@ -799,27 +721,29 @@
 			'gameNo':"N"
 		}
 		var user:Object;
-		if ((user = _findPlayerFromList(game.blackName))) {
+		if ((user = _users[game.blackName])) {
 			game.blackWins = user.wins;
 			game.blackLosses = user.losses;
 			game.blackStreakBest = user.streak_best;
+			game.black = user;
 		}
-		if ((user = _findPlayerFromList(game.whiteName))) {
+		if ((user = _users[game.whiteName])) {
 			game.whiteWins = user.wins;
 			game.whiteLosses = user.losses;
 			game.whiteStreakBest = user.streak_best;
+			game.white = user;
 		}
 		game.blackCountry = InfoFetcher.country_names[game.blackCountryCode];
 		game.blackFlagURL = DIRECTORY + "images/flags_s/" + String(game.blackCountryCode + 1000).substring(1) + ".gif";
 		game.whiteCountry = InfoFetcher.country_names[game.whiteCountryCode];
 		game.whiteFlagURL = DIRECTORY + "images/flags_s/" + String(game.whiteCountryCode + 1000).substring(1) + ".gif";
-		for (i = 0; i < _infoFetcher.titleName.length; i++) {
-			if (game.blackName.toLowerCase() == _infoFetcher.titleUser[i]) {
-				game.blackTitle = _infoFetcher.titleName[i];
+		for (i = 0; i < InfoFetcher.titleName.length; i++) {
+			if (game.blackName.toLowerCase() == InfoFetcher.titleUser[i]) {
+				game.blackTitle = InfoFetcher.titleName[i];
 //				if (_infoFetcher.titleAvatar[i] != "*") game.blackAvatar = _infoFetcher.titleAvatar[i];
 			}
-			if (game.whiteName.toLowerCase() == _infoFetcher.titleUser[i]) {
-				game.whiteTitle = _infoFetcher.titleName[i];
+			if (game.whiteName.toLowerCase() == InfoFetcher.titleUser[i]) {
+				game.whiteTitle = InfoFetcher.titleName[i];
 //				if (_infoFetcher.titleAvatar[i] != "*") game.whiteAvatar = _infoFetcher.titleAvatar[i];
 			}
 		}
@@ -921,7 +845,7 @@
 	  board.post_game = false;
 	  board.isStudyHost = false;
 	  for (var j:int = 0; j < 2 ; j++) {
-		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
+		_player_infos[j] = _users[_client.playerNames[j]];
 	  }
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       _game_name = e.message.split(":")[1];
@@ -942,9 +866,9 @@
 		  allowWatcherChatCheckbox.selected = true;
 		  allowWatcherChatCheckbox.visible = true;
 	  }
-	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
+	  if (board.gameType == "hc" || _player_infos[0].isProvisional) {
 		  board.superior = Kyokumen.GOTE;
-	  } else if (String(_player_infos[1].rating).match(/^\*/)) {
+	  } else if (_player_infos[1].isProvisional) {
 		  board.superior = Kyokumen.SENTE;
 	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
 		  board.superior = Kyokumen.SENTE;
@@ -1006,7 +930,8 @@
 		  'wins':_watch_game.blackWins,
 		  'losses':_watch_game.blackLosses,
 		  'streak_best':_watch_game.blackStreakBest,
-		  'game_name':_game_name.split("+")[1]
+		  'game_name':_game_name.split("+")[1],
+		  'avatar':_users[_watch_game.blackName].avatar
 	  }
 	  var whiteInfo:Object = {
 		  'name':_watch_game.whiteName,
@@ -1018,7 +943,8 @@
 		  'wins':_watch_game.whiteWins,
 		  'losses':_watch_game.whiteLosses,
 		  'streak_best':_watch_game.whiteStreakBest,
-		  'game_name':_game_name.split("+")[1]
+		  'game_name':_game_name.split("+")[1],
+		  'avatar':_users[_watch_game.whiteName].avatar
 	  }
 	  _player_infos[0] = blackInfo;
 	  _player_infos[1] = whiteInfo;
@@ -1475,7 +1401,7 @@
 		}
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
 		if (_infoFetcher.banned.indexOf(name.toLowerCase()) >= 0) return;
-		if (_pmAutoOpen && !_playerInfoWindows[name]) _openPlayerInfo(_findPlayerFromList(name));
+		if (_pmAutoOpen && !_playerInfoWindows[name]) _openPlayerInfo(name);
 		_writePmLog(name, message, "#FF0000");
 		if (_playerInfoWindows[name]) {
 			_playerInfoWindows[name].maximize();
@@ -1491,7 +1417,7 @@
 		}
 		if (_chat_sound3_play) _sound_chat3.play();
 		if (_leaving) {
-			if (_findPlayerFromList(name)) {
+			if (_users[name]) {
 				var hour:int = (_leaveMinutes - _leaveTimer.currentCount) / 60;
 				var minute:int = (_leaveMinutes - _leaveTimer.currentCount) % 60;
 				_sendPrivateChat(name, "(auto-reply) " + _leaveMessage + " (Will be back in " + hour + " hours " + minute + " minutes.)");
@@ -2102,50 +2028,51 @@
 	  }
     }
 
-	private function _openPlayerInfo(user:Object):void {
+	private function _openPlayerInfo(name:String):void {
+	  var user:Object = _users[name];
 	  if (!user) return;
-	  kifuSearchPlayerText.text = user.name;
-	  if (_playerInfoWindows[user.name]) {
-		  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
-		  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
-		  _playerInfoWindows[user.name].maximize();
+	  kifuSearchPlayerText.text = name;
+	  if (_playerInfoWindows[name]) {
+		  _playerInfoWindows[name].x = Math.max(0, mouseX - 100);
+		  _playerInfoWindows[name].y = Math.max(0, mouseY - 150);
+		  _playerInfoWindows[name].maximize();
 		  return;
 	  }
-	  _playerInfoWindows[user.name] = new PlayerInfoWindow();
-	  _playerInfoWindows[user.name].x = Math.max(0, mouseX - 100);
-	  _playerInfoWindows[user.name].y = Math.max(0, mouseY - 150);
-	  PopUpManager.addPopUp(_playerInfoWindows[user.name], this, false);
-	  _playerInfoWindows[user.name].pmText = _pmLog[user.name];
-	  _playerInfoWindows[user.name].addEventListener("close_window", _handlePlayerInfoClose);
-	  _playerInfoWindows[user.name].readUser(user);
+	  _playerInfoWindows[name] = new PlayerInfoWindow();
+	  _playerInfoWindows[name].x = Math.max(0, mouseX - 100);
+	  _playerInfoWindows[name].y = Math.max(0, mouseY - 150);
+	  PopUpManager.addPopUp(_playerInfoWindows[name], this, false);
+	  _playerInfoWindows[name].pmText = _pmLog[name];
+	  _playerInfoWindows[name].addEventListener("close_window", _handlePlayerInfoClose);
+	  _playerInfoWindows[name].readUser(user);
 	  if (_isDuringMyGame()) {
-		  _playerInfoWindows[user.name].invite.enabled = false;
-		  _playerInfoWindows[user.name].directMessage.enabled = false;
+		  _playerInfoWindows[name].invite.enabled = false;
+		  _playerInfoWindows[name].directMessage.enabled = false;
 	  } else {
-		  _playerInfoWindows[user.name].directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat(user.name));
-		  _playerInfoWindows[user.name].directMessage.setFocus();
+		  _playerInfoWindows[name].directMessage.addEventListener(FlexEvent.ENTER, _handleSendPrivateChat(user.name));
+		  _playerInfoWindows[name].directMessage.setFocus();
 	  }
-	  if (user.name == login_name) {
-		  _playerInfoWindows[user.name].selfCommands.includeInLayout = true;
-		  _playerInfoWindows[user.name].selfCommands.visible = true;
+	  if (name == login_name) {
+		  _playerInfoWindows[name].selfCommands.includeInLayout = true;
+		  _playerInfoWindows[name].selfCommands.visible = true;
 	  } else {
-		  _playerInfoWindows[user.name].othersCommands.includeInLayout = true;
-		  _playerInfoWindows[user.name].othersCommands.visible = true;
-		  if (user.status == "game_waiting"  && user.game_name.indexOf(user.name) >= 0) {
-			  _playerInfoWindows[user.name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge(user.name));
-			  _playerInfoWindows[user.name].challenge.enabled = true;
+		  _playerInfoWindows[name].othersCommands.includeInLayout = true;
+		  _playerInfoWindows[name].othersCommands.visible = true;
+		  if (user.status == "game_waiting"  && user.game_name.indexOf(name) >= 0) {
+			  _playerInfoWindows[name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge(name));
+			  _playerInfoWindows[name].challenge.enabled = true;
 		  }
 		  if (user.status != "game") {
-			  _playerInfoWindows[user.name].invite.addEventListener(MouseEvent.CLICK, _handleInvite(user.name));
-			  _playerInfoWindows[user.name].invite.enabled = true;
+			  _playerInfoWindows[name].invite.addEventListener(MouseEvent.CLICK, _handleInvite(name));
+			  _playerInfoWindows[name].invite.enabled = true;
 		  }
-		  _playerInfoWindows[user.name].favorite.addEventListener(MouseEvent.CLICK, _handleFavorite(user.name));
+		  _playerInfoWindows[name].favorite.addEventListener(MouseEvent.CLICK, _handleFavorite(name));
 		  if (user.titleName != "admin") {
-			  _playerInfoWindows[user.name].ignore.addEventListener(MouseEvent.CLICK, _handleIgnore(user.name));
-			  _playerInfoWindows[user.name].ignore.enabled = true;
+			  _playerInfoWindows[name].ignore.addEventListener(MouseEvent.CLICK, _handleIgnore(name));
+			  _playerInfoWindows[name].ignore.enabled = true;
 		  }
 	  }
-	  _playerInfoWindows[user.name].callLater(_playerInfoWindows[user.name].scrollDown);
+	  _playerInfoWindows[name].callLater(_playerInfoWindows[name].scrollDown);
 	}
 	
 	private function _handlePlayerInfoClose(e:Event):void {
@@ -2176,8 +2103,8 @@
 			  _writeUserMessage("You can only challenge one player at a time.\n", 1, "#008800");
 			  return;
 		  }
-		  _challengeUser = _findPlayerFromList(name);
-		  if (_challengeUser == null || !(_challengeUser.status2.match(/W/))) {
+		  _challengeUser = _users[name];
+		  if (_challengeUser == null || !(_challengeUser.statusMark.match(/W/))) {
 			  Alert.show("The opponent is not waiting for a game.", lan.error);
 		  } else {
 			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
@@ -2420,7 +2347,7 @@
 	}
 
 	private function _gamePlayerInfo(e:MouseEvent):void {
-	  _openPlayerInfo(_findPlayerFromList(e.target.text));
+	  _openPlayerInfo(e.target.text);
 	}
 	
   //------------------------------------------------------------------------------------------------------------------------ KIFU
@@ -2589,7 +2516,7 @@
 	private function _playerInfoFromText(textArea:TextArea):void {
 		var selectedText:String = textArea.text.substring(textArea.selectionBeginIndex, textArea.selectionEndIndex);
 		var match:Array;
-		if ((match = selectedText.match(/^\[(.+)\]$/))) _openPlayerInfo(_findPlayerFromList(match[1]));
+		if ((match = selectedText.match(/^\[(.+)\]$/))) _openPlayerInfo(match[1]);
 	}
 	
 	//=========================================================
@@ -2791,9 +2718,9 @@
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			player.created_at = player.created_at.split(" ")[0];
 			player.updated_at = player.updated_at.split(" ")[0];
-			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
-				  if (player.login == _infoFetcher.titleUser[i]) {
-					  player.title = _infoFetcher.titleName[i];
+			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+				  if (player.login == InfoFetcher.titleUser[i]) {
+					  player.title = InfoFetcher.titleName[i];
 					  break;
 				  }
 			}
@@ -2852,9 +2779,9 @@
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
 			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
-			for (var i:int = 0; i < _infoFetcher.titleUser.length; i++) {
-				  if (player.login == _infoFetcher.titleUser[i]) {
-					  player.title = _infoFetcher.titleName[i];
+			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+				  if (player.login == InfoFetcher.titleUser[i]) {
+					  player.title = InfoFetcher.titleName[i];
 					  break;
 				  }
 			}
@@ -3122,17 +3049,9 @@
 		_sound_chat3.play();
 	}
 	
-	private function _findPlayerFromList(str:String):Object {
-		for (var i:int = 0; i < _user_list.length; i++) {
-			if (_user_list[i].name == str) return _user_list[i];
-		}
-		return null;
-	}
-	
 	private function _sendPrivateChat(sendTo:String, message:String):void {
 		if (!_isDuringMyGame()) {
-			var user:Object = _findPlayerFromList(sendTo);
-			if (user && user.status == "game") {
+			if (_users[sendTo] && _users[sendTo].status == "game") {
 				if  (_game_name && _monitoring && sendTo == board.playerInfos[0].name) {
 					_client.privateChat(board.playerInfos[1].name, "[auto-PM] Sent private message to Black.");
 					_client.gameChat(_game_name, "[auto-chat&PM] Sent private message to Black.");
@@ -3204,19 +3123,19 @@
   </mx:Component>
   <mx:Component id="playerListNameRenderer">
 	  <mx:HBox verticalAlign="middle" paddingLeft="3" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Label text="{data.favorite}" paddingLeft="-2" paddingRight="-13" width="{data.favoriteWidth}" color="#DD7700" />
+		<mx:Label text="{data.mark}" paddingLeft="-2" paddingRight="-13" width="{data.markWidth}" color="#DD7700" />
 		<mx:Label text="{data.name}" paddingLeft="-10" paddingRight="-7" width="120" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
 	  <mx:HBox verticalAlign="middle" paddingLeft="3" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Image source="{data.flagURL}" width="16" height="13" toolTip="{data.country}" />
+		<mx:Image source="{data.flag_ss}" width="16" height="13" toolTip="{data.country}" />
 		<mx:Label text="{data.country3}" textAlign="center" paddingLeft="-9" paddingRight="-7" width="18" toolTip="{data.country}" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="waiterListNameRenderer">
 	  <mx:HBox paddingLeft="2" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Image source="{data.flagURL}" width="27" height="17" toolTip="{data.country}" />
+		<mx:Image source="{data.flag_s}" width="27" height="17" toolTip="{data.country}" />
 		<mx:Label text="■" paddingLeft="-6" paddingRight="-9" width="5" color="{data.rankColor}" />
 		<mx:Label text="{data.name}" paddingLeft="-8" paddingRight="-7" width="100" />
 	  </mx:HBox>
@@ -3322,9 +3241,9 @@
       </mx:HBox>
 	  <mx:HBox>
 		<mx:VDividedBox liveDragging="true">
-			<mx:DataGrid id="userListGrid" width="345" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem);" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
+			<mx:DataGrid id="userListGrid" width="345" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 			 <mx:columns>
-			  <mx:DataGridColumn headerStyleName="header81" dataField="status2" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="statusMark" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="64" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="119" paddingLeft="1" sortCompareFunction="_sortName" />
@@ -3332,9 +3251,9 @@
 			  <mx:DataGridColumn headerStyleName="header81" dataField="rating" headerText="EXP" width="45" paddingRight="5" paddingLeft="0" textAlign="right" sortable="false" />
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(waiterListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
+			<mx:DataGrid id="waiterListGrid" width="345" height="102" headerHeight="21" change="_waiterSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(waiterListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 			 <mx:columns>
-			  <mx:DataGridColumn headerStyleName="header81" dataField="time" dataTipField="timeTip" headerText="{lan.thinking_time}" width="100" paddingLeft="0" textAlign="center" showDataTips="true" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="gameDescriptionTime" dataTipField="gameDescriptionTimeTip" headerText="{lan.thinking_time}" width="100" paddingLeft="0" textAlign="center" showDataTips="true" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="50" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListCountryRenderer}" headerText="{lan.country}" width="65" paddingLeft="2" sortCompareFunction="_sortCountry" />
@@ -3435,7 +3354,7 @@
 					<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
 					<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
 				  </mx:HBox>
-					<mx:DataGrid id="watcherListGrid" width="195" height="105" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(_findPlayerFromList(watcherListGrid.selectedItem.name));" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+					<mx:DataGrid id="watcherListGrid" width="195" height="105" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(watcherListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 					 <mx:columns>
 					  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="102" paddingLeft="2" sortCompareFunction="_sortName" />
 					  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />

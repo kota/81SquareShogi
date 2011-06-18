@@ -182,14 +182,14 @@ package
 		}
 		
 		public function get total():int {
-			return wins + losses;
+			return wins + losses + draws;
 		}
 		
 		public function get percentage():Number {
-			if (wins + losses == 0) {
+			if (total == 0) {
 				return 0;
 			} else {
-				return (wins / (wins + losses + draws) * 100);
+				return (wins / total * 100);
 			}
 		}
 		
