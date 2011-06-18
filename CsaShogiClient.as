@@ -60,6 +60,7 @@ package{
     private var _player_names:Array;
 	private var _login_name:String;
 	private var _waiting_gamename:String;
+	private var _idle:Boolean = false;
 
     private var _buffer:String;
     private var _buffers:Object;
@@ -245,7 +246,10 @@ package{
     }
 	
 	public function idle(onoff:Boolean):void {
-		send("%%IDLE " + (onoff ? 1 : 0));
+		if (_idle != onoff) {
+			_idle = onoff;
+			send("%%IDLE " + (onoff ? 1 : 0));
+		}
 	}
 
     public function watchers(game_name:String):void{

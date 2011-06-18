@@ -25,6 +25,7 @@
     <![CDATA[
     import flash.display.*;
 	import flash.events.Event;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
 	import flash.filters.ColorMatrixFilter;
@@ -57,7 +58,7 @@
 	import Game;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/06/12";
+	public const VERSION:String = "ver.2011/06/18";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -155,6 +156,7 @@
 	private var _userMessageScrollPos1:int;
 	private var _userMessageScrollPos2:int;
 	private var _initPositionStr:String;
+	private var _idleTimer:Timer;
     private var _keepAliveTimer:Timer;
 	private var _leaveTimer:Timer;
 	private var _leaveMinutes:int;
@@ -298,12 +300,16 @@
 	  }
       loginMessage.text = "Logged in Successfully";
 	  clock.start();
+	  this.addEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
+	  this.addEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
 	  if (InfoFetcher.admins.indexOf(login_name.toLowerCase()) >= 0) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
       _keepAliveTimer = new Timer(81000);
-      _keepAliveTimer.addEventListener(TimerEvent.TIMER,_handleKeepAlive);
+      _keepAliveTimer.addEventListener(TimerEvent.TIMER, _handleKeepAlive);
+	  _idleTimer = new Timer(900000, 1);
+	  _idleTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleIdleTimer);
 	  _refresh();
 	  if (_infoFetcher.initMessage != null) {
 		_writeUserMessage(_infoFetcher.initMessage + "\n", 1, "#008800");
@@ -333,6 +339,11 @@
 
 		private function _handleLogout(e:ServerMessageEvent):void {
 		_keepAliveTimer.stop();
+		_idleTimer.stop();
+		_keepAliveTimer.removeEventListener(TimerEvent.TIMER, _handleKeepAlive);
+	  	_idleTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _handleIdleTimer);
+		this.removeEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
+		this.removeEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
 		loginMessage.text = "logged out successfully";
 		titleBanner.source = DIRECTORY + "images/81Dojo_bye.jpg";
 		mainViewStack.selectedIndex = 0;
@@ -352,7 +363,7 @@
         if (match != null) {
 			var tokens:Array = match[2].split(" ");
 			if (!_users[match[1]]) _users[match[1]] = new User(match[1]);
-			_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), parseInt(tokens[11]),StringUtil.trim(tokens[0]),tokens[5],tokens[1],tokens[2],tokens[6],parseInt(tokens[7]),tokens[12]);
+			_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), parseInt(tokens[11]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[12] == "true");
 			if (match[1] == login_name) {
 				  _users[match[1]].markSelf();
 				  if (_status_disconnected) _users[match[1]].disconnected = true;
@@ -1538,6 +1549,8 @@
 		_leaveTimer = new Timer(60000, _leaveMinutes);
 		_leaveTimer.start();
 		_leaveMessage = e.target.parent.parent.messageText.text;
+		_idleTimer.stop();
+		_client.idle(true);
 	}
 	
 	private function _leaveEnd(e:Event):void {
@@ -2684,6 +2697,16 @@
 	  _refresh();
 //  	  if (mainViewStack.selectedIndex == 1) bulletin.flip();
     }
+	
+	private function _idleClear(e:Event):void {
+		_idleTimer.reset();
+		_idleTimer.start();
+		_client.idle(false);
+	}
+	
+	private function _handleIdleTimer(e:TimerEvent):void {
+		_client.idle(true);
+	}
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
 		var match:Array;
@@ -2898,7 +2921,7 @@
   <mx:Component id="playerListNameRenderer">
 	  <mx:HBox verticalAlign="middle" paddingLeft="3" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Label text="{data.mark}" paddingLeft="-2" paddingRight="-13" width="{data.markWidth}" color="#DD7700" />
-		<mx:Label text="{data.name}" paddingLeft="-10" paddingRight="-7" width="120" />
+		<mx:Label text="{data.name}" color="{data.idleColor}" paddingLeft="-10" paddingRight="-7" width="120" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="playerListCountryRenderer">
