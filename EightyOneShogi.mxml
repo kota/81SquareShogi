@@ -79,11 +79,10 @@
 	private var _watcher_list:Array = new Array();
 	private var _kifu_search_list:Array;
 	private var _player_search_list:Array;
-	private var _ranking_rate_list:Array;
+	private var _ranking_exp_list:Array;
 	private var _ranking_wins_list:Array;
 	private var _ranking_total_list:Array;
 	private var _ranking_percentage_list:Array;
-	private var _ranking_streak_list:Array;
     public var login_name:String;
 	private var _watch_game:Object;
 	private var _challengeUser:Object;
@@ -2245,14 +2244,12 @@
 		var country_code:String = "";
 		switch (rankingTabNavigator.selectedIndex) {
 			case 0:
-				if (_ranking_rate_list) {country_code = _ranking_rate_list[0].country_code;} break;
+				if (_ranking_exp_list) {country_code = _ranking_exp_list[0].country_code;} break;
 			case 1:
-				if (_ranking_streak_list) {country_code = _ranking_streak_list[0].country_code;} break;
-			case 2:
 				if (_ranking_percentage_list) {country_code = _ranking_percentage_list[0].country_code;} break;
-			case 3:
+			case 2:
 				if (_ranking_wins_list) {country_code = _ranking_wins_list[0].country_code;} break;
-			case 4:
+			case 3:
 				if (_ranking_total_list) {country_code = _ranking_total_list[0].country_code;} break;
 		}
 		if (country_code == "") {
@@ -2469,14 +2466,12 @@
 		var type:String;
 		switch (rankingTabNavigator.selectedIndex) {
 			case 0:
-				type = "rate"; break;
+				type = "exp"; break;
 			case 1:
-				type = "streak"; break;
-			case 2:
 				type = "percentage"; break;
-			case 3:
+			case 2:
 				type = "wins"; break;
-			case 4:
+			case 3:
 				type = "total"; break;
 		}
 		_api.rankingSearch(type);
@@ -2488,12 +2483,10 @@
 		switch (String(e.target.bufferXML.@item)) {
 			case "wins":
 				_ranking_wins_list = new Array(); break;
-			case "rate":
-				_ranking_rate_list = new Array(); break;
+			case "exp":
+				_ranking_exp_list = new Array(); break;
 			case "total":
 				_ranking_total_list = new Array(); break;
-			case "streak":
-				_ranking_streak_list = new Array(); break;
 			case "percentage":
 				_ranking_percentage_list = new Array(); break;
 		}
@@ -2505,13 +2498,13 @@
 				'login':String(playerXML.login),
 				'country_code':String(_infoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
 				'country':InfoFetcher.country_names[_infoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
-				'wins':parseInt(playerXML.wins),
-				'losses':parseInt(playerXML.losses),
-				'total':parseInt(playerXML.wins) + parseInt(playerXML.losses),
-				'percentage':(100 * parseInt(playerXML.wins) / Math.max(1, parseInt(playerXML.wins) + parseInt(playerXML.losses))).toFixed(1),
-				'streak_best':parseInt(playerXML.streak_best),
-				'rate':parseInt(playerXML.rate),
-				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
+				'wins':parseInt(playerXML.wins34),
+				'losses':parseInt(playerXML.losses34),
+				'draws':parseInt(playerXML.draws34),
+				'total':parseInt(playerXML.wins34) + parseInt(playerXML.losses34) + parseInt(playerXML.draws34),
+				'percentage':(100 * parseInt(playerXML.wins34) / Math.max(1, parseInt(playerXML.wins34) + parseInt(playerXML.losses34) + parseInt(playerXML.draws34))).toFixed(1),
+				'exp':parseInt(playerXML.exp34),
+				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.exp34))
 			}
 			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
@@ -2528,12 +2521,10 @@
 				switch (String(e.target.bufferXML.@item)) {
 					case "wins":
 						_ranking_wins_list.push(player); break;
-					case "rate":
-						_ranking_rate_list.push(player); break;
+					case "exp":
+						_ranking_exp_list.push(player); break;
 					case "total":
 						_ranking_total_list.push(player); break;
-					case "streak":
-						_ranking_streak_list.push(player); break;
 					case "percentage":
 						_ranking_percentage_list.push(player); break;
 				}
@@ -2542,9 +2533,8 @@
 		}
 		winRankingGrid.dataProvider = _ranking_wins_list;
 		totalRankingGrid.dataProvider = _ranking_total_list;
-		streakRankingGrid.dataProvider = _ranking_streak_list;
 		percentageRankingGrid.dataProvider = _ranking_percentage_list;
-		rateRankingGrid.dataProvider = _ranking_rate_list;
+		rateRankingGrid.dataProvider = _ranking_exp_list;
 		_rankingTabChange();
 	}
 
@@ -3225,7 +3215,7 @@
 			<mx:HBox label="{lan.view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
 				<mx:VBox horizontalAlign="center" paddingRight="20">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
-					<mx:Button id="searchRankingButton" enabled="false" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
+					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
 					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
@@ -3233,31 +3223,16 @@
 						<mx:DataGrid id="rateRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
 							<mx:columns>
 							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
+							<mx:DataGridColumn dataField="exp" headerText="EXP" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
 							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+<!--							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" /> -->
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="65" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="draws" headerText="draw" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" textAlign="right" paddingRight="5" />
-							</mx:columns>
-						</mx:DataGrid>
-					</mx:VBox>
-					<mx:VBox label="{lan.streak}">
-						<mx:DataGrid id="streakRankingGrid" width="550" height="440" rowHeight="21" sortableColumns="false">
-							<mx:columns>
-							<mx:DataGridColumn dataField="number" headerText="No." width="28" textAlign="center" />
-							<mx:DataGridColumn dataField="streak_best" headerText="{lan.streak_short}" width="55" textAlign="right" paddingRight="5" fontWeight="bold" fontSize="12" />
-							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
-							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
-							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
@@ -3269,11 +3244,12 @@
 							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+<!--							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" /> -->
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="65" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
+							<mx:DataGridColumn dataField="draws" headerText="draw" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="exp" headerText="EXP" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
@@ -3286,10 +3262,10 @@
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
 							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="65" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="total" headerText="{lan.total}" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="percentage" headerText="{lan.percentage_short}" width="45" paddingRight="5" textAlign="right" />
-							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5"/>
+							<mx:DataGridColumn dataField="exp" headerText="EXP" textAlign="right" paddingRight="5"/>
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
@@ -3301,11 +3277,12 @@
 							<mx:DataGridColumn dataField="login" headerText="{lan.name}" width="100" />
 							<mx:DataGridColumn dataField="flagURL" headerText="" paddingLeft="0" paddingRight="0" itemRenderer="mx.controls.Image" width="27" resizable="false" />
 							<mx:DataGridColumn dataField="country" headerText="{lan.country}" width="80" />
-							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" />
-							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="45" textAlign="center" paddingLeft="0" />
+<!--							<mx:DataGridColumn dataField="title" headerText="{lan.title}" width="55" textAlign="center" paddingLeft="0" /> -->
+							<mx:DataGridColumn dataField="rank" headerText="{lan.rank}" width="65" textAlign="center" paddingLeft="0" />
 							<mx:DataGridColumn dataField="wins" headerText="{lan.win}" width="45" textAlign="right" paddingRight="5" />
 							<mx:DataGridColumn dataField="losses" headerText="{lan.loss}" width="45" textAlign="right" paddingRight="5" />
-							<mx:DataGridColumn dataField="rate" headerText="{lan.rate}" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="draws" headerText="draw" width="45" textAlign="right" paddingRight="5" />
+							<mx:DataGridColumn dataField="exp" headerText="EXP" textAlign="right" paddingRight="5" />
 							</mx:columns>
 						</mx:DataGrid>
 					</mx:VBox>
