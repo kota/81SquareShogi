@@ -491,33 +491,15 @@
 
     private function _handleWatchers(e:ServerMessageEvent):void{
       var watchers:Array = e.message.split("\n");
-      var watcher_list:Array = new Array();
+      _watcher_list = new Array();
       for each(var watcher_data:String in watchers){
         if(watcher_data.match(/^##\[WATCHERS34\] \+OK$/)){
           break;
         }
-        var watcher:Object = new Object();
         var match:Array = watcher_data.match(/^##\[WATCHERS34\] (.*) (\d+) (\d+)$/);
-        if(match){
-          watcher.name = match[1];
-		  watcher.rate = parseInt(match[2]);
-		  watcher.country = InfoFetcher.country_names[parseInt(match[3])];
-		  watcher.country3 = InfoFetcher.country_names3[parseInt(match[3])];
-		  watcher.flagURL = DIRECTORY + "images/flags_ss/" + String(parseInt(match[3]) + 1000).substr(1) + ".png";
-		  watcher.favorite = "";
-		  watcher.favoriteWidth = 0;
-		  if (watcher.name == login_name) {
-			  watcher.favorite = "◆";
-			  watcher.favoriteWidth = 11;
-		  } else if (_favorite_list.indexOf(watcher.name.toLowerCase()) >= 0) {
-			  watcher.favorite = "★";
-			  watcher.favoriteWidth = 11;
-		  }
-          watcher_list.unshift(watcher);
-        }
+        if (match && _users[match[1]]) _watcher_list.push(_users[match[1]]);
       }
-      watcher_list.sortOn("rate", Array.NUMERIC | Array.DESCENDING);
-	  _watcher_list = watcher_list;
+      _watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       watcherListGrid.dataProvider = _watcher_list;
 	  watchersPanel.title = lan.watchers + " (" + _watcher_list.length +")";
 //	  watcherListTitle.text = lan.watchers + " (" + watcher_list.length +")";
@@ -3205,7 +3187,7 @@
 					 <mx:columns>
 					  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="102" paddingLeft="2" sortCompareFunction="_sortName" />
 					  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />
-					  <mx:DataGridColumn dataField="rate" headerText="EXP" width="37" paddingLeft="0" paddingRight="5" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+					  <mx:DataGridColumn dataField="rating" headerText="EXP" width="37" paddingLeft="0" paddingRight="5" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 					 </mx:columns>
 					</mx:DataGrid>
 				</mx:Panel>
