@@ -35,6 +35,8 @@ package
 		public var favorite:String = "";
 		public var favoriteWidth:int = 0;
 		
+		public var exist:Boolean;
+		
 		public function User(name:String) {
 			this.name = name;
 		}
@@ -69,6 +71,7 @@ package
 			this.monitor_game = monitor_game;
 			this.moves = moves;
 			this.idle = idle;
+			exist = true;
 		}
 		
 		public function setFromLobbyIn(rating:int, country_code:int, wins:int, losses:int, streak:int, streak_best:int):void {
