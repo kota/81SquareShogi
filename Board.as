@@ -155,7 +155,6 @@ package  {
 	private var _centerY:int;
 	private var _hoverTimer:Timer = new Timer(100, 1);
 	public var kid:int;
-	public var opening:String = "";
     public var piece_type:int = 0;
 	public var piece_type34:int = 0;
 	public var hold_piece:Boolean = true;
@@ -797,57 +796,10 @@ package  {
 	  studyOrigin = 0;
     }
 	
-    public function startView(kifu_contents:String):void {
-      var moves:Array = new Array();
-	  var kyokumen_str:String = "";
+    public function startView(kyokumen_str:String, game:Game, moves:Array):void {
+	  _game = game;
 	  kifu_list = new Array();
 	  kifu_list_self = new Array();
-      for each(var line:String in kifu_contents.split("\n")) {
-		  if (line.match(/^To_Move/)) {
-			  kyokumen_str += "P0" + line.substring(8) + "\n";
-		  } else if (line.match(/^P[0-9\+\-]/)) {
-			  kyokumen_str += line + "\n";
-		  } else if (line.match(/^N\+.+$/)) {
-			  _player_infos[0] = new Object();
-			  _player_infos[0].name = line.substring(2);
-			  _player_infos[0].titleName = "";
-		  } else if (line.match(/^N\-.+$/)) {
-			  _player_infos[1] = new Object();
-			  _player_infos[1].name = line.substring(2);
-			  _player_infos[1].titleName = "";
-		  } else if (line.match(/^I\+.+$/)) {
-			  _player_infos[0].rating = line.substring(2).split(",")[0];
-			  if (_player_infos[0].rating.match(/^\*/)) {
-				  _player_infos[0].rank = "-";
-			  } else {
-				  _player_infos[0].rating = parseInt(_player_infos[0].rating);
-				  _player_infos[0].rank = InfoFetcher.makeRankFromRating(_player_infos[0].rating);
-			  }
-			  _player_infos[0].country_code = parseInt(line.substring(2).split(",")[1]);
-		  } else if (line.match(/^I\-.+$/)) {
-			  _player_infos[1].rating = line.substring(2).split(",")[0];
-			  if (_player_infos[1].rating.match(/^\*/)) {
-				  _player_infos[1].rank = "-";
-			  } else {
-				  _player_infos[1].rating = parseInt(_player_infos[1].rating);
-				  _player_infos[1].rank = InfoFetcher.makeRankFromRating(_player_infos[1].rating);
-			  }
-			  _player_infos[1].country_code = parseInt(line.substring(2).split(",")[1]);
-		  } else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
-            var move_and_time:Object = new Object();
-            move_and_time.move = line;
-			move_and_time.comment = "";
-            moves.push(move_and_time);
-          } else if (line.match(/^(T.*)$/)) {
-            Object(moves[moves.length - 1]).time = line;
-//          } else if (line.match(/^#(RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
-//			  break;
-		  } else if (line.match(/^'\*/)) {
-			  Object(moves[moves.length - 1]).comment += line + "\n";
-		  } else if (line.match(/summary/)) {
-			  opening = line.split(":")[5] ? InfoFetcher.openingNameEn(line.split(":")[5]) : "";
-		  }
-      }
 	  
       if (kyokumen_str != "") {
 		trace(kyokumen_str);
@@ -858,12 +810,8 @@ package  {
       }
 
 	  _my_turn = Kyokumen.SENTE;
-//      name_labels[0].text = _player_infos[_my_turn].name;
-//      name_labels[1].text = _player_infos[1-_my_turn].name;
-//      _info_labels[0].text = "";
-//      _info_labels[1].text = "";
-//      _turn_symbols[0].source = _my_turn == Kyokumen.SENTE ? black : white;
-//      _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
+	  _player_infos[0] = _game.black;
+	  _player_infos[1] = _game.white;
 	  _arrangeInfos();
 	  timers[0].reset(0, 0);
 	  timers[1].reset(0, 0);
@@ -1203,5 +1151,10 @@ package  {
 			  else parentApplication.userMessage2.htmlText = "";
 		  }
 	  }
+	  
+	  public function get openingEn():String {
+		  return _game.openingEn;
+	  }
+	  
   }
 }
