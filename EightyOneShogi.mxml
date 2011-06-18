@@ -327,6 +327,7 @@
       var users:Array = e.message.split("\n");
       var user_list:Array = new Array();
 	  var waiter_list:Array = new Array();
+	  for each(var user:User in _users) user.exist = false;
       for each(var user_data:String in users){
         if(user_data.match("##[WHO] +OK") != null){
           break;
@@ -335,7 +336,7 @@
         if (match != null) {
 			var tokens:Array = match[2].split(" ");
 			if (!_users[match[1]]) _users[match[1]] = new User(match[1]);
-				_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[11]);
+			_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[11]);
 			if (match[1] == login_name) {
 				  _users[match[1]].markSelf();
 				  if (_status_disconnected) _users[match[1]].disconnected = true;
@@ -344,6 +345,9 @@
 			}
 		}
       }
+	  for each(user in _users) {
+		  if (!user.exist) delete _users[user.name];
+	  }
 	  _refreshUserList();
 	  _refreshWaiterList();
     }
