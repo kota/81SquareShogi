@@ -634,11 +634,10 @@
 	  }
 	  board.post_game = false;
 	  board.isStudyHost = false;
-	  for (var j:int = 0; j < 2 ; j++) {
-		_player_infos[j] = _users[_client.playerNames[j]];
-	  }
+
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       _game_name = e.message.split(":")[1];
+	  var game:Game = new Game(_game_name, _users[_client.playerNames[0]], _users[_client.playerNames[1]]);
 	  board.kid = parseInt(e.message.split(":")[2]);
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
@@ -656,16 +655,8 @@
 		  allowWatcherChatCheckbox.selected = true;
 		  allowWatcherChatCheckbox.visible = true;
 	  }
-	  if (board.gameType == "hc" || _player_infos[0].isProvisional) {
-		  board.superior = Kyokumen.GOTE;
-	  } else if (_player_infos[1].isProvisional) {
-		  board.superior = Kyokumen.SENTE;
-	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
-		  board.superior = Kyokumen.SENTE;
-	  } else {
-		  board.superior = Kyokumen.GOTE;
-	  }
-      board.startGame(_initPositionStr, _client.myTurn, _player_infos,match[3], match[4]);
+	  board.superior = game.superior;
+      board.startGame(_initPositionStr, _client.myTurn, game);
 	  _watcher_list = new Array();
 	  watcherListGrid.dataProvider = _watcher_list;
 	  userMessage2.htmlText = "";
@@ -711,34 +702,6 @@
 //	  for (var j:int = 0; j < 2 ; j++) {
 //		_player_infos[j] = _findPlayerFromList(_client.playerNames[j]);
 //	  }
-	  var blackInfo:Object = {
-		  'name':_watch_game.blackName,
-		  'rating':_watch_game.blackRating,
-		  'rank':_watch_game.blackRank,
-		  'titleName':_watch_game.blackTitle,
-		  'country_code':_watch_game.blackCountryCode,
-		  'labelColor':_watch_game.blackColor,
-		  'wins':_watch_game.blackWins,
-		  'losses':_watch_game.blackLosses,
-		  'streak_best':_watch_game.blackStreakBest,
-		  'game_name':_game_name.split("+")[1],
-		  'avatar':_users[_watch_game.blackName].avatar
-	  }
-	  var whiteInfo:Object = {
-		  'name':_watch_game.whiteName,
-		  'rating':_watch_game.whiteRating,
-		  'rank':_watch_game.whiteRank,
-		  'titleName':_watch_game.whiteTitle,
-		  'country_code':_watch_game.whiteCountryCode,
-		  'labelColor':_watch_game.whiteColor,
-		  'wins':_watch_game.whiteWins,
-		  'losses':_watch_game.whiteLosses,
-		  'streak_best':_watch_game.whiteStreakBest,
-		  'game_name':_game_name.split("+")[1],
-		  'avatar':_users[_watch_game.blackName].avatar
-	  }
-	  _player_infos[0] = blackInfo;
-	  _player_infos[1] = whiteInfo;
 
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
@@ -756,18 +719,8 @@
 		  allowWatcherChatCheckbox.selected = true;
 		  allowWatcherChatCheckbox.visible = true;
 	  }
-	  if (board.gameType == "hc" || String(_player_infos[0].rating).match(/^\*/)) {
-		  board.superior = Kyokumen.GOTE;
-	  } else if (String(_player_infos[1].rating).match(/^\*/)) {
-		  board.superior = Kyokumen.SENTE;
-	  } else if (_player_infos[0].rating > _player_infos[1].rating) {
-		  board.superior = Kyokumen.SENTE;
-	  } else {
-		  board.superior = Kyokumen.GOTE;
-	  }
+	  board.superior = _watch_game.superior;
 	  match = _game_name.split("+")[1].match(/\-(\d+)\-(\d+)$/);
-	  var total:int = parseInt(match[1]); // parseInt(_game_name.split("+")[1].split("-")[1]);
-	  var byoyomi:int = parseInt(match[2]); //parseInt(_game_name.split("+")[1].split("-")[2]);
 	  var end_game:Boolean = false;
 	  var result:String = "";
 	  var moves:Array = new Array();
@@ -803,7 +756,7 @@
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
 	  
-	  board.startGame(_initPositionStr, _client.myTurn, _player_infos, total, byoyomi, moves);
+	  board.startGame(_initPositionStr, _client.myTurn, _watch_game, moves);
 	  
 	  _client.watchers(_game_name);
 	  userMessage2.htmlText = "";
@@ -1634,7 +1587,7 @@
     private function _gameSelected():void {
       var game:Object = gameListGrid.selectedItem;
 	  for (var i:int = 0; i < _user_list.length; i++) {
-		  if (_user_list[i].name == game.blackName || _user_list[i].name == game.whiteName) {
+		  if (_user_list[i].name == game.black.name || _user_list[i].name == game.white.name) {
 			  userListGrid.selectedIndex = i;
 			  userListGrid.scrollToIndex(i);
 			  break;
@@ -1689,7 +1642,7 @@
 	private function _watchDialog():void {
 		if (_game_name) return;
 		_watch_game = gameListGrid.selectedItem;
-		if (_watch_game.blackName == login_name || _watch_game.whiteName == login_name) {
+		if (_watch_game.black.name == login_name || _watch_game.white.name == login_name) {
 			Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
 		} else {
 		    if (_status_disconnected) {
@@ -1726,22 +1679,14 @@
 //			 board.my_turn = Kyokumen.GOTE;
 		 }
 		 _game_name = _watch_game.id;
-		 var game_info:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+		 var game_info:Array = _watch_game.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 		  if (game_info[1].match(/^hc/)) {
 			  board.gameType = "hc";
 		  } else {
 			  board.gameType = game_info[1];
 		  }
 		 allowWatcherChatCheckbox.visible = false;
-		 if (board.gameType == "hc" || String(_watch_game.blackRating).match(/^\*/)) {
-			 board.superior = Kyokumen.GOTE;
-		 } else if (String(_watch_game.whiteRating).match(/^\*/)) {
-			 board.superior = Kyokumen.SENTE;
-		 } else if (_watch_game.blackRating > _watch_game.whiteRating) {
-			 board.superior = Kyokumen.SENTE;
-		 } else {
-			 board.superior = Kyokumen.GOTE;
-		 }
+		 board.superior = _watch_game.superior;
 		_monitoring = true;
 		board.post_game = false;
 		board.isStudyHost = false;

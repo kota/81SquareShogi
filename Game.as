@@ -18,6 +18,9 @@ package
 		public var black:ObjectProxy;
 		public var white:ObjectProxy;
 		public var game_name:String;
+		public var game_tag:String;
+		public var total:int;
+		public var byoyomi:int;
 		public var status:String = "game";
 		public var moves:int = 0;
 		public var isIn:Array = new Array(true, true);
@@ -31,33 +34,36 @@ package
 		public function Game(id:String, black:User, white:User) {
 			this.id = id;
 			game_name = id.split("+")[1];
+			var game_info:Array = game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+			game_tag = game_info[1];
+			total = parseInt(game_info[3]);
+			byoyomi = parseInt(game_info[4]);
 			this.black = new ObjectProxy(black);
 			this.white = new ObjectProxy(white);
 		}
 		
-		public function setFromList(moves:int, status:String, isInBlack:String, isInWhite:String, watchers:int, opening:String):void {
+		public function setFromList(moves:int, status:String, isInBlack:Boolean, isInWhite:Boolean, watchers:int, opening:String):void {
 			this.moves = moves;
 			this.status = status;
 			isIn[0] = isInBlack;
 			isIn[1] = isInWhite;
+			trace(isInBlack + "   " + isInWhite);
 			this.watchers = watchers;
 			this.opening = opening;
 			exist = true;
 		}
 		
 		public function get openingJp():String {
-			var game_info:Array = game_name.match(/^([0-9a-z]+?)_.*-[0-9]*-[0-9]*$/);
-			if (game_info[1].match(/^(hc|va)/)) {
-				return InfoFetcher.gameTypeJp(game_info[1]);
+			if (game_tag.match(/^(hc|va)/)) {
+				return InfoFetcher.gameTypeJp(game_tag);
 			} else {
 				return InfoFetcher.openingNameJp(opening);
 			}
 		}
 
 		public function get openingEn():String {
-			var game_info:Array = game_name.match(/^([0-9a-z]+?)_.*-[0-9]*-[0-9]*$/);
-			if (game_info[1].match(/^(hc|va)/)) {
-				return InfoFetcher.gameType(game_info[1]);
+			if (game_tag.match(/^(hc|va)/)) {
+				return InfoFetcher.gameType(game_tag);
 			} else {
 				return InfoFetcher.openingNameEn(opening);
 			}
@@ -98,11 +104,23 @@ package
 		}
 		
 		public function get maxRating():int {
-			if (isIn[0] || isIn[1]) {
-				return Math.max(black.rating, white.rating);
-			} else {
+			if (!isIn[0] || !isIn[1]) {
 				return Math.max(black.rating, white.rating) - 3000;
+			} else {
+				return Math.max(black.rating, white.rating);
 			}
+		}
+		
+		public function get superior():int {
+			if (game_tag.match(/^hc/) || black.isProvisional) {
+				 return Kyokumen.GOTE;
+			 } else if (white.isProvisional) {
+				 return Kyokumen.SENTE;
+			 } else if (black.rating > white.rating) {
+				 return Kyokumen.SENTE;
+			 } else {
+				 return Kyokumen.GOTE;
+			 }
 		}
 		
 		public function nameColor(turn:int):uint {

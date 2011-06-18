@@ -222,6 +222,11 @@ package
 			else return String(rating);
 		}
 		
+		public function get description():String {
+			var str:String = titleName;
+			return "R:" + rateStr + ", " + (str == "" ? rank : str);
+		}
+		
 		public function get total():int {
 			return wins + losses;
 		}

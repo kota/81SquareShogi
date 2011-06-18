@@ -138,6 +138,7 @@ package  {
     private var _in_game:Boolean;
 	private var _move_sent:Boolean = false;
 	private var _client_timeout:Boolean;
+	private var _game:Object;
 
     private var _selected_square:Square;
     private var _last_to_square:Square;
@@ -496,23 +497,23 @@ package  {
 		_grabPieceCallback = callback;
 	}
 
-    public function startGame(kyokumen_str:String, my_turn:int, player_infos:Array, time_total:int, time_byoyomi:int, moves:Array = null):void {
+    public function startGame(kyokumen_str:String, my_turn:int, game:Object, moves:Array = null):void {
       trace("game started");
+	  _game = game;
 	  rematch[0] = false;
 	  rematch[1] = false;
 	  isPlayer = true;
-	  _player_infos = player_infos;
-	  _player_infos[0].labelColor = 0x000000;
-	  _player_infos[1].labelColor = 0x000000;
+	  _player_infos[0] = game.black;
+	  _player_infos[1] = game.white;
       _my_turn = my_turn;
-	  if (_player_infos[_my_turn].game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
+	  if (_game.game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
       resetBoard();
 	  initializeKifu();
       _initializeKyokumen(kyokumen_str);
       setPosition(_position);
 	  _arrangeInfos();
-	  timers[0].reset(time_total,time_byoyomi);
-	  timers[1].reset(time_total,time_byoyomi);
+	  timers[0].reset(_game.total, _game.byoyomi);
+	  timers[1].reset(_game.total, _game.byoyomi);
 	  timers[_my_turn == _position.turn ? 0 : 1].start();
       if (moves) {
 		  if (moves.length > 0) {
@@ -541,8 +542,8 @@ package  {
       _turn_symbols[1].source = _my_turn == Kyokumen.SENTE ? white_r : black_r;
       name_labels[0].text = _player_infos[_my_turn].name;
       name_labels[1].text = _player_infos[1 - _my_turn].name;
-      _info_labels[0].text = "R:" + _player_infos[_my_turn].rating + ", " + (_player_infos[_my_turn].titleName == "" ? _player_infos[_my_turn].rank : _player_infos[_my_turn].titleName);
-      _info_labels[1].text = "R:" + _player_infos[1 - _my_turn].rating + ", " + (_player_infos[1 - _my_turn].titleName == "" ? _player_infos[1 - _my_turn].rank : _player_infos[1 - _my_turn].titleName);
+      _info_labels[0].text = _player_infos[_my_turn].description;
+      _info_labels[1].text = _player_infos[1 - _my_turn].description;
 	  var avatar:Image = new Image();
 	  avatar.source = _player_infos[_my_turn].avatar;
 	  _avatar_images[0].addChild(avatar);
@@ -551,8 +552,8 @@ package  {
 	  avatar.source = _player_infos[1 - _my_turn].avatar; 
 	  _avatar_images[1].addChild(avatar);
 	  if (!viewing) _avatar_images[1].addChild(InfoFetcher.medalCanvas(_player_infos[1 - _my_turn]));
-	  _player_flags[0].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[_my_turn].country_code + 1000).substring(1) + ".swf";
-	  _player_flags[1].source = IMAGE_DIRECTORY + "flags_m/" + String(_player_infos[1 - _my_turn].country_code + 1000).substring(1) + ".swf";
+	  _player_flags[0].source = _player_infos[_my_turn].flag_m;
+	  _player_flags[1].source = _player_infos[1 - _my_turn].flag_m;
 	}
 	
 	public function flipBoard():void {
@@ -616,8 +617,8 @@ package  {
       trace("game end");
 			timers[0].stop();
 			timers[1].stop();
-		    name_labels[0].setStyle('color', _player_infos[_my_turn].labelColor);
-		    name_labels[1].setStyle('color', _player_infos[1 - _my_turn].labelColor);
+		    if (name_labels[0].getStyle('color') != 0x999999) name_labels[0].setStyle('color', 0x000000)
+		    if (name_labels[1].getStyle('color') != 0x999999) name_labels[1].setStyle('color', 0x000000)
 		cancelSquareSelect();
       _in_game = false;
 	  _client_timeout = false;
@@ -735,8 +736,6 @@ package  {
     }
 
     private function _startMonitor(game_info:String, watch_game:Object):void {
-      var total_time:int;
-      var byoyomi:int;
       var current_turn:int;
       var last_move:Point;
       var moves:Array = new Array();
@@ -754,10 +753,8 @@ package  {
 		  }
         }
       }
-
-	  match = watch_game.id.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
-	  total_time = parseInt(match[3]);
-	  byoyomi = parseInt(match[4]);
+	  _game = watch_game;
+	  match = _game.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 	  if (match[2].match(/\-\-..$/)) _board_bg_image.filters = [filterTournament];
 	  
       var kyokumen_str:String = _parsePosition(game_info);
@@ -771,35 +768,13 @@ package  {
 	  rematch[1] = false;
 //      watch_game_end = false;
 
-	  var blackInfo:Object = {
-		  'name':watch_game.blackName,
-		  'rating':watch_game.blackRating,
-		  'rank':watch_game.blackRank,
-		  'avatar':watch_game.black.avatar,
-		  'titleName':watch_game.blackTitle,
-		  'country_code':watch_game.blackCountryCode,
-		  'labelColor':watch_game.blackColor,
-		  'wins':watch_game.blackWins,
-		  'losses':watch_game.blackLosses,
-		  'streak_best':watch_game.blackStreakBest
-	  }
-	  var whiteInfo:Object = {
-		  'name':watch_game.whiteName,
-		  'rating':watch_game.whiteRating,
-		  'rank':watch_game.whiteRank,
-		  'avatar':watch_game.white.avatar,
-		  'titleName':watch_game.whiteTitle,
-		  'country_code':watch_game.whiteCountryCode,
-		  'labelColor':watch_game.whiteColor,
-		  'wins':watch_game.whiteWins,
-		  'losses':watch_game.whiteLosses,
-		  'streak_best':watch_game.whiteStreakBest
-	  }
-	  _player_infos[0] = blackInfo;
-	  _player_infos[1] = whiteInfo;
+	  _player_infos[0] = _game.black;
+	  _player_infos[1] = _game.white;
 	  _arrangeInfos();
-      timers[0].reset(total_time,byoyomi);
-      timers[1].reset(total_time,byoyomi);
+	  name_labels[0].setStyle('color', _game.nameColor(_my_turn));
+	  name_labels[1].setStyle('color', _game.nameColor(1 - _my_turn));
+      timers[0].reset(_game.total, _game.byoyomi);
+      timers[1].reset(_game.total, _game.byoyomi);
 
       var running_timer:int = _position.turn == _my_turn ? 0 : 1;
       timers[running_timer].start();
