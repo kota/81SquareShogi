@@ -914,7 +914,7 @@ package  {
 					alt.x = mouseX - alt.width / 2 + 5;
 					alt.y = mouseY - 90;
 				}
-            } else if (isPlayer && (_player_infos[_my_turn].game_name.match(/^(nr)_/) || ((_player_infos[_my_turn].game_name.match(/^(hc|va)/) && _my_turn == Kyokumen.SENTE))) && _position.isNifu(_from, _to)) {
+            } else if (isPlayer && (gameType == "nr" || (gameType == "hc" && _my_turn == Kyokumen.SENTE)) && _position.isNifu(_from, _to)) {
 					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
 					cancelSquareSelect();
 					_to = null;

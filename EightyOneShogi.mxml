@@ -475,7 +475,8 @@
 			_user_list.push(_users[tokens[0]]);
 			userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 		}
-		userListGrid.dataProvider = _user_list;
+		_user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
+		_updateList(userListGrid, _user_list);
 	}
 	
 	private function _handleLobbyOut(e:ServerMessageEvent):void {
@@ -492,7 +493,7 @@
 		for (var i:int = 0; i < _user_list.length; i++){
 			if (_user_list[i].name == e.message) {
 				_user_list.splice(i, 1);
-				userListGrid.dataProvider = _user_list;
+				_updateList(userListGrid, _user_list);
 				break;
 			}
 		}
@@ -515,7 +516,7 @@
 			}
 			if (_users[name]) _users[name].setFromGame(e.message.split(",")[0], e.message.split(",")[1]);
 		}
-		userListGrid.dataProvider = _user_list;
+		_updateList(userListGrid, _user_list);
 		_refreshWaiterList();
 	}
 	
@@ -531,11 +532,11 @@
 		}
 		if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
 		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
-		userListGrid.dataProvider = _user_list;
+		_updateList(userListGrid, _user_list);
 		_refreshWaiterList();
 		_games[game_id] = new Game(game_id, _users[tokens[2]], _users[tokens[3]]);
 		_game_list.unshift(new ObjectProxy(_games[game_id]));
-		gameListGrid.dataProvider = _game_list;
+		_updateList(gameListGrid, _game_list);
 	}
 	
 	private function _handleAdminMonitor(e:ServerMessageEvent):void {
@@ -2808,6 +2809,21 @@
     } else {
 	  _client.chat("[auto-chat] " + str);
 	}
+  }
+  
+  private function _updateList(dataGrid:DataGrid, provider:Array):void {
+	  var item:Object = dataGrid.selectedItem;
+	  var n:int = dataGrid.verticalScrollPosition;
+	  dataGrid.dataProvider = provider;
+	  if (item) {
+		  for (var i:int = 0; i < provider.length; i++) {
+			  if (provider[i] == item) {
+				  dataGrid.selectedIndex = i;
+				  break;
+			  }
+		  }
+	  }
+	  dataGrid.verticalScrollPosition = n;
   }
   
   private function _isDuringMyGame():Boolean {
