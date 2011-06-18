@@ -228,6 +228,10 @@ package
 			}
 		}
 		
+		public function get idleColor():uint {
+			return idle ? 0x0000FF : 0x000000;
+		}
+		
 		public function markSelf():void {
 			mark = "◆";
 			markWidth = 11;

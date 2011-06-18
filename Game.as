@@ -47,7 +47,6 @@ package
 			this.status = status;
 			isIn[0] = isInBlack;
 			isIn[1] = isInWhite;
-			trace(isInBlack + "   " + isInWhite);
 			this.watchers = watchers;
 			exist = true;
 		}
