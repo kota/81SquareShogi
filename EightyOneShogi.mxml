@@ -705,7 +705,8 @@
 		  board.superior = Kyokumen.GOTE;
 	  }
       board.startGame(_initPositionStr, _client.myTurn, _player_infos,match[3], match[4]);
-	  _client.watchers(_game_name);
+	  _watcher_list = new Array();
+	  watcherListGrid.dataProvider = _watcher_list;
 	  userMessage2.htmlText = "";
 	  _writeUserMessage(_infoFetcher.gameMessage + "\n", 2, "#008800");
 	  if (match[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + match[2].substr(match[2].length - 2, 2) + ".jpg", 2);
@@ -1314,21 +1315,10 @@
 			if (mainViewStack.selectedIndex != 2) return;
 			_writeUserMessage(tokens[0] + " entered.\n", 2, "#008800");
 			if (_chat_sound2_play && _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _sound_door_open.play();
-			var user:Object = {
-				'name':tokens[0],
-				'country':InfoFetcher.country_names[parseInt(tokens[1])],
-				'country3':InfoFetcher.country_names3[parseInt(tokens[1])],
-				'flagURL':DIRECTORY + "images/flags_ss/" + String(parseInt(tokens[1]) + 1000).substr(1) + ".png",
-				'rate':parseInt(tokens[4]),
-				'favorite':"",
-				'favoriteWidth':0
-			}
-			if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) {
-				user.favorite = "★";
-				user.favoriteWidth = 11;
-			}
-			_watcher_list.push(user);
+			if (_users[tokens[0]]) _watcher_list.push(_users[tokens[0]]);
+			_watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 			watcherListGrid.dataProvider = _watcher_list;
+			watchersPanel.title = lan.watchers + " (" + _watcher_list.length +")";
 		}
 		if (board.isStudyHost && board.post_game) _sendStudy(tokens[0]);
 	}
@@ -1351,6 +1341,7 @@
 				if (_watcher_list[i].name == e.message) {
 					_watcher_list.splice(i, 1);
 					watcherListGrid.dataProvider = _watcher_list;
+					watchersPanel.title = lan.watchers + " (" + _watcher_list.length +")";
 					break;
 				}
 			}
@@ -1538,7 +1529,6 @@
 	  _keepAliveTimer.start();
       _client.who();
 	  if (loadList) _client.list();
-	  if (_game_name) _client.watchers(_game_name);
     }
 	
     private function _newGameForm():void{
@@ -1563,7 +1553,7 @@
     private function _stopWaiting():void {
 	  _waiting = false;
       _client.stopWaiting();
-      _refresh(false);
+//      _refresh(false);
       stopButton.enabled = false;
     }
 
@@ -1604,7 +1594,7 @@
 		  return;
 	  }
       _client.waitForGame(total,byoyomi,handicap,tournament);
-      _refresh(false);
+//      _refresh(false);
       stopButton.enabled = true;
     }
 
