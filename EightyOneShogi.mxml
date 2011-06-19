@@ -539,7 +539,7 @@
 		if ((tokens = e.message.match(/^\[(.+)\]$/))) {
 			if (_users[tokens[1]]) _users[tokens[1]].setFromGame("*", "*");
 		} else {
-			tokens = e.message.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*),(.)$/);
+			tokens = e.message.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*),/);
 			if (tokens[2].match(/^@/)) return;
 			if (tokens[2].match(/\-\-..$/)) {
 				var name:String = tokens[2].substr(0, tokens[2].length - 4);
