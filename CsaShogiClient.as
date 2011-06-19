@@ -233,6 +233,15 @@ package{
       send("%%LIST");
     }
 	
+	public function refresh(loadList:Boolean):void {
+		if (_idle) {
+			keepAlive();
+		} else {
+			who();
+			if (loadList) list();
+		}
+	}
+	
 	public function setRate(n:int):void {
 		if (_current_state == STATE_CONNECTED) {
 			send("%%SETRATE " + n);
@@ -249,6 +258,7 @@ package{
 		if (_idle != onoff) {
 			_idle = onoff;
 			send("%%IDLE " + (onoff ? 1 : 0));
+			if (!onoff) refresh(true);
 		}
 	}
 

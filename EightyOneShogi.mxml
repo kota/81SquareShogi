@@ -1097,6 +1097,7 @@
 				board.rematch[1] = true;
 			}
 			if (board.post_game && board.rematch[0] && board.rematch[1]) {
+				_refresh(false);
 				_writeUserMessage("Rematch Agreed.\n", 2, "#008800", true);
 				board.rematch[0] == false;
 				board.rematch[1] == false;
@@ -1423,8 +1424,7 @@
     private function _refresh(loadList:Boolean = true):void {
 	  _keepAliveTimer.reset();
 	  _keepAliveTimer.start();
-      _client.who();
-	  if (loadList) _client.list();
+	  _client.refresh(loadList);
     }
 	
     private function _newGameForm():void{
