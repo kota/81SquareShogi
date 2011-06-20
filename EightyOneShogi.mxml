@@ -2540,6 +2540,7 @@
 			var player:Object = {
 				'number':num,
 				'login':String(playerXML.login),
+				'name':String(playerXML.name),
 				'country_code':String(InfoFetcher.country_codes[parseInt(playerXML.country_id)-1] + 1000).substring(1),
 				'country':InfoFetcher.country_names[InfoFetcher.country_codes[parseInt(playerXML.country_id)-1]],
 				'wins':parseInt(playerXML.wins),
@@ -2550,6 +2551,7 @@
 				'rate':parseInt(playerXML.rate),
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
+			if (player.name.toLowerCase() == player.login) player.login = player.name;
 			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
 				  if (player.login == InfoFetcher.titleUser[i]) {
