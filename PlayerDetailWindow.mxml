@@ -97,6 +97,7 @@
 			  _updated = player["updated-at"];
 			  _updated = _updated.substr(0, 10);
 			  _pr = player.pr;
+			  if (!_pr) _pr = "";
 			  _pr = _pr.replace(/\r\n/g, "\n");
 			  if (_pr.match(/^\[object/)) _pr = "";
 			  _rating = player.rate;

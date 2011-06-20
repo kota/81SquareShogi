@@ -631,7 +631,7 @@
 	  for each(var line:String in e.message.split("\n")) {
 		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
 	  }
-	  _client.agree();
+//	  _client.agree();
   }
 
     private function _handleGameStarted(e:ServerMessageEvent):void {

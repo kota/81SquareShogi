@@ -142,15 +142,18 @@
 				hbox.setStyle('horizontalGap', 0);
 				hbox.setStyle('paddingBottom', 0);
 				var label:Label = new Label();
+				label.setStyle('leading', 1);
 				label.text = "■";
 				label.setStyle('color', datum.color);
 				hbox.addChild(label);
 				label = new Label();
+				label.setStyle('leading', 1);
 				label.width = 90;
 				label.text = InfoFetcher.openingNameJp(datum.name);
 				label.toolTip = InfoFetcher.openingNameEn(datum.name);
 				hbox.addChild(label);
 				label = new Label();
+				label.setStyle('leading', 1);
 				label.width = 60;
 				label.setStyle('textAlign', 'right');
 				_percents[datum.name] = (datum.black + datum.white) / _n * 100;
