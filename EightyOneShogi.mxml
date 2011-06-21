@@ -2308,7 +2308,9 @@
 			kifuSearchGrid.dataProvider = null;
 			var fromDate:Date = new Date("2010/9/20");
 			if (kifuSearchFromChooser.selectedDate > fromDate) fromDate = kifuSearchFromChooser.selectedDate;
-			_api.kifuSearch(kifuSearchPlayerText.text.toLowerCase(), fromDate, kifuSearchToChooser.selectedDate);
+			var toDate:Date = new Date();
+			toDate.setTime(kifuSearchToChooser.selectedDate.getTime() + 24 * 60 * 60 * 1000);
+			_api.kifuSearch(kifuSearchPlayerText.text.toLowerCase(), kifuSearchOpponentText.text.toLowerCase(), fromDate, toDate);
 			searchAccordion.enabled = false;
 		}
 	}
@@ -3227,30 +3229,37 @@
 			<mx:HBox label="{lan.kifu_search}" paddingTop="8" paddingLeft="8" width="820" height="530">
 				<mx:VBox>
 					<mx:HBox>
-						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendKifuSearch();" />
-						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="Share" click="_shareKifu3();" fontSize="11" />
-						<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+						<mx:Label text="{lan.name}1"/>
+						<mx:TextInput id="kifuSearchPlayerText" width="85" />
 					</mx:HBox>
 					<mx:HBox>
-						<mx:Label text="{lan.name}"/>
-						<mx:TextInput id="kifuSearchPlayerText" width="90" />
+						<mx:Label text="{lan.name}2"/>
+						<mx:TextInput id="kifuSearchOpponentText" width="85" />
 					</mx:HBox>
 					<mx:Label text="From"/>
 					<mx:DateChooser id="kifuSearchFromChooser" showToday="false" />
 					<mx:Label text="To"/>
 					<mx:DateChooser id="kifuSearchToChooser" showToday="false" />
 				</mx:VBox>
-				<mx:DataGrid id="kifuSearchGrid" width="615" height="470" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
-					<mx:columns>
-					<mx:DataGridColumn dataField="winner" headerText="{lan.result}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn itemRenderer="{kifuSearchBlackRenderer}" headerText="{lan.black}" width="100" paddingLeft="0" />
-					<mx:DataGridColumn itemRenderer="{kifuSearchWhiteRenderer}" headerText="{lan.white}" width="100" paddingLeft="0" />
-					<mx:DataGridColumn dataField="rule" headerText="{lan.rule}" width="110" paddingLeft="2" />
-					<mx:DataGridColumn dataField="opening" headerText="{lan.opening}" width="120" paddingLeft="2" />
-					<mx:DataGridColumn dataField="moves" headerText="{lan.moves}" width="45" textAlign="center" paddingLeft="0" />
-					<mx:DataGridColumn dataField="date" headerText="{lan.game_date}"/>
-					</mx:columns>
-				</mx:DataGrid>
+				<mx:VBox>
+					<mx:HBox>
+						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendKifuSearch();" />
+						<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+						<mx:Spacer width="400"/>
+						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="Share" click="_shareKifu3();" fontSize="11" />
+					</mx:HBox>
+					<mx:DataGrid id="kifuSearchGrid" width="615" height="440" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
+						<mx:columns>
+						<mx:DataGridColumn dataField="winner" headerText="{lan.result}" width="45" textAlign="center" paddingLeft="0" />
+						<mx:DataGridColumn itemRenderer="{kifuSearchBlackRenderer}" headerText="{lan.black}" width="100" paddingLeft="0" />
+						<mx:DataGridColumn itemRenderer="{kifuSearchWhiteRenderer}" headerText="{lan.white}" width="100" paddingLeft="0" />
+						<mx:DataGridColumn dataField="rule" headerText="{lan.rule}" width="110" paddingLeft="2" />
+						<mx:DataGridColumn dataField="opening" headerText="{lan.opening}" width="120" paddingLeft="2" />
+						<mx:DataGridColumn dataField="moves" headerText="{lan.moves}" width="45" textAlign="center" paddingLeft="0" />
+						<mx:DataGridColumn dataField="date" headerText="{lan.game_date}"/>
+						</mx:columns>
+					</mx:DataGrid>
+				</mx:VBox>
 			</mx:HBox>
 			<mx:VBox label="{lan.player_search}" paddingTop="10" paddingLeft="10" width="800" height="530">
 				<mx:HBox>

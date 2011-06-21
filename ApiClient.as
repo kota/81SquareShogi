@@ -63,10 +63,11 @@ package{
 			trace("dispatch api response");
 		}
 		
-		public function kifuSearch(name:String, from:Date, to:Date):void {
+		public function kifuSearch(name1:String, name2:String, from:Date, to:Date):void {
+			if (name2 == "") name2 = "*";
 			var fromStr:String = from.getFullYear() + "-" + String(from.getMonth() + 101).substring(1) + "-" + String(from.getDate() + 100).substring(1);
 			var toStr:String = to.getFullYear() + "-" + String(to.getMonth() + 101).substring(1) + "-" + String(to.getDate() + 100).substring(1);
-			_kifuSearchService.url = "http://" + _host + ":" + _port + "/api/kifus/search/" + name + "/" + fromStr + "/" + toStr;
+			_kifuSearchService.url = "http://" + _host + ":" + _port + "/api/kifus/search/" + name1 + "/" + name2 + "/" + fromStr + "/" + toStr;
 			trace("send: " + _kifuSearchService.url);
 			_kifuSearchService.send();
 			if (_isAdmin) dispatchEvent(new ServerMessageEvent(ADMIN_MONITOR, "SENT>>> " + _kifuSearchService.url +"\n"));
