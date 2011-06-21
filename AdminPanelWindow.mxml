@@ -4,14 +4,18 @@
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.Event;
+		  import flash.events.KeyboardEvent;
           import mx.controls.*;
 		  import mx.events.MoveEvent;
           import mx.managers.PopUpManager;
 		  
 		  private var _scrollPos:int;
+		  private var _commandHistory:Array = new Array();
+		  private var _nHistory:int = 0;
 		  
 		  private function _initWindow():void {
 			  this.addEventListener("move", _checkMove);
+			  adminCommandInput.addEventListener(KeyboardEvent.KEY_DOWN, _handleKeyDown);
 		  }
 		  
 		  private function _checkMove(e:Event):void {
@@ -28,6 +32,23 @@
 			if (scrollCheck.selected) logTextArea.verticalScrollPosition = logTextArea.maxVerticalScrollPosition;
 			else logTextArea.verticalScrollPosition = _scrollPos;
 		}
+		
+		private function _saveHistory():void {
+			if (adminCommandInput.text != "") {
+				_commandHistory.unshift(adminCommandInput.text);
+				_nHistory = 0;
+			}
+		}
+		
+		private function _handleKeyDown(e:KeyboardEvent):void {
+			if (e.keyCode == 38) {
+				if (_nHistory < _commandHistory.length) _nHistory += 1;
+				if (_nHistory > 0) e.currentTarget.text = _commandHistory[_nHistory - 1];
+			} else if (e.keyCode == 40) {
+				if (_nHistory > 1) _nHistory -= 1;
+				if (_nHistory > 0) e.currentTarget.text = _commandHistory[_nHistory - 1];
+			}
+		}
 		  
 		  private function _close():void {
 			  PopUpManager.removePopUp(this);
@@ -37,7 +58,7 @@
 		
     </mx:Script>
 	<mx:HBox>
-		<mx:TextInput id="adminCommandInput" width="300"/>
+		<mx:TextInput id="adminCommandInput" width="300" enter="_saveHistory();" />
 		<mx:CheckBox id="scrollCheck" label="Auto-scroll" selected="true" />
 		<mx:Spacer width="50"/>
 		<mx:Button id="broadcastButton" label="Broadcast"/>
