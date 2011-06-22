@@ -40,6 +40,7 @@ package{
 	public static var GAME:String = 'game';
 	public static var START:String = 'start';
 	public static var RESULT:String = 'result';
+	public static var SETRATE:String = 'setrate';
 	public static var ADMIN_MONITOR:String = 'admin_monitor';
     
     public static var STATE_CONNECTED:int     = 0;
@@ -401,8 +402,8 @@ package{
 				if (line.match(/##\[OFFLINE_PM\] \+OK$/)) {
 			        _dispatchServerMessageEvent(OFFLINE_PM);
                 }
-			  } else if (line.match(/^##\[SETRATE\] \+OK/)) {
-				  Alert.show("Rate successfully updated.");
+			  } else if ((match = line.match(/^##\[SETRATE\](\d+)$/))) {
+				  dispatchEvent(new ServerMessageEvent(SETRATE, match[1]));
 			  }
               break;
             case STATE_GAME_WAITING:

@@ -257,6 +257,7 @@
 	  _client.addEventListener(CsaShogiClient.START, _handleStart);
 	  _client.addEventListener(CsaShogiClient.GAME, _handleGame);
 	  _client.addEventListener(CsaShogiClient.RESULT, _handleResult);
+	  _client.addEventListener(CsaShogiClient.SETRATE, _handleSetRate);
 	  _client.addEventListener(CsaShogiClient.ADMIN_MONITOR, _handleAdminMonitor);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
@@ -1941,6 +1942,12 @@
 		return function(e:MouseEvent):void {
 			_client.setRate(InfoFetcher.rank_thresholds[_playerInfoWindows[name].setRateCombo.selectedIndex + 5]);
 		}
+	}
+	
+	private function _handleSetRate(e:ServerMessageEvent):void {
+		_users[login_name].rating = parseInt(e.message);
+		userListGrid.dataProvider = _user_list;
+		Alert.show("Rate updated successfully.");
 	}
 	
 	private function _scrollDownUser():void {
