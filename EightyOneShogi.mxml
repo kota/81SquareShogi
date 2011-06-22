@@ -469,7 +469,7 @@
         if(watcher_data.match(/^##\[WATCHERS\] \+OK$/)){
           break;
         }
-        var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*) (\d+) (\d+)$/);
+        var match:Array = watcher_data.match(/^##\[WATCHERS\] (.*)$/);
         if (match && _users[match[1]]) _watcher_list.push(_users[match[1]]);
       }
       _watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
@@ -557,8 +557,7 @@
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
-		var game_id:String = e.message.split(",")[0];
-		var tokens:Array = game_id.split("+");
+		var tokens:Array = e.message.split("+");
 		if (mainViewStack.selectedIndex == 1) {
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
@@ -570,8 +569,8 @@
 		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
 		_updateList(userListGrid, _user_list);
 		_refreshWaiterList();
-		_games[game_id] = new Game(game_id, _users[tokens[2]], _users[tokens[3]]);
-		_game_list.unshift(new ObjectProxy(_games[game_id]));
+		_games[e.message] = new Game(e.message, _users[tokens[2]], _users[tokens[3]]);
+		_game_list.unshift(new ObjectProxy(_games[e.message]));
 		_updateList(gameListGrid, _game_list);
 	}
 	
@@ -1205,33 +1204,32 @@
 	
 //--------------------------------------------------------------------------------------------------------------------------------- GAME ROOM 
 	private function _handleEnter(e:ServerMessageEvent):void {
-		var tokens:Array = e.message.split(",");
-		if (tokens[0] == board.playerInfos[0].name) {
+		if (e.message == board.playerInfos[0].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(tokens[0] + " entered.\n", 2, "#000000", true);
+			_writeUserMessage(e.message + " entered.\n", 2, "#000000", true);
 			board.name_labels[board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
-		} else if (tokens[0] == board.playerInfos[1].name) {
+		} else if (e.message == board.playerInfos[1].name) {
 			if (_disconnectAlertWindow) {
 				_disconnectAlertWindow.terminate();
 				_disconnectAlertWindow = null;
 			}
-			_writeUserMessage(tokens[0] + " entered.\n", 2, "#666666", true);
+			_writeUserMessage(e.message + " entered.\n", 2, "#666666", true);
 			board.name_labels[1 - board.my_turn].setStyle("color", 0x000000);
 			if (_chat_sound2_play) _sound_door_open.play();
 		} else {
 			if (mainViewStack.selectedIndex != 2) return;
-			_writeUserMessage(tokens[0] + " entered.\n", 2, "#008800");
-			if (_chat_sound2_play && _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _sound_door_open.play();
-			if (_users[tokens[0]]) _watcher_list.push(_users[tokens[0]]);
+			_writeUserMessage(e.message + " entered.\n", 2, "#008800");
+			if (_chat_sound2_play && _favorite_list.indexOf(e.message.toLowerCase()) >= 0) _sound_door_open.play();
+			if (_users[e.message]) _watcher_list.push(_users[e.message]);
 			_watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 			watcherListGrid.dataProvider = _watcher_list;
 			watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
 		}
-		if (board.isStudyHost && board.post_game) _sendStudy(tokens[0]);
+		if (board.isStudyHost && board.post_game) _sendStudy(e.message);
 	}
 	
 	private function _handleLeave(e:ServerMessageEvent):void {

@@ -323,7 +323,11 @@ package{
           dispatchEvent(new ServerMessageEvent(CHAT,line + "\n"));
         } else if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO),T/)){
           dispatchEvent(new ServerMessageEvent(MOVE, line));
-		} else if ((match = line.match(/^##\[ENTER\](.+)$/))) {
+		} else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
+		  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
+		} else if ((match = line.match(/^##\[LOBBY_OUT\]\[(.*)\]$/))) {
+		  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
+		} else if ((match = line.match(/^##\[ENTER\]\[(.+)\]$/))) {
 			dispatchEvent(new ServerMessageEvent(ENTER, match[1]));
 		} else if ((match = line.match(/^##\[LEAVE\]\[(.+)\]/))) {
 			dispatchEvent(new ServerMessageEvent(LEAVE, match[1]));
@@ -378,10 +382,6 @@ package{
 					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) _current_state = STATE_CONNECTED;
 			        _dispatchServerMessageEvent(RECONNECT);
                 }
-			  } else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
-				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
-			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
-				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
 			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(GAME, match[1]));
 			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
@@ -414,15 +414,11 @@ package{
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));
-			  } else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
-				  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
-			  } else if ((match = line.match(/^##\[LOBBY_OUT\](.*)$/))) {
-				  dispatchEvent(new ServerMessageEvent(LOBBY_OUT, match[1]));
 			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(GAME, match[1]));
-			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
+			  } else if ((match = line.match(/^##\[START\]\[(.*)\]$/))) {
 				  dispatchEvent(new ServerMessageEvent(START, match[1]));
-			  } else if ((match = line.match(/^##\[CHALLENGE\](.+)$/))) {
+			  } else if ((match = line.match(/^##\[CHALLENGE\]\[(.+)\]$/))) {
 				  dispatchEvent(new ServerMessageEvent(CHALLENGE, match[1]));
 			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
