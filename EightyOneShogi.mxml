@@ -256,6 +256,7 @@
 	  _client.addEventListener(CsaShogiClient.LOBBY_OUT, _handleLobbyOut);
 	  _client.addEventListener(CsaShogiClient.START, _handleStart);
 	  _client.addEventListener(CsaShogiClient.GAME, _handleGame);
+	  _client.addEventListener(CsaShogiClient.RESULT, _handleResult);
 	  _client.addEventListener(CsaShogiClient.ADMIN_MONITOR, _handleAdminMonitor);
 	  _api.addEventListener(ApiClient.KIFU_SEARCH, _handleKifuSearch);
 	  _api.addEventListener(ApiClient.KIFU_DETAIL, _handleKifuDetail);
@@ -926,16 +927,14 @@
 	  radioKifuReplay.enabled = true;
 	  radioKifuListen.enabled = true;
       if (e.message.indexOf("LOSE") >= 0) {
-		if (board.playerInfos[0].rank != "-" && board.playerInfos[1].rank == "-") _openGameResultWindow(-2);
-		else _openGameResultWindow(-1);
+		_openGameResultWindow(-1);
 		board.infoBoxes[1].setStyle('borderThickness', 2);
 		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
 		board.isStudyHost = true;
-		if (board.playerInfos[0].rank == "-" && board.playerInfos[1].rank != "-") _openGameResultWindow(2);
-		else _openGameResultWindow(1);
+		_openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
 		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
@@ -983,7 +982,12 @@
 	private function _openGameResultWindow(v:int):void {
 	  _gameResultWindow = GameResultWindow(PopUpManager.createPopUp(board, GameResultWindow, false));
       PopUpManager.centerPopUp(_gameResultWindow);
-	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn], board.playerInfos[1 - board.my_turn], board.kifu_list.length < 5 ? "hoge+nr_hoge-0-30+hoge1+hoge2+111" : _game_name, v);
+	  _gameResultWindow.initWindow(board.playerInfos[board.my_turn].name, board.playerInfos[1 - board.my_turn].name, v);
+	}
+	
+	private function _handleResult(e:ServerMessageEvent):void {
+		var tokens:Array = e.message.split(",");
+		if (_gameResultWindow) _gameResultWindow.readRateChange(parseInt(tokens[0]), parseInt(tokens[1]), parseInt(tokens[2]), parseInt(tokens[3]));
 	}
 
     private function _handleMove(e:ServerMessageEvent):void {

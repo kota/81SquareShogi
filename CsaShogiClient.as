@@ -39,6 +39,7 @@ package{
 	public static var LOBBY_OUT:String = 'lobby_out';
 	public static var GAME:String = 'game';
 	public static var START:String = 'start';
+	public static var RESULT:String = 'result';
 	public static var ADMIN_MONITOR:String = 'admin_monitor';
     
     public static var STATE_CONNECTED:int     = 0;
@@ -390,6 +391,8 @@ package{
 				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
 			  } else if ((match = line.match(/^##\[DECLINE\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(DECLINE, match[1]));
+			  } else if ((match = line.match(/^##\[RESULT\](.*)$/))) {
+				  dispatchEvent(new ServerMessageEvent(RESULT, match[1]));
               } else if (line.match(/^LOGOUT:completed/)) {
 				_current_state = STATE_NOT_CONNECTED;
 				dispatchEvent(new ServerMessageEvent(LOGOUT_COMPLETED, "Logout Completed"));

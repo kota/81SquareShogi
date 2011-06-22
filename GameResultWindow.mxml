@@ -1,13 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="335" height="105" fontSize="12" horizontalAlign="center" headerHeight="0"
-                      borderThicknessBottom="3" borderThicknessLeft="3" borderThicknessRight="3" borderThicknessTop="3"
-                      cornerRadius="0" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg">
+                      borderThicknessBottom="3" borderThicknessLeft="3" borderThicknessRight="3" borderThicknessTop="3" click="_stopAndRemove();"
+                      cornerRadius="0" horizontalScrollPolicy="off" verticalScrollPolicy="off" backgroundImage="{IMAGE_DIRECTORY}windowBg.jpg" alpha="0">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.TimerEvent;
 		  import flash.utils.Timer;
           import mx.controls.*;
           import mx.managers.PopUpManager;
+		  
+		  private static const WIN:String = "win";
+		  private static const LOSE:String = "lose";
+		  private static const DRAW:String = "draw";
 
 		  [Bindable]
 		  private var _main:String;
@@ -25,74 +29,80 @@
 		  private var _opponent_rank:String;
 		  private var _dy:int;
 		  private const IMAGE_DIRECTORY:String = "http://www.81squareuniverse.com/dojo/images/";
+		  private var _resultType:String;
 		  private var _afterTimer:Timer = new Timer(500, 1);
-		  private var _closeTimer:Timer = new Timer(4000, 1);
-		  private var _fadeTimer:Timer = new Timer(50, 20);
+		  private var _closeTimer:Timer = new Timer(5000, 1);
+		  private var _fadeInTimer:Timer = new Timer(50, 10);
+		  private var _fadeOutTimer:Timer = new Timer(50, 20);
 		  
-		  public function initWindow(you:Object, opponent:Object, game_name:String, v:int):void {
-			  youAfter.visible = false;
-			  youRank.visible = false;
-			  opponentAfter.visible = false;
-			  opponentRank.visible = false;
-			  if (String(you.rating).match(/^\*/)) you.rating = parseInt(you.rating.substr(1));
-			  if (String(opponent.rating).match(/^\*/)) opponent.rating = parseInt(opponent.rating.substr(1));
-			  var match:Array = game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
-			  var multiply:Number = 1 + (Math.pow(parseInt(match[3]) / 300, 0.8) - 1) / (Math.pow(9, 0.8) -1);
-			  if (match[1] == "r") {
-				  var dif:int = InfoFetcher.ratingDif(you.rating, opponent.rating, multiply, v);
-			  } else {
-				  dif = 0;
-			  }
-			  
-			  _you_before = you.name + ": " + you.rating;
-			  _opponent_before = opponent.name + ": " + opponent.rating;
+		  public function initWindow(you:String, opponent:String, v:int):void {
+			  _you_before = you + ": ";
+			  _opponent_before = opponent + ": ";
 			  _you_rank = "";
 			  _opponent_rank = "";
+			  
 			  if (v > 0) {
-				  _dy = -2;
+				  _resultType = WIN;
 				  _main = "YOU WIN!";
 				  mainLabel.setStyle('color', 0xFF0000);
-				  var difL:int = v > 1 ? Math.round(dif / 2.0) : dif;
-				  _you_after = "-> " + (you.rating + dif) + " (+" + dif +")";
-				  _opponent_after = "-> " + (opponent.rating - difL) + " (-" + difL + ")";
-				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating + dif)) {
-					  _you_rank = "Rank Up!";
-					  youRank.setStyle('color', 0xFF0000);
-				  }
-				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating - difL)) {
-					  _opponent_rank = "Rank Down";
-					  opponentRank.setStyle('color', 0x0000FF);
-				  }
+				  _dy = - 2;
 			  } else if (v < 0) {
-				  _dy = 2;
+				  _resultType = LOSE;
 				  _main = "YOU LOST";
 				  mainLabel.setStyle('color', 0x0000FF);
-				  difL = v < -1 ? Math.round(dif / 2.0) : dif;
-				  _you_after = "-> " + (you.rating - difL) + " (-" + difL +")";
-				  _opponent_after = "-> " + (opponent.rating + dif) + " (+" + dif + ")";
-				  if (InfoFetcher.makeRankFromRating(you.rating) != InfoFetcher.makeRankFromRating(you.rating - difL)) {
-					  _you_rank = "Rank Down!";
-					  youRank.setStyle('color', 0x0000FF);
-				  }
-				  if (InfoFetcher.makeRankFromRating(opponent.rating) != InfoFetcher.makeRankFromRating(opponent.rating + dif)) {
-					  _opponent_rank = "Rank Up!";
-					  opponentRank.setStyle('color', 0xFF0000);
-				  }
+				  _dy = 2;
 			  } else {
-				  _dy = 0;
+				  _resultType = DRAW;
 				  _main = "DRAW";
 				  mainLabel.setStyle('color', 0x008800);
-				  _you_after = "-> " + you.rating;
-				  _opponent_after = "-> " + opponent.rating;
+				  _dy = 0;
 			  }
-			  _closeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _close);
-			  _afterTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _after);
-			  _fadeTimer.addEventListener(TimerEvent.TIMER, _fade);
-			  _fadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _remove);
-			  _closeTimer.start();
-			  _afterTimer.start();
+			_fadeInTimer.addEventListener(TimerEvent.TIMER, _fadeIn);
+			_fadeInTimer.start();
+			_fadeOutTimer.addEventListener(TimerEvent.TIMER, _fadeOut);
+			_fadeOutTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _remove);
+			_closeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _close);
+			_closeTimer.start();
 		  }
 		  
+		  public function readRateChange(you1:int, you2:int, opponent1:int, opponent2:int):void {
+			_you_before = _you_before + you1;
+			_opponent_before = _opponent_before + opponent1;
+			switch (_resultType) {
+				case WIN:
+					_you_after = "-> " + you2 + " (+" + (you2 - you1) +")";
+					_opponent_after = "-> " + opponent2 + " (-" + (opponent1 - opponent2) + ")";
+					if (InfoFetcher.makeRankFromRating(you1) != InfoFetcher.makeRankFromRating(you2)) {
+					  _you_rank = "Rank Up!";
+					  youRank.setStyle('color', 0xFF0000);
+					}
+					if (InfoFetcher.makeRankFromRating(opponent1) != InfoFetcher.makeRankFromRating(opponent2)) {
+					  _opponent_rank = "Rank Down";
+					  opponentRank.setStyle('color', 0x0000FF);
+					}
+					break;
+				case LOSE:
+					_you_after = "-> " + you2 + " (-" + (you1 - you2) +")";
+					_opponent_after = "-> " + opponent2 + " (+" + (opponent2 - opponent1) + ")";
+					if (InfoFetcher.makeRankFromRating(you1) != InfoFetcher.makeRankFromRating(you2)) {
+					  _you_rank = "Rank Down";
+					  youRank.setStyle('color', 0x0000FF);
+					}
+					if (InfoFetcher.makeRankFromRating(opponent1) != InfoFetcher.makeRankFromRating(opponent2)) {
+					  _opponent_rank = "Rank Up!";
+					  opponentRank.setStyle('color', 0xFF0000);
+					}
+					break;
+				case DRAW:
+					_you_after = "-> " + you2;
+					_opponent_after = "-> " + opponent2;
+			}
+			youBefore.visible = true;
+			opponentBefore.visible = true;
+			_afterTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _after);
+			_afterTimer.start();
+		}
+
 		  private function _after(e:TimerEvent):void {
 			  youAfter.visible = true;
 			  youRank.visible = true;
@@ -101,15 +111,38 @@
 		  }
 		  
           private function _close(e:TimerEvent):void {
-			  _fadeTimer.start();
+			  _fadeOutTimer.start();
           }
 		  
-		  private function _fade(e:TimerEvent):void {
+		  private function _fadeIn(e:TimerEvent):void {
+			  this.alpha += 0.1;
+		  }
+		  
+		  private function _fadeOut(e:TimerEvent):void {
 			  this.alpha -= 0.05;
 			  this.y += _dy;
 		  }
 		  
-		  private function _remove(e:TimerEvent):void{
+		  private function _remove(e:TimerEvent):void {
+			  _stopAndRemove();
+		  }
+		  
+		  private function _stopAndRemove():void{
+			  youBefore.visible = false;
+			  opponentBefore.visible = false;
+			  youAfter.visible = false;
+			  youRank.visible = false;
+			  opponentAfter.visible = false;
+			  opponentRank.visible = false;
+			  _fadeInTimer.stop();
+			  _fadeOutTimer.stop();
+			  _closeTimer.stop();
+			  _afterTimer.stop();
+			_fadeInTimer.removeEventListener(TimerEvent.TIMER, _fadeIn);
+			_fadeOutTimer.removeEventListener(TimerEvent.TIMER, _fadeOut);
+			_fadeOutTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _remove);
+			_closeTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _close);
+			_afterTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _after);
 			  PopUpManager.removePopUp(this);
 		  }
 
@@ -120,14 +153,14 @@
 	<mx:Label id="mainLabel" text="{_main}" fontSize="19" fontWeight="bold" paddingTop="5" />
 	<mx:VBox horizontalAlign="left">
 		<mx:HBox>
-			<mx:Label text="{_you_before}"/>
-			<mx:Label id="youAfter" text="{_you_after}" fontWeight="bold" showEffect="showEffect" />
-			<mx:Label id="youRank" text="{_you_rank}" fontWeight="bold" showEffect="showEffect"/>
+			<mx:Label id="youBefore" text="{_you_before}" visible="false" />
+			<mx:Label id="youAfter" text="{_you_after}" fontWeight="bold" showEffect="showEffect" visible="false" />
+			<mx:Label id="youRank" text="{_you_rank}" fontWeight="bold" showEffect="showEffect" visible="false" />
 		</mx:HBox>
 		<mx:HBox>
-			<mx:Label text="{_opponent_before}"/>
-			<mx:Label id="opponentAfter" text="{_opponent_after}" fontWeight="bold" showEffect="showEffect"/>
-			<mx:Label id="opponentRank" text="{_opponent_rank}" fontWeight="bold" showEffect="showEffect" />
+			<mx:Label id="opponentBefore" text="{_opponent_before}" visible="false" />
+			<mx:Label id="opponentAfter" text="{_opponent_after}" fontWeight="bold" showEffect="showEffect" visible="false" />
+			<mx:Label id="opponentRank" text="{_opponent_rank}" fontWeight="bold" showEffect="showEffect" visible="false" />
 		</mx:HBox>
 	</mx:VBox>
 </mx:TitleWindow>
