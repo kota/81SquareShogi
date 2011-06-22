@@ -588,15 +588,15 @@
 		  _client.decline("Already starting a game.");
 		  return;
 	  }
+	  var challenger:User = _users[e.message];
+	  if (!challenger) {
+		  _client.decline("Data could not sent properly.");
+		  return;
+	  }
       _sound_challenger.play();
       _challengerAlertWindow = ChallengerAlertWindow(PopUpManager.createPopUp(this, ChallengerAlertWindow, true));
       PopUpManager.centerPopUp(_challengerAlertWindow);
-	  _challengerAlertWindow.challenger = e.message.split(",")[0];
-	  _challengerAlertWindow.country = InfoFetcher.country_names[e.message.split(",")[1]];
-	  _challengerAlertWindow.countryCode = String(parseInt(e.message.split(",")[1]) + 1000).substr(1);
-	  _challengerAlertWindow.rate = e.message.split(",")[2];
-	  _challengerAlertWindow.rank = InfoFetcher.makeRankFromRating(parseInt(e.message.split(",")[2]));
-	  _challengerAlertWindow.rankColor = InfoFetcher.makeColorFromRating(parseInt(e.message.split(",")[2]));
+	  _challengerAlertWindow.challenger = new ObjectProxy(challenger);
       _challengerAlertWindow.addEventListener("accept", _handleChallengerAcceptButton);
 	  _challengerAlertWindow.addEventListener("decline", _handleChallengerRejectButton);
 	  _challengerAlertWindow.startTimer();

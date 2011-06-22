@@ -5,21 +5,10 @@
 		  import flash.events.Event;
           import mx.controls.*;
           import mx.managers.PopUpManager;
+		  import mx.utils.ObjectProxy;
 
-		  private static const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  [Bindable]
-		  public var challenger:String;
-		  [Bindable]
-		  public var country:String;
-		  [Bindable]
-		  public var countryCode:String;
-		  [Bindable]
-		  public var rank:String;
-		  [Bindable]
-		  public var rankColor:uint;
-		  [Bindable]
-		  public var rate:String;
-		  
+		  public var challenger:ObjectProxy;
 		  public var _timer:Timer = new Timer(1000, 20);
 		  [Bindable]
 		  public var remainTime:int = 20;
@@ -56,10 +45,6 @@
 			dispatchEvent(new Event("accept"));
             PopUpManager.removePopUp(this);
           }
-		  
-		  private function _swfError():void {
-//			  flagLoader.source = IMAGE_DIRECTORY + "flags_m/err.swf";
-		  }
 
         ]]>
     </mx:Script>
@@ -67,15 +52,15 @@
 		<mx:HBox>
 			<mx:VBox paddingRight="20">
 				<mx:HBox>
-					<mx:Label text="■" fontSize="14" color="{rankColor}"/>
+					<mx:Label text="■" fontSize="14" color="{challenger.rankColor}"/>
 					<mx:Spacer width="-18"/>
-					<mx:Label text="{challenger}" fontSize="16" fontWeight="bold" />
+					<mx:Label text="{challenger.name}" fontSize="16" fontWeight="bold" />
 				</mx:HBox>
-				<mx:Label text="  {parentApplication.lan.country}: {country}"/>
+				<mx:Label text="  {parentApplication.lan.country}: {challenger.country}"/>
 			</mx:VBox>
-			<mx:SWFLoader width="56" height="44" source="{IMAGE_DIRECTORY}flags_m/{countryCode}.swf" ioError="_swfError();" />
+			<mx:SWFLoader width="56" height="44" source="{challenger.flag_m}"/>
 		</mx:HBox>
-		<mx:Label text="  {parentApplication.lan.rate}: {rate}, ({rank})"/>
+		<mx:Label text="  {parentApplication.lan.rate}: {challenger.rateStr}, ({challenger.rank})"/>
 	</mx:VBox>
 	<mx:VBox width="100%" horizontalAlign="center" paddingTop="5">
 		<mx:HBox>
