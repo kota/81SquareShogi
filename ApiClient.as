@@ -158,8 +158,8 @@ package{
 			}
 		}
 		
-		public function rankingSearch(type:String):void {
-			_rankingService.url = "http://" + _host + ":" + _port + "/api/players/ranking/" + type;
+		public function rankingSearch(country:String, type:String):void {
+			_rankingService.url = "http://" + _host + ":" + _port + "/api/players/ranking/" + country + "/" + type;
 			_rankingService.resultFormat = "e4x";
 			trace("send: " + _rankingService.url);
 			_rankingService.send();

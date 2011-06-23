@@ -35,6 +35,7 @@
 		public static var country_codes:Array;
 		public static var country_names:Array;
 		public static var country_names3:Array;
+		public static var country_list_names:Array;
 		public static var country_maps:Array;
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA',
 																				'PM', 'PR', 'PI', 'PO', 'PS', 'PK', 'PZ', 'PT', 'PN', 'PA', 'PJ',
@@ -88,6 +89,7 @@
 			country_codes = new Array();
 			country_names = new Array();
 			country_names3 = new Array();
+			country_list_names = new Array('== ALL ==');
 			country_maps = new Array();
 			cheaters = new Array();
 			banned = new Array();
@@ -123,6 +125,7 @@
 							country_codes.push(parseInt(line.split("\t")[0]));
 							country_names[parseInt(line.split("\t")[0])] = line.split("\t")[1];
 							country_names3[parseInt(line.split("\t")[0])] = line.split("\t")[2];
+							country_list_names.push(line.split("\t")[1]);
 							country_maps.push(line.split("\t")[3]);
 							break;
 						case "CHEAT":

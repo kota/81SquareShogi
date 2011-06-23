@@ -310,6 +310,8 @@
 	  this.addEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
 	  if (InfoFetcher.isAdminLv1(login_name) || InfoFetcher.isAdminLv2(login_name)) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
+	  rankingCountryList.dataProvider = InfoFetcher.country_list_names;
+	  rankingCountryList.selectedIndex = 0;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
       _keepAliveTimer = new Timer(81000);
@@ -2521,6 +2523,7 @@
 					  break;
 				  }
 			}
+			if (player.name.toLowerCase() == player.login) player.login = player.name;
 			_player_search_list.push(player);
 		}
 		playerSearchGrid.dataProvider = _player_search_list;
@@ -2545,7 +2548,8 @@
 			case 4:
 				type = "total"; break;
 		}
-		_api.rankingSearch(type);
+		var country:String = rankingCountryList.selectedIndex == 0 ? "*" : String(rankingCountryList.selectedIndex);
+		_api.rankingSearch(country, type);
 	}
 	
 	private function _handleRankingSearch(e:Event):void {
@@ -2580,7 +2584,6 @@
 				'rate':parseInt(playerXML.rate),
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
-			if (player.name.toLowerCase() == player.login) player.login = player.name;
 			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
 				  if (player.login == InfoFetcher.titleUser[i]) {
@@ -2588,6 +2591,7 @@
 					  break;
 				  }
 			}
+			if (player.name.toLowerCase() == player.login) player.login = player.name;
 			if (_infoFetcher.cheaters.indexOf(player.login) >= 0) { // Temporarily
 				listed = false;
 				num -= 1;
@@ -2608,6 +2612,7 @@
 			}
 			listed = true;
 		}
+		if (num == 0) { Alert.show("Data not found."); return;}
 		winRankingGrid.dataProvider = _ranking_wins_list;
 		totalRankingGrid.dataProvider = _ranking_total_list;
 		streakRankingGrid.dataProvider = _ranking_streak_list;
@@ -3295,11 +3300,13 @@
 					</mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>
-			<mx:HBox label="{lan.view_rankings}" horizontalAlign="center" paddingTop="10" paddingLeft="10" width="700" height="530">
-				<mx:VBox horizontalAlign="center" paddingRight="20">
+			<mx:HBox label="{lan.view_rankings}" horizontalAlign="center" horizontalGap="20" paddingTop="10" paddingLeft="10" width="750" height="530">
+				<mx:VBox horizontalAlign="center">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
 					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
 					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+					<mx:Spacer height="20"/>
+					<mx:List id="rankingCountryList" width="120" height="300"/>
 				</mx:VBox>
 				<mx:TabNavigator id="rankingTabNavigator" paddingTop="8" paddingLeft="8" width="580" height="480" change="_rankingTabChange();">
 					<mx:VBox label="{lan.rate}">
