@@ -100,7 +100,7 @@
 			  if (!_pr) _pr = "";
 			  _pr = _pr.replace(/\r\n/g, "\n");
 			  if (_pr.match(/^\[object/)) _pr = "";
-			  _rating = player.rate;
+			  _rating = parseInt(player.rate);
 			  _maxRating = player["max-rate"];
 			  _rank = InfoFetcher.makeRankFromRating(_rating);
 			  _wins = player.wins;

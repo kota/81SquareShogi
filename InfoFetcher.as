@@ -47,7 +47,8 @@
 																				'女流名人', '女流王座', '女流王位', '女流王将', '倉敷藤花', 'マイナビ');
 		public static const pie_chart_order:Array = new Array("opposition_static", "yagura", "bishop_exchange", "side_pawn", "double_wing", "unknown", "double_ranging", "opposing_rook", "3rd_file_rook", "4th_file_rook", "central_rook");
 		public static const radar_chart_order:Array = new Array("opposition_static","yagura_and_bishop","side_and_wing","unknown","double_ranging","opposition_ranging");
-		public static var admins:Array = new Array('kota', 'hidetchi', 'test1', 'test2', 'test3');
+		public static const adminsLv1:Array = new Array('kota', 'hidetchi', 'test1', 'test2', 'test3');
+		public static const adminsLv2:Array = new Array('berni314', 'tkaneko', 'test4');
 		
 		public var cheaters:Array;
 		public var banned:Array;
@@ -682,6 +683,14 @@
 				if (tournament_codes[i] == s) return tournament_name_jp[i];
 			}
 			return "";
+		}
+		
+		public static function isAdminLv1(login:String):Boolean {
+			return (adminsLv1.indexOf(login.toLowerCase()) >= 0);
+		}
+		
+		public static function isAdminLv2(login:String):Boolean {
+			return (adminsLv2.indexOf(login.toLowerCase()) >= 0);
 		}
 		
 	}

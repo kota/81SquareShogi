@@ -15,7 +15,11 @@
 		  
 		  private function _initWindow():void {
 			  this.addEventListener("move", _checkMove);
-			  adminCommandInput.addEventListener(KeyboardEvent.KEY_DOWN, _handleKeyDown);
+			  if (InfoFetcher.adminsLv1.indexOf(parentApplication.login_name.toLowerCase()) >= 0) {
+				  adminCommandInput.enabled = true;
+				  broadcastButton.enabled = true;
+				  adminCommandInput.addEventListener(KeyboardEvent.KEY_DOWN, _handleKeyDown);
+			  }
 		  }
 		  
 		  private function _checkMove(e:Event):void {
@@ -58,10 +62,10 @@
 		
     </mx:Script>
 	<mx:HBox>
-		<mx:TextInput id="adminCommandInput" width="300" enter="_saveHistory();" />
+		<mx:TextInput id="adminCommandInput" width="300" enter="_saveHistory();" enabled="false" />
 		<mx:CheckBox id="scrollCheck" label="Auto-scroll" selected="true" />
 		<mx:Spacer width="50"/>
-		<mx:Button id="broadcastButton" label="Broadcast"/>
+		<mx:Button id="broadcastButton" label="Broadcast" enabled="false" />
 	</mx:HBox>
 	<mx:TextArea id="logTextArea" width="800" height="500" fontFamily="Lucida console" fontSize="11" wordWrap="false" backgroundColor="0x000000" color="0xbbbbbb" />
 

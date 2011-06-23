@@ -308,7 +308,7 @@
 	  clock.start();
 	  this.addEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
 	  this.addEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
-	  if (InfoFetcher.admins.indexOf(login_name.toLowerCase()) >= 0) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
+	  if (InfoFetcher.isAdminLv1(login_name) || InfoFetcher.isAdminLv2(login_name)) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
 	  _infoFetcher.addEventListener("loadComplete", _handleLoadOption);
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
@@ -1020,7 +1020,7 @@
 		var sender:String = e.message.substr(8).match(/^\[(.+?)\]\s.*$/)[1];
 		var match:Array;
 		if ((match = e.message.match(/\[\#\#BROADCAST\](.+)$/))) {
-			if (InfoFetcher.admins.indexOf(sender.toLowerCase()) >= 0) {
+			if (InfoFetcher.isAdminLv1(sender)) {
 				_writeUserMessage("###BROADCAST###\n" + match[1] + "\n", 1, "#FF0000", true);
 				_writeUserMessage("###BROADCAST###\n" + match[1] + "\n", 2, "#FF0000", true);
 				_sound_chat3.play();
