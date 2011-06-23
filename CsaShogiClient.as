@@ -386,7 +386,7 @@ package{
                 }
 			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(GAME, match[1]));
-			  } else if ((match = line.match(/^##\[START\](.*)$/))) {
+			  } else if ((match = line.match(/^##\[START\]\[(.*)\]$/))) {
 				  dispatchEvent(new ServerMessageEvent(START, match[1]));
 			  } else if ((match = line.match(/^##\[ACCEPT\](.*)$/))) {
 				  dispatchEvent(new ServerMessageEvent(ACCEPT, match[1]));
