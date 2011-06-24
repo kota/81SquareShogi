@@ -68,6 +68,9 @@
 		  private var _streak_best:int = 0;
 		  [Bindable]
 		  private var _pr:String = "";
+		  private var _cityName:String;
+		  private var _cityLatitude:Number;
+		  private var _cityLongitude:Number;
 
 		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private var _mapLoaded:Boolean = false;
@@ -115,6 +118,9 @@
 			  _rank34 = InfoFetcher.makeRank34FromExp(_exp);
 			  _percentage = (_wins + _losses == 0) ? 0 : (_wins / (_wins + _losses)*100);
 			  _percentage34 = (_wins34 + _losses34 == 0) ? 0 : (_wins34 / (_wins34 + _losses34) * 100);
+			  _cityName = player["city-name"];
+			  _cityLatitude = player["city-lat"];
+			  _cityLongitude = player["city-lon"];
 			  if (_mapLoaded) _drawMap();
 		  }
 
@@ -139,8 +145,16 @@
 				  map.enableScrollWheelZoom();
 				   var marker:Marker = new Marker(
 					   new LatLng(tokens[3],tokens[4]),
-					   new MarkerOptions({ fillStyle: new FillStyle({color: 0x00ff00}), radius: 5, tooltip: tokens[5], strokeStyle: new StrokeStyle({thickness: 1.5, color: 0x008800})}));
+					   new MarkerOptions({ fillStyle: new FillStyle({color: 0x00ff00}), radius: 4, tooltip: ("Capital: " + tokens[5]), strokeStyle: new StrokeStyle({thickness: 1, color: 0x008800})}));
 				   map.addOverlay(marker);
+			  }
+			  if (_cityLatitude && _cityLongitude) {
+				  if (_cityLatitude >= -90 && _cityLatitude <= 90 && _cityLongitude >= -180 && _cityLongitude <= 180) {
+					   marker = new Marker(
+						   new LatLng(_cityLatitude, _cityLongitude),
+						   new MarkerOptions({ fillStyle: new FillStyle({color: 0xffff00}), radius: 6, tooltip: ("I'm here: " + _cityName), strokeStyle: new StrokeStyle({thickness: 1.5, color: 0x000000})}));
+					   map.addOverlay(marker);
+				  }
 			  }
 		  }
 		  
