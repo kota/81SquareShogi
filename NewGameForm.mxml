@@ -3,6 +3,7 @@
 					paddingLeft="10" paddingBottom="8" paddingRight="5" paddingTop="5">
 	    <mx:Script>
         <![CDATA[
+		  import flash.events.Event;
           import mx.controls.*;
           import mx.managers.PopUpManager;
           import mx.collections.ArrayCollection;
@@ -104,6 +105,10 @@
 				handicap = tournament_name.selectedItem.type;
 				tournament = "--" + tournament_name.selectedItem.code;
 				break;
+			  case 6:
+				dispatchEvent(new Event("study_room"));
+				PopUpManager.removePopUp(this);
+				return;
               default:
                 break;
             }
@@ -120,6 +125,9 @@
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
             nonrated_handicap.enabled = timeSetting.selectedValue == 4;
 			tournament_name.enabled = timeSetting.selectedValue == 5;
+			study_handicap.enabled = timeSetting.selectedValue == 6;
+			blackName.enabled = timeSetting.selectedValue == 6;
+			whiteName.enabled = timeSetting.selectedValue == 6;
           }
 
         ]]>
@@ -140,6 +148,14 @@
     <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
+    </mx:HBox>
+	<mx:RadioButton groupName="timeSetting" label="Study Room (VENUS only)" value="6" fontSize="11"/>
+	<mx:HBox paddingLeft="50">
+		<mx:ComboBox id="study_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
+    </mx:HBox>
+	<mx:HBox paddingLeft="50">
+		<mx:TextInput id="blackName" text="Black" width="65" enabled="false"/>
+		<mx:TextInput id="whiteName" text="White" width="65" enabled="false"/>
     </mx:HBox>
     <mx:HBox paddingTop="15">
 	    <mx:Button id="Submit" click="submit();" label="{parentApplication.lan.wait}"/> 

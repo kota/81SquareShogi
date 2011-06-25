@@ -58,7 +58,7 @@
 	import Game;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/06/18";
+	public const VERSION:String = "ver.2011/06/24";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -561,19 +561,32 @@
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
+		if (mainViewStack.selectedIndex != 1) return;
 		var tokens:Array = e.message.split("+");
-		if (mainViewStack.selectedIndex == 1) {
+		if (tokens[0] == "STUDY") {
+			var game_info:Array = tokens[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+			_writeUserMessage(game_info[2] + " CREATED STUDY ROOM.\n", 1, "#008800");
+			if (_chat_sound1_play) {
+				if (_favorite_list.indexOf(game_info[2].toLowerCase()) >= 0) _sound_game_start.play();
+				else _sound_chat1.play();
+			}
+			var black:User = new User(tokens[2]);
+			black.setFromStudy();
+			var white:User = new User(tokens[3]);
+			white.setFromStudy();
+			_games[e.message] = new Game(e.message, black, white);
+		} else {
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
 				else _sound_chat1.play();
 			}
+			if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
+			if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
+			_updateList(userListGrid, _user_list);
+			_refreshWaiterList();
+			_games[e.message] = new Game(e.message, _users[tokens[2]], _users[tokens[3]]);
 		}
-		if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
-		if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
-		_updateList(userListGrid, _user_list);
-		_refreshWaiterList();
-		_games[e.message] = new Game(e.message, _users[tokens[2]], _users[tokens[3]]);
 		_game_list.unshift(new ObjectProxy(_games[e.message]));
 		_updateList(gameListGrid, _game_list);
 	}
@@ -955,13 +968,6 @@
 			  board.isStudyHost = false;
 		  }
 	  }
-	  if (board.isStudyHost) {
-		_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
-		board.onListen = false;
-		radioKifuReplay.selected = true;
-		radioKifuListen.enabled = false;
-		sidePanel.setStyle('borderColor', _panelReplayColor);
-	  }
 	  allowWatcherChatCheckbox.visible = false;
       closeButton.enabled = true;
       resignButton.enabled = false;
@@ -977,7 +983,7 @@
       kifuDataGrid.selectable = true;
       kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
       kifuDataGrid.callLater(_scrollDownKifu); //kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
-	  if (board.isStudyHost) _sendStudy();
+	  if (board.isStudyHost) _toggleHostStatus(true);
       board.endGame();
 	  _status_disconnected = false;
     }
@@ -1091,15 +1097,7 @@
 			}
 			trace(sender + "-" + match[1] + "-" + match[2] + "-" + match[3]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
-			if (match[1] == login_name) {
-				board.isStudyHost = true;
-				_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
-				board.onListen = false;
-				radioKifuReplay.selected = true;
-				radioKifuListen.enabled = false;
-				sidePanel.setStyle('borderColor', _panelReplayColor);
-				_sendStudy();
-			}
+			if (match[1] == login_name) _toggleHostStatus(true);
 		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##REMATCH\]$/))) {
 			if (match[1] == board.playerInfos[0].name) {
 				board.rematch[0] = true;
@@ -1302,6 +1300,7 @@
     private function _handleMonitor(e:ServerMessageEvent):void {
       var kifuMove:Object = new Object();
 	  var end_game:Boolean = false;
+	  var study_room:Boolean = false;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
 	  if (_watch_game != null) board.monitor(e.message, _watch_game);
 	  if (_impasseStatusWindow) {
@@ -1343,6 +1342,10 @@
 		  kifuMove.move = "Repetition Draw";
 		  kifuMove.moveKIF = "千日手";
 		  board.kifu_list.push(kifuMove);
+      } else if (e.message.indexOf("#SUSPEND") >= 0) {
+		  end_game = true;
+		  study_room = true;
+          _writeUserMessage("Game suspended.\n", 2, "#DD0088");
       }
 	  if (board.onListen || !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
 		  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
@@ -1363,8 +1366,12 @@
 				board.infoBoxes[board.my_turn == Kyokumen.GOTE ? 0 : 1].setStyle('borderThickness', 2);
 				board.infoBoxes[board.my_turn == Kyokumen.GOTE ? 0 : 1].setStyle('borderColor', 0xFF0000);
 			}
-			_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
-			if (_end_sound_play) _sound_win.play();
+			if (study_room) {
+				if (_watch_game.isStudyHost(login_name)) _toggleHostStatus(true);
+			} else {
+				_writeUserMessage("### Game End ###\n", 2, "#DD0088", true);
+				if (_end_sound_play) _sound_win.play();
+			}
 			board.endGame();
 	  } else {
 		  var match:Array;
@@ -1451,9 +1458,14 @@
 		if (_so.data.rule_total) nonrated_total.selectedIndex = _so.data.rule_total;
 		if (_so.data.rule_byoyomi) nonrated_byoyomi.selectedIndex = _so.data.rule_byoyomi;
 		if (_so.data.rule_handicap) nonrated_handicap.selectedIndex = _so.data.rule_handicap;
+		addEventListener("study_room", _handleCreateStudyRoom);
 		addEventListener(GameRuleEvent.RULE_SELECTED,_handleRuleSelected);
       }
     }
+	
+	private function _handleCreateStudyRoom(e:Event):void {
+		_client.study(e.target.study_handicap.selectedItem.data, e.target.blackName.text, e.target.whiteName.text, "*");
+	}
   
     private function _stopWaiting():void {
 	  _waiting = false;
@@ -1665,7 +1677,7 @@
 	private function _watchDialog():void {
 		if (_game_name) return;
 		_watch_game = gameListGrid.selectedItem;
-		if (_watch_game.black.name == login_name || _watch_game.white.name == login_name) {
+		if (!_watch_game.id.match(/^STUDY/) && (_watch_game.black.name == login_name || _watch_game.white.name == login_name)) {
 			Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
 		} else {
 		    if (_status_disconnected) {
@@ -2829,6 +2841,16 @@
 		} else {
 			board.addArrow(fromType, from, to, _arrow_color, "", Board.ARROWS_SELF, true);
 		}
+	}
+	
+	private function _toggleHostStatus(onoff:Boolean):void {
+		board.isStudyHost = true;
+		_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
+		board.onListen = false;
+		radioKifuReplay.selected = true;
+		radioKifuListen.enabled = false;
+		sidePanel.setStyle('borderColor', _panelReplayColor);
+		_sendStudy();
 	}
 	
 	private function _sendStudy(sendTo:String = null):void {

@@ -101,6 +101,13 @@ package
 			this.idle = false;
 		}
 		
+		public function setFromStudy():void {
+			rating = 0;
+			country_code = 0;
+			wins = 0;
+			losses = 0;
+		}
+		
 		public function get country():String {
 			return InfoFetcher.country_names[country_code];
 		}

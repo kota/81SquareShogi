@@ -69,7 +69,7 @@ package
 		}
 		
 		public function get statusMark():String {
-			if (status == "game") {
+			if (status == "game" || status == "suspend") {
 				return String(moves);
 			} else {
 				return "End";
@@ -77,6 +77,7 @@ package
 		}
 		
 		public function get description():String {
+			if (id.match(/^STUDY/)) return "STUDY";
 			var game_info:Array = game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 			if (game_info[2].match(/\-\-..$/)) {
 				return InfoFetcher.fetchTournamentJp(game_info[2].substr(game_info[2].length - 2, 2));
@@ -123,10 +124,12 @@ package
 		}
 		
 		public function nameColor(turn:int):uint {
+			if (id.match(/^STUDY/)) return 0x999999;
 			return isIn[turn] ? 0x000000 : 0x999999;
 		}
 		
 		public function flagFilter(turn:int):ColorMatrixFilter {
+			if (id.match(/^STUDY/)) return filterGrey;
 			return isIn[turn] ? filterDefault : filterGrey;
 		}
 		
@@ -135,6 +138,15 @@ package
 				return "underline";
 			} else {
 				return undefined
+			}
+		}
+		
+		public function isStudyHost(name:String):Boolean {
+			if (id.match(/^STUDY/)) {
+				var game_info:Array = game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
+				return name == game_info[2];
+			} else {
+				return false;
 			}
 		}
 		

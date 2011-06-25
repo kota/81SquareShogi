@@ -133,6 +133,9 @@ package{
 		}
 	}
 	
+	public function study(handicap:String, black:String, white:String, moves:String):void {
+		send("%%%STUDY " + handicap + " " + black + " " + white + " " + moves);
+	}
 	
 	public function accept():void {
 		send("ACCEPT");
@@ -381,7 +384,7 @@ package{
 					if (match[1] == _login_name) _my_turn = Kyokumen.GOTE;
 				} else if (line.match(/##\[RECONNECT\]\[.*\] \+OK/)) {
 					_current_state = STATE_GAME;
-					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/)) _current_state = STATE_CONNECTED;
+					if (_buffers[RECONNECT].match(/##\[RECONNECT\]\[.+\]\s#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|SUSPEND)/)) _current_state = STATE_CONNECTED;
 			        _dispatchServerMessageEvent(RECONNECT);
                 }
 			  } else if ((match = line.match(/^##\[GAME\](.*)$/))) {
