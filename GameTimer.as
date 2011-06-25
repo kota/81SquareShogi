@@ -219,22 +219,13 @@ package {
 					//_timer.stop();
 				}
 			} else if (_byoyomi_flag) {
-				if (_time_left % 10 == 0 && _time_left <= 30) {
-					if (soundType == 2) {
-						_voices[9 + int((_byoyomi - _time_left)/10)].play();
-					}
+				if (soundType == 1) {
+					if ((_time_left >= 1 && _time_left <= 5) || _time_left == 7 || _time_left == 9) _sound_timer.play();
+				} else if (soundType == 2) {
+					if (_time_left == 10 || _time_left == 20 || _time_left == 30) _voices[9 + int((_byoyomi - _time_left) / 10)].play();
+					else if (_time_left >= 1 && _time_left <= 9) _voices[10 - _time_left].play();
 				}
-				if(_time_left == 10){
-					_box.setStyle('backgroundColor', 0xFF5500);
-					if (soundType == 1) _sound_timer.play();
-				}
-				if (_time_left <= 9 && _time_left >= 1) {
-					if (soundType == 1 && _time_left <= 5) {
-						_sound_timer.play();
-					} else if (soundType == 2) {
-						_voices[10 - _time_left].play();
-					}
-				}
+				if (_time_left == 10) _box.setStyle('backgroundColor', 0xFF5500);
 			}
 			_display();
 		}
