@@ -667,8 +667,6 @@
 		  chatMessage2.enabled = true;
 		  board.viewing = false;
 	  }
-	  board.post_game = false;
-	  board.isStudyHost = false;
 
       var match:Array = e.message.match(/^START:(.*)\+(.*)-([0-9]*)-([0-9]*)/);
       _game_name = e.message.split(":")[1];
@@ -732,8 +730,6 @@
 	  _waiting = false;
 	  _challenging = false;
 	  _rematching = false;
-	  board.post_game = false;
-	  board.isStudyHost = false;
 
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
@@ -915,8 +911,7 @@
       if (e.message.indexOf("TIME_UP") >= 0) {
 		if (GameTimer.soundType == 2) _sound_timeup.play();
         board.timeout();
-        //_writeUserMessage("Time up.\n",2);
-		if (board.position.turn == board.my_turn) _sendAutoChat("Time out.");
+        _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
         kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
         kifuMove.moveKIF = "切れ負け";
         board.kifu_list.push(kifuMove);
@@ -1065,7 +1060,7 @@
 		} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
 			if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
 		} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
-			_handleStudy(match[1], match[2]);
+			_handleStudy(sender, match[1], match[2]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
 			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
@@ -1097,7 +1092,16 @@
 			}
 			trace(sender + "-" + match[1] + "-" + match[2] + "-" + match[3]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
+			board.isSubHost = false;
 			if (match[1] == login_name) _toggleHostStatus(true);
+			else _writeUserMessage("Study Host status given to " + match[1] + "\n", 2, "#008800", false);
+		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
+			if (match[1] == login_name) {
+				_writeUserMessage("You are given Study sub-host status.\n", 2, "#008800", true);
+				board.isSubHost = true;
+			} else {
+				_writeUserMessage("Study Sub-host status given to " + match[1] + "\n", 2, "#008800", false);
+			}
 		} else if ((match = e.message.substr(12).match(/^\[(.+)\]\s\[##REMATCH\]$/))) {
 			if (match[1] == board.playerInfos[0].name) {
 				board.rematch[0] = true;
@@ -1141,7 +1145,7 @@
 		var name:String = match[1];
 		var message:String = match[2];
 		if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
-			_handleStudy(match[1], match[2]);
+			_handleStudy(name, match[1], match[2]);
 			return;
 		}
 		if (_ignore_list.indexOf(name.toLowerCase()) >= 0) return;
@@ -1170,14 +1174,15 @@
 		}
 	}
 	
-	private function _handleStudy(base:int, branch:String):void {
+	private function _handleStudy(name:String,  base:int, branch:String):void {
 		if (!board.studyOn) board.studyOn = true;
 		board.clearArrows(Board.ARROWS_PUBLIC);
-		if (board.isStudyHost) return;
+		if (board.isStudyHost && name == login_name) return;
 		board.studyOrigin = base;
 		if (branch == "*") {
 			if (board.study_list.length > 0) board.study_list = new Array();
-			if (!(board.post_game && board.onListen)) return;
+			if (!(board.post_game && board.onListen) && !board.isStudyHost) return;
+			board.cancelSquareSelect();
 			if (board.kifu_list_self.length > 0) {
 				board.kifu_list_self = new Array();
 				kifuDataGrid.dataProvider = board.kifu_list;
@@ -1186,12 +1191,15 @@
 			board.replayMoves(base, true);
 			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
 		} else {
+			var old_length:int = board.study_list.length;
 			board.study_list = branch.split("/");
-			if (!(board.post_game && board.onListen)) return;
+			if (!(board.post_game && board.onListen) && !board.isStudyHost) return;
+			board.cancelSquareSelect();
 			if (board.kifu_list_self.length > 0) board.kifu_list_self = new Array();
 			for (var i:int = 0; i <= base; i++) board.kifu_list_self.push(board.kifu_list[i]);
 			board.replayMoves(base, true);
-			for (i = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false, false);
+			for (i = 0; i < board.study_list.length; i++) board.makeMove(board.study_list[i] + ",T0", false, (i == board.study_list.length - 1) && (i >= old_length - 1));
+			if (name != login_name && board.study_list.length >= old_length) board.showLastSquareLabel(name);
 			kifuDataGrid.dataProvider = board.kifu_list_self;
 			kifuDataGrid.selectedIndex = board.kifu_list_self.length - 1;
 			kifuDataGrid.scrollToIndex(kifuDataGrid.selectedIndex);
@@ -1238,7 +1246,6 @@
 	}
 	
 	private function _handleLeave(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex != 2) return;
 		if (board.playerInfos[0] == null) return;
 		if (e.message == board.playerInfos[0].name) {
 			_writeUserMessage(e.message + " left.\n", 2, "#000000", true);
@@ -1678,7 +1685,11 @@
 		if (_game_name) return;
 		_watch_game = gameListGrid.selectedItem;
 		if (!_watch_game.id.match(/^STUDY/) && (_watch_game.black.name == login_name || _watch_game.white.name == login_name)) {
-			Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
+			if (_waiting) {
+				Alert.show("Stop waiting for game before you reconnect.");
+			} else {
+				Alert.show("Reconnect to this game?", "Reconnect", Alert.YES | Alert.NO, gameListGrid, _reconnect);
+			}
 		} else {
 		    if (_status_disconnected) {
 			    Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
@@ -1723,8 +1734,6 @@
 		 allowWatcherChatCheckbox.visible = false;
 		 board.superior = _watch_game.superior;
 		_monitoring = true;
-		board.post_game = false;
-		board.isStudyHost = false;
 		_client.monitorOn(_game_name);
 		_client.watchers(_game_name);
 		  logoutButton.enabled = false;
@@ -1786,7 +1795,7 @@
 	  if (name == login_name) {
 		  _playerInfoWindows[name].selfCommands.includeInLayout = true;
 		  _playerInfoWindows[name].selfCommands.visible = true;
-		  if (user.wins + user.losses < 10) {
+		  if (user.isProvisional) {
 			  _playerInfoWindows[name].setRateButton.addEventListener(MouseEvent.CLICK, _setRate(name));
 			  _playerInfoWindows[name].setRateButton.enabled = true;
 			  _playerInfoWindows[name].setRateCombo.dataProvider = InfoFetcher.rank_names.slice(5, 17);
@@ -1796,18 +1805,20 @@
 	  } else {
 		  _playerInfoWindows[name].othersCommands.includeInLayout = true;
 		  _playerInfoWindows[name].othersCommands.visible = true;
-		  if (user.status == "game_waiting"  && user.game_name.indexOf(name) >= 0) {
+		  if (!user.statusMark.match(/(G|P)/)) {
 			  _playerInfoWindows[name].challenge.addEventListener(MouseEvent.CLICK, _handleChallenge(name));
 			  _playerInfoWindows[name].challenge.enabled = true;
 		  }
-		  if (user.status != "game") {
-			  _playerInfoWindows[name].invite.addEventListener(MouseEvent.CLICK, _handleInvite(name));
-			  _playerInfoWindows[name].invite.enabled = true;
-		  }
 		  _playerInfoWindows[name].favorite.addEventListener(MouseEvent.CLICK, _handleFavorite(name));
-		  if (user.titleName != "admin") {
+		  if (!InfoFetcher.isAdminLv1(name)) {
 			  _playerInfoWindows[name].ignore.addEventListener(MouseEvent.CLICK, _handleIgnore(name));
 			  _playerInfoWindows[name].ignore.enabled = true;
+		  }
+		  if (_game_name && board.isStudyHost) {
+			  if (_watcher_list.indexOf(user) >= 0 || name == board.playerInfos[0].name || name == board.playerInfos[1].name){
+				_playerInfoWindows[name].allowStudy.addEventListener(MouseEvent.CLICK, _handleAllowStudy(name));
+				_playerInfoWindows[name].allowStudy.enabled = true;
+			  }
 		  }
 	  }
 	  _playerInfoWindows[name].callLater(_playerInfoWindows[name].scrollDown);
@@ -1889,8 +1900,9 @@
 			  return;
 		  }
 		  _challengeUser = _users[name];
-		  if (_challengeUser == null || !(_challengeUser.statusMark.match(/W/))) {
-			  Alert.show("The opponent is not waiting for a game.", lan.error);
+		  if (!_challengeUser) return;
+		  if (!(_challengeUser.statusMark.match(/W/))) {
+			  Alert.show("Opponent is not waiting for a game. Invite to your game?", "Invite?", Alert.YES | Alert.NO, e.target.parent.parent, _handleInviteAlert);
 		  } else {
 			var match:Array = _challengeUser.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 			var total:int = parseInt(match[3]) / 60 ;
@@ -1910,22 +1922,22 @@
 
     private function _handleChallengeAlert(e:CloseEvent):void{
       if (e.detail == Alert.YES) {
-      _challenging = true;
-      _writeUserMessage("Challenging..... (Must wait for 20 seconds max)\n", 1, "#008800");
-      _client.challenge(_challengeUser.name);
+		  _challenging = true;
+		  _writeUserMessage("Challenging " + _challengeUser.name + "..... (Must wait for 20 seconds max)\n", 1, "#008800");
+		  _client.challenge(_challengeUser.name);
       } else if (e.detail == Alert.CANCEL) {
       }
     }
 	
-	private function _handleInvite(name:String):Function {
-		return function(e:MouseEvent):void{
+	private function _handleInviteAlert(e:CloseEvent):void {
+		if (e.detail == Alert.YES) {
 			if (!_waiting) {
 				Alert.show("Create a game first.", lan.error);
 			} else {
 				var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 				var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
 				var hc:String = InfoFetcher.gameType(match[1]);
-				_sendPrivateChat(name, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
+				_sendPrivateChat(_challengeUser.name, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
 			}
 		}
 	}
@@ -1949,6 +1961,12 @@
 			}
 			_ignore_list.push(name.toLowerCase());
 			Alert.show("Added to ignore list temporarily.\nGo to Option Window to set it permanent or cancel.");
+		}
+	}
+	
+	private function _handleAllowStudy(name:String):Function {
+		return function(e:MouseEvent):void {
+			if (_game_name && board.isStudyHost) _client.gameChat(_game_name, "[##SUBHOST_ON]" + name);
 		}
 	}
 	
@@ -2810,10 +2828,10 @@
 
     private function _playerMove(from:Point, to:Point, promote:Boolean):void {
 	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
-	  if (!board.onListen) {
+	  if (!board.onListen || (board.onListen && board.isSubHost)) {
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.cancelSquareSelect();
-		  if (board.isStudyHost) {
+		  if (board.isStudyHost || (board.onListen && board.isSubHost)) {
 			  if (!String(kifuDataGrid.selectedItem.num).match(/^\*/)) _sendAutoChat("Launched study mode at #" + kifuDataGrid.selectedIndex);
 		  }
 		  var n:int = kifuDataGrid.selectedIndex;
@@ -2821,7 +2839,7 @@
 			for (var i:int = 0; i <= n; i++) board.kifu_list_self.push(board.kifu_list[i]);
 		  }
 		  while (board.kifu_list_self.length - 1 > n) board.kifu_list_self.pop();
-		  if (board.post_game || board.viewing) {
+		  if (board.isStudyHost) {
 			  board.makeMove(str + ",T0", false, true);
 		  } else {
 			  board.makeMove(str + ",T0", false, false);
@@ -2829,7 +2847,7 @@
 		  kifuDataGrid.dataProvider = board.kifu_list_self;
 		  kifuDataGrid.selectedIndex = board.kifu_list_self.length - 1;
 		  kifuDataGrid.scrollToIndex(board.kifu_list_self.length - 1);
-		  if (board.isStudyHost) _sendStudy();
+		  if (board.isStudyHost || (board.onListen && board.isSubHost)) _sendStudy();
 	  } else {
 		  _client.move(str);
 	  }

@@ -2,10 +2,13 @@ package {
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.TimerEvent;
+	import flash.text.TextField;
 	import flash.utils.Timer;
 	import mx.containers.Canvas;
 	import mx.controls.Image;
+	import mx.core.IUIComponent;
 	import mx.core.UIComponent;
+	import flash.text.TextFormat;
 
   public class Square extends Canvas {
     private var _coord_x:int;
@@ -14,6 +17,10 @@ package {
 	private var _stayTimer:Timer = new Timer(150, 1);
 	private var _dead:Boolean = false;
 	private var _movableMarker:UIComponent = new UIComponent();
+	private var _studyLabelUIC:UIComponent = new UIComponent();
+	private var _studyLabel:TextField;
+	private var _studyLabelHoldTimer:Timer = new Timer(1500, 1);
+	private var _studyLabelFadeTimer:Timer = new Timer(100, 10);
 
     public static const KOMA_WIDTH:int = 43;
     public static const KOMA_HEIGHT:int = 48;
@@ -41,6 +48,9 @@ package {
       _coord_x = x;
       _coord_y = y;
 	  _stayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleStay);
+	  _studyLabelHoldTimer.addEventListener(TimerEvent.TIMER, _handleTimerHold);
+	  _studyLabelFadeTimer.addEventListener(TimerEvent.TIMER, _handleTimerFade);
+	  _studyLabelFadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerFadeComplete);
     }
 	
 	public function hidePiece():void {
@@ -57,6 +67,43 @@ package {
 	
 	public function hideMovable():void {
 		if (contains(_movableMarker)) removeChild(_movableMarker);
+	}
+	
+	public function showLabel(name:String):void {
+		_studyLabelHoldTimer.reset();
+		_studyLabelFadeTimer.reset();
+		if (_studyLabel == null) {
+			_studyLabel = new TextField();
+			_studyLabel.x = 0;
+			_studyLabel.y = -3;
+			_studyLabel.autoSize = "left";
+			_studyLabel.selectable = false;
+			_studyLabel.defaultTextFormat = new TextFormat("Meiryo UI", 10, 0x00AA00, true);
+			_studyLabelUIC.addChild(_studyLabel);
+		}
+		hideLabel();
+		_studyLabel.text = name;
+		_studyLabel.alpha = 1.0;
+		addChild(_studyLabelUIC);
+		_studyLabelHoldTimer.start();
+	}
+	
+	public function hideLabel():void {
+		if (contains(_studyLabelUIC)) removeChild(_studyLabelUIC);
+	}
+	
+	private function _handleTimerHold(e:TimerEvent):void {
+		_studyLabelHoldTimer.reset();
+		_studyLabelFadeTimer.start();
+	}
+	
+	private function _handleTimerFade(e:TimerEvent):void {
+		_studyLabel.alpha -= 0.1;
+	}
+	
+	private function _handleTimerFadeComplete(e:TimerEvent):void {
+		_studyLabelFadeTimer.reset();
+		hideLabel();
 	}
 	
 	public function mouseOver():void {

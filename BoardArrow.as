@@ -42,7 +42,8 @@
 			_to = new Point(to.x, to.y);
 			_color = color;
 			_sender = sender;
-			_nameTag.htmlText = "<b>" + _sender + "</b>";
+			_nameTag.defaultTextFormat = new TextFormat("Meiryo UI", 10, _color, true);
+			_nameTag.text = sender;
 			_nameTagHoldTimer.addEventListener(TimerEvent.TIMER, _handleTimerHold);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER, _handleTimerFade);
 			_nameTagFadeTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleTimerFadeComplete);
@@ -84,7 +85,6 @@
 //			_nameTag.antiAliasType = AntiAliasType.ADVANCED;
 			_nameTag.x = to.x + 10;
 			_nameTag.y = to.y - 16;
-			_nameTag.textColor = _color;
 			_nameTag.autoSize = "left";
 			_nameTag.selectable = false;
 			_sprite.addChild(_nameTag);

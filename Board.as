@@ -165,6 +165,7 @@ package  {
 	public var post_game:Boolean = false;
 	public var isPlayer:Boolean = false;
 	public var isStudyHost:Boolean = false;
+	public var isSubHost:Boolean = false;
 	public var onListen:Boolean = false;
 	public var viewing:Boolean = false;
 	public var studyOrigin:int;
@@ -655,6 +656,7 @@ package  {
 	  since_last_move = 0;
 	  studyOn = false;
 	  isStudyHost = false;
+	  isSubHost = false;
 	  clearArrows(ARROWS_PUBLIC);
 	  clearArrows(ARROWS_SELF);
 	  cancelSquareSelect();
@@ -865,7 +867,7 @@ package  {
 		  _arrow_from = null;
 		  return;
 	  }
-      if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
+      if((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen || (onListen && isSubHost)) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))){
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
 		if (e.currentTarget.dead) return;
@@ -973,7 +975,7 @@ package  {
 	}
 
     private function _handMouseUpHandler(e:MouseEvent):void{
-      if ((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
+      if ((_in_game && _position.turn == _my_turn && !_move_sent) || !onListen ||  (onListen && isSubHost)) { // || (post_game && (isWinner || (isLoser && onListen && _position.turn == _my_turn && study_list.length > 0)))) {
 		if (e.currentTarget.parent != handBoxes[_my_turn == Kyokumen.SENTE ? _position.turn : (1 - _position.turn)]) return;
         if(_from == null){
 		  if (_last_from_square != null) {
@@ -1086,6 +1088,10 @@ package  {
 			}
 		}
 	}
+	
+	public function showLastSquareLabel(name:String):void {
+		_last_to_square.showLabel(name);
+	}
 
 	private function _showMovableSquares(from:Point):void {
 		var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(from));
@@ -1116,7 +1122,7 @@ package  {
 		  if (!_position) return;
 		  var mv:Movement;
 		  if (_last_to_square != null){
-		  	_last_to_square.setStyle('backgroundColor',undefined);
+		  	_last_to_square.setStyle('backgroundColor', undefined);
 		  	_last_to_square = null;
 		  }
 		  if (_last_from_square != null){
@@ -1129,6 +1135,7 @@ package  {
 		  _position.loadFromString(_position.initialPositionStr);
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {
+				  if (actual ? i >= kifu_list.length : i >= kifu_list_self.length) break;
 			      var mvtmp:Movement;
 				  mvtmp = actual ? _position.generateMovementFromString(kifu_list[i].moveStr) : _position.generateMovementFromString(kifu_list_self[i].moveStr);
 				  if (!mvtmp) continue;

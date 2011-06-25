@@ -225,7 +225,7 @@ package {
 					if (_time_left == 10 || _time_left == 20 || _time_left == 30) _voices[9 + int((_byoyomi - _time_left) / 10)].play();
 					else if (_time_left >= 1 && _time_left <= 9) _voices[10 - _time_left].play();
 				}
-				if (_time_left == 10) _box.setStyle('backgroundColor', 0xFF5500);
+				if (_time_left == 9) _box.setStyle('backgroundColor', 0xFF5500);
 			}
 			_display();
 		}

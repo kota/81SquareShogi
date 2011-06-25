@@ -139,10 +139,10 @@
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
 		<mx:Button id="detail" label="Detail" click="_openDetail();" />
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
+			<mx:Button id="challenge" click="_close();" label="{parentApplication.lan.challenge}" enabled="false" />
 			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="Favorite" />
 			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{parentApplication.lan.ignore}" enabled="false"/>
-			<mx:Button id="challenge" click="_close();" label="{parentApplication.lan.challenge}" enabled="false" />
-			<mx:Button id="invite" label="{parentApplication.lan.invite}" enabled="false"/>
+			<mx:Button id="allowStudy" label="Allow" toolTip="Allow to move pieces in study mode" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
 			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
