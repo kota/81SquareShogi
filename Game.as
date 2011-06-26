@@ -106,6 +106,8 @@ package
 		public function get maxRating():int {
 			if (!isIn[0] || !isIn[1]) {
 				return Math.max(black.rating, white.rating) - 3000;
+			} else if (game_name.match(/\-\-..\-\d/)) {
+				return Math.max(black.rating, white.rating) + 3000;
 			} else {
 				return Math.max(black.rating, white.rating);
 			}
