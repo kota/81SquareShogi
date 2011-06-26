@@ -806,7 +806,7 @@ package  {
 			  mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
 			  kifu_list.push(mv);
 		  }
-		  Object(kifu_list[kifu_list.length - 1]).comment = move.comment;
+		  kifu_list[kifu_list.length - 1].comment = move.comment;
         }
       }
     }

@@ -35,6 +35,7 @@ package  {
 		private var _time:int = 0;
 		private var _special:int = 0;
 		private var _branch:Boolean = false;
+		private var _comment:String = "";
 		
 		public function Movement(n:int = 0) {
 			_n = n;
@@ -213,6 +214,12 @@ package  {
 		}
 		public function set branch(v:Boolean):void{
 			this._branch = v;
+		}
+		public function get comment():String{
+			return this._comment;
+		}
+		public function set comment(v:String):void{
+			this._comment = v;
 		}
 
 	}
