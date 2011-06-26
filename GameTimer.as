@@ -137,10 +137,7 @@ package {
 			_time_left = _byoyomi_flag ? _byoyomi : _total;
 			_accumulated_time = 0;
 			_timeout_flag = false;
-			if (_byoyomi_flag) {
-				if (_byoyomi <= 10) _box.setStyle('backgroundColor',0xFF5500);
-					else _box.setStyle('backgroundColor',0xFFFF00);
-			}
+			if (_byoyomi_flag) _box.setStyle('backgroundColor',0xFFFF00);
 			else _box.setStyle('backgroundColor', 0xFFFFFF);
 			_arrows.visible = false;
 			_display();
@@ -150,8 +147,7 @@ package {
 			if(_timer.running){
 				_timer.stop();
 				if (_byoyomi_flag) {
-					if (_byoyomi <= 10) _box.setStyle('backgroundColor',0xFF5500);
-					else _box.setStyle('backgroundColor',0xFFFF00);
+					_box.setStyle('backgroundColor',0xFFFF00);
 					_time_left = _byoyomi;
 				}
 			}

@@ -93,7 +93,7 @@ package  {
 			if (_n == 0 || _special >= TIMEUP) return str;
 			do {
 				str += " ";
-			} while (str.length < 8);
+			} while (str.length < (listType == LIST_WESTERN ? 8 : 6));
 			return str + "(" + _time + ")";
 		}
 		

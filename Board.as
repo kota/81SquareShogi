@@ -125,8 +125,8 @@ package  {
 	private var _grabPieceCallback:Function;
 
     [Bindable]
-    public var kifu_list:Array;
-	public var kifu_list_self:Array;
+    public var kifu_list:Array = new Array();
+	public var kifu_list_self:Array = new Array();
 	private var _arrows:Array = new Array();
     private var _from:Point;
     private var _to:Point;
@@ -709,7 +709,7 @@ package  {
         makeMove(match[1] + ',' + time, true, true);
       } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) { //||
 		  time = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
-		  var mv:Movement = Movement(kifu_list.length);
+		  var mv:Movement = new Movement(kifu_list.length);
 		  mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(time.substr(1)));
 		  kifu_list.push(mv);
       } else {

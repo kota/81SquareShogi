@@ -1964,6 +1964,10 @@
 	//=========================================================
 	
 	//------------------------------------------------------------------------------------------------------------------------ BUTTONS
+	private function _watcherRefresh():void {
+		if (_game_name) _client.watchers(_game_name);
+	}
+	
 	private function _resignAlert():void {
 		if (board.my_turn == board.position.turn)
         Alert.show("","Resign?",Alert.YES|Alert.NO, controlPanel, _resign);
@@ -3195,15 +3199,15 @@
         <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2" horizontalGap="2">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
-			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" fontSize="9" click="_refresh();"/>
+			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_watcherRefresh();"/>
 			<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
 		  </mx:HBox>
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(watcherListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
-			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="72" paddingLeft="2" sortCompareFunction="_sortName" />
-			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="51" paddingLeft="2" sortCompareFunction="_sortCountry" />
-			  <mx:DataGridColumn dataField="rateStr" headerText="{lan.rate}" width="37" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
+			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="90" paddingLeft="2" sortCompareFunction="_sortName" />
+			  <mx:DataGridColumn itemRenderer="{playerListCountryRenderer}" headerText="{lan.country_short}" width="30" paddingLeft="2" sortCompareFunction="_sortCountry" />
+			  <mx:DataGridColumn dataField="rateStr" headerText="{lan.rate}" width="40" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
 			<mx:VBox height="453">
