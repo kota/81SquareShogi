@@ -811,75 +811,46 @@
 	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
 
 	  if (end_game) {
-		  var kifuMove:Object = new Object();
+		  var mv:Movement = new Movement(board.kifu_list.length);
 		  if (e.message.indexOf("#TIME_UP") >= 0) {
 			board.timeout();
 			_writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
-			kifuMove.num = board.kifu_list.length;
-			kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
-			kifuMove.moveKIF = "切れ負け";
-			board.kifu_list.push(kifuMove);
+			mv.setGameEnd(board.last_pos.turn, Movement.TIMEUP);
+			board.kifu_list.push(mv);
 		  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
 			  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
 		  } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
 			_writeUserMessage("Illegal Move.\n", 2, "#DD0088");
-			kifuMove.num = board.kifu_list.length;
-			kifuMove.move = "Illegal Move";
-			kifuMove.moveKIF = "相手の反則にて勝ち";
-			board.kifu_list.push(kifuMove);
+			mv.setGameEnd(board.last_pos.turn, Movement.ILLEGAL);
+			board.kifu_list.push(mv);
 		  } else if (e.message.indexOf("#RESIGN") >= 0) {
 			  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 		  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 			  _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
-			  kifuMove.num = board.kifu_list.length;
-			  kifuMove.move = "Perpetual Check";
-			  kifuMove.moveKIF = "王手千日手";
-			  board.kifu_list.push(kifuMove);		  
+			  mv.setGameEnd(board.last_pos.turn, Movement.OUTE_SENNICHITE);
+			  board.kifu_list.push(mv);		  
 		  } else if (e.message.indexOf("#SENNICHITE") >= 0) {
 			  _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
-			  kifuMove.num = board.kifu_list.length;
-			  kifuMove.move = "Repetition Draw";
-			  kifuMove.moveKIF = "千日手";
-			  board.kifu_list.push(kifuMove);
+			  mv.setGameEnd(board.last_pos.turn, Movement.SENNICHITE);
+			  board.kifu_list.push(mv);
 		  }
 		  board.post_game = true;
 		  radioKifuReplay.enabled = true;
 		  radioKifuListen.enabled = true;
 		  if (result == "LOSE") {
-//			if (board.playerInfos[0].rank != "-" && board.playerInfos[1].rank == "-") _openGameResultWindow(-2);
-//			else _openGameResultWindow(-1);
 			board.infoBoxes[1].setStyle('borderThickness', 2);
 			board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
 			_writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_lose.play();
 		  } else if (result == "WIN") {
-//			board.isStudyHost = true;
-//			if (board.playerInfos[0].rank == "-" && board.playerInfos[1].rank != "-") _openGameResultWindow(2);
-//			else _openGameResultWindow(1);
 			board.infoBoxes[0].setStyle('borderThickness', 2);
 			board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
 			_writeUserMessage("### You Win ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 		  } else if (result == "DRAW") {
-//			if (board.my_turn == Kyokumen.GOTE) board.isStudyHost = true;
-//			_openGameResultWindow(0);
 			_writeUserMessage("### Draw ###\n", 2, "#DD0088", true);
 			if (_end_sound_play) _sound_win.play();
 		  }
-//		  if (board.gameType == "hc") {
-//			  if (board.my_turn == Kyokumen.GOTE) {
-//				  board.isStudyHost = true;
-//			  } else {
-//				  board.isStudyHost = false;
-//			  }
-//		  }
-//		  if (board.isStudyHost) {
-//			_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
-//			board.onListen = false;
-//			radioKifuReplay.selected = true;
-//			radioKifuListen.enabled = false;
-//			sidePanel.setStyle('borderColor', _panelReplayColor);
-//		  }
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
 		  rematchButton.visible = true;
@@ -893,7 +864,6 @@
 		  kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
 		  kifuDataGrid.selectable = true;
 		  kifuDataGrid.selectedIndex = board.kifu_list.length;
-//		  if (board.isStudyHost) _sendStudy();
 		  board.endGame();
 	  } else {
 		  board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(board.since_last_move);
@@ -901,39 +871,34 @@
     }
 	
     private function _handleGameEnd(e:ServerMessageEvent):void {
-      var kifuMove:Object = new Object();
+      var mv:Movement = new Movement(board.kifu_list.length);
 	  if (_disconnectAlertWindow) {
 		  _disconnectAlertWindow.terminate();
 		  _disconnectAlertWindow = null;
 	  }
 	  board.post_game = true;
-      kifuMove.num = board.kifu_list.length;
       if (e.message.indexOf("TIME_UP") >= 0) {
 		if (GameTimer.soundType == 2) _sound_timeup.play();
         board.timeout();
         _writeUserMessage((board.position.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
-        kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
-        kifuMove.moveKIF = "切れ負け";
-        board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.position.turn, Movement.TIMEUP);
+        board.kifu_list.push(mv);
 	  } else if (e.message.indexOf("DISCONNECT") >= 0) {
         _writeUserMessage("Opponent disconnected.\n", 2, "#DD0088");
       } else if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
         _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
-          kifuMove.move = "Illegal Move";
-          kifuMove.moveKIF = "相手の反則にて勝ち";
-          board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.position.turn, Movement.ILLEGAL);
+          board.kifu_list.push(mv);
       } else if (e.message.indexOf("RESIGN") >= 0) {
         _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
       } else if (e.message.indexOf("OUTE_SENNICHITE") >= 0) {
         _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
-		kifuMove.move = "Perpetual Check";
-		kifuMove.moveKIF = "王手千日手";
-		board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.position.turn, Movement.OUTE_SENNICHITE);
+		board.kifu_list.push(mv);
       } else if (e.message.indexOf("SENNICHITE") >= 0) {
         _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
-		kifuMove.move = "Repetition Draw";
-		kifuMove.moveKIF = "千日手";
-		board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.position.turn, Movement.SENNICHITE);
+		board.kifu_list.push(mv);
       }
 	  radioKifuReplay.enabled = true;
 	  radioKifuListen.enabled = true;
@@ -997,12 +962,9 @@
     private function _handleMove(e:ServerMessageEvent):void {
 	  board.clearArrows(Board.ARROWS_PUBLIC);
 	  if (e.message.match(/%TORYO/)) {
-		  var kifuMove:Object = new Object;
-//		        _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
-			kifuMove.num = board.kifu_list.length;
-			kifuMove.move = (board.position.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + e.message.split(",T")[1] + ")";
-			kifuMove.moveKIF = "投了   ( " + int(e.message.split(",T")[1]/60) + ":" + e.message.split(",T")[1] % 60 + "/)";
-			board.kifu_list.push(kifuMove);
+		  var mv:Movement = new Movement(board.kifu_list.length);
+			mv.setGameEnd(board.position.turn, Movement.RESIGN, parseInt(e.message.split(",T")[1]));
+			board.kifu_list.push(mv);
 	  } else {
 		if (board.since_last_move > 0) {
 			board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(- board.since_last_move);
@@ -1305,7 +1267,7 @@
     }
 
     private function _handleMonitor(e:ServerMessageEvent):void {
-      var kifuMove:Object = new Object();
+      var mv:Movement = new Movement(board.kifu_list.length);
 	  var end_game:Boolean = false;
 	  var study_room:Boolean = false;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
@@ -1318,43 +1280,36 @@
 		end_game = true;
         board.timeout();
         _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black: " : "White: ") + "Time up.\n", 2, "#DD0088");
-		kifuMove.num = board.kifu_list.length;
-        kifuMove.move = (board.last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Time up";
-        kifuMove.moveKIF = "切れ負け";
-        board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.last_pos.turn, Movement.TIMEUP);
+        board.kifu_list.push(mv);
 	  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
 		  end_game = true;
 		  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
       } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
 		end_game = true;
         _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
-		kifuMove.num = board.kifu_list.length;
-		kifuMove.move = "Illegal Move";
-		kifuMove.moveKIF = "相手の反則にて勝ち";
-		board.kifu_list.push(kifuMove);
+		mv.setGameEnd(board.last_pos.turn, Movement.ILLEGAL);
+		board.kifu_list.push(mv);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
 		  end_game = true;
 		  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 		  end_game = true;
           _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
-		  kifuMove.num = board.kifu_list.length;
-		  kifuMove.move = "Perpetual Check";
-		  kifuMove.moveKIF = "王手千日手";
-		  board.kifu_list.push(kifuMove);		  
+		  mv.setGameEnd(board.last_pos.turn, Movement.OUTE_SENNICHITE);
+		  board.kifu_list.push(mv);		  
       } else if (e.message.indexOf("#SENNICHITE") >= 0) {
 		  end_game = true;
           _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
-		  kifuMove.num = board.kifu_list.length;
-		  kifuMove.move = "Repetition Draw";
-		  kifuMove.moveKIF = "千日手";
-		  board.kifu_list.push(kifuMove);
+		  mv.setGameEnd(board.last_pos.turn, Movement.SENNICHITE);
+		  board.kifu_list.push(mv);
       } else if (e.message.indexOf("#SUSPEND") >= 0) {
 		  end_game = true;
 		  study_room = true;
           _writeUserMessage("Game suspended.\n", 2, "#DD0088");
       }
-	  if (board.onListen || !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+//	  if (board.onListen || !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+	  if (board.onListen || !kifuDataGrid.selectedItem.branch) {
 		  var i:int = kifuDataGrid.selectedIndex >= 0 ? kifuDataGrid.selectedIndex : 0;
 		  kifuDataGrid.scrollToIndex(0);
 		  kifuDataGrid.dataProvider = board.kifu_list;
@@ -1497,6 +1452,7 @@
 		chatSound3CheckBox.selected = _chat_sound3_play;
 		grabPieceCheckBox.selected = board.hold_piece;
 		highlightMovableCheckBox.selected = board.highlight_movable;
+		RadioGroup3.selectedValue = Movement.listType;
 		pmAutoOpenCheckBox.selected = _pmAutoOpen;
 		acceptArrowsCheckBox.selected = _accept_arrows;
 		arrowColorPicker.selectedColor = _arrow_color;
@@ -2207,7 +2163,7 @@
 		  for (var i:int = 1; i < board.kifu_list.length ; i++) {
 			for (var j:int = 1; j <= 4 - String(i).length; j++) KIFDataText += " ";
 			KIFDataText += String(i) + " ";
-			KIFDataText += board.kifu_list[i].moveKIF + "\r\n";
+			KIFDataText += board.kifu_list[i].toKIFNotation() + "\r\n";
 		  }
 		  return KIFDataText;
 	}
@@ -2222,7 +2178,7 @@
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	board.clearArrows(Board.ARROWS_SELF);
-	if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+	if (kifuDataGrid.selectedItem.branch) {
 		board.replayMoves(n, false);
 	} else {
 		if (board.kifu_list_self.length > 0) {
@@ -2243,21 +2199,18 @@
 	board.clearArrows(Board.ARROWS_SELF);
     switch (i) {
       case -2:
-		kifuDataGrid.selectedIndex = 0;
-        break;
-      case -1:
-		if (kifuDataGrid.selectedIndex > 0) kifuDataGrid.selectedIndex--;
+	  case -1:
+		if (kifuDataGrid.selectedIndex == 0) return;
+		if (i == -1) kifuDataGrid.selectedIndex--;
+		else kifuDataGrid.selectedIndex = 0;
         break;
 	  case 1:
       case 2:
 		if (kifuDataGrid.selectedIndex < kifuDataGrid.dataProvider.length - 1 ) {
-			if (i == 1) {
-				kifuDataGrid.selectedIndex++;
-			} else {
-				kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
-			}
+			if (i == 1) kifuDataGrid.selectedIndex++;
+			else kifuDataGrid.selectedIndex = kifuDataGrid.dataProvider.length;
 		} else {
-			if (!board.post_game && !board.onListen && !board.viewing && !String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+			if (!board.post_game && !board.onListen && !board.viewing && !kifuDataGrid.selectedItem.branch) {
 				radioKifuListen.selected = true;
 				_toggleListen();
 			}
@@ -2271,9 +2224,8 @@
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	var n:int = kifuDataGrid.selectedIndex;
-	if (String(kifuDataGrid.selectedItem.num).match(/^\*/)) {
+	if (kifuDataGrid.selectedItem.branch) {
 		board.replayMoves(n, false);
-		if (board.isStudyHost) _sendStudy();
 	} else {
 		if (board.kifu_list_self.length > 0) {
 			board.kifu_list_self = new Array();
@@ -2283,8 +2235,8 @@
 			if (board.isStudyHost) _sendAutoChat("Quit study mode.");
 		}
 		board.replayMoves(n, true);
-		if (board.isStudyHost) _sendStudy();
 	}
+	if (board.isStudyHost) _sendStudy();
 	kifuDataGrid.scrollToIndex(n);
   }
 	
@@ -2676,6 +2628,7 @@
 	  _chat_sound3_play = _optionWindow.chatSound3CheckBox.selected;
 	  board.hold_piece = _optionWindow.grabPieceCheckBox.selected;
 	  board.highlight_movable = _optionWindow.highlightMovableCheckBox.selected;
+	  Movement.listType = int(_optionWindow.RadioGroup3.selectedValue);
 	  _pmAutoOpen = _optionWindow.pmAutoOpenCheckBox.selected;
 	  _accept_arrows = _optionWindow.acceptArrowsCheckBox.selected;
 	  _arrow_color = _optionWindow.arrowColorPicker.selectedColor;
@@ -2701,6 +2654,7 @@
 		urlVariables.chatSound2 = _chat_sound2_play;
 		urlVariables.chatSound3 = _chat_sound3_play;
 		urlVariables.grabPiece = board.hold_piece;
+		urlVariables.notation = Movement.listType;
 		urlVariables.pmAutoOpen = _pmAutoOpen;
 		urlVariables.acceptArrow = _accept_arrows;
 		urlVariables.arrowColor = _arrow_color;
@@ -2736,6 +2690,7 @@
 		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
 		_chat_sound3_play = _infoFetcher.userSettings.chatSound3;
 		board.hold_piece = _infoFetcher.userSettings.grabPiece;
+		Movement.listType = _infoFetcher.userSettings.notation;
 		_pmAutoOpen = _infoFetcher.userSettings.pmAutoOpen;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
@@ -2832,7 +2787,7 @@
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.cancelSquareSelect();
 		  if (board.isStudyHost || (board.onListen && board.isSubHost)) {
-			  if (!String(kifuDataGrid.selectedItem.num).match(/^\*/)) _sendAutoChat("Launched study mode at #" + kifuDataGrid.selectedIndex);
+			  if (!kifuDataGrid.selectedItem.branch) _sendAutoChat("Launched study mode at #" + kifuDataGrid.selectedIndex);
 		  }
 		  var n:int = kifuDataGrid.selectedIndex;
 		  if (board.kifu_list_self.length == 0) {
@@ -2874,10 +2829,11 @@
 	private function _sendStudy(sendTo:String = null):void {
 		var str:String = "";
 		for (var i:int = kifuDataGrid.selectedIndex; i >= 0; i--) {
-			if (String(kifuDataGrid.dataProvider[i].num).match(/^\*/)) {
-				str = "/" + kifuDataGrid.dataProvider[i].moveStr.split(",")[0] + str;
+			if (kifuDataGrid.dataProvider[i].branch) {
+				str = "/" + kifuDataGrid.dataProvider[i].toCSA() + str;
 			} else {
-				str = kifuDataGrid.dataProvider[i].num + str;
+				//str = kifuDataGrid.dataProvider[i].n + str;
+				str = i + str;
 				break;
 			}
 		}
@@ -3263,8 +3219,8 @@
 				  </mx:HBox>
 				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
 				 <mx:columns>
-				  <mx:DataGridColumn headerText="No." dataField="num" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
-				  <mx:DataGridColumn dataField="move"/>
+				  <mx:DataGridColumn headerText="No." dataField="numStr" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
+				  <mx:DataGridColumn headerText="Moves" dataField="toListString" fontFamily="Lucida Console" fontSize="11" />
 				 </mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>

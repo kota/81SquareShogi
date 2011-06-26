@@ -546,6 +546,7 @@
 			userSettings.pieceType34 = 0;
 			userSettings.highlightMovable = true;
 			userSettings.byoyomi = 1;
+			userSettings.notation = 0;
 			userSettings.acceptArrow = true;
 			userSettings.arrowColor = 0x00CC00;
 			userSettings.ignoreList = "";
@@ -562,6 +563,7 @@
 					if (userData[i].grabPiece == null) userSettings.grabPiece = true;
 					if (userData[i].pieceType34 == null) userSettings.pieceType34 = 0;
 					if (userData[i].highlightMovable == null) userSettings.highlightMovable = true;
+					if (userData[i].notation == null) userSettings.notation = 0;
 					break;
 				}
 			}

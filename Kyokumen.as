@@ -22,12 +22,7 @@ package  {
 		private var _promoteY2:int;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
-    private static const koma_western_names:Array = new Array('K','R','B','G','S','N','L','P','','D','H','','+S','+N','+L','T');
-    private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
 	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
-    private static const rank_western_names:Array = new Array('a','b','c','d','e','f','g','h','i');
-    private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
-    private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
 	private static const ALL_POINTS:int = 2 * (koma_impasse_points[0] + 27);
 	
 	public var initialPositionStr:String;
@@ -352,8 +347,9 @@ package  {
       }
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
-
-      return new Movement(_turn,from,to,koma,promote,capture);
+	  var mv:Movement = new Movement();
+	  mv.setFromKyokumen(_turn, from, to, koma, promote, capture, _last_to);
+	  return mv;
     }
 
     public function generateMovementFromString(moveStr:String):Movement {
@@ -370,19 +366,20 @@ package  {
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
       var koma:Koma = new Koma(koma_names.indexOf(moveStr.slice(5,7)),to.x,to.y,turn);
-			var match:Array = moveStr.match(/,T([0-9]*)/);
-			var time:int = parseInt(match[1]);
+	  var match:Array = moveStr.match(/,T([0-9]*)/);
+	  var time:int = parseInt(match[1]);
 	  if (from.x != HAND){
 	  	var promote:Boolean = getKomaAt(from).type != koma_names.indexOf(moveStr.slice(5,7));
 	  }
-      return new Movement(turn,from,to,koma,promote,capture,time);
+	  var mv:Movement = new Movement();
+	  mv.setFromKyokumen(turn, from, to, koma, promote, capture, _last_to, time);
+	  return mv;
     }
 		
 		public function move(mv:Movement):void {
-			var koma:Koma = mv.koma; 
 			//drop
 			if(mv.from.x == HAND){
-				_komadai[koma.ownerPlayer].removeKoma(koma.type);
+				_komadai[mv.koma.ownerPlayer].removeKoma(mv.koma.type);
 			}
 			//put piece into hand if capturing.
 			if (getKomaAt(mv.to) != null) {
@@ -396,11 +393,10 @@ package  {
 			//move piece
 			if(mv.from.x != HAND){
 				//_ban[mv.from.x - 1][mv.from.y - 1] = null;
-        setKomaAt(mv.from,null);
+				setKomaAt(mv.from,null);
 			}
-			koma.x = mv.to.x;
-			koma.y = mv.to.y;
-      setKomaAt(mv.to,koma);
+			setKomaAt(mv.to, new Koma(mv.koma.type, mv.to.x, mv.to.y, mv.koma.ownerPlayer));
+			_last_to = mv.to;
 			_turn = _turn == SENTE ? GOTE : SENTE;
 		}
 
@@ -472,50 +468,6 @@ package  {
 //			}
 //			return n;
 //		}
-		
-	public function generateWesternNotationFromMovement(mv:Movement):String {
-	  var notationStr:String = mv.turn == 0 ? "▲" : "△";
-	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
-	  notationStr += koma_western_names[originalType];
-	  if (mv.from.x == HAND) {
-	  	notationStr += "*";
-	  } else if (mv.capture) {
-	  	notationStr += "x";
-	  } else {
-	  	notationStr += "-";
-	  }
-	  if (mv.to.x != _last_to.x || mv.to.y != _last_to.y) {
-		notationStr += 9 - mv.to.x
-		notationStr += rank_western_names[mv.to.y];
-	  }
-	  _last_to = mv.to;
-	  if (mv.promote) {
-	  	notationStr += "+";
-	  } else if (mv.from.x != HAND && !mv.koma.isPromoted() && mv.koma.type != Koma.OU && mv.koma.type != Koma.KI){
-	  	if ( (1-mv.turn)*mv.from.y + mv.turn*(8-mv.from.y) <= 2 || (1-mv.turn)*mv.to.y + mv.turn*(8-mv.to.y) <=2 ) notationStr += "=";
-	  } 
-	  do {
-		  notationStr += " ";
-	  } while (notationStr.length < 7);
-	  notationStr += " (" + mv.time + ")";
-	  return notationStr;	
-	}
-	
-	public function generateKIFTextFromMovement(mv:Movement):String{
-	  var KIFStr:String = file_japanese_names[8 - mv.to.x];
-	  KIFStr += rank_japanese_names[mv.to.y];
-	  
-	  var originalType:int = mv.promote ? mv.koma.type - Koma.PROMOTE : mv.koma.type;
-	  KIFStr += koma_japanese_names[originalType];
-	  if (mv.from.x == HAND) {
-	  	KIFStr += "打";
-	  } else {
-	  	if (mv.promote) KIFStr += "成";
-	  	KIFStr += "(" + String(9 - mv.from.x) + String(mv.from.y + 1) + ")";
-	  }
-	  KIFStr += "   ( " + int(mv.time/60) + ":" + mv.time % 60 + "/)";
-	  return KIFStr;	
-	}
 
 	}
 	

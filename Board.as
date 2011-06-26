@@ -351,10 +351,8 @@ package  {
 	public function initializeKifu():void {
 	  kifu_list = new Array();
 	  kifu_list_self = new Array();
-      var kifuMove:Object = new Object();
-      kifuMove.num = "0";
-      kifuMove.move = "Start";
-      kifu_list.push(kifuMove);
+      var mv:Movement = new Movement();
+      kifu_list.push(mv);
 	  study_list = new Array();
 	}
 
@@ -411,12 +409,9 @@ package  {
 		_move_sent = false;
 		if (!actual) {
 			var mv:Movement = _position.generateMovementFromString(move);
-			var kifuMove:Object = new Object();
-			kifuMove.num = "*" + kifu_list_self.length;										//No. of the Move
-			kifuMove.move = _position.generateWesternNotationFromMovement(mv);	//Western Notation
-			kifuMove.moveStr = move;												//CSA
-			kifuMove.moveKIF = _position.generateKIFTextFromMovement(mv);			//Japanese Notation
-			kifu_list_self.push(kifuMove);
+			mv.n = kifu_list_self.length;
+			mv.branch = true;
+			kifu_list_self.push(mv);
 		} else {
 			mv = _last_pos.generateMovementFromString(move);
 			if (!viewing) {
@@ -426,12 +421,8 @@ package  {
 				timers[running_timer].suspend();
 				timers[1 - running_timer].resume();
 			}
-			kifuMove = new Object();
-			kifuMove.num = kifu_list.length;										//No. of the Move
-			kifuMove.move = _last_pos.generateWesternNotationFromMovement(mv);	//Western Notation
-			kifuMove.moveStr = move;												//CSA
-			kifuMove.moveKIF = _last_pos.generateKIFTextFromMovement(mv);			//Japanese Notation
-			kifu_list.push(kifuMove);
+			mv.n = kifu_list.length;
+			kifu_list.push(mv);
 		}
 		if (actual) {
 			_last_pos.move(mv);
@@ -519,12 +510,9 @@ package  {
 		  if (moves.length > 0) {
 			for each(var move:Object in moves) {
 				if (move.move == "%TORYO") {
-					var kifuMove:Object = new Object();
-					kifuMove.num = kifu_list.length;										//No. of the Move
-					kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
-					kifuMove.moveStr = "%TORYO";												//CSA
-					kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";			//Japanese Notation
-					kifu_list.push(kifuMove);
+					var mv:Movement = new Movement(kifu_list.length);
+					mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
+					kifu_list.push(mv);
 					timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
 				} else {
 					makeMove(move.move + "," + move.time, true, false);
@@ -720,17 +708,10 @@ package  {
 		}
         makeMove(match[1] + ',' + time, true, true);
       } else if (game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] %TORYO$/)) { //||
-//               game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] #TIME_UP$/)) {
-//    	  watch_game_end = true;
-//    		timers[0].stop();
-//   		timers[1].stop();
 		  time = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
-		  var kifuMove:Object = new Object();
-		  kifuMove.num = kifu_list.length;										//No. of the Move
-		  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + time.substr(1) + ")";	//Western Notation
-		  kifuMove.moveStr = "%TORYO";												//CSA
-		  kifuMove.moveKIF = "投了   ( " + int(parseInt(time.substr(1))/60) + ":" + parseInt(time.substr(1)) % 60 + "/)";			//Japanese Notation
-		  kifu_list.push(kifuMove);
+		  var mv:Movement = Movement(kifu_list.length);
+		  mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(time.substr(1)));
+		  kifu_list.push(mv);
       } else {
         return;
       }
@@ -783,12 +764,9 @@ package  {
       if (moves.length > 0) {
         for each(var move:Object in moves) {
 			if (move.move == "%TORYO") {
-				var kifuMove:Object = new Object();
-				kifuMove.num = kifu_list.length;										//No. of the Move
-				kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substr(1) + ")";	//Western Notation
-				kifuMove.moveStr = "%TORYO";												//CSA
-				kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1)/60) + ":" + move.time.substr(1) % 60 + "/)";			//Japanese Notation
-				kifu_list.push(kifuMove);
+				var mv:Movement = new Movement(kifu_list.length);
+				mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
+				kifu_list.push(mv);
 				timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(parseInt(move.time.substr(1)));
 			} else {
 				makeMove(move.move + "," + move.time, true, false);
@@ -824,11 +802,9 @@ package  {
 			  makeMove(move.move + "," + move.time, true, false);
 			  trace(move.move + "," + move.time);
 		  } else {
-			  var kifuMove:Object = new Object();
-			  kifuMove.num = kifu_list.length
-			  kifuMove.move = (_last_pos.turn == Kyokumen.SENTE ? "▲" : "△") + "Resign (" + move.time.substring(1) + ")";
-			  kifuMove.moveKIF = "投了   ( " + int(move.time.substr(1) / 60) + ":" + move.time.substr(1) % 60 + "/)";
-			  kifu_list.push(kifuMove);
+			  var mv:Movement = new Movement(kifu_list.length);
+			  mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
+			  kifu_list.push(mv);
 		  }
 		  Object(kifu_list[kifu_list.length - 1]).comment = move.comment;
         }
@@ -1136,14 +1112,10 @@ package  {
 		  if (n >= 1){
 			  for (var i:int = 1; i <= n; i++ ) {
 				  if (actual ? i >= kifu_list.length : i >= kifu_list_self.length) break;
-			      var mvtmp:Movement;
-				  mvtmp = actual ? _position.generateMovementFromString(kifu_list[i].moveStr) : _position.generateMovementFromString(kifu_list_self[i].moveStr);
-				  if (!mvtmp) continue;
-				  mv = mvtmp;
-				  if (i == n) _position.generateWesternNotationFromMovement(mv);
-			      _position.move(mv);
+				  mv = actual ? kifu_list[i] : kifu_list_self[i];
+			      if (mv.replayable()) _position.move(mv);
 			  }
-			  if (mv) {
+			  if (mv.replayable()) {
 				  _last_to_square = _cells[mv.to.y][mv.to.x];
 				  _last_to_square.setStyle('backgroundColor', '0xCC3333');
 				  if (mv.from.x < Kyokumen.HAND) {
