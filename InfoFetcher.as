@@ -58,7 +58,7 @@
 		public var serverMaintenanceTime:Date;
 		public static var clock_differences:Array;
 		private var _urlRequest:URLRequest = new URLRequest();
-		private var _httpService:HTTPService = new HTTPService();
+		private var _loadOptionService:HTTPService = new HTTPService();
 		public var userSettings:Object = new Object();
 		private var _login_name:String;
 		[Embed(source = "/images/gold_medal.png")]
@@ -75,7 +75,6 @@
 			_urlLoader.addEventListener(Event.COMPLETE, _parseInfo);
 			_urlRequest.url = SOURCE + "users/write.php";
 			_urlRequest.method = URLRequestMethod.GET;
-			_httpService.url = SOURCE + "users/userConfig.xml";
 			refresh();
 		}
 		
@@ -526,48 +525,27 @@
 			sendToURL(_urlRequest);
 		}
 		
-		public function loadSettings(str:String):void{
-			_login_name = str;
-			_httpService.addEventListener(ResultEvent.RESULT, _handleSettings);
-			_httpService.send();
+		public function loadSettings(name:String):void{
+			_loadOptionService.url = SOURCE + "users/read.php?name=" + name.toLowerCase();
+			_loadOptionService.addEventListener(ResultEvent.RESULT, _handleSettings);
+			_loadOptionService.send();
 		}
 		
 		private function _handleSettings(e:ResultEvent):void {
-			var userData:ArrayCollection = new ArrayCollection();
-			userData = e.result.users.user as ArrayCollection;
-			userSettings.pieceSound = true;
-			userSettings.chatSound1 = true;
-			userSettings.chatSound2 = true;
-			userSettings.chatSound3 = true;
-			userSettings.pmAutoOpen = false;
-			userSettings.grabPiece = true;
-			userSettings.endSound = true;
-			userSettings.pieceType = 0;
-			userSettings.pieceType34 = 0;
-			userSettings.highlightMovable = true;
-			userSettings.byoyomi = 1;
-			userSettings.notation = 0;
-			userSettings.acceptArrow = true;
-			userSettings.arrowColor = 0x00CC00;
-			userSettings.ignoreList = "";
-			userSettings.favoriteList = "";
-			for (var i:int = 0; i < userData.length; i++) {
-				if (userData[i].name == _login_name) {
-					userSettings = userData[i];
-					if (userData[i].acceptArrow == null) userSettings.acceptArrow = true;
-					if (userData[i].arrowColor == null) userSettings.arrowColor = 0x00CC00;
-					if (userData[i].chatSound3 == null) userSettings.chatSound3 = true;
-					if (userData[i].ignoreList == null) userSettings.ignoreList = "";
-					if (userData[i].favoriteList == null) userSettings.favoriteList = "";
-					if (userData[i].pmAutoOpen == null) userSettings.pmAutoOpen = false;
-					if (userData[i].grabPiece == null) userSettings.grabPiece = true;
-					if (userData[i].pieceType34 == null) userSettings.pieceType34 = 0;
-					if (userData[i].highlightMovable == null) userSettings.highlightMovable = true;
-					if (userData[i].notation == null) userSettings.notation = 0;
-					break;
-				}
+			if (e.result.user) {
+				userSettings = e.result.user;
+				if (userSettings.acceptArrow == null) userSettings.acceptArrow = true;
+				if (userSettings.arrowColor == null) userSettings.arrowColor = 0x00CC00;
+				if (userSettings.chatSound3 == null) userSettings.chatSound3 = true;
+				if (userSettings.ignoreList == null) userSettings.ignoreList = "";
+				if (userSettings.favoriteList == null) userSettings.favoriteList = "";
+				if (userSettings.pmAutoOpen == null) userSettings.pmAutoOpen = false;
+				if (userSettings.grabPiece == null) userSettings.grabPiece = true;
+				if (userSettings.pieceType34 == null) userSettings.pieceType34 = 0;
+				if (userSettings.highlightMovable == null) userSettings.highlightMovable = true;
+				if (userSettings.notation == null) userSettings.notation = 0;
+				dispatchEvent(new Event("loadComplete"));
 			}
-			dispatchEvent(new Event("loadComplete"));
 		}
 		
 		public static function medalCanvas(user:Object):Canvas {
