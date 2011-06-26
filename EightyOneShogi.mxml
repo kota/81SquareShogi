@@ -95,6 +95,7 @@
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
 	private var _status_disconnected:Boolean = false;
+	private const arrow_comments:Array = new Array("", "Good move is this.", "My guess is this.", "How about this?", "This might not work.", "The aim here is this.");
 
     [Embed(source = "/sound/win.mp3")]
     private var Sound_win:Class;
@@ -222,6 +223,7 @@
 		  if (_so.data.pass) password.text = _so.data.pass;
 		  if (_so.data.language) languageSelector.selectedIndex = _so.data.language;
 	  }
+	  arrowComent.dataProvider = arrow_comments;
 	  languageSelector.loadLanguage();
 	  _api.addEventListener(ApiClient.READ_SERVER, _handleReadServer);
 	  _api.readServer();
@@ -2064,6 +2066,7 @@
   }
   
 	private function _clearArrows():void {
+		arrowComent.selectedIndex = 0;
 		if (board.isStudyHost || board.onListen) {
 			if (board.clearArrows(Board.ARROWS_PUBLIC, "")) {
 				_client.gameChat(_game_name, "[##ARROW]CLEAR");
@@ -2815,6 +2818,8 @@
 	private function _addMyArrow(fromType:int, from:Point, to:Point):void {
 		if (board.isStudyHost || board.onListen) {
 			_client.gameChat(_game_name, "[##ARROW]" + fromType + "," + from.x + "," + from.y + "," + to.x + "," + to.y + ",0x" + _arrow_color.toString(16));
+			if (arrowComent.selectedIndex != 0) _client.gameChat(_game_name, "[comment] " + arrowComent.selectedItem);
+			arrowComent.selectedIndex = 0;
 		} else {
 			board.addArrow(fromType, from, to, _arrow_color, "", Board.ARROWS_SELF, true);
 		}
@@ -3177,12 +3182,14 @@
 				<mx:Button id="forwardAllButton" label=">|" enabled="false" click="replayByButton(2);"/>
 			</mx:HBox>
           </mx:HBox>
-		 <mx:HBox width="300" horizontalAlign="right">
-			<mx:Button label="{lan.clear_arrows}" click="_clearArrows();"/>
+		 <mx:HBox width="300" horizontalAlign="right" horizontalGap="0">
+			<mx:Label text="Arrows" fontSize="10" />
+			<mx:ComboBox id="arrowComent" width="115" rowCount="6" fontSize="9" />
+			<mx:Button label="Clear" click="_clearArrows();"/>
 		 </mx:HBox>
 		 <mx:Spacer height="-20"/>
-		 <mx:HBox verticalAlign="bottom">
-			<mx:Label text="{lan.chat}"/>
+		 <mx:HBox verticalAlign="bottom" horizontalGap="0">
+			<mx:Label text="{lan.chat}" fontSize="10" />
 			<mx:Button id="greetButton" icon="@Embed('images/icon_greet.png')" toolTip="{lan.greet}" click="_greetMenu();"/>
 		 </mx:HBox>
 		 <mx:TextInput id="chatMessage2" width="300" fontFamily="Meiryo UI" />
