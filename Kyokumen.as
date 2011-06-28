@@ -348,7 +348,7 @@ package  {
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
 	  var mv:Movement = new Movement();
-	  mv.setFromKyokumen(_turn, from, to, koma, promote, capture, _last_to);
+	  mv.setFromKyokumen(_turn, from, to, koma.type, promote, capture, _last_to);
 	  return mv;
     }
 
@@ -365,21 +365,20 @@ package  {
       var to:Point = new Point(parseInt(moveStr.charAt(3)),parseInt(moveStr.charAt(4)));
       to = translateHumanCoordinates(to);
       var capture:Boolean = getKomaAt(to) != null
-      var koma:Koma = new Koma(koma_names.indexOf(moveStr.slice(5,7)),to.x,to.y,turn);
 	  var match:Array = moveStr.match(/,T([0-9]*)/);
 	  var time:int = parseInt(match[1]);
 	  if (from.x != HAND){
 	  	var promote:Boolean = getKomaAt(from).type != koma_names.indexOf(moveStr.slice(5,7));
 	  }
 	  var mv:Movement = new Movement();
-	  mv.setFromKyokumen(turn, from, to, koma, promote, capture, _last_to, time);
+	  mv.setFromKyokumen(turn, from, to, koma_names.indexOf(moveStr.slice(5,7)) - (promote ? Koma.PROMOTE : 0), promote, capture, _last_to, time);
 	  return mv;
     }
 		
 		public function move(mv:Movement):void {
 			//drop
 			if(mv.from.x == HAND){
-				_komadai[mv.koma.ownerPlayer].removeKoma(mv.koma.type);
+				_komadai[mv.turn].removeKoma(mv.type);
 			}
 			//put piece into hand if capturing.
 			if (getKomaAt(mv.to) != null) {
@@ -395,7 +394,7 @@ package  {
 				//_ban[mv.from.x - 1][mv.from.y - 1] = null;
 				setKomaAt(mv.from,null);
 			}
-			setKomaAt(mv.to, new Koma(mv.koma.type, mv.to.x, mv.to.y, mv.koma.ownerPlayer));
+			setKomaAt(mv.to, mv.getResultKoma());
 			_last_to = mv.to;
 			_turn = _turn == SENTE ? GOTE : SENTE;
 		}

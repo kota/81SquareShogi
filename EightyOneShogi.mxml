@@ -2790,6 +2790,7 @@
 
     private function _playerMove(from:Point, to:Point, promote:Boolean):void {
 	  var str:String = board.position.generateMovementFromCoordinates(from, to, promote).toCSA();
+	  trace(str);
 	  if (!board.onListen || (board.onListen && board.isSubHost)) {
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.cancelSquareSelect();
@@ -2949,12 +2950,12 @@
 	  <mx:HBox horizontalAlign="left" paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
 		<mx:Label text="{data.black.rank}" textAlign="right" width="40" paddingLeft="-9" paddingRight="-7" color="{data.black.rankColor}"/>
 		<mx:Image filters="{[data.flagFilter(0)]}" source="{data.black.flag_s}" width="27" height="17" toolTip="{data.black.country}"/>
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.black.name}" color="{data.nameColor(0)}" textDecoration="{data.nameDecoration(0)}" width="95" textAlign="left" />
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.black.name}" color="{data.nameColor(0)}" textDecoration="{data.nameDecoration(0)}" width="90" textAlign="left" />
 	  </mx:HBox>
   </mx:Component>
   <mx:Component id="gameListWhiteRenderer">
 	  <mx:HBox horizontalAlign="right"  paddingLeft="0" paddingRight="0" height="100%" horizontalScrollPolicy="off">
-		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.white.name}" color="{data.nameColor(1)}" textDecoration="{data.nameDecoration(1)}" width="95" textAlign="right" />
+		<mx:Label paddingLeft="-7" paddingRight="-7" text="{data.white.name}" color="{data.nameColor(1)}" textDecoration="{data.nameDecoration(1)}" width="90" textAlign="right" />
 		<mx:Image filters="{[data.flagFilter(1)]}" source="{data.white.flag_s}" width="27" height="17" toolTip="{data.white.country}" />
 		<mx:Label text="{data.white.rank}" textAlign="left" width="40" paddingLeft="-7" paddingRight="-9" color="{data.white.rankColor}" />
 	  </mx:HBox>

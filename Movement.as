@@ -29,7 +29,7 @@ package  {
 		private var _from:Point = null;
 		private var _to:Point = null;
 		private var _last_to:Point = null;
-		private var _koma:Koma = null;
+		private var _type:int;
 		private var _promote:Boolean = false;
 		private var _capture:Boolean = false;
 		private var _time:int = 0;
@@ -41,11 +41,11 @@ package  {
 			_n = n;
 		}
 		
-		public function setFromKyokumen(turn:int, from:Point, to:Point, koma:Koma, promote:Boolean, capture:Boolean = false, last_to:Point = null, time:int = 0):void {
+		public function setFromKyokumen(turn:int, from:Point, to:Point, type:int, promote:Boolean, capture:Boolean = false, last_to:Point = null, time:int = 0):void {
 			_turn = turn;
 			_from = from;
 			_to = to;
-			_koma = koma;
+			_type = type;
 			_promote = promote;
 			_capture = capture;
 			_last_to = last_to;
@@ -64,7 +64,7 @@ package  {
 
 		public function toCSA():String{
 			var from:Point;
-			if(_from.x > Kyokumen.HAND){
+			if(_from.x >= Kyokumen.HAND){
 				from = new Point(0,0);
 			} else {
 				from = toHumanCoordinates(_from);
@@ -73,9 +73,9 @@ package  {
 			var buff:String = _turn == 0 ? "+" : "-"
 			buff += from.x.toString() + from.y.toString() + to.x.toString() + to.y.toString();
 			if (_promote) {
-				buff += Kyokumen.koma_names[_koma.type + Koma.PROMOTE];
+				buff += Kyokumen.koma_names[_type + Koma.PROMOTE];
 			} else {
-				buff += Kyokumen.koma_names[_koma.type];
+				buff += Kyokumen.koma_names[_type];
 			}
 			return buff;
 		}
@@ -114,8 +114,8 @@ package  {
 						return " Perpetual Check";
 				}
 			}
-			var str:String = koma_western_names[_promote ? _koma.type - Koma.PROMOTE : _koma.type];
-			if (_from.x == Kyokumen.HAND) {
+			var str:String = koma_western_names[_type];
+			if (_from.x >= Kyokumen.HAND) {
 				str += "*";
 			} else if (_capture) {
 				str += "x";
@@ -128,7 +128,7 @@ package  {
 			}
 			if (_promote) {
 				str += "+";
-			} else if (_from.x != Kyokumen.HAND && !_koma.isPromoted() && _koma.type != Koma.OU && _koma.type != Koma.KI){
+			} else if (_from.x != Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
 				if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += "=";
 			} 
 			return str;	
@@ -156,13 +156,13 @@ package  {
 			} else {
 				str = "同　";
 			}
-			str += koma_japanese_names[_promote ? _koma.type - Koma.PROMOTE : _koma.type];
-			if (_from.x == Kyokumen.HAND) {
+			str += koma_japanese_names[_type];
+			if (_from.x >= Kyokumen.HAND) {
 				str += "打";
 			} else {
 				if (_promote) {
 					str += "成";
-				} else if (_from.x != Kyokumen.HAND && !_koma.isPromoted() && _koma.type != Koma.OU && _koma.type != Koma.KI){
+				} else if (_from.x < Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
 					if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += "不成";
 				} 
 			}
@@ -171,22 +171,25 @@ package  {
 		
 		public function toKIFNotation():String{
 			var str:String = toJapaneseNotation();
-			if (_from && _from.x != Kyokumen.HAND) str += "(" + String(9 - _from.x) + String(_from.y + 1) + ")";
+			if (_from && _from.x < Kyokumen.HAND) str += "(" + String(9 - _from.x) + String(_from.y + 1) + ")";
 			return str + "   ( " + int(_time/60) + ":" + _time % 60 + "/)";
 		}
 		
 		public function replayable():Boolean {
 			return (!_n == 0 && _special == 0);
 		}
-		
+
+		public function getResultKoma():Koma {
+			return new Koma(_promote ? _type + Koma.PROMOTE : _type, _to.x, _to.y, _turn);
+		}
 		public function get from():Point {
 			return this._from;
 		}
 		public function get to():Point {
 			return this._to;
 		}
-		public function get koma():Koma {
-			return this._koma;
+		public function get type():int {
+			return this._type;
 		}
 		public function get promote():Boolean {
 			return this._promote;
