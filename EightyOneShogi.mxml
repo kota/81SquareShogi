@@ -3229,10 +3229,10 @@
 						<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
 						<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
 				  </mx:HBox>
-				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20">
+				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20" paddingTop="0" paddingBottom="0">
 				 <mx:columns>
 				  <mx:DataGridColumn headerText="No." dataField="numStr" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
-				  <mx:DataGridColumn headerText="Moves" dataField="toListString" fontFamily="Lucida Console" fontSize="11" />
+				  <mx:DataGridColumn headerText="Moves" dataField="toListString" fontFamily="Meiryo UI" fontSize="12" paddingLeft="2" />
 				 </mx:columns>
 				</mx:DataGrid>
 			</mx:VBox>

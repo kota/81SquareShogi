@@ -15,14 +15,18 @@ package  {
 		public static const SENNICHITE:int = 3;
 		public static const ILLEGAL:int = 4;
 		public static const OUTE_SENNICHITE:int = 5;
-		public static const LIST_WESTERN:int = 0;
+		public static const LIST_UNIVERSAL:int = 0;
 		public static const LIST_JAPANESE:int = 1;
+		public static const LIST_WESTERN:int = 2;
 		private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
 		private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
 		private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
-		private static const koma_western_names:Array = new Array(' K', ' R', ' B', ' G', ' S', ' N', ' L', ' P', '', ' D', ' H', '', '+S', '+N', '+L', ' T');
-		private static const rank_western_names:Array = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i');
-		public static var listType:int = LIST_WESTERN;
+		private static const koma_western_names:Array = new Array('Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', '', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ');
+//		private static const koma_western_names:Array = new Array(' K', ' R', ' B', ' G', ' S', ' N', ' L', ' P', '', ' D', ' H', '', '+S', '+N', '+L', ' T');
+		private static const rank_western_names:Array = new Array('ａ', 'ｂ', 'ｃ', 'ｄ', 'ｅ', 'ｆ', 'ｇ', 'ｈ', 'ｉ');
+//		private static const rank_western_names:Array = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i');
+		private static const rank_universal_names:Array = new Array('ⅰ', 'ⅱ', 'ⅲ', 'ⅳ', 'ⅴ', 'ⅵ', 'ⅶ', 'ⅷ', 'ⅸ');
+		public static var listType:int = LIST_UNIVERSAL;
 		
 		private var _n:int;
 		private var _turn:int = 0;
@@ -90,15 +94,15 @@ package  {
 			} else {
 				str = _turn == 0 ? "▲" : "△";
 			}
-			str += (listType == LIST_WESTERN ? toWesternNotation() : toJapaneseNotation());
+			str += (listType == LIST_JAPANESE ? toJapaneseNotation() : toWesternNotation(listType == LIST_UNIVERSAL));
 			if (_n == 0 || _special >= TIMEUP) return str;
 			do {
-				str += " ";
-			} while (str.length < (listType == LIST_WESTERN ? 8 : 6));
+				str += "　";
+			} while (str.length < (listType == LIST_JAPANESE ? 6 : 8));
 			return str + "(" + _time + ")";
 		}
 		
-		public function toWesternNotation():String {
+		public function toWesternNotation(universal:Boolean):String {
 			if (_n == 0) return "Start";
 			if (_special > 0) {
 				switch (_special) {
@@ -116,15 +120,15 @@ package  {
 			}
 			var str:String = koma_western_names[_type];
 			if (_from.x >= Kyokumen.HAND) {
-				str += "*";
+				str += "* ";
 			} else if (_capture) {
-				str += "x";
+				str += "x ";
 			} else {
-				str += "-";
+				str += "- ";
 			}
 			if (_to.x != _last_to.x || _to.y != _last_to.y) {
 				str += 9 - _to.x
-				str += rank_western_names[_to.y];
+				str += universal ? rank_universal_names[_to.y] : rank_western_names[_to.y];
 			}
 			if (_promote) {
 				str += "+";
@@ -158,7 +162,7 @@ package  {
 			}
 			str += koma_japanese_names[_type];
 			if (_from.x >= Kyokumen.HAND) {
-				str += "打";
+				if (_type != 7) str += "打";
 			} else {
 				if (_promote) {
 					str += "成";

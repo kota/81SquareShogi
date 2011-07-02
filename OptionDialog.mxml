@@ -80,8 +80,9 @@
 			<mx:HBox>
 				<mx:Label text="Notation Style" fontWeight="bold" paddingLeft="10"/>
 				<mx:RadioButtonGroup id="RadioGroup3"/>
-				<mx:RadioButton label="Western" groupName="RadioGroup3" value="0"/>
+				<mx:RadioButton label="Universal" groupName="RadioGroup3" value="0"/>
 				<mx:RadioButton label="Japanese" groupName="RadioGroup3" value="1"/>
+				<mx:RadioButton label="Western" groupName="RadioGroup3" value="2"/>
 			</mx:HBox>
 			<mx:HBox>
 				<mx:Label text="PM Reception" fontWeight="bold" paddingLeft="10" />
