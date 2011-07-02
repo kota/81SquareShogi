@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="150" fontSize="13" horizontalScrollPolicy="off" title="Disconnection">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="400" height="150" fontSize="13" horizontalScrollPolicy="off" title="Disconnection" backgroundColor="0xFFFF55" borderColor="0xFF0000">
 	    <mx:Script>
         <![CDATA[
 		  import flash.events.TimerEvent;

@@ -1249,7 +1249,7 @@
 	}
 	
 	private function _openDisconnectAlertWindow():void {
-	  _disconnectAlertWindow = DisconnectAlertWindow(PopUpManager.createPopUp(board, DisconnectAlertWindow, false));
+	  _disconnectAlertWindow = DisconnectAlertWindow(PopUpManager.createPopUp(board.infoBoxes[0], DisconnectAlertWindow, false));
       PopUpManager.centerPopUp(_disconnectAlertWindow);
 	  _disconnectAlertWindow.addEventListener("declare", _handleDisconnectDeclare);
 	  _disconnectAlertWindow.startTimer();
