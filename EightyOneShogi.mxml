@@ -373,7 +373,7 @@
         if (match != null) {
 			var tokens:Array = match[2].split(" ");
 			if (!_users[match[1]]) _users[match[1]] = new User(match[1]);
-			_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), parseInt(tokens[10]), parseInt(tokens[11]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[12] == "true");
+			_users[match[1]].setFromWho(parseInt(tokens[3]), parseInt(tokens[4]), parseInt(tokens[8]), parseInt(tokens[9]), Math.max(0, parseInt(tokens[10])), parseInt(tokens[11]), StringUtil.trim(tokens[0]), tokens[5], tokens[1], tokens[2], tokens[6], parseInt(tokens[7]), tokens[12] == "true");
 			if (match[1] == login_name) {
 				  _users[match[1]].markSelf();
 				  if (_status_disconnected) _users[match[1]].disconnected = true;
@@ -405,7 +405,7 @@
 			  break;
 			}
 		}
-		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+		userListPanel.title = "81Dojo - " + serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 	}
 	
 	private function _refreshWaiterList():void {
@@ -511,7 +511,7 @@
 		} else {
 			_users[tokens[0]].initialize();
 		}
-		_users[tokens[0]].setFromLobbyIn(parseInt(tokens[1]), parseInt(tokens[3]),parseInt(tokens[4]),parseInt(tokens[5]),parseInt(tokens[6]),parseInt(tokens[7]))
+		_users[tokens[0]].setFromLobbyIn(parseInt(tokens[1]), parseInt(tokens[3]),parseInt(tokens[4]),parseInt(tokens[5]),Math.max(0, parseInt(tokens[6])),parseInt(tokens[7]))
 		if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _users[tokens[0]].markFavorite();
 		if (add) {
 			_user_list.push(_users[tokens[0]]);

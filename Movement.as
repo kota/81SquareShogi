@@ -94,7 +94,7 @@ package  {
 			} else {
 				str = _turn == 0 ? "▲" : "△";
 			}
-			str += (listType == LIST_JAPANESE ? toJapaneseNotation() : toWesternNotation(listType == LIST_UNIVERSAL));
+			str += (listType == LIST_JAPANESE ? toJapaneseNotation(false) : toWesternNotation(listType == LIST_UNIVERSAL));
 			if (_n == 0 || _special >= TIMEUP) return str;
 			do {
 				str += "　";
@@ -138,7 +138,7 @@ package  {
 			return str;	
 		}
 		
-		public function toJapaneseNotation():String {
+		public function toJapaneseNotation(forFile:Boolean):String {
 			if (_n == 0) return "開始";
 			if (_special > 0) {
 				switch (_special) {
@@ -162,7 +162,7 @@ package  {
 			}
 			str += koma_japanese_names[_type];
 			if (_from.x >= Kyokumen.HAND) {
-				if (_type != 7) str += "打";
+				if (_type != 7 || forFile) str += "打";
 			} else {
 				if (_promote) {
 					str += "成";
@@ -174,7 +174,7 @@ package  {
 		}
 		
 		public function toKIFNotation():String{
-			var str:String = toJapaneseNotation();
+			var str:String = toJapaneseNotation(true);
 			if (_from && _from.x < Kyokumen.HAND) str += "(" + String(9 - _from.x) + String(_from.y + 1) + ")";
 			return str + "   ( " + int(_time/60) + ":" + _time % 60 + "/)";
 		}
