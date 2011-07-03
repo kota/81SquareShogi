@@ -1025,6 +1025,8 @@
 			if (sender != login_name && board.onListen) board.handleGrab(match[1], match[2]);
 		} else if ((match = e.message.match(/\[\#\#STUDY\](\d+)\/(.+)$/))) {
 			_handleStudy(sender, match[1], match[2]);
+		} else if (e.message.match(/\[\#\#EXPORT\]$/)) {
+			if (sender != login_name) _writeUserMessage("Kifu exported by " + sender + ".\n", 2, "#008800");
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\]CLEAR$/))) {
 			if (sender != login_name) board.clearArrows(Board.ARROWS_PUBLIC, sender);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##ARROW\](.+),(.+),(.+),(.+),(.+),(.+)$/))) {
@@ -2153,7 +2155,13 @@
 	  }
   }
   
+  private function _copyKIF():void {
+	  if (_isDuringMyGame()) _client.gameChat(_game_name, "[##EXPORT]");
+	  System.setClipboard(_formatKIF());
+  }
+  
   private function _saveKIF():void {
+	  if (_isDuringMyGame())  _client.gameChat(_game_name, "[##EXPORT]");
 	  var date_time:String = _game_name.split("+")[4];
 	  var fileReference:FileReference = new FileReference();
 	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
@@ -2930,8 +2938,6 @@
   
   private function _isDuringMyGame():Boolean {
 	  return board.inGame;
-//	  if (_game_name && board.isPlayer && !board.post_game) return true;
-//	  return false;
   }
   
 	//=========================================================
@@ -3221,7 +3227,7 @@
 			<mx:VBox height="453">
 				<mx:HBox paddingBottom="3">
 					<mx:Label text="{lan.kifu}" fontWeight="bold"/>
-					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="System.setClipboard(_formatKIF());"/>
+					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="_copyKIF();"/>
 					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
 				</mx:HBox>
 				  <mx:HBox paddingLeft="2" paddingTop="-3">
