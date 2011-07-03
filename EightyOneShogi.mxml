@@ -1019,6 +1019,7 @@
 		if (!_game_name) return;
 		var sender:String = e.message.substr(12).match(/^\[(.+?)\]\s.*$/)[1];
 		var match:Array;
+		if (_isDuringMyGame() && (e.message.substr(12).match(/^\[(.+?)\]\s\[comment\]/))) return;
 		if ((match = e.message.match(/\[\#\#HOVER\](\d+),(\d+)$/))) {
 			if (sender != login_name && board.onListen) board.handleHover(match[1], match[2]);
 		} else if ((match = e.message.match(/\[\#\#GRAB\](\d+),(\d+)$/))) {
