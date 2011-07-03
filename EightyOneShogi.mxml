@@ -48,7 +48,6 @@
     import mx.controls.*;
     import mx.managers.PopUpManager;
     import mx.core.IFlexDisplayObject;
-	import com.web2memo.text.Jcode;
     import CsaShogiClient;
 	import ApiClient;
 	import InfoFetcher;
@@ -2167,11 +2166,11 @@
 	  if (_isDuringMyGame())  _client.gameChat(_game_name, "[##EXPORT]");
 	  var date_time:String = _game_name.split("+")[4];
 	  var fileReference:FileReference = new FileReference();
-	  fileReference.save(Jcode.getInstance().UTF8toSJIS(_formatKIF()), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
+	  fileReference.save(_formatKIF(), "81Dojo-" + date_time.substr(0,4) + "-" + date_time.substr(4,2) + "-" + date_time.substr(6,2) + "-" + date_time.substr(8,2) + "-" + date_time.substr(10,2)  + ".kif");
   }
  
 	private function _formatKIF():String{
-		  var KIFDataText:String = "";
+		  var KIFDataText:String = "#KIF version=2.0 encoding=UTF-8\r\n";
 		  KIFDataText += "開始日時：" + _game_name.split("+")[4].substr(0,4) + "/" + _game_name.split("+")[4].substr(4,2) + "/" + _game_name.split("+")[4].substr(6,2) + "\r\n";
 		  KIFDataText += "場所：81-Dojo (" + VERSION +")\r\n";
 		  KIFDataText += InfoFetcher.gameTypeKIF(_game_name.split("+")[1].match(/^([0-9a-z]+?)_/)[1]) + "\r\n";
