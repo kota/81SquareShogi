@@ -874,7 +874,7 @@ package  {
             e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
 			if (hold_piece) {
 				e.currentTarget.hidePiece();
-				CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+				if (piece_type != 7) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 //				CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
 			}
 			if (isPlayer && !post_game) _grabPieceCallback(x, y);
@@ -975,7 +975,7 @@ package  {
           e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
 		  if (hold_piece) {
 			e.currentTarget.hidePiece();
-			CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+			if (piece_type != 7) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 		  }
 		  if (isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
 		  _pieceGrab = true;

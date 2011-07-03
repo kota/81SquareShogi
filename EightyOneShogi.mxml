@@ -2152,14 +2152,14 @@
 			board.eraseArrows(Board.ARROWS_PUBLIC);
 			board.showArrows(Board.ARROWS_SELF);
 		  }
-		  if (board.post_game && !board.isStudyHost) {
-			board.replayMoves(kifuDataGrid.selectedIndex, true);
-		  }
+//		  if (board.post_game && !board.isStudyHost) {
+//			board.replayMoves(kifuDataGrid.selectedIndex, true);
+//		  }
 	  }
   }
   
   private function _copyKIF():void {
-	  if (_isDuringMyGame()) _client.gameChat(_game_name, "[##EXPORT]");
+	  if (_isDuringMyGame() && board.gameType == "r") _client.gameChat(_game_name, "[##EXPORT]");
 	  System.setClipboard(_formatKIF());
   }
   
