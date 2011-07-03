@@ -24,6 +24,7 @@
 	<mx:Script>
     <![CDATA[
     import flash.display.*;
+	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
@@ -35,6 +36,7 @@
 	import flash.net.SharedObject;
 	import flash.net.URLLoader;
 	import flash.net.URLVariables;
+	import flash.ui.ContextMenu;
 	import flash.ui.Mouse;
 	import flash.utils.Timer;
 	import mx.utils.ObjectProxy;

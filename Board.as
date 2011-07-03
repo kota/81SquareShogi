@@ -6,6 +6,7 @@
 
 package  {
 	import flash.display.Sprite;
+	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.TimerEvent;
@@ -13,6 +14,7 @@ package  {
 	import flash.geom.Point;
 	import flash.media.Sound;
 	import flash.system.System;
+	import flash.ui.ContextMenu;
 	import flash.utils.Timer;
 	import mx.containers.HBox;
 	import mx.controls.SWFLoader;
@@ -181,6 +183,10 @@ package  {
     
     //TODO Define the layout with mxml.
     public function Board() {
+	  var rmenu:ContextMenu = new ContextMenu();
+	  rmenu.hideBuiltInItems();
+	  rmenu.addEventListener(ContextMenuEvent.MENU_SELECT, _rightClick);
+	  this.contextMenu = rmenu;
       super();
       _cells = new Array(9);
       for (var i:int; i < 9; i++ ) {
@@ -237,6 +243,7 @@ package  {
         hand.x = i == 0 ? MY_HAND_X : HIS_HAND_X;
         hand.y = i == 0 ? MY_HAND_Y : HIS_HAND_Y;
         handBoxes[i] = hand;
+		hand.addEventListener(MouseEvent.CLICK, _handTableMouseUpHandler);
         addChild(hand);
         
  		var timer:GameTimer = new GameTimer();
@@ -612,6 +619,13 @@ package  {
 	  _client_timeout = false;
     }
 	
+	private function _rightClick(e:ContextMenuEvent):void {
+		cancelSquareSelect();
+		for each (var arr:Array in _cells) {
+			for each (var sq:Square in arr) sq.mouseOut();
+		}
+	}
+	
 	public function cancelSquareSelect():void {
 	   if(_selected_square != null){
         _selected_square.setStyle('backgroundColor', undefined);
@@ -976,6 +990,10 @@ package  {
       }
 	  _arrow_from = null;
     }
+	
+	public function _handTableMouseUpHandler(e:MouseEvent):void {
+		if (e.currentTarget == e.target && e.target == handBoxes[_my_turn == _position.turn ? 0 : 1]) cancelSquareSelect();
+	}
 	
 	public function handleHover(x:int, y:int):void {
 		var sq:Square = _cells[y - 1][9 - x];
