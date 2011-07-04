@@ -128,12 +128,12 @@ package  {
 			}
 			if (_to.x != _last_to.x || _to.y != _last_to.y) {
 				str += 9 - _to.x
-				str += universal ? rank_universal_names[_to.y] : rank_western_names[_to.y];
+				str += to.y + 1;// universal ? file_japanese_names[_to.y] : rank_western_names[_to.y];
 			}
 			if (_promote) {
-				str += "+";
+				str += " +";
 			} else if (_from.x != Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
-				if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += "=";
+				if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += " =";
 			} 
 			return str;	
 		}
