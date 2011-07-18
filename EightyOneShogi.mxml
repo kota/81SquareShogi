@@ -516,7 +516,7 @@
 		if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0) _users[tokens[0]].markFavorite();
 		if (add) {
 			_user_list.push(_users[tokens[0]]);
-			userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+			userListPanel.title = "81Dojo - " + serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 		}
 		_user_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 		_updateList(userListGrid, _user_list);
@@ -540,7 +540,7 @@
 				break;
 			}
 		}
-		userListPanel.title = serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
+		userListPanel.title = "81Dojo - " + serverName + " : " + lan.lobby + " (" + _user_list.length + " players)";
 		_refreshWaiterList();
 		delete _users[e.message];
 	}
@@ -906,13 +906,14 @@
 	  radioKifuReplay.enabled = true;
 	  radioKifuListen.enabled = true;
       if (e.message.indexOf("LOSE") >= 0) {
+		board.isStudyHost = true;
 		_openGameResultWindow(-1);
 		board.infoBoxes[1].setStyle('borderThickness', 2);
 		board.infoBoxes[1].setStyle('borderColor', 0xFF0000);
         _writeUserMessage("### You Lose ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_lose.play();
       } else if (e.message.indexOf("WIN") >= 0) {
-		board.isStudyHost = true;
+		board.isSubHost = true;
 		_openGameResultWindow(1);
 		board.infoBoxes[0].setStyle('borderThickness', 2);
 		board.infoBoxes[0].setStyle('borderColor', 0xFF0000);
@@ -920,6 +921,7 @@
         if (_end_sound_play) _sound_win.play();
       } else if (e.message.indexOf("DRAW") >= 0) {
 		if (board.my_turn == Kyokumen.GOTE) board.isStudyHost = true;
+		else board.isSubHost = true;
 		_openGameResultWindow(0);
         _writeUserMessage("### Draw ###\n", 2, "#DD0088", true);
         if (_end_sound_play) _sound_win.play();
@@ -927,8 +929,10 @@
 	  if (board.gameType == "hc") {
 		  if (board.my_turn == Kyokumen.GOTE) {
 			  board.isStudyHost = true;
+			  board.isSubHost = false;
 		  } else {
 			  board.isStudyHost = false;
+			  board.isSubHost = true;
 		  }
 	  }
 	  allowWatcherChatCheckbox.visible = false;
@@ -947,6 +951,7 @@
       kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
       kifuDataGrid.callLater(_scrollDownKifu); //kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
 	  if (board.isStudyHost) _toggleHostStatus(true);
+	  if (board.isSubHost) _writeUserMessage("You are a sub-host of study mode. You can move the host's pieces.\n", 2, "#008800", true);
       board.endGame();
 	  _status_disconnected = false;
     }
@@ -1065,7 +1070,7 @@
 			else _writeUserMessage("Study Host status given to " + match[1] + "\n", 2, "#008800", false);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
 			if (match[1] == login_name) {
-				_writeUserMessage("You are given Study sub-host status.\n", 2, "#008800", true);
+				_writeUserMessage("You are given Study sub-host status. You can move the host's pieces.\n", 2, "#008800", true);
 				board.isSubHost = true;
 			} else {
 				_writeUserMessage("Study Sub-host status given to " + match[1] + "\n", 2, "#008800", false);
