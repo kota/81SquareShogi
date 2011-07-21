@@ -59,7 +59,7 @@
 	import Game;
     import mx.utils.StringUtil;
 	
-	public const VERSION:String = "ver.2011/06/24";
+	public const VERSION:String = "ver.2011/07/21";
 	private const DIRECTORY:String = "http://81dojo.com/dojo/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -3080,7 +3080,7 @@
 			 <mx:columns>
 			  <mx:DataGridColumn itemRenderer="{serverListRenderer}" headerText="{lan.server}" width="90" paddingLeft="0" />
 			  <mx:DataGridColumn dataField="description" headerText="Description" width="80" paddingLeft="0" />
-			  <mx:DataGridColumn dataField="population" headerText="Player" width="45" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="population" headerText="{lan.players}" width="45" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn dataField="alive" headerText="Alive" width="45" paddingLeft="0" textAlign="center" />
 			 </mx:columns>
 		  </mx:DataGrid>
@@ -3225,9 +3225,9 @@
 			</mx:HBox>
           </mx:HBox>
 		 <mx:HBox width="300" horizontalAlign="right" horizontalGap="0">
-			<mx:Label text="Arrows" fontSize="10" />
+			<mx:Label text="{lan.arrow}" fontSize="10" />
 			<mx:ComboBox id="arrowComent" width="115" rowCount="6" fontSize="9" />
-			<mx:Button label="Clear" click="_clearArrows();"/>
+			<mx:Button label="{lan.clear}" click="_clearArrows();"/>
 		 </mx:HBox>
 		 <mx:Spacer height="-20"/>
 		 <mx:HBox verticalAlign="bottom" horizontalGap="0">
@@ -3307,9 +3307,9 @@
 				<mx:VBox>
 					<mx:HBox>
 						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendKifuSearch();" />
-						<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+						<mx:Button label="{lan.close}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 						<mx:Spacer width="400"/>
-						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="Share" click="_shareKifu3();" fontSize="11" />
+						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu3();" fontSize="11" />
 					</mx:HBox>
 					<mx:DataGrid id="kifuSearchGrid" width="615" height="440" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 						<mx:columns>
@@ -3329,7 +3329,7 @@
 					<mx:Label text="{lan.name}"/>
 					<mx:TextInput id="playerSearchNameText"/>
 					<mx:Button id="searchPlayerButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendPlayerSearch();" />
-					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+					<mx:Button label="{lan.close}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 				</mx:HBox>
 				<mx:DataGrid id="playerSearchGrid" width="755" height="440" rowHeight="21">
 					<mx:columns>
@@ -3353,7 +3353,7 @@
 				<mx:VBox horizontalAlign="center">
 					<mx:SWFLoader id="rankingFlagLoader" width="56" height="44"/>
 					<mx:Button id="searchRankingButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendRankingSearch();" />
-					<mx:Button label="{lan.close_search}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
+					<mx:Button label="{lan.close}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
 					<mx:Spacer height="20"/>
 					<mx:List id="rankingCountryList" width="120" height="300"/>
 				</mx:VBox>

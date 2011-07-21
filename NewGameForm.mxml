@@ -146,11 +146,11 @@
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
     </mx:HBox>
-    <mx:RadioButton groupName="timeSetting" label="Tournament" value="5" fontSize="11"/>
+    <mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.tournament}" value="5" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
     </mx:HBox>
-	<mx:RadioButton groupName="timeSetting" label="Study Room (VENUS only)" value="6" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.study_room} (VENUS only)" value="6" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="study_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
     </mx:HBox>

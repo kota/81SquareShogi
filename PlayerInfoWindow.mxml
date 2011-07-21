@@ -137,16 +137,16 @@
 		<mx:TextInput id="directMessage" keyDown="_clearHighlight();" width="360" height="23" fontFamily="Meiryo UI" fontSize="11" />
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" paddingTop="0">
-		<mx:Button id="detail" label="Detail" click="_openDetail();" />
+		<mx:Button id="detail" label="{parentApplication.lan.detail}" click="_openDetail();" />
 		<mx:HBox id="othersCommands" visible="false" includeInLayout="false">
 			<mx:Button id="challenge" click="_close();" label="{parentApplication.lan.challenge}" enabled="false" />
-			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="Favorite" />
+			<mx:Button id="favorite" icon="@Embed('images/icon_star.png')" toolTip="{parentApplication.lan.favorite}" />
 			<mx:Button id="ignore" icon="@Embed('images/icon_block.png')" toolTip="{parentApplication.lan.ignore}" enabled="false"/>
-			<mx:Button id="allowStudy" label="Allow" toolTip="Allow to move pieces in study mode" enabled="false"/>
+			<mx:Button id="allowStudy" label="{parentApplication.lan.allow}" toolTip="Allow to move pieces in study mode" enabled="false"/>
 		</mx:HBox>
 		<mx:HBox id="selfCommands" visible="false" includeInLayout="false">
 			<mx:ComboBox id="setRateCombo" enabled="false" width="80" fontSize="10" />
-			<mx:Button id="setRateButton" label="Set Rate" enabled="false" />
+			<mx:Button id="setRateButton" label="{parentApplication.lan.set_rate}" enabled="false" />
 		</mx:HBox>
 		<mx:CheckBox id="pmCheckBox" label="" click="togglePM();" paddingRight="-5" toolTip="Open PM window" />
 		<mx:Image source="@Embed('images/icon_greet.png')" click="pmCheckBox.selected = !pmCheckBox.selected; togglePM();" toolTip="Open PM window" />

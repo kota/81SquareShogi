@@ -39,9 +39,9 @@
 	<mx:HBox horizontalAlign="center" width="100%">
 		<mx:VBox horizontalAlign="center">
 			<mx:Label text=""/>
-			<mx:Label text="Entered"/>
-			<mx:Label text="Pieces"/>
-			<mx:Label text="Points"/>
+			<mx:Label text="{parentApplication.lan.entered_impasse}"/>
+			<mx:Label text="{parentApplication.lan.pieces_impasse}"/>
+			<mx:Label text="{parentApplication.lan.points_impasse}"/>
 		</mx:VBox>
 		<mx:VBox horizontalAlign="center">
 			<mx:Label text="{parentApplication.lan.black}" fontWeight="bold" />
@@ -58,6 +58,6 @@
 	</mx:HBox>
 	<mx:HBox width="100%" horizontalAlign="center">
 		<mx:Button id="kachiButton" label="{parentApplication.lan.declare}" click="_close();" enabled="false" />
-		<mx:Button label="Close" click="_close();"/>
+		<mx:Button label="{parentApplication.lan.close}" click="_close();"/>
 	</mx:HBox>
 </mx:TitleWindow>

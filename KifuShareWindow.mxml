@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" title="Share Kifu" width="300" height="170"
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" title="{parentApplication.lan.share}" width="300" height="170"
 		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="20" horizontalAlign="center">
 	<mx:Script>
         <![CDATA[

@@ -312,9 +312,9 @@
 			</mx:HBox>
 		</mx:VBox>
 		<mx:VBox>
-			<mx:Label text="Status: {connection}"/>
-			<mx:Label text="Joined on: {_joined}"/>
-			<mx:Label text="Updated on: {_updated}" />
+			<mx:Label text="{parentApplication.lan.status}: {connection}"/>
+			<mx:Label text="{parentApplication.lan.signed_up}: {_joined}"/>
+			<mx:Label text="{parentApplication.lan.last_updated}: {_updated}" />
 			<mx:Label text="PR:"/>
 			<mx:Spacer height="-15"/>
 			<mx:TextArea width="220" height="95" text="{_pr}" fontSize="10" editable="false" />
@@ -330,10 +330,10 @@
 			<mx:HBox>
 				<mx:Label text="Shogi" fontWeight="bold" fontSize="13" />
 				<mx:Spacer width="20"/>
-				<mx:Button label="Tendencies" click="resultViewStack.selectedIndex = 0;" fontSize="10" />
-				<mx:Button label="Winning %" click="resultViewStack.selectedIndex = 1;" fontSize="10"/>
-				<mx:Button label="Rate History" click="resultViewStack.selectedIndex = 2;" fontSize="10"/>
-				<mx:Button label="Data Table" click="resultViewStack.selectedIndex = resultViewStack.selectedIndex == 3 ? 4 : 3;" fontSize="10"/>
+				<mx:Button label="{parentApplication.lan.tendency}" click="resultViewStack.selectedIndex = 0;" fontSize="10" />
+				<mx:Button label="{parentApplication.lan.percentage}" click="resultViewStack.selectedIndex = 1;" fontSize="10"/>
+				<mx:Button label="{parentApplication.lan.rate_history}" click="resultViewStack.selectedIndex = 2;" fontSize="10"/>
+				<mx:Button label="{parentApplication.lan.data_table}" click="resultViewStack.selectedIndex = resultViewStack.selectedIndex == 3 ? 4 : 3;" fontSize="10"/>
 			</mx:HBox>
 			<mx:HBox>
 				<mx:ViewStack id="resultViewStack" width="400" height="220">
