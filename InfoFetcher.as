@@ -37,13 +37,13 @@
 		public static var country_names3:Array;
 		public static var country_list_names:Array;
 		public static var country_maps:Array;
-		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA',
+		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'DM', 'KY', 'LA', 'RL',
 																				'PM', 'PR', 'PI', 'PO', 'PS', 'PK', 'PZ', 'PT', 'PN', 'PA', 'PJ',
 																				'JM', 'JZ', 'JI', 'JO', 'JF', 'JV');
-		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO',
+		public static var tournament_name_en:Array = new Array('81Ou', 'CosmOu', 'Aeon Saint', 'Supernova', 'Shooting Star', 'Dark Matter', 'Kyosha', 'LATINO', 'Relay Shogi',
 																				'Meijin', 'Ryu-ou', 'Ou-i', 'Oushou', 'Kisei', 'Kiou', 'Ouza', 'Masters Tournament', 'Rookies Tournament', 'Asahi Cup', 'JT Series',
 																				'Women Meijin', 'Women Ouza', 'Woman Ou-i', 'Women Oushou', 'Kurashiki Azalea', 'MyNavi Women Open');
-		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦',
+		public static var tournament_name_jp:Array = new Array('八一王戦', '宇宙王戦', '永聖戦', '新星戦', '流星戦', '冥将戦', '香車戦', '中南米戦', 'リレー',
 																				'名人戦', '竜王戦', '王位戦', '王将戦', '棋聖戦', '棋王戦', '王座戦', '達人戦', '新人王戦', '朝日杯', 'JT杯',
 																				'女流名人', '女流王座', '女流王位', '女流王将', '倉敷藤花', 'マイナビ');
 		public static const pie_chart_order:Array = new Array("opposition_static", "yagura", "bishop_exchange", "side_pawn", "double_wing", "unknown", "double_ranging", "opposing_rook", "3rd_file_rook", "4th_file_rook", "central_rook");

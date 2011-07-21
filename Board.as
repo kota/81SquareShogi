@@ -176,6 +176,7 @@ package  {
 	public var studyOn:Boolean = false;
 	public var rematch:Array = new Array(2);
 	public var sendHover:Boolean = false;
+	public var isRelay:Boolean = false;
 
 	private var _time_sente:int;
 	private var _time_gote:int;
@@ -505,6 +506,7 @@ package  {
 	  _player_infos[1] = game.white;
       _my_turn = my_turn;
 	  if (_game.game_name.match(/\-\-..\-\d+\-\d+$/)) _board_bg_image.filters = [filterTournament];
+	  if (_game.game_name.match(/\-\-RL\-\d+\-\d+$/)) isRelay = true;
       resetBoard();
 	  initializeKifu();
       _initializeKyokumen(kyokumen_str);
@@ -659,6 +661,7 @@ package  {
 	  studyOn = false;
 	  isStudyHost = false;
 	  isSubHost = false;
+	  isRelay = false;
 	  clearArrows(ARROWS_PUBLIC);
 	  clearArrows(ARROWS_SELF);
 	  cancelSquareSelect();
@@ -752,6 +755,7 @@ package  {
 	  _game = watch_game;
 	  match = _game.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 	  if (match[2].match(/\-\-..$/)) _board_bg_image.filters = [filterTournament];
+	  if (match[2].match(/\-\-RL$/)) isRelay = true;
 	  
       var kyokumen_str:String = _parsePosition(game_info);
       if(kyokumen_str != ""){

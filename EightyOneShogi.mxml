@@ -582,7 +582,6 @@
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
 			if (_chat_sound1_play) {
 				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
-				else _sound_chat1.play();
 			}
 			if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
 			if (_users[tokens[3]]) _users[tokens[3]].setFromStart(tokens[1], "-");
@@ -986,6 +985,7 @@
 		  board.position.calcImpasse();
 		  _impasseStatusWindow.setStatus(board.position.impasseStatus, board.position.turn == board.my_turn ? board.my_turn : -1);
 	  }
+	  if (board.isRelay) _checkRelaySwitch();
     }
   
 //--------------------------------------------------------------------------------------------------------------------------------- CHAT 
@@ -1352,6 +1352,7 @@
 			board.since_last_move = parseInt(match[1]);
 			board.timers[board.my_turn == board.last_pos.turn ? 0 : 1].accumulateTime(board.since_last_move);
 		  }
+		  if (board.isRelay) _checkRelaySwitch();
 	  }
     }
 
@@ -2869,6 +2870,33 @@
 		} else {
 			_client.gameChat(_game_name, str);
 		}
+	}
+	
+	private function _checkRelaySwitch():void {
+		var team:String;
+		var num:int;
+		if ((board.kifu_list.length + 10) % 20 == 0) {
+			team = "Black";
+			num = (board.kifu_list.length + 10) / 20;
+		} else if ((board.kifu_list.length - 1) % 20 == 0) {
+			team = "White";
+			num = (board.kifu_list.length - 1) / 20;
+		} else {
+			return;
+		}
+		if (!board.kifu_list[board.kifu_list.length - 1].replayable()) return;
+		_writeUserMessage("### " + team + " team, switch players in 60 seconds ###\n", 2, "#FF0000", true);
+		switch (num % 4) {
+			case 1:
+				_writeUserMessage("   (1st player -> 2nd player)\n", 2, "#FF0000"); break;
+			case 2:
+				_writeUserMessage("   (2nd player -> 3rd player)\n", 2, "#FF0000"); break;
+			case 3:
+				_writeUserMessage("   (3rd player -> 4th player)\n", 2, "#FF0000"); break;
+			case 0:
+				_writeUserMessage("   (4th player -> 1st player)\n", 2, "#FF0000");
+		}
+		if (_chat_sound3_play) _sound_chat3.play();
 	}
 
     private function _checkTimeout():void {
