@@ -965,7 +965,12 @@ package  {
 		} else {
 			_arrow_from_type = _my_turn == Kyokumen.SENTE ? Kyokumen.GOTE: Kyokumen.SENTE;
 		}
-		_arrow_from = new Point(e.currentTarget.x + KOMA_WIDTH / 2, e.currentTarget.y + KOMA_HEIGHT / 2);
+		var n:int = 0;
+		for (var i:int = 0; i < e.currentTarget.parent.numChildren; i++) {
+			if (e.currentTarget.parent.getChildAt(i) == e.currentTarget) break;
+			if (e.currentTarget.parent.getChildAt(i).coord_x == e.currentTarget.coord_x) n += 1;
+		}
+		_arrow_from = new Point(e.currentTarget.coord_x - Kyokumen.HAND, n);
 	}
 
     private function _handMouseUpHandler(e:MouseEvent):void{
@@ -1059,7 +1064,22 @@ package  {
 		if (_arrows[target].length >= MAX_ARROWS) {
 			removeChild(_arrows[target].shift());
 		}
-		var arrow:BoardArrow = new BoardArrow(fromType, from, to, color, sender);
+		if (fromType != BoardArrow.FROM_BOARD) {
+			var hand:Object = handBoxes[_my_turn == fromType ? 0 : 1];
+			var n:int = 0;
+			for (var i:int = 0; i < hand.numChildren; i++) {
+				if (hand.getChildAt(i).coord_x - Kyokumen.HAND == from.x) {
+					if (n == from.y) {
+						from = new Point(hand.getChildAt(i).x + KOMA_WIDTH / 2, hand.getChildAt(i).y + KOMA_HEIGHT / 2);
+						break;
+					} else {
+						n += 1;
+					}
+				}
+			}
+		}
+		var pixel_to:Point = new Point(_cells[to.y - 1][9 - to.x].x + KOMA_WIDTH / 2, _cells[to.y - 1][9 - to.x].y + KOMA_HEIGHT / 2);
+		var arrow:BoardArrow = new BoardArrow(fromType, from, to , color, sender);
 		_arrows[target].push(arrow);
 		addChild(arrow);
 		if (showNow) arrow.drawArrow(_my_turn);

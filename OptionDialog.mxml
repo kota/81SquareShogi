@@ -32,7 +32,7 @@
 			
 			public function drawArrow():void {
 				arrowCanvas.removeAllChildren();
-				var arrow:BoardArrow = new BoardArrow( -1, new Point(6, 1), new Point(9, 1), arrowColorPicker.selectedColor, parentApplication.login_name);
+				var arrow:BoardArrow = new BoardArrow(-1 ,new Point(6, 1), new Point(9, 1), arrowColorPicker.selectedColor, parentApplication.login_name);
 				arrow.drawArrow(0);
 				arrow.x = - 205;
 				arrow.y = - 29;
