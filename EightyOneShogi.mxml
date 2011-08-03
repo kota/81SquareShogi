@@ -160,12 +160,14 @@
 	private var _userMessageScrollPos2:int;
 	private var _initPositionStr:String;
 	private var _idleTimer:Timer;
+	private var _pmRingTimer:Timer;
     private var _keepAliveTimer:Timer;
 	private var _leaveTimer:Timer;
 	private var _leaveMinutes:int;
 	private var _leaveMessage:String;
 	private var _infoFetcher:InfoFetcher;
 	private var _pmLog:Object = new Object();
+	private var _pmRingBuffer:Array = new Array();
 	private var _allowWatcherChat:Boolean = false;
 	private var _adminLog:String = "";
 	private var _chatHistory:Array = new Array();
@@ -321,6 +323,8 @@
 	  _infoFetcher.loadSettings(login_name.toLowerCase());
       _keepAliveTimer = new Timer(81000);
       _keepAliveTimer.addEventListener(TimerEvent.TIMER, _handleKeepAlive);
+	  _pmRingTimer = new Timer(81000, 1);
+	  _pmRingTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handlePmRingTimer);
 	  _idleTimer = new Timer(900000, 1);
 	  _idleTimer.addEventListener(TimerEvent.TIMER_COMPLETE, _handleIdleTimer);
 	  _refresh();
@@ -354,6 +358,7 @@
 		_keepAliveTimer.stop();
 		_idleTimer.stop();
 		_keepAliveTimer.removeEventListener(TimerEvent.TIMER, _handleKeepAlive);
+		_pmRingTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _handlePmRingTimer);
 	  	_idleTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _handleIdleTimer);
 		this.removeEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
 		this.removeEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
@@ -1139,7 +1144,14 @@
 		} else if (mainViewStack.selectedIndex == 2) {
 			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
 		}
-		if (_chat_sound3_play) _sound_chat3.play();
+		if (_pmRingBuffer.indexOf(name) >= 0) {
+			if (_chat_sound3_play) _sound_chat2.play();
+		} else {
+			if (_chat_sound3_play) _sound_chat3.play();
+			_pmRingBuffer.push(name);
+		}
+		_pmRingTimer.reset();
+		_pmRingTimer.start();
 		if (_leaving) {
 			if (_users[name]) {
 				var hour:int = (_leaveMinutes - _leaveTimer.currentCount) / 60;
@@ -2752,6 +2764,10 @@
 	
 	private function _handleIdleTimer(e:TimerEvent):void {
 		_client.idle(true);
+	}
+	
+	private function _handlePmRingTimer(e:TimerEvent):void {
+		_pmRingBuffer = new Array();
 	}
 
     private function _writeUserMessage(message:String, n:int, colorCode:String, bold:Boolean = false):void {
