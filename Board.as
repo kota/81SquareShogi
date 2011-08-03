@@ -98,7 +98,7 @@ package  {
 	[Embed(source = "/sound/piece_double.mp3")]
 	private var sound_piece_double:Class;
 	private var _sound_piece_double:Sound = new sound_piece_double();
-	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
+	private const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
 
     public var handBoxes:Array;
 	public var infoBoxes:Array;

@@ -72,7 +72,7 @@
 		  private var _cityLatitude:Number;
 		  private var _cityLongitude:Number;
 
-		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
+		  private const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
 		  private var _mapLoaded:Boolean = false;
 		  private var _detailLoaded:Boolean = false;
 		  private var _countryMapInfo:String;
@@ -321,7 +321,7 @@
 		</mx:VBox>
 
 		<maps:Map xmlns:maps="com.google.maps.*" id="map" mapevent_mapready="_onMapReady(event)" width="280" height="190"
-		key="ABQIAAAA3ixmRh8intDkiLxI7stEWBT5yFy9Ond2P01B_VeTE9wFqTX3wxROJ3RmY17ZpxD6yiabjGLW6ebu0g" sensor="false" />
+		key="ABQIAAAA3ixmRh8intDkiLxI7stEWBRRcFstc8fS6PNRbx73gFqDz6uERRTy8n1ZPM6UZ8fRVdmwPSXdTYkA1w" sensor="false" />
 
 	</mx:HBox>
 	

@@ -39,7 +39,7 @@ package{
 		private var _port:int = 80;
 
 		public function ApiClient() {
-			Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
+			Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml?110801b');
 			_kifuSearchService.addEventListener(ResultEvent.RESULT, _handleKifuSearch);
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);

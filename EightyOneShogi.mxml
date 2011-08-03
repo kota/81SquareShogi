@@ -58,9 +58,10 @@
 	import User;
 	import Game;
     import mx.utils.StringUtil;
+	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2011/07/21";
-	private const DIRECTORY:String = "http://81dojo.com/dojo/";
+	public const VERSION:String = "ver.2011/08/01";
+	private const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
 	[Bindable]
@@ -186,6 +187,7 @@
     private function initApp():void
     {
       trace("application initialized..");
+	  Security.loadPolicyFile('http://81dojo.com/crossdomain.xml');
 	  _infoFetcher = new InfoFetcher();
       board.setMoveCallback(_playerMove);
       board.setTimeoutCallback(_checkTimeout);
@@ -356,7 +358,7 @@
 		this.removeEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
 		this.removeEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
 		loginMessage.text = "logged out successfully";
-		titleBanner.source = DIRECTORY + "images/81Dojo_bye.jpg";
+		titleBanner.source = IMAGE_DIRECTORY + "81Dojo_bye.jpg";
 		mainViewStack.selectedIndex = 0;
 //		loginButton.enabled = true;
 	}
@@ -696,7 +698,7 @@
 	  watcherListGrid.dataProvider = _watcher_list;
 	  userMessage2.htmlText = "";
 	  _writeUserMessage(_infoFetcher.gameMessage + "\n", 2, "#008800");
-	  if (match[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + match[2].substr(match[2].length - 2, 2) + ".jpg", 2);
+	  if (match[2].match(/\-\-..$/)) _imgUserMessage(IMAGE_DIRECTORY + "banners/" + match[2].substr(match[2].length - 2, 2) + ".jpg", 2);
       if(_client.myTurn == Kyokumen.SENTE){
         _writeUserMessage("You are Black " + (board.gameType == "hc" ? "(Handicap taker).\n" : "(Sente).\n"), 2, "#008800");
       } else {
@@ -1711,7 +1713,7 @@
 		  } else {
 			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see watcher's chat even during game.\n", 2, "#008800", true);
 		  }
-		  if (game_info[2].match(/\-\-..$/)) _imgUserMessage(DIRECTORY + "images/banners/" + game_info[2].substr(game_info[2].length - 2, 2) + ".jpg", 2);
+		  if (game_info[2].match(/\-\-..$/)) _imgUserMessage(IMAGE_DIRECTORY + "banners/" + game_info[2].substr(game_info[2].length - 2, 2) + ".jpg", 2);
 		  mainViewStack.selectedIndex = 2;
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
@@ -2315,7 +2317,7 @@
 		if (country_code == "") {
 			rankingFlagLoader.source = "";
 		} else {
-			rankingFlagLoader.source = DIRECTORY + "images/flags_m/" + country_code + ".swf";
+			rankingFlagLoader.source = IMAGE_DIRECTORY + "flags_m/" + country_code + ".swf";
 		}
 	}
 	
@@ -2371,14 +2373,14 @@
 					kifu.blackRankColor = String(summaries[6]).match(/^\*/) ? 0x999999 : InfoFetcher.makeColorFromRating(summaries[6].split(",")[0]);
 					kifu.blackRank = String(summaries[6]).match(/^\*/) ? "-" : InfoFetcher.makeRankFromRating(summaries[6].split(",")[0]);
 					kifu.blackCountryCode = parseInt(summaries[6].split(",")[1]);
-					kifu.blackFlagURL = DIRECTORY + "images/flags_ss/" + String(kifu.blackCountryCode + 1000).substr(1) + ".png";
+					kifu.blackFlagURL = IMAGE_DIRECTORY + "flags_ss/" + String(kifu.blackCountryCode + 1000).substr(1) + ".png";
 					kifu.blackCountry = InfoFetcher.country_names[kifu.blackCountryCode];
 				} else kifu.blackRankColor = 0xFFFFFF;
 				if (summaries[7]) {
 					kifu.whiteRankColor = String(summaries[7]).match(/^\*/) ? 0x999999 : InfoFetcher.makeColorFromRating(summaries[7].split(",")[0]);
 					kifu.whiteRank = String(summaries[7]).match(/^\*/) ? "-" : InfoFetcher.makeRankFromRating(summaries[7].split(",")[0]);
 					kifu.whiteCountryCode = parseInt(summaries[7].split(",")[1]);
-					kifu.whiteFlagURL = DIRECTORY + "images/flags_ss/" + String(kifu.whiteCountryCode + 1000).substr(1) + ".png";
+					kifu.whiteFlagURL = IMAGE_DIRECTORY + "flags_ss/" + String(kifu.whiteCountryCode + 1000).substr(1) + ".png";
 					kifu.whiteCountry = InfoFetcher.country_names[kifu.whiteCountryCode];
 				} else kifu.whiteRankColor = 0xFFFFFF;
 				_kifu_search_list.push(kifu);
@@ -2518,7 +2520,7 @@
 			player.country = InfoFetcher.country_names[InfoFetcher.country_codes[player.country_id - 1]];
 			player.total = parseInt(player.wins) + parseInt(player.losses);
 			player.percentage = (100 * player.wins / Math.max(1, player.total)).toFixed(1);
-			player.flagURL = DIRECTORY + "images/flags_s/" + String(InfoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
+			player.flagURL = IMAGE_DIRECTORY + "flags_s/" + String(InfoFetcher.country_codes[player.country_id - 1] + 1000).substring(1) + ".gif";
 			player.rank = InfoFetcher.makeRankFromRating(player.rate);
 			player.created_at = player.created_at.split(" ")[0];
 			player.updated_at = player.updated_at.split(" ")[0];
@@ -2589,7 +2591,7 @@
 				'rate':parseInt(playerXML.rate),
 				'rank':InfoFetcher.makeRankFromRating(parseInt(playerXML.rate))
 			}
-			player.flagURL = DIRECTORY + "images/flags_s/" + player.country_code + ".gif";
+			player.flagURL = IMAGE_DIRECTORY + "flags_s/" + player.country_code + ".gif";
 			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
 				  if (player.login == InfoFetcher.titleUser[i]) {
 					  player.title = InfoFetcher.titleName[i];
@@ -3050,7 +3052,7 @@
 		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 	  </mx:HBox>
-	  <mx:Image id="titleBanner" source="{DIRECTORY}images/81Dojo.jpg"/>
+	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
