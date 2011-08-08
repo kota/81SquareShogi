@@ -173,6 +173,8 @@
 	private var _adminLog:String = "";
 	private var _chatHistory:Array = new Array();
 	private var _nHistory:int = 0;
+	private var _mouseX:Number;
+	private var _mouseY:Number;
 	
     private var _optionWindow:OptionDialog;
 	private var _newGameWindow:NewGameForm; 
@@ -314,8 +316,8 @@
 	  }
       loginMessage.text = "Logged in Successfully";
 	  clock.start();
-	  this.addEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
-	  this.addEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
+	  this.addEventListener(MouseEvent.MOUSE_MOVE, _idleClear(true));
+	  this.addEventListener(KeyboardEvent.KEY_DOWN, _idleClear(false));
 	  if (InfoFetcher.isAdminLv1(login_name) || InfoFetcher.isAdminLv2(login_name)) { adminButton.visible = true; _client.adminOn(); _api.adminOn(); }
       mainViewStack.selectedIndex = 1;
 	  rankingCountryList.dataProvider = InfoFetcher.country_list_names;
@@ -361,8 +363,8 @@
 		_keepAliveTimer.removeEventListener(TimerEvent.TIMER, _handleKeepAlive);
 		_pmRingTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _handlePmRingTimer);
 	  	_idleTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, _handleIdleTimer);
-		this.removeEventListener(MouseEvent.MOUSE_MOVE, _idleClear);
-		this.removeEventListener(KeyboardEvent.KEY_DOWN, _idleClear);
+		this.removeEventListener(MouseEvent.MOUSE_MOVE, _idleClear(true));
+		this.removeEventListener(KeyboardEvent.KEY_DOWN, _idleClear(false));
 		loginMessage.text = "logged out successfully";
 		titleBanner.source = IMAGE_DIRECTORY + "81Dojo_bye.jpg";
 		mainViewStack.selectedIndex = 0;
@@ -2309,7 +2311,7 @@
 	}
 	
 	private function _rollOut(e:MouseEvent):void {
-		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_OUT]0,0");
+		if (_isDuringMyGame() && !board.viewing && board.gameType == "r") _client.gameChat(_game_name, "[##M_OUT]" + int(_mouseX) + "," + int(_mouseY));
 	}
 
 	private function _playerInfoFromText(textArea:TextArea):void {
@@ -2766,10 +2768,16 @@
 //  	  if (mainViewStack.selectedIndex == 1) bulletin.flip();
     }
 	
-	private function _idleClear(e:Event):void {
-		_idleTimer.reset();
-		_idleTimer.start();
-		_client.idle(false);
+	private function _idleClear(mouse:Boolean):Function {
+		return function(e:Event):void {
+			if (mouse) {
+				_mouseX = MouseEvent(e).stageX;
+				_mouseY = MouseEvent(e).stageY;
+			}
+			_idleTimer.reset();
+			_idleTimer.start();
+			_client.idle(false);
+		}
 	}
 	
 	private function _handleIdleTimer(e:TimerEvent):void {
