@@ -1140,10 +1140,9 @@
 			_playerInfoWindows[name].togglePM();
 			_playerInfoWindows[name].pmTextArea.setStyle('backgroundColor', 0xFFFFBB);
 			_playerInfoWindows[name].callLater(_playerInfoWindows[name].scrollDown);
-		} else if (mainViewStack.selectedIndex == 1 || mainViewStack.selectedIndex == 3) {
+		} else {
 			_writeUserMessage("PM: " + e.message.substr(15), 1, "#FF0000");
-		} else if (mainViewStack.selectedIndex == 2) {
-			_writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
+			if (mainViewStack.selectedIndex == 2) _writeUserMessage("PM: " + e.message.substr(15), 2, "#FF0000");
 		}
 		if (_pmRingBuffer.indexOf(name) >= 0) {
 			if (_chat_sound3_play) _sound_chat2.play();
