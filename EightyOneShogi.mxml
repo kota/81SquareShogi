@@ -2786,7 +2786,7 @@
 //		if ((match = message.match(/\s(https?\:\/\/[^\"]+?)\s/))) message = message.replace(/\shttps?\:\/\/[^\"]+?\s/, " <u><a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a></u> ");
 		if ((match = message.match(/(https?\:\/\/[^\"^\s^\\]+)/))) message = message.replace(/https?\:\/\/[^\"^\s^\\]+/, "<u><a href=\"" + match[1] + "\" target=\"_blank\">" + match[1] + "</a></u>");
 		message = "<font color='" + colorCode + "'>" + (bold ? "<b>" : "") + message + (bold ? "</b>" : "") + "</font>";
-		message = message.replace(/\\n/g, "\n");
+		message = message.replace(/\\n/g, "\n     ");
 		switch (n) {
 			case 1:
 				_userMessageScrollPos1 = userMessage1.verticalScrollPosition
