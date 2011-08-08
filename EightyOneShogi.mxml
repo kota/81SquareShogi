@@ -92,6 +92,7 @@
     private var _monitoring:Boolean;
 	private var _waiting:Boolean = false;
     private var _challenging:Boolean = false;
+	private var _shareKifuEnabled:Boolean = false;
 	private var _gameAccepted:Boolean = false;
 	private var _rematching:Boolean = false;
 	private var _leaving:Boolean = false;
@@ -716,7 +717,7 @@
 	  reverseButton.enabled = false;
 	  greetButton.visible = true;
 	  rematchButton.visible = false;
-	  shareKifuButton2.visible = false;
+	  _shareKifuEnabled = false;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
       forwardOneButton.enabled = false;
@@ -806,7 +807,7 @@
 	  reverseButton.enabled = false;
 	  greetButton.visible = true;
 	  rematchButton.visible = false;
-	  shareKifuButton2.visible = false;
+	  _shareKifuEnabled = false;
       rewindAllButton.enabled = false;
       rewindOneButton.enabled = false;
       forwardOneButton.enabled = false;
@@ -863,7 +864,7 @@
 		  closeButton.enabled = true;
 		  resignButton.enabled = false;
 		  rematchButton.visible = true;
-		  shareKifuButton2.visible = true;
+		  _shareKifuEnabled = true;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
 		  forwardOneButton.enabled = true;
@@ -945,7 +946,7 @@
       closeButton.enabled = true;
       resignButton.enabled = false;
 	  rematchButton.visible = true;
-	  shareKifuButton2.visible = true;
+	  _shareKifuEnabled = true;
       rewindAllButton.enabled = true;
       rewindOneButton.enabled = true;
       forwardOneButton.enabled = true;
@@ -1345,7 +1346,7 @@
 			board.post_game = true;
 			radioKifuReplay.enabled = true;
 			radioKifuListen.enabled = true;
-			shareKifuButton2.visible = true;
+			_shareKifuEnabled = true;
 			if (e.message.indexOf("#SENTE_WIN") >= 0) {
 				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderThickness', 2);
 				board.infoBoxes[board.my_turn == Kyokumen.SENTE ? 0 : 1].setStyle('borderColor', 0xFF0000);
@@ -1732,7 +1733,7 @@
 		  reverseButton.enabled = true;
 		  greetButton.visible = false;
 		  rematchButton.visible = false;
-		  shareKifuButton2.visible = false;
+		  _shareKifuEnabled = false;
 		  rewindAllButton.enabled = true;
 		  rewindOneButton.enabled = true;
 		  forwardOneButton.enabled = true;
@@ -2104,30 +2105,40 @@
 	}
 	
 	private function _shareKifu2():void {
-		var kifu:Object = new Object();
-		kifu.id = board.kid;
-		kifu.opening = board.openingEn;
-		kifu.black = board.playerInfos[0].name;
-		kifu.white = board.playerInfos[1].name;
-		kifu.blackRank = board.playerInfos[0].rank;
-		kifu.whiteRank = board.playerInfos[1].rank;
-		kifu.blackCountryCode = board.playerInfos[0].country_code;
-		kifu.whiteCountryCode = board.playerInfos[1].country_code;
-		if (!board.viewing) {
-			for each (var game:Object in _game_list) {
-				if (game.id == _game_name) {
-					kifu.opening = game.openingEn;
-					break;
+		var diagram:Object = new Object();
+		diagram.sfen = board.position.toSFEN() + "%20" + (kifuDataGrid.selectedIndex ? kifuDataGrid.selectedIndex : (kifuDataGrid.dataProvider.length - 1));
+		diagram.sname = board.playerInfos[0].name;
+		diagram.gname = board.playerInfos[1].name;
+		diagram.lm = board.getLastSquareName();
+		var kifu:Object = null;
+		if (_shareKifuEnabled) {
+			kifu = new Object();
+			kifu.id = board.kid;
+			kifu.opening = board.openingEn;
+			kifu.black = board.playerInfos[0].name;
+			kifu.white = board.playerInfos[1].name;
+			kifu.blackRank = board.playerInfos[0].rank;
+			kifu.whiteRank = board.playerInfos[1].rank;
+			kifu.blackCountryCode = board.playerInfos[0].country_code;
+			kifu.whiteCountryCode = board.playerInfos[1].country_code;
+			if (!board.viewing) {
+				for each (var game:Object in _game_list) {
+					if (game.id == _game_name) {
+						kifu.opening = game.openingEn;
+						break;
+					}
 				}
 			}
 		}
-		_openKifuShareWindow(kifu, board.piece_type, board.my_turn, kifuDataGrid.selectedIndex);
+		_openKifuShareWindow(kifu, diagram, board.piece_type, board.my_turn, kifuDataGrid.selectedIndex);
 	}
 	
-	private function _openKifuShareWindow(kifu:Object, pieceType:int = 0,  turn:int = 0, moves:int = 0):void {
+	private function _openKifuShareWindow(kifu:Object, diagram:Object = null, pieceType:int = 0,  turn:int = 0, moves:int = 0):void {
 		_kifuShareWindow = KifuShareWindow(PopUpManager.createPopUp(this, KifuShareWindow, true));
 		PopUpManager.centerPopUp(_kifuShareWindow);
+		_kifuShareWindow.toggleRadio(kifu != null, diagram != null);
 		_kifuShareWindow.kifu = kifu;
+		_kifuShareWindow.diagram = diagram;
 		_kifuShareWindow.moves = moves;
 		_kifuShareWindow.turn = turn;
 		_kifuShareWindow.pieceType = pieceType;
@@ -2473,7 +2484,7 @@
 		reverseButton.enabled = true;
 		greetButton.visible = false;
 		rematchButton.visible = false;
-		shareKifuButton2.visible = true;
+		_shareKifuEnabled = true;
 		userMessage2.htmlText = "";
 		kifuDataGrid.selectable = true;
 		rewindAllButton.enabled = true;
@@ -3233,7 +3244,6 @@
 			  </mx:HBox>
 		  </mx:HBox>
           <mx:HBox width="300" horizontalAlign="right">
-			<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
 			<mx:Button id="rematchButton" icon="@Embed('images/icon_finger.png')" toolTip="{lan.rematch}" click="_rematch();"/>
 			<mx:HBox width="100%" horizontalAlign="right" horizontalScrollPolicy="off" horizontalGap="5">
 				<mx:Button id="rewindAllButton" label="|&lt;" enabled="false" click="replayByButton(-2);"/>
@@ -3280,8 +3290,13 @@
 			<mx:VBox height="453">
 				<mx:HBox paddingBottom="3">
 					<mx:Label text="{lan.kifu}" fontWeight="bold"/>
-					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="_copyKIF();"/>
-					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
+					<mx:VBox>
+						<mx:HBox>
+							<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="_copyKIF();"/>
+							<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
+						</mx:HBox>
+					<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
+					</mx:VBox>
 				</mx:HBox>
 				  <mx:HBox paddingLeft="2" paddingTop="-3">
 						<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />

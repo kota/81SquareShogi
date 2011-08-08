@@ -1110,6 +1110,11 @@ package  {
 	public function showLastSquareLabel(name:String):void {
 		_last_to_square.showLabel(name);
 	}
+	
+	public function getLastSquareName():String {
+		if (_last_to_square) return String(_last_to_square.coord_x) + String(_last_to_square.coord_y);
+		else return "";
+	}
 
 	private function _showMovableSquares(from:Point):void {
 		var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(from));

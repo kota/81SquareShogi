@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" title="{parentApplication.lan.share}" width="300" height="170"
-		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="20" horizontalAlign="center">
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" horizontalScrollPolicy="off" verticalScrollPolicy="off" title="{parentApplication.lan.share}" width="330" height="200"
+		paddingLeft="8" paddingBottom="8" paddingRight="8" paddingTop="8" horizontalAlign="center">
 	<mx:Script>
         <![CDATA[
 			import flash.net.URLRequest;
@@ -8,45 +8,88 @@
             import mx.managers.PopUpManager;
 			private const DIRECTORY:String = "http://www.81dojo.com/";
 			public var kifu:Object;
+			public var diagram:Object;
 			public var moves:int;
 			public var turn:int;
 			public var pieceType:int;
-
+			
+			private function _toURL():String {
+				var str:String;
+				if (RadioGroup1.selectedValue == 0) {
+					str = DIRECTORY + "kifuviewer.html?kid=" + kifu.id;
+					if (pieceType != 0) str += "&piece=" + pieceType;
+					if (turn != 0) str += "&turn=" + turn;
+					if (moves != 0) str += "&moves=" + moves;
+				} else {
+					str = "http://sfenreader.appspot.com/sfen?sfen=" + diagram.sfen;
+					str += "&lm=" + diagram.lm;
+					str += "&sname=" + diagram.sname;
+					str += "&gname=" + diagram.gname;
+					str += "&title=from_81Dojo";
+				}
+				return str;
+			}
+			
 			private function _copyURL():void {
-				var str:String = DIRECTORY + "kifuviewer.html?kid=" + kifu.id;
-				if (pieceType != 0) str += "&piece=" + pieceType;
-				if (turn != 0) str += "&turn=" + turn;
-				if (moves != 0) str += "&moves=" + moves;
+				System.setClipboard(_toURL());
+				Alert.show("URL is set to clipboard.");
+			}
+			
+			private function _copyHTML():void {
+				var str:String;
+				if (RadioGroup1.selectedValue == 0) {
+					str = "<embed src=\"http://49.212.52.151/dojo/EightyOneKifuViewer.swf?kid=" + kifu.id;
+					if (pieceType != 0) str += "&piece=" + pieceType;
+					if (turn != 0) str += "&turn=" + turn;
+					if (moves != 0) str += "&moves=" + moves;
+					str += "\" type=\"application/x-shockwave-flash\" bgcolor=\"#ffffff\" pluginspage=\"http://www.adobe.com/go/getflashplayer_jp\" height=\"350\" width=\"595\">";
+				} else {
+					str = "<img src=\"" + _toURL() + "\">";
+				}
 				System.setClipboard(str);
-				Alert.show("Kifuview-URL is set to clipboard.");
+				Alert.show("Embed HTML tag set to clipboard.");
 			}
 			
 			private function _sendTwitter():void {
-				var str:String = "http://twitter.com/share?text=81Dojo Kifu: [";
-				str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ", " + kifu.blackRank + ") vs ";
-				str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ", " + kifu.whiteRank +")]";
-				if (kifu.opening != "") str += ", " + kifu.opening;
-				str += ". %2381dojo";
-				str += "&url=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id;
-				if (pieceType != 0) str += "%26piece%3d" + pieceType;
-				if (turn != 0) str += "%26turn%3d" + turn;
-				if (moves != 0) str += "%26moves%3d" + moves;
+				var str:String = "http://twitter.com/share?text=";
+				if (RadioGroup1.selectedValue == 0) {
+					str += "81Dojo Kifu: [";
+					str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ", " + kifu.blackRank + ") vs ";
+					str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ", " + kifu.whiteRank +")]";
+					if (kifu.opening != "") str += ", " + kifu.opening;
+					str += ". %2381dojo";
+				} else {
+					str += "81Dojo Diagram: [" + diagram.sname + " vs " + diagram.gname + "]";
+					str += " %2381dojo (powered by fantakeshi)";
+				}
+				str += "&url=" + encodeURIComponent(_toURL());
 				navigateToURL(new URLRequest(str),"_blank");
 			}
 			
 			private function _sendFacebook():void {
-				var str:String = "http://www.facebook.com/sharer.php?u=" + DIRECTORY + "kifuviewer.html%3fkid%3d" + kifu.id;
-				if (pieceType != 0) str += "%26piece%3d" + pieceType;
-				if (turn != 0) str += "%26turn%3d" + turn;
-				if (moves != 0) str += "%26moves%3d" + moves;
+				var str:String = "http://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(_toURL());
 				navigateToURL(new URLRequest(str),"_blank");
 			}
+			
+			public function toggleRadio(kifuEnabled:Boolean, diagramEnabled:Boolean):void{
+				kifuRadio.enabled = kifuEnabled;
+				diagramRadio.enabled = diagramEnabled;
+				if (!kifuEnabled) diagramRadio.selected = true;
+				else if (!diagramEnabled) kifuRadio.selected = true;
+			}
+			
         ]]>
     </mx:Script>
-	<mx:HBox horizontalAlign="center" paddingBottom="15">
-		<mx:Button label="URL" fontSize="20" height="44" click="_copyURL();" />
+	<mx:VBox>
+		<mx:RadioButtonGroup id="RadioGroup1"/>
+		<mx:RadioButton id="kifuRadio" fontSize="11" label="Kifu (on 81Dojo Kifu Viewer)" groupName="RadioGroup1" value="0" selected="true" />
+		<mx:RadioButton id="diagramRadio" fontSize="11" label="Diagram (on cloud service by fantakeshi)" groupName="RadioGroup1"  value="1"/>
+	</mx:VBox>
+	<mx:HBox horizontalAlign="center" paddingBottom="10">
 		<mx:Button icon="@Embed('images/icon_twitter.png')" toolTip="Twitter" click="_sendTwitter();" />
 		<mx:Button icon="@Embed('images/icon_facebook.png')" toolTip="Facebook" click="_sendFacebook();" />
+		<mx:Button label="&lt;HTML>" fontSize="14" height="44" click="_copyHTML();" paddingRight="0" paddingLeft="0" />
+		<mx:Button label="URL" fontSize="14" height="44" click="_copyURL();" />
 	</mx:HBox>
 	<mx:Button label="Close" click="PopUpManager.removePopUp(this);" fontSize="12" />
 </mx:TitleWindow>

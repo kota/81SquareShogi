@@ -22,6 +22,7 @@ package  {
 		private var _promoteY2:int;
 
     public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
+	private static const koma_sfen_names:Array = new Array('K', 'R', 'B', 'G', 'S', 'N', 'L', 'P', '', '%2BR', '%2BB', '', '%2BS', '%2BN', '%2BL', '%2BP');
 	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
 	private static const ALL_POINTS:int = 2 * (koma_impasse_points[0] + 27);
 	
@@ -143,6 +144,40 @@ package  {
 			}
 			if (line.length > 2) str += line + "\n";
 		}
+		return str;
+	}
+	
+	public function toSFEN():String {
+		var str:String = "";
+		var n:int = 0;
+		for (var y:int = 0; y < 9; y++) {
+			for (var x:int = 0; x < 9; x++) {
+				if (_ban[x][y]) {
+					if (n > 0) str += n;
+					n = 0;
+					if (_ban[x][y].ownerPlayer == SENTE) {
+						str += koma_sfen_names[_ban[x][y].type];
+					} else {
+						str += koma_sfen_names[_ban[x][y].type].toLowerCase();
+					}
+				} else {
+					n += 1;
+				}
+			}
+			if (n > 0) str += n;
+			n = 0;
+			if (y < 8) str += "/";
+		}
+		str += "%20" + (turn == SENTE ? "b" : "w");
+		var hand:String = ""
+		for (var j:int = 0; j < 2;j++) {
+			for (var i:int = 0; i < 8; i++) {
+				n = _komadai[j].getNumOfKoma(i);
+				if (n > 0) hand += (n > 1 ? n : "") + (j == 0 ? koma_sfen_names[i] : koma_sfen_names[i].toLowerCase());
+			}
+		}
+		if (hand == "") hand = "-";
+		str += "%20" + hand;
 		return str;
 	}
 		
