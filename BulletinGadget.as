@@ -17,9 +17,11 @@ package  {
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
 	import flash.net.navigateToURL;
+	import mx.controls.SWFLoader;
 	import mx.effects.Effect;
 	import mx.effects.WipeDown;
 	import mx.effects.WipeUp;
+	import AdBox;
 
   public class BulletinGadget extends ViewStack {
     
@@ -173,6 +175,27 @@ package  {
 			}
 			y += 15;
 		}
+		//Ads
+		page = new Canvas();
+		page.width = 175;
+		page.height = 625;
+		page.horizontalScrollPolicy = "off";
+		page.setStyle('backgroundColor', '#EEFFCC');
+		page.setStyle('showEffect', _showEffect);
+		page.setStyle('hideEffect', _hideEffect);
+		label = new Label();
+		label.addEventListener(MouseEvent.CLICK, _handleFlip);
+		label.text = "Shogi Goods Info";
+		label.setStyle('textAlign', 'center');
+		label.width = page.width
+		label.setStyle('color', '#FF0000');
+		label.setStyle('fontWeight', 'bold');
+		page.addChild(label);
+		var adBox:AdBox = new AdBox();
+		adBox.y = 25;
+		page.addChild(adBox);
+		addChild(page);
+		
 		this.selectedIndex = 0;
 		_flipTimer.start();
     }
