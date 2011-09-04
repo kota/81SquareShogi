@@ -35,7 +35,7 @@ package{
 		
 		//private var _host:String = '127.0.0.1';
 		//private var _host:String = '81dojo.dyndns.org';
-		private var _host:String = 'account.81dojo.com';
+		private var _host:String = 'account-81dojo.dyndns-web.com';
 		private var _port:int = 80;
 
 		public function ApiClient() {
