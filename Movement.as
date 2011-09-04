@@ -166,7 +166,7 @@ package  {
 			} else {
 				if (_promote) {
 					str += "成";
-				} else if (_from.x < Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
+				} else if (!forFile && _from.x < Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
 					if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += "不成";
 				} 
 			}
