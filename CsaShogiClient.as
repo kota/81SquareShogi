@@ -79,6 +79,7 @@ package{
 		}
 
 		public function connect():void{
+		  Security.loadPolicyFile("xmlsocket://" + _host + ":844");
 		  _socket = new Socket();
 		  _socket.addEventListener(Event.CONNECT,_handleConnect);
 		  _socket.addEventListener(Event.CLOSE,_handleClose);
