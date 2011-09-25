@@ -79,7 +79,7 @@ package{
 		}
 
 		public function connect():void{
-		  Security.loadPolicyFile("xmlsocket://" + _host + ":844");
+		  Security.loadPolicyFile("xmlsocket://" + _host + ":" + _port);
 		  _socket = new Socket();
 		  _socket.addEventListener(Event.CONNECT,_handleConnect);
 		  _socket.addEventListener(Event.CLOSE,_handleClose);
@@ -480,7 +480,8 @@ package{
 		}
 
 		private function _handleSecurityError(e:SecurityErrorEvent):void{
-			Alert.show(e.toString());
+			if (e.toString().match(/\#2048/)) Alert.show("Login authentication failed.\nPlease reload and use VENUS server.\n(Please also notify 81Dojo staff about the problem.)");
+			else Alert.show(e.toString());
 		}
 
 		public function isConnected():Boolean{
