@@ -85,15 +85,15 @@
 					if (_nRanging <= 0.05 * _n) {
 						typeLabel.toolTip = "純粋居飛車党"; typeLabel.text = "Pure Static Rook Player";
 					}
-					if (_percents["yagura"] / 100 >= _nStatic / _n * 0.6) {
+					if (_percents["yagura"] / 100 >= 0.8 * (_nStatic / _n - _percents["opposition_static"] / 100)) {
 						typeLabel.toolTip = "矢倉マニア"; typeLabel.text = "Yagura Enthusiast";
-					} else if (_percents["bishop_exchange"] / 100 >= _nStatic / _n * 0.6) {
+					} else if (_percents["bishop_exchange"] / 100 >= 0.8 * (_nStatic / _n - _percents["opposition_static"] / 100)) {
 						typeLabel.toolTip = "角換りマニア"; typeLabel.text = "Bishop Exchange Enthusiast";
-					} else if (_percents["side_pawn"] / 100 >= _nStatic / _n * 0.6) {
+					} else if (_percents["side_pawn"] / 100 >= 0.8 * (_nStatic / _n - _percents["opposition_static"] / 100)) {
 						typeLabel.toolTip = "横歩取りマニア"; typeLabel.text = "Side Pawn Picker Enthusiast";
 					}
 				} else if (_nRanging >= 2.0 / 3.0 * _n) {
-					typeLabel.toolTip = "振り飛車党"; typeLabel.text = "Ranging Rook Player";
+					typeLabel.toolTip = "振り飛車党"; typeLabel.text = "Swinging Rook Player";
 					if (_percents["3rd_file_rook"] / 100 >= _nRanging / _n * 2.0 / 3.0 ||
 					     _nRanging/_n - (_percents["3rd_file_rook"] + _percents["double_ranging"])/100 <= 0.25*_percents["3rd_file_rook"]/100)  {
 						typeLabel.toolTip = "三間飛車党"; typeLabel.text = "3rd-file Rook Player";
@@ -113,7 +113,7 @@
 							case "中飛車党":
 								typeLabel.toolTip = "中飛車マニア"; typeLabel.text = "Central Rook Enthusiast"; break;
 							default:
-								typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Ranging Rook Player";
+								typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Swinging Rook Player";
 						}
 					}
 				} else if (_nOpposition >= 2.0 / 3.0 * _n && _percents["opposition_static"]/100 >= 0.25* _nOpposition/_n && _percents["oppsition_static"]/100 <= 0.75 *_nOpposition/_n) {
@@ -131,7 +131,7 @@
 				} else if (_nRanging <= 0.05 * _n) {
 					typeLabel.toolTip = "純粋居飛車党"; typeLabel.text = "Pure Static Rook Player";
 				} else if (_nStatic <= 0.05 * _n) {
-					typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Ranging Rook Player";
+					typeLabel.toolTip = "純粋振り飛車党"; typeLabel.text = "Pure Swinging Rook Player";
 				} else {
 					typeLabel.toolTip = "オールラウンダー"; typeLabel.text = "All-rounder";
 				}

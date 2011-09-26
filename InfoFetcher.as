@@ -476,7 +476,7 @@
 				case "yagura":
 					return "Yagura";
 				case "double_ranging":
-					return "Double Ranging Rook";
+					return "Double Swinging Rook";
 				case "opposition_static":
 					return "Static Rook, Opposition";
 				case "central_rook":
