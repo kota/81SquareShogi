@@ -46,7 +46,8 @@
 			{label:"Three Pawns", data:"hcfu3" },
 			{label:"Naked King", data:"hcnaked" },
 			{label:"Mini-shogi", data:"vamini" },
-			{label:"GoroGoro-shogi", data:"va5656" }]
+			{label:"GoroGoro-shogi", data:"va5656" },
+			{label:"3x3 Shogi", data:"va33" } ]
 		  );
 		  
 		  [Bindable]

@@ -343,6 +343,8 @@ package  {
 			  } else {
 				if (i == 7) square.dead = true;
 			  }
+		  } else if (gameType == "va33") {
+			  if (i <= 2 || i >= 6 || j <= 2 || j >= 6) square.dead = true;
 		  }
           square.x = BAN_LEFT_MARGIN + BAN_EDGE_PADDING + j * KOMA_WIDTH + 1;
           square.y = BAN_TOP_MARGIN + BAN_EDGE_PADDING + i * KOMA_HEIGHT + 1;
@@ -368,6 +370,9 @@ package  {
 	  if (gameType == "va5656") {
 		  _position = new Kyokumen(str, 3, 6);
 		  _last_pos = new Kyokumen(str, 3, 6);
+	  } else if (gameType == "va33") {
+		  _position = new Kyokumen(str, 3, 5);
+		  _last_pos = new Kyokumen(str, 3, 5);
 	  } else {
 		_position = new Kyokumen(str);
 		_last_pos = new Kyokumen(str);

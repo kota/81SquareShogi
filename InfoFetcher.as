@@ -218,6 +218,8 @@
 				return "Mini Shogi";
 			case "va5656":
 				return "Goro-Goro Shogi";
+			case "va33":
+				return "3x3 Shogi";
 			}
 			return "";
 		}
@@ -259,6 +261,8 @@
 				return "Mini Shogi";
 			case "va5656":
 				return "Goro-Goro";
+			case "va33":
+				return "3x3";
 			}
 			return "";
 		}
@@ -295,6 +299,8 @@
 				return "5五将棋";
 			case "va5656":
 				return "ゴロゴロ";
+			case "va33":
+				return "3x3";
 			}
 			return "";
 		}
