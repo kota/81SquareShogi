@@ -185,7 +185,7 @@ package  {
 		page.setStyle('hideEffect', _hideEffect);
 		label = new Label();
 		label.addEventListener(MouseEvent.CLICK, _handleFlip);
-		label.text = "Shogi Goods Info";
+		label.text = "New Shogi Goods Overview";
 		label.setStyle('textAlign', 'center');
 		label.width = page.width
 		label.setStyle('color', '#FF0000');

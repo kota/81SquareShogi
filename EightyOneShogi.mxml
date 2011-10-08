@@ -346,7 +346,7 @@
 		  }
 	  }
 //	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
-	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + ", " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
+	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + " (max:" + e.message.split(":")[11] + "), " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
 	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\nIDにハイフンが含まれているとバグが発生することが判明しています。管理者にID変更を依頼して下さい。\n", 1, "#FF0000", true);
     }

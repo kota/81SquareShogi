@@ -112,7 +112,7 @@
 	<mx:Label text="対抗型 居飛車" x="235" y="0" toolTip="Static Rook in Opposition" />
 	<mx:Label text="矢倉・角換り" x="300" y="100" toolTipShow="true" toolTip="Yagura / Bishop Exchange" />
 	<mx:Label text="相掛かり・横歩" x="240" y="200" toolTip="Side Pawn Picker / Double Wing Attack" />
-	<mx:Label text="対抗型 振り飛車" x="85" y="0" toolTip="Ranging Rook in Opposition" />
-	<mx:Label text="相振り飛車" x="45" y="100" toolTip="Double Ranging Rook" />
+	<mx:Label text="対抗型 振り飛車" x="85" y="0" toolTip="Swinging Rook in Opposition" />
+	<mx:Label text="相振り飛車" x="45" y="100" toolTip="Double Swinging Rook" />
 	<mx:Label text="力戦" x="125" y="200" toolTip="Free-style" />
 </mx:Canvas>
