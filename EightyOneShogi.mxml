@@ -221,7 +221,7 @@
   _servers.push(server);
   server = { 'name':"SATURN", 'description':"3X4", 'icon':_icon_saturn, 'host':"49.212.52.151", 'port':"4083", 'alive':"NO" };
   _servers.push(server);
-  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4081", 'alive':"NO" };
+  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"49.212.52.151", 'port':"4084", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
@@ -2353,6 +2353,7 @@
 			var toDate:Date = new Date();
 			toDate.setTime(kifuSearchToChooser.selectedDate.getTime() + 24 * 60 * 60 * 1000);
 			_api.kifuSearch(kifuSearchPlayerText.text.toLowerCase(), kifuSearchOpponentText.text.toLowerCase(), fromDate, toDate);
+			searchKifuCountLabel.text = "";
 			searchAccordion.enabled = false;
 		}
 	}
@@ -2366,6 +2367,9 @@
 		_kifu_search_list = new Array();
 		var hc:String;
 		var match:Array;
+		var nWin:int = 0;
+		var nLoss:int = 0;
+		var nDraw:int = 0;
 		for each (var kifu:Object in e.target.bufferData) {
 			match = kifu.game_id.split("+")[1].match(/^([0-9a-z]+?)_.+\-(\d+)\-(\d+)$/);
 			if (match[1] == "r") {
@@ -2384,10 +2388,13 @@
 			if (kifu.result.match(/summary/)) {
 				if (kifu.result.match(new RegExp(kifuSearchPlayerText.text + " win", "i"))) {
 					kifu.winner = "WIN";
+					nWin += 1;
 				} else if (kifu.result.match(new RegExp(kifuSearchPlayerText.text + " lose", "i"))) {
 					kifu.winner = "LOSE";
+					nLoss += 1;
 				} else {
 					kifu.winner = "DRAW";
+					nDraw += 1;
 				}
 				var summaries:Array = kifu.result.split(":");
 				kifu.moves = summaries[4] ? summaries[4] : "-";
@@ -2411,6 +2418,7 @@
 			}
 		}
 		kifuSearchGrid.dataProvider = _kifu_search_list;
+		searchKifuCountLabel.text = nWin + " wins, " + nLoss + " losses, " + nDraw + " draws";
 	}
 	
 	private function _kifuSearchSelected():void {
@@ -3348,7 +3356,7 @@
 					<mx:HBox>
 						<mx:Button id="searchKifuButton" icon="@Embed('images/icon_search.png')" toolTip="{lan.search}" click="_sendKifuSearch();" />
 						<mx:Button label="{lan.close}" click="mainViewStack.selectedIndex=1;" fontSize="11" />
-						<mx:Spacer width="400"/>
+						<mx:Label id="searchKifuCountLabel" width="400" fontSize="13" fontWeight="bold" />
 						<mx:Button id="shareKifuButton3" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu3();" fontSize="11" />
 					</mx:HBox>
 					<mx:DataGrid id="kifuSearchGrid" width="615" height="440" rowHeight="21" headerHeight="21" doubleClickEnabled="true" doubleClick="_kifuSearchSelected();" paddingTop="0" paddingBottom="0" verticalAlign="middle">
