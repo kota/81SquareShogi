@@ -31,7 +31,8 @@
 			 {label:"ไทย", image:"764", fileName:"thai"},
 			 {label:"Українська", image:"804", fileName:"ukranian" },
 			 {label:"Česky", image:"203", fileName:"czech" },
-			 {label:"한국어", image:"410", fileName:"korean"}]
+			 {label:"한국어", image:"410", fileName:"korean" },
+			 {label:"Nederlands", image:"528", fileName:"dutch"}]
           );
 		  
 		  private var _words:Object = {	// Default (ENGLISH)
