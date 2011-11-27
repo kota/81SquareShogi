@@ -9,7 +9,7 @@ package
 
 	public class PieceSet
 	{
-		private const SOURCE_DIRECTORY:String = "http://49.212.52.151/dojo/images/piecesets/";
+		private const SOURCE_DIRECTORY:String = "http://81dojo.com/dojo/images/piecesets/";
 		private var _koma_images:Array = new Array(2);
 		private var _name:String;
 		private var _loader:Loader = new Loader();

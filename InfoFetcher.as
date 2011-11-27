@@ -21,7 +21,7 @@
 	public class InfoFetcher extends EventDispatcher
 	{
 		private var _urlLoader:URLLoader = new URLLoader();
-		private const SOURCE:String = "http://49.212.52.151/dojo/";
+		private const SOURCE:String = "http://81dojo.com/dojo/";
 		public var newestVer:String;
 		public static var titleUser:Array;
 		public static var titleName:Array;

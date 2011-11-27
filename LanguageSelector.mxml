@@ -11,7 +11,7 @@
 		  import flash.net.URLRequest;
 		  import mx.utils.ObjectProxy;
 		  
-		  private const LANGUAGE_DIRECTORY:String = "http://49.212.52.151/dojo/languages/";
+		  private const LANGUAGE_DIRECTORY:String = "http://81dojo.com/dojo/languages/";
           [Bindable]
           private var _items:ArrayCollection = new ArrayCollection(
             [{label:"English", image:"826", fileName:"english"},

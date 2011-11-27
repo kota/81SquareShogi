@@ -26,7 +26,7 @@ package  {
   public class BulletinGadget extends ViewStack {
     
 	private var _urlLoader:URLLoader = new URLLoader();
-	private const SOURCE:String = "http://49.212.52.151/dojo/";
+	private const SOURCE:String = "http://81dojo.com/dojo/";
 	private var _hideEffect:Effect = new WipeUp();
 	private var _showEffect:Effect = new WipeDown();
 	private var _flipTimer:Timer = new Timer(30000);

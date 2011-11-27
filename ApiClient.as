@@ -35,11 +35,12 @@ package{
 		
 		//private var _host:String = '127.0.0.1';
 		//private var _host:String = '81dojo.dyndns.org';
-		private var _host:String = 'account-81dojo.dyndns-web.com';
+		private var _host:String = '49.212.52.151';
 		private var _port:int = 80;
 
 		public function ApiClient() {
-			Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
+//			Security.loadPolicyFile('http://' + _host + ':' + _port + '/crossdomain.xml');
+Security.loadPolicyFile('http://81dojo.com:' + _port + '/crossdomain.xml');
 			_kifuSearchService.addEventListener(ResultEvent.RESULT, _handleKifuSearch);
 			_kifuDetailService.addEventListener(ResultEvent.RESULT, _handleKifuDetail);
 			_playerSearchService.addEventListener(ResultEvent.RESULT, _handlePlayerSearch);

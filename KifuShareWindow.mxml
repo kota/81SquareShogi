@@ -38,7 +38,7 @@
 			private function _copyHTML():void {
 				var str:String;
 				if (RadioGroup1.selectedValue == 0) {
-					str = "<embed src=\"http://49.212.52.151/dojo/EightyOneKifuViewer.swf?kid=" + kifu.id;
+					str = "<embed src=\"http://81dojo.com/dojo/EightyOneKifuViewer.swf?kid=" + kifu.id;
 					if (pieceType != 0) str += "&piece=" + pieceType;
 					if (turn != 0) str += "&turn=" + turn;
 					if (moves != 0) str += "&moves=" + moves;

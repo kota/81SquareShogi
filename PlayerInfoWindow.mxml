@@ -15,7 +15,7 @@
 
 		  [Bindable]
 		  public var pmText:String = "";
-		  private const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
+		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private const MINIMIZED_HEIGHT:int = 29;
 		  
 		  private function _initWindow():void {

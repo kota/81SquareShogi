@@ -11,7 +11,7 @@ package
 		public static const STATE_GAME_WAITING:String = "game_waiting";
 		public static const STATE_GAME:String = "game";
 		public static const STATE_POSTGAME:String = "post_game";
-		private static const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
+		private static const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		public var name:String;
 		public var rating:int;
 		public var country_code:int = 0;

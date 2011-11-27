@@ -72,7 +72,7 @@
 		  private var _cityLatitude:Number;
 		  private var _cityLongitude:Number;
 
-		  private const IMAGE_DIRECTORY:String = "http://49.212.52.151/dojo/images/";
+		  private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 		  private var _mapLoaded:Boolean = false;
 		  private var _detailLoaded:Boolean = false;
 		  private var _countryMapInfo:String;
