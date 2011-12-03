@@ -821,14 +821,26 @@ package  {
 
       if (moves.length > 0) {
         for each(var move:Object in moves) {
-		  if (move.move != "%TORYO") {
-			  makeMove(move.move + "," + move.time, true, false);
-			  trace(move.move + "," + move.time);
-		  } else {
-			  var mv:Movement = new Movement(kifu_list.length);
-			  mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1)));
-			  kifu_list.push(mv);
-		  }
+			trace(move.move);
+			if (move.move.match(/(TORYO|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
+				var mv:Movement = new Movement(kifu_list.length);
+				switch(move.move) {
+					case "%TORYO":
+						mv.setGameEnd(_last_pos.turn, Movement.RESIGN, parseInt(move.time.substr(1))); break;
+					case "#TIME_UP":
+						mv.setGameEnd(_last_pos.turn, Movement.TIMEUP, 0); break;
+					case "#ILLEGAL_MOVE":
+						mv.setGameEnd(_last_pos.turn, Movement.ILLEGAL, 0); break;
+					case "#SENNICHITE":
+						mv.setGameEnd(_last_pos.turn, Movement.SENNICHITE, 0); break;
+					case "#OUTE_SENNICHITE":
+						mv.setGameEnd(_last_pos.turn, Movement.OUTE_SENNICHITE, 0); break;
+				}
+				kifu_list.push(mv);
+			} else {
+				makeMove(move.move + "," + move.time, true, false);
+				trace(move.move + "," + move.time);
+			}
 		  kifu_list[kifu_list.length - 1].comment = move.comment;
         }
       }

@@ -2462,7 +2462,7 @@
 			  white.setFromList(parseInt(line.substring(2).split(",")[0]), parseInt(line.substring(2).split(",")[1]));
 			  white.wins = line.match(/\*/) ? 0 : 10;
 			  var game:Game = new Game(_game_name, black, white);
-			} else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO") {
+			} else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO" || line.match(/^#(TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
 			var move_and_time:Object = new Object();
 			move_and_time.move = line;
 			move_and_time.comment = "";
