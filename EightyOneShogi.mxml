@@ -1454,7 +1454,8 @@
     }
 	
 	private function _handleCreateStudyRoom(e:Event):void {
-		_client.study(e.target.study_handicap.selectedItem.data, e.target.blackName.text, e.target.whiteName.text, "*");
+		var csa_moves:String = e.target.moves.join("/");
+		_client.study(e.target.study_handicap.selectedItem.data, e.target.blackName.text, e.target.whiteName.text, csa_moves);
 	}
   
     private function _stopWaiting():void {
@@ -3132,11 +3133,11 @@
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
       <mx:Label paddingTop="5" text="(c) Chief Programmer: Kota" fontSize="14" />
 	  <mx:HBox paddingTop="-3">
-		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
-		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/>
+<!--		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
+		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/> -->
 		  <mx:Label text="(c) Administrative Co-programmer: Hidetchi" fontSize="12"/>
-		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
-		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/>
+<!--		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
+		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/> -->
 	  </mx:HBox>
 	  <mx:Label paddingTop="10"  paddingBottom="0" text="- Materials -" fontSize="10" />
 	  <mx:LinkButton paddingTop="-2" paddingBottom="0" label="CC Resources for Shogi Applications by muchonovski" click="navigateToURL(new URLRequest('http://www.muchonov.com/bona/'), 'quote')"/>
