@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2011/11/19";
+	public const VERSION:String = "ver.2011/12/09";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -1174,6 +1174,7 @@
 			board.cancelSquareSelect();
 			if (board.kifu_list_self.length > 0) {
 				board.kifu_list_self = new Array();
+				kifuDataGrid.scrollToIndex(0);
 				kifuDataGrid.dataProvider = board.kifu_list;
 			}
 			kifuDataGrid.selectedIndex = base;
