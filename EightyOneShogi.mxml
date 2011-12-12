@@ -1455,7 +1455,7 @@
     }
 	
 	private function _handleCreateStudyRoom(e:Event):void {
-		var csa_moves:String = e.target.moves.join("/");
+		var csa_moves:String = e.target.moves ? e.target.moves.join("/") : "*";
 		_client.study(e.target.study_handicap.selectedItem.data, e.target.blackName.text, e.target.whiteName.text, csa_moves);
 	}
   
