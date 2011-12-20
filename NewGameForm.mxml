@@ -13,30 +13,10 @@
 		  public var kifuRef:FileReference = new FileReference();
 		  public var prev:String;
 		  public var moves:Array;
-          
-          [Bindable]
-          public var totals:ArrayCollection = new ArrayCollection(
-            [{label:"0min", data:0},
-             {label:"5min", data:300},
-             {label:"10min", data:600},
-			 {label:"15min", data:900},
-             {label:"20min", data:1200},
-             {label:"30min", data:1800},
-			 {label:"45min", data:2700},
-			 {label:"60min", data:3600}]
-          );
-
-          [Bindable]
-          public var byoyomis:ArrayCollection = new ArrayCollection(
-            [{label:"10sec", data:10},
-             {label:"20sec", data:20},
-			 {label:"30sec", data:30},
-             {label:"60sec", data:60}]
-          );
 		  
 		  [Bindable]
 		  public var handicaps:ArrayCollection = new ArrayCollection(
-		   [{label:"Even Game", data:"nr"},
+			[{label:"Even Game", data:"nr"},
 			{label:"Lance Down", data:"hclance"},
 			{label:"Bishop Down", data:"hcbishop" },
 			{label:"Rook Down", data:"hcrook" },
@@ -268,17 +248,55 @@
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="toggleTimeSelection();"/>
-	<mx:RadioButton groupName="timeSetting" label="45min - 60sec , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label="15min - 60sec , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label=" 5min - 30sec , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
-	<mx:RadioButton groupName="timeSetting" label=" 0min - 30sec , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="45{parentApplication.lan.min} - 60{parentApplication.lan.sec} , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label="15{parentApplication.lan.min} - 60{parentApplication.lan.sec} , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 5{parentApplication.lan.min} - 30{parentApplication.lan.sec} , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
+	<mx:RadioButton groupName="timeSetting" label=" 0{parentApplication.lan.min} - 30{parentApplication.lan.sec} , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_total" dataProvider="{totals}" enabled="false" selectedIndex="3" />
-		<mx:ComboBox id="nonrated_byoyomi" dataProvider="{byoyomis}" enabled="false" selectedIndex="4" />
+		<mx:ComboBox id="nonrated_total" enabled="false" selectedIndex="3">
+		  <mx:ArrayCollection>
+			 <mx:Object label=" 0{parentApplication.lan.min}" data="0"/>
+			 <mx:Object label=" 5{parentApplication.lan.min}" data="300"/>
+			 <mx:Object label="10{parentApplication.lan.min}" data="600"/>
+			 <mx:Object label="15{parentApplication.lan.min}" data="900"/>
+			 <mx:Object label="20{parentApplication.lan.min}" data="1200"/>
+			 <mx:Object label="30{parentApplication.lan.min}" data="1800"/>
+			 <mx:Object label="45{parentApplication.lan.min}" data="2700"/>
+			 <mx:Object label="60{parentApplication.lan.min}" data="3600"/>
+		  </mx:ArrayCollection>
+		</mx:ComboBox>
+		<mx:ComboBox id="nonrated_byoyomi" enabled="false" selectedIndex="4">
+		  <mx:ArrayCollection>
+			 <mx:Object label="10{parentApplication.lan.sec}" data="10"/>
+			 <mx:Object label="20{parentApplication.lan.sec}" data="20"/>
+			 <mx:Object label="30{parentApplication.lan.sec}" data="30"/>
+			 <mx:Object label="60{parentApplication.lan.sec}" data="60"/>
+		  </mx:ArrayCollection>
+		</mx:ComboBox>
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
+		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" enabled="false">
+		  <mx:ArrayCollection>
+			 <mx:Object label="{parentApplication.lan.hc_even}" data="nr"/>
+			 <mx:Object label="{parentApplication.lan.hc_lance}" data="hclance"/>
+			 <mx:Object label="{parentApplication.lan.hc_bishop}" data="hcbishop"/>
+			 <mx:Object label="{parentApplication.lan.hc_rook}" data="hcrook"/>
+			 <mx:Object label="{parentApplication.lan.hc_rooklance}" data="hcrooklance"/>
+			 <mx:Object label="{parentApplication.lan.hc_rooksilver}" data="hcrooksilver"/>
+			 <mx:Object label="{parentApplication.lan.hc_2p}" data="hc2p"/>
+			 <mx:Object label="{parentApplication.lan.hc_4p}" data="hc4p"/>
+			 <mx:Object label="{parentApplication.lan.hc_6p}" data="hc6p"/>
+			 <mx:Object label="{parentApplication.lan.hc_8p}" data="hc8p"/>
+			 <mx:Object label="{parentApplication.lan.hc_tombo}" data="hctombo"/>
+			 <mx:Object label="{parentApplication.lan.hc_10p}" data="hc10p"/>
+			 <mx:Object label="{parentApplication.lan.hc_3pawns}" data="hcfu3"/>
+			 <mx:Object label="{parentApplication.lan.hc_naked}" data="hcnaked"/>
+			 <mx:Object label="{parentApplication.lan.hc_mini}" data="vamini"/>
+			 <mx:Object label="{parentApplication.lan.hc_56}" data="va5656"/>
+			 <mx:Object label="{parentApplication.lan.hc_33}" data="va33"/>
+		  </mx:ArrayCollection>
+		</mx:ComboBox>
     </mx:HBox>
     <mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.tournament}" value="5" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
@@ -286,14 +304,14 @@
     </mx:HBox>
 	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.study_room}" value="6" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="study_handicap" selectedIndex="0" dataProvider="{handicaps}" enabled="false"/>
+		<mx:ComboBox id="study_handicap" selectedIndex="0" dataProvider="{nonrated_handicap.dataProvider}" enabled="false"/>
     </mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:TextInput id="blackName" text="Black" width="65" enabled="false"/>
 		<mx:TextInput id="whiteName" text="White" width="65" enabled="false"/>
     </mx:HBox>
 	<mx:HBox paddingLeft="50">
-		<mx:Button id="loadKifuButton" label="Load" enabled="false" click="_loadKifu();" />
+		<mx:Button id="loadKifuButton" label="{parentApplication.lan.load_kifu}" enabled="false" click="_loadKifu();" />
 		<mx:TextInput id="kifuName" editable="false" width="100" enabled="false" />
 	</mx:HBox>
     <mx:HBox paddingTop="15">

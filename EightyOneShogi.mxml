@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2011/12/09";
+	public const VERSION:String = "ver.2011/12/20";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -3125,9 +3125,9 @@
 		  <mx:DataGrid id="serverListGrid" sortableColumns="false" height="155">
 			 <mx:columns>
 			  <mx:DataGridColumn itemRenderer="{serverListRenderer}" headerText="{lan.server}" width="90" paddingLeft="0" />
-			  <mx:DataGridColumn dataField="description" headerText="Description" width="80" paddingLeft="0" />
+			  <mx:DataGridColumn dataField="description" headerText="{lan.description}" width="80" paddingLeft="0" />
 			  <mx:DataGridColumn dataField="population" headerText="{lan.players}" width="45" paddingLeft="0" textAlign="center" />
-			  <mx:DataGridColumn dataField="alive" headerText="Alive" width="45" paddingLeft="0" textAlign="center" />
+			  <mx:DataGridColumn dataField="alive" headerText="{lan.alive}" width="45" paddingLeft="0" textAlign="center" />
 			 </mx:columns>
 		  </mx:DataGrid>
 	  </mx:HBox>

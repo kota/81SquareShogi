@@ -42,7 +42,7 @@
         ]]>
     </mx:Script>
 	<mx:TabNavigator id="optionTab" width="370" height="370" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
-		<mx:VBox label="Piece Type" paddingLeft="20" paddingTop="10" verticalGap="0">
+		<mx:VBox label="{parentApplication.lan.pieces}" paddingLeft="20" paddingTop="10" verticalGap="0">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
 			<mx:VBox id="pieceSetVBox" verticalGap="0" height="240" width="100%" horizontalScrollPolicy="off" />
 				<mx:HBox>
@@ -52,46 +52,46 @@
 					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="7"/>
 				</mx:HBox>
 			<mx:Spacer height="10"/>
-			<mx:CheckBox id="grabPieceCheckBox" label="Grab piece when moving"/>
-			<mx:CheckBox id="highlightMovableCheckBox" label="Highlight movable squares"/>
+			<mx:CheckBox id="grabPieceCheckBox" label="{parentApplication.lan.op_grab}"/>
+			<mx:CheckBox id="highlightMovableCheckBox" label="{parentApplication.lan.op_highlight}"/>
 		</mx:VBox>
 		<mx:VBox label="{parentApplication.lan.sound}" paddingLeft="20" paddingTop="10">
-			<mx:CheckBox label="piece sound" id="pieceSoundCheckBox"/>
-			<mx:CheckBox label="game end sound" id="gameEndSoundCheckBox"/>
+			<mx:CheckBox label="{parentApplication.lan.sound_piece}" id="pieceSoundCheckBox"/>
+			<mx:CheckBox label="{parentApplication.lan.sound_end}" id="gameEndSoundCheckBox"/>
 			<mx:HBox>
-				<mx:Label text="incoming chat sound"/>
+				<mx:Label text="{parentApplication.lan.sound_chat}"/>
 				<mx:VBox>
-					<mx:CheckBox label="Main Lobby" id="chatSound1CheckBox"/>
-					<mx:CheckBox label="Game Room" id="chatSound2CheckBox"/>
-					<mx:CheckBox label="Private Message" id="chatSound3CheckBox"/>
+					<mx:CheckBox label="{parentApplication.lan.lobby}" id="chatSound1CheckBox"/>
+					<mx:CheckBox label="{parentApplication.lan.game_room}" id="chatSound2CheckBox"/>
+					<mx:CheckBox label="{parentApplication.lan.pm}" id="chatSound3CheckBox"/>
 				</mx:VBox>
 			</mx:HBox>
 			<mx:HBox>
-				<mx:Label text="byoyomi sound"/>
+				<mx:Label text="{parentApplication.lan.sound_byoyomi}"/>
 				<mx:VBox>
 					<mx:RadioButtonGroup id="RadioGroup1"/>
 					<mx:RadioButton label="OFF" groupName="RadioGroup1" value="0"/>
-					<mx:RadioButton label="Chime" groupName="RadioGroup1" value="1"/>
-					<mx:RadioButton label="Japanese (by Madoka KITAO)" groupName="RadioGroup1" value="2"/>
+					<mx:RadioButton label="{parentApplication.lan.byoyomi_chime}" groupName="RadioGroup1" value="1"/>
+					<mx:RadioButton label="{parentApplication.lan.byoyomi_jp} (by Madoka KITAO)" groupName="RadioGroup1" value="2"/>
 				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
-		<mx:VBox label="Communication">
+		<mx:VBox label="{parentApplication.lan.communication}">
 			<mx:HBox>
-				<mx:Label text="Notation Style" fontWeight="bold" paddingLeft="10"/>
+				<mx:Label text="{parentApplication.lan.notation}" fontWeight="bold" paddingLeft="10"/>
 				<mx:RadioButtonGroup id="RadioGroup3"/>
-				<mx:RadioButton label="Universal" groupName="RadioGroup3" value="0"/>
-				<mx:RadioButton label="Japanese" groupName="RadioGroup3" value="1"/>
-				<mx:RadioButton label="Western" groupName="RadioGroup3" value="2"/>
+				<mx:RadioButton label="{parentApplication.lan.notation_uni}" groupName="RadioGroup3" value="0"/>
+				<mx:RadioButton label="{parentApplication.lan.notation_jp}" groupName="RadioGroup3" value="1"/>
+				<mx:RadioButton label="{parentApplication.lan.notation_west}" groupName="RadioGroup3" value="2"/>
 			</mx:HBox>
 			<mx:HBox>
-				<mx:Label text="PM Reception" fontWeight="bold" paddingLeft="10" />
-				<mx:CheckBox id="pmAutoOpenCheckBox" label="Auto-open Window"/>
+				<mx:Label text="{parentApplication.lan.pm}" fontWeight="bold" paddingLeft="10" />
+				<mx:CheckBox id="pmAutoOpenCheckBox" label="{parentApplication.lan.pm_auto}"/>
 			</mx:HBox>
-			<mx:Label text="Arrow Drawing" fontWeight="bold" paddingLeft="10" />
-			<mx:CheckBox label="Accept arrows from others" id="acceptArrowsCheckBox" paddingLeft="30" />
+			<mx:Label text="{parentApplication.lan.arrow}" fontWeight="bold" paddingLeft="10" />
+			<mx:CheckBox label="{parentApplication.lan.arrow_accept}" id="acceptArrowsCheckBox" paddingLeft="30" />
 			<mx:HBox paddingLeft="30" verticalAlign="middle">
-				<mx:Label text = "Your Color"/>
+				<mx:Label text = "{parentApplication.lan.arrow_color}"/>
 				<mx:ColorPicker id="arrowColorPicker" showTextField="true" width="30" height="30" change="drawArrow();" />
 				<mx:Label text="" paddingRight="0" />
 				<mx:Canvas id="arrowCanvas" backgroundColor="#FFDD55" width="160" height="30"/>
@@ -100,12 +100,12 @@
 				<mx:VBox paddingLeft="10" width="140" horizontalAlign="center">
 					<mx:Label text="{parentApplication.lan.ignore}" fontWeight="bold" width="100%" />
 					<mx:List id="ignoreList" rowCount="4" width="110" />
-					<mx:Button id="removeIgnoreButton" label="Remove" />
+					<mx:Button id="removeIgnoreButton" label="{parentApplication.lan.remove}" />
 				</mx:VBox>
 				<mx:VBox paddingLeft="10" width="140" horizontalAlign="center">
 					<mx:Label text="{parentApplication.lan.favorite}" fontWeight="bold" width="100%" />
 					<mx:List id="favoriteList" rowCount="4" width="110" />
-					<mx:Button id="removeFavoriteButton" label="Remove"/>
+					<mx:Button id="removeFavoriteButton" label="{parentApplication.lan.remove}"/>
 				</mx:VBox>
 			</mx:HBox>
 		</mx:VBox>
