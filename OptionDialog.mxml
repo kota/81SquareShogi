@@ -11,7 +11,7 @@
 			import PieceSet;
 			
 			public function loadPieceSets(sets:Array):void {
-				for (var i:int = 0; i < 5; i++ ) {
+				for (var i:int = 0; i < 6; i++ ) {
 					var hbox:HBox = new HBox();
 					hbox.setStyle('horizontalGap', 0);
 					var radioButton:RadioButton = new RadioButton();
@@ -41,15 +41,15 @@
 			
         ]]>
     </mx:Script>
-	<mx:TabNavigator id="optionTab" width="370" height="370" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
+	<mx:TabNavigator id="optionTab" width="370" height="420" horizontalScrollPolicy="off" verticalScrollPolicy="off" creationPolicy="all">
 		<mx:VBox label="{parentApplication.lan.pieces}" paddingLeft="20" paddingTop="10" verticalGap="0">
 			<mx:RadioButtonGroup id="RadioGroup2"/>
-			<mx:VBox id="pieceSetVBox" verticalGap="0" height="240" width="100%" horizontalScrollPolicy="off" />
+			<mx:VBox id="pieceSetVBox" verticalGap="0" height="290" width="100%" horizontalScrollPolicy="off" />
 				<mx:HBox>
 					<mx:Label text="{parentApplication.lan.blind_piece}"/>
-					<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="5"/>
-					<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="6"/>
-					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="7"/>
+					<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="6"/>
+					<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="7"/>
+					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="8"/>
 				</mx:HBox>
 			<mx:Spacer height="10"/>
 			<mx:CheckBox id="grabPieceCheckBox" label="{parentApplication.lan.op_grab}"/>

@@ -733,9 +733,9 @@
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
-	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+	  if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Extreme.");
     }
 
     private function _handleReconnect(e:ServerMessageEvent):void {
@@ -818,9 +818,9 @@
 	  logoutButton.enabled = false;
       kifuDataGrid.dataProvider = board.kifu_list;
       mainViewStack.selectedIndex = 2;
-	  if (board.piece_type == 4) _sendAutoChat("Pieces set to Blind, Middle.");
-	  else if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Hard.");
-	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Extreme.");
+	  if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Middle.");
+	  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Hard.");
+	  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Extreme.");
 
 	  if (end_game) {
 		  var mv:Movement = new Movement(board.kifu_list.length);
@@ -2694,10 +2694,10 @@
 	  _so.data.optionTab = _optionWindow.optionTab.selectedIndex;
 	  if (_isDuringMyGame()) {
 		  if (board.piece_type >= 5 && board.piece_type != _prev_piece_type) {
-			  if (board.piece_type == 5) _sendAutoChat("Pieces set to Blind, Middle.");
-			  else if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Hard.");
-			  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Extreme.");
-		  } else if (board.piece_type <= 4 && _prev_piece_type >= 5) {
+			  if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Middle.");
+			  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Hard.");
+			  else if (board.piece_type == 8) _sendAutoChat("Pieces set to Blind, Extreme.");
+		  } else if (board.piece_type <= 5 && _prev_piece_type >= 6) {
 			  _sendAutoChat("Pieces set to Normal.");
 		  }
 	  }

@@ -69,6 +69,8 @@ package  {
     private var board_ghand:Class
     [Embed(source = "/images/bg_tatami.png")]
 	private var board_bg:Class
+	
+	private var _board_classes:Array;
     
     [Embed(source = "/images/white.png")]
     private var white:Class
@@ -87,6 +89,7 @@ package  {
 		new PieceSet("Hidetchi.swf", "Hidetchi's Internationalized"),
 		new PieceSet("Alphabet.swf", "Hidetchi's Alphabet"),
 		new PieceSet("Dobutsu.swf", "Dobutsu by pieco"),
+		new PieceSet("Kingyo.swf", "Goldfish Aquarium by Yoko Ikeda"),
 		new PieceSet("BlindMiddle.swf", "Middle"),
 		new PieceSet("BlindHard.swf", "Hard"),
 		new PieceSet("BlindExtreme.swf", "Extreme")
@@ -117,7 +120,7 @@ package  {
     private var _board_shand_image:Image = new Image();
     private var _board_ghand_image:Image = new Image();
     
-    private var _board_corrdinate:Array = new Array();
+    private var _board_coord_classes:Array = new Array();
 
     private var _playerMoveCallback:Function;
     private var _timeoutCallback:Function;
@@ -210,9 +213,13 @@ package  {
       _board_masu_image.source = board_masu;
       _board_masu_image.width = BAN_WIDTH;
       _board_masu_image.height = BAN_HEIGHT;
+      _board_masu_image.x = BAN_LEFT_MARGIN;
+      _board_masu_image.y = BAN_TOP_MARGIN;
 
       _board_coord_image.width = BAN_WIDTH;
       _board_coord_image.height = BAN_HEIGHT;
+      _board_coord_image.x = BAN_LEFT_MARGIN;
+      _board_coord_image.y = BAN_TOP_MARGIN;
       
       _board_shand_image.source = board_shand;
       _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
@@ -223,8 +230,8 @@ package  {
       
       addChild(_board_bg_image);
       addChild(_board_back_image);
-      _board_back_image.addChild(_board_masu_image);
-      _board_back_image.addChild(_board_coord_image);
+      addChild(_board_masu_image);
+      addChild(_board_coord_image);
       addChild(_board_shand_image);
       addChild(_board_ghand_image);
 	
@@ -236,6 +243,7 @@ package  {
       timers = new Array(2);
 	  _avatar_images = new Array(2);
 	  _player_flags = new Array(2);
+	  _board_coord_classes = new Array(board_scoord_e, board_gcoord_e);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
         
@@ -310,13 +318,10 @@ package  {
       _centerY = BAN_TOP_MARGIN + BAN_EDGE_PADDING + 4.5 * KOMA_HEIGHT + 1;
     }
 
-    public function resetBoard():void{
-     if(_my_turn == Kyokumen.SENTE){
-        _board_coord_image.source = board_scoord_e
-      } else {
-        _board_coord_image.source = board_gcoord_e
-      }
-
+    public function resetBoard():void {
+		_board_back_image.source = pieceSets[piece_type].boardBackClass ? pieceSets[piece_type].boardBackClass : board_back;
+		_board_masu_image.source = pieceSets[piece_type].boardMasuClass ? pieceSets[piece_type].boardMasuClass : board_masu;
+		_board_coord_image.source = pieceSets[piece_type].getCoordClass(0) ? pieceSets[piece_type].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1) : _board_coord_classes[_my_turn == Kyokumen.SENTE ? 0 : 1];
       for (var i:int = 0; i < 9; i++ ) {
         for (var j:int = 0; j < 9;j++ ){
           if(_cells[i][j] != null){
@@ -391,10 +396,7 @@ package  {
           } else {
             _cells[y][x].source = emptyImage;
           }
-		  if (_cells[y][x].dead) _cells[y][x].source = deadSquare;
-//		  if (gameType == "mini") {
-//			if (x <= 1 || x >=7 || y <= 1 || y >= 7) _cells[y][x].source = deadSquare;
-//		  }
+		  if (_cells[y][x].dead) _cells[y][x].source = pieceSets[piece_type].deadSquareClass ? pieceSets[piece_type].deadSquareClass : deadSquare;
         }
       }
       handBoxes[0].removeAllChildren();
@@ -714,6 +716,9 @@ package  {
 	
     public function setPieceType(i:int):void{
     	piece_type = i;
+		_board_back_image.source = pieceSets[i].boardBackClass ? pieceSets[i].boardBackClass : board_back;
+		_board_masu_image.source = pieceSets[i].boardMasuClass ? pieceSets[i].boardMasuClass : board_masu;
+		_board_coord_image.source = pieceSets[i].getCoordClass(0) ? pieceSets[i].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1) : _board_coord_classes[_my_turn == Kyokumen.SENTE ? 0 : 1];
     	if (_position != null) setPosition(_position);
     }
 
@@ -895,7 +900,7 @@ package  {
             e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
 			if (hold_piece) {
 				e.currentTarget.hidePiece();
-				if (piece_type != 7) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+				if (piece_type != 8) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 //				CursorManager.setCursor(e.currentTarget.source, 2, - e.localX, - e.localY);
 			}
 			if (isPlayer && !post_game) _grabPieceCallback(x, y);
@@ -1001,7 +1006,7 @@ package  {
           e.currentTarget.setStyle('backgroundColor', '0x33CCCC');
 		  if (hold_piece) {
 			e.currentTarget.hidePiece();
-			if (piece_type != 7) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+			if (piece_type != 8) CursorManager.setCursor(e.currentTarget.source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
 		  }
 		  if (isPlayer && !post_game) _grabPieceCallback(e.currentTarget.coord_x, _position.turn);
 		  _pieceGrab = true;
