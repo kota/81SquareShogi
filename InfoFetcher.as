@@ -37,6 +37,8 @@
 		public static var country_names3:Array;
 		public static var country_list_names:Array;
 		public static var country_maps:Array;
+		public static var ads_num:Array;
+		public static var ads_title:Array;
 		public static var tournament_codes:Array = new Array('81', 'CO', 'AS', 'SN', 'SS', 'RZ', 'DM', 'KY', 'LA', 'RL',
 																				'PM', 'PR', 'PI', 'PO', 'PS', 'PK', 'PZ', 'PT', 'PN', 'PA', 'PJ',
 																				'JM', 'JZ', 'JI', 'JO', 'JF', 'JV');
@@ -90,6 +92,8 @@
 			country_names3 = new Array();
 			country_list_names = new Array('== ALL ==');
 			country_maps = new Array();
+			ads_num = new Array();
+			ads_title = new Array();
 			cheaters = new Array();
 			banned = new Array();
 			clock_differences = new Array();
@@ -143,6 +147,10 @@
 							for each (var diff:String in line.split(",")) {
 								clock_differences.push(parseInt(diff));
 							}
+							break;
+						case "ADS":
+							ads_num.push(parseInt(line.split(",")[0]));
+							ads_title.push(line.split(",")[1]);
 							break;
 						default:
 					}

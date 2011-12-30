@@ -30,6 +30,7 @@ package  {
 	private var _hideEffect:Effect = new WipeUp();
 	private var _showEffect:Effect = new WipeDown();
 	private var _flipTimer:Timer = new Timer(30000);
+	private var _adBox:AdBox = new AdBox;
     
     public function BulletinGadget() {
       super();
@@ -191,14 +192,17 @@ package  {
 		label.setStyle('color', '#FF0000');
 		label.setStyle('fontWeight', 'bold');
 		page.addChild(label);
-		var adBox:AdBox = new AdBox();
-		adBox.y = 25;
-		page.addChild(adBox);
+		_adBox.y = 25;
+		page.addChild(_adBox);
 		addChild(page);
 		
 		this.selectedIndex = 0;
 		_flipTimer.start();
     }
+	
+	public function loadAds():void {
+		_adBox.loadAds();
+	}
 	
 	private function _jumpURL(e:MouseEvent):void {
 		navigateToURL(new URLRequest(e.target.parent.id), "_blank");

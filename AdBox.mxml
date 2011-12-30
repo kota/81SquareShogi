@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" paddingLeft="0" paddingRight="0" fontSize="11" verticalGap="0" width="175" height="600" horizontalAlign="center" horizontalScrollPolicy="off">
+	    <mx:Script>
+        <![CDATA[
+import flash.events.MouseEvent;
+import mx.controls.Image;
+import mx.controls.Label;
+import mx.controls.LinkButton;
+import mx.controls.Spacer;
+			private const IMAGE_URL:String = "http://81dojo.com/dojo/images/ads/";
+			private const SHOP_URL:String = "http://shop.nekomado.com/products/detail.php?product_id=";
+			
+			public function loadAds():void {
+				for (var i:int = 0; i < InfoFetcher.ads_num.length; i++ ) {
+					var sp:Spacer = new Spacer();
+					sp.height = 7;
+					var lb:Label = new Label();
+					lb.setStyle("fontSize", 12);
+					lb.setStyle("fontWeight", "bold");
+					lb.setStyle("textDecoration", "underline");
+					lb.text = InfoFetcher.ads_title[i];
+					var im:Image = new Image();
+					im.source = IMAGE_URL + String(InfoFetcher.ads_num[i] + 1000).substring(1) + ".jpg";
+					var bt:LinkButton = new LinkButton();
+					bt.setStyle("color", 0x0000FF);
+					bt.label = ">> More Detail <<";
+					bt.data = InfoFetcher.ads_num[i];
+					bt.addEventListener(MouseEvent.CLICK, _showProductLink);
+					this.addChild(sp);
+					addChild(lb);
+					addChild(im);
+					addChild(bt);
+				}
+			}
+			
+			private function _showProductLink(e:MouseEvent):void {
+				navigateToURL(new URLRequest(SHOP_URL + e.target.data.toString()), "quote");
+			}
+			
+			private function _showLink(id:int):void {
+				navigateToURL(new URLRequest(SHOP_URL + id.toString()), "quote");
+			}
+        ]]>
+    </mx:Script>
+
+</mx:VBox>
