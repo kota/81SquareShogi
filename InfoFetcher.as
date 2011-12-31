@@ -598,18 +598,18 @@
 				}
 				canvas.addChild(medal);
 			}
-			if (user.wins >= 100) {
+			if (user.wins >= 200) {
 				medal = new Image();
 				medal.source = bronze_medal;
-				medal.toolTip = "100 wins";
+				medal.toolTip = "200 wins";
 				medal.x = 24 * (i - 1);
 				i += 1;
-				if (user.wins >= 300) {
+				if (user.wins >= 1000) {
 					medal.source = gold_medal;
-					medal.toolTip = "300 wins";
-				} else if (user.wins >= 200) {
+					medal.toolTip = "1000 wins";
+				} else if (user.wins >= 500) {
 					medal.source = silver_medal;
-					medal.toolTip = "200 wins";
+					medal.toolTip = "500 wins";
 				}
 				canvas.addChild(medal);
 			}

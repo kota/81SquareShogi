@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2011/12/20";
+	public const VERSION:String = "ver.2012/01/01";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -3097,7 +3097,7 @@
 		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 	  </mx:HBox>
-	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg"/>
+	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo_201201.jpg"/>
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
