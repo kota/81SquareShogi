@@ -88,7 +88,7 @@ package  {
 		new PieceSet("Kinki.swf", "Kinki (2-kanji)"),
 		new PieceSet("Hidetchi.swf", "Hidetchi's Internationalized"),
 		new PieceSet("Alphabet.swf", "Hidetchi's Alphabet"),
-		new PieceSet("Dobutsu.swf", "Dobutsu by pieco"),
+		new PieceSet("Dobutsu_v2.swf", "Dobutsu by pieco"),
 		new PieceSet("Kingyo.swf", "Goldfish Aquarium by Yoko Ikeda"),
 		new PieceSet("BlindMiddle.swf", "Middle"),
 		new PieceSet("BlindHard.swf", "Hard"),
