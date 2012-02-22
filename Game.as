@@ -53,7 +53,7 @@ package
 		}
 		
 		public function get openingJp():String {
-			if (game_tag.match(/^(hc|va)/)) {
+			if (game_tag.match(/^(hc|va)/) && game_tag != "hcfixed") {
 				return InfoFetcher.gameTypeJp(game_tag);
 			} else {
 				return InfoFetcher.openingNameJp(opening);
@@ -61,7 +61,7 @@ package
 		}
 
 		public function get openingEn():String {
-			if (game_tag.match(/^(hc|va)/)) {
+			if (game_tag.match(/^(hc|va)/) && game_tag != "hcfixed") {
 				return InfoFetcher.gameTypeShort(game_tag);
 			} else {
 				return InfoFetcher.openingNameEn(opening);

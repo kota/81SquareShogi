@@ -17,6 +17,7 @@
 		  [Bindable]
 		  public var handicaps:ArrayCollection = new ArrayCollection(
 			[{label:"Even Game", data:"nr"},
+			{label:"Fixed-black", data:"hcfixed"},
 			{label:"Lance Down", data:"hclance"},
 			{label:"Bishop Down", data:"hcbishop" },
 			{label:"Rook Down", data:"hcrook" },
@@ -280,6 +281,7 @@
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" enabled="false">
 		  <mx:ArrayCollection>
 			 <mx:Object label="{parentApplication.lan.hc_even}" data="nr"/>
+			 <mx:Object label="{parentApplication.lan.hc_fixed}" data="hcfixed"/>
 			 <mx:Object label="{parentApplication.lan.hc_lance}" data="hclance"/>
 			 <mx:Object label="{parentApplication.lan.hc_bishop}" data="hcbishop"/>
 			 <mx:Object label="{parentApplication.lan.hc_rook}" data="hcrook"/>

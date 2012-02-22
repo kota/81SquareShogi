@@ -196,6 +196,8 @@
 				return "Rated";
 			case "nr":
 				return "Non-rated";
+			case "hcfixed":
+				return "Fixed-black Handicap (Non-rated)";
 			case "hclance":
 				return "Lance Handicap (Non-rated)";
 			case "hcbishop":
@@ -223,13 +225,13 @@
 			case "hcnaked":
 				return "Naked King Handicap (Non-rated)";
 			case "vaoa":
-				return "Open-air Shogi";
+				return "Open-air Shogi (Non-rated)";
 			case "vamini":
-				return "Mini Shogi";
+				return "Mini Shogi (Non-rated)";
 			case "va5656":
-				return "Goro-Goro Shogi";
+				return "Goro-Goro Shogi (Non-rated)";
 			case "va33":
-				return "3x3 Shogi";
+				return "3x3 Shogi (Non-rated)";
 			}
 			return "";
 		}
@@ -240,6 +242,8 @@
 				return "-";
 			case "nr":
 				return "-";
+			case "hcfixed":
+				return "Fixed-black";
 			case "hclance":
 				return "Lance HC";
 			case "hcbishop":
@@ -281,6 +285,8 @@
 		
 		public static function gameTypeJp(str:String):String {
 			switch (str) {
+			case "hcfixed":
+				return "定先";
 			case "hclance":
 				return "香落ち";
 			case "hcbishop":
@@ -323,8 +329,8 @@
 			var type_str:String = "手合割："
 			switch (str) {
 			case "r":
-				type_str += "平手"; break;
 			case "nr":
+			case "hcfixed":
 				type_str += "平手"; break;
 			case "hclance":
 				type_str += "香落ち"; break;
