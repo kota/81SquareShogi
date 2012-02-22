@@ -58,6 +58,16 @@
 				logout: "Log Out",
 				back_to_game: "Back to Game",
 				status_short: "Stat",
+				stat_m: "Monitoring",
+				stat_w: "Waiting",
+				stat_p: "Postgame",
+				stat_g: "Game",
+				stat_g1: "started",
+				stat_g2: "opening",
+				stat_g3: "middlegame",
+				stat_g4: "middle/end",
+				stat_g5: "endgame",
+				stat_d: "Disconnected",
 				title: "Title",
 				rank: "Rank",
 				name: "Name",
@@ -170,11 +180,15 @@
 				data_table: "Data Table",
 				status: "Status"
 			};
+			
+			[Bindable]
+			static public var lan:ObjectProxy;
 		  
 			private var _urlLoader:URLLoader = new URLLoader();
 			
 			public function readDefault():void {
 				parentApplication.lan = new ObjectProxy(_words);
+				lan = new ObjectProxy(_words);
 			}
 			
 			private function _readLanguage(e:Event):void {
@@ -185,6 +199,7 @@
 					}
 				}
 				parentApplication.lan = new ObjectProxy(_words);
+				lan = new ObjectProxy(_words);
 				_urlLoader.removeEventListener(Event.COMPLETE, _readLanguage);
 			}
 			

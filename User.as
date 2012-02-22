@@ -1,5 +1,7 @@
 package 
 {
+	import mx.utils.ObjectProxy;
+	import LanguageSelector;
 	
 	/**
 	 * ...
@@ -29,7 +31,6 @@ package
 		public var markWidth:int = 0;
 		public var idle:Boolean = false;
 		public var disconnected:Boolean = false;
-		public var cheater:Boolean = false;
 		
 		public var favorite:String = "";
 		public var favoriteWidth:int = 0;
@@ -51,7 +52,6 @@ package
 			markWidth = 0;
 			idle = false;
 			disconnected = false;
-			cheater = false;
 		}
 		
 		public function setFromWho(rating:int, country_code:int, wins:int, losses:int, streak:int, streak_best:int,
@@ -142,13 +142,33 @@ package
 			return str;
 		}
 		
+		public function get statusMarkTip():String {
+			var str:String = "";
+			if (monitor_game != "*") {
+				if (status == STATE_GAME_WAITING && !game_name.match(/_@/)) str = LanguageSelector.lan.stat_m + " / " + LanguageSelector.lan.stat_w;
+				else str = LanguageSelector.lan.stat_m;
+			} else if (status == STATE_GAME_WAITING && !game_name.match(/_@/)){
+				 str = LanguageSelector.lan.stat_w;
+			} else if (status == STATE_POSTGAME) {
+				str = LanguageSelector.lan.stat_p;
+			} else if (status == STATE_GAME) {
+				  str = LanguageSelector.lan.stat_g + ": ";
+				  if (moves < 10) str += LanguageSelector.lan.stat_g1;
+				  else if (moves < 20) str += LanguageSelector.lan.stat_g2;
+				  else if (moves < 40) str += LanguageSelector.lan.stat_g3;
+				  else if (moves < 60) str += LanguageSelector.lan.stat_g4;
+				  else str += LanguageSelector.lan.stat_g5;
+			}
+			if (disconnected) str = LanguageSelector.lan.stat_g + "(" + LanguageSelector.lan.stat_d + ")";
+			return str;
+		}
+		
 		public function get titleName():String {
 			  for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
 					  if (name.toLowerCase() == InfoFetcher.titleUser[i]) {
 						  return InfoFetcher.titleName[i];
 					  }
 			  }
-			  if (cheater) return "!!!";
 			  return "";
 		}
 		

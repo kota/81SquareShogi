@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/01/01";
+	public const VERSION:String = "ver.2012/01/03";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -396,6 +396,9 @@
       }
 	  for each(user in _users) {
 		  if (!user.exist) delete _users[user.name];
+		  if (InfoFetcher.isAdminLv1(login_name)) {
+			  if (_infoFetcher.cheaters.indexOf(user.name) >= 0) _writeUserMessage("C: " + user.name, 1, "#FF0000");
+		  }
 	  }
 	  _refreshUserList();
 	  _refreshWaiterList();
@@ -2596,7 +2599,6 @@
 	
 	private function _handleRankingSearch(e:Event):void {
 		searchAccordion.enabled = true;
-		var listed:Boolean = true;
 		switch (String(e.target.bufferXML.@item)) {
 			case "wins":
 				_ranking_wins_list = new Array(); break;
@@ -2634,25 +2636,18 @@
 				  }
 			}
 			if (player.name.toLowerCase() == player.login) player.login = player.name;
-			if (_infoFetcher.cheaters.indexOf(player.login) >= 0) { // Temporarily
-				listed = false;
-				num -= 1;
+			switch (String(e.target.bufferXML.@item)) {
+				case "wins":
+					_ranking_wins_list.push(player); break;
+				case "rate":
+					_ranking_rate_list.push(player); break;
+				case "total":
+					_ranking_total_list.push(player); break;
+				case "streak":
+					_ranking_streak_list.push(player); break;
+				case "percentage":
+					_ranking_percentage_list.push(player); break;
 			}
-			if (listed) {
-				switch (String(e.target.bufferXML.@item)) {
-					case "wins":
-						_ranking_wins_list.push(player); break;
-					case "rate":
-						_ranking_rate_list.push(player); break;
-					case "total":
-						_ranking_total_list.push(player); break;
-					case "streak":
-						_ranking_streak_list.push(player); break;
-					case "percentage":
-						_ranking_percentage_list.push(player); break;
-				}
-			}
-			listed = true;
 		}
 		if (num == 0) { Alert.show("Data not found."); return;}
 		winRankingGrid.dataProvider = _ranking_wins_list;
@@ -3097,7 +3092,7 @@
 		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 	  </mx:HBox>
-	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo_201201.jpg" toolTip="" />
+	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg" toolTip="" />
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
@@ -3172,7 +3167,7 @@
 		<mx:VDividedBox liveDragging="true">
 			<mx:DataGrid id="userListGrid" width="360" height="363" headerHeight="21" change="_userSelected();" rowHeight="20" doubleClickEnabled="true" doubleClick="_openPlayerInfo(userListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle" click="_holdRefresh();">
 			 <mx:columns>
-			  <mx:DataGridColumn headerStyleName="header81" dataField="statusMark" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" />
+			  <mx:DataGridColumn headerStyleName="header81" dataField="statusMark" headerText="{lan.status_short}" width="32" paddingLeft="0" paddingRight="0" textAlign="center" showDataTips="true" dataTipField="statusMarkTip" />
 			  <mx:DataGridColumn headerStyleName="header81" dataField="titleName" headerText="{lan.title}" showDataTips="true" dataTipField="titleSubName" width="53" paddingLeft="0" textAlign="center" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{rankRenderer}" headerText="{lan.rank}" width="49" paddingLeft="0" textAlign="center" sortable="false" />
 			  <mx:DataGridColumn headerStyleName="header81" itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="130" paddingLeft="1" sortCompareFunction="_sortName" />
