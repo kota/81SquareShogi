@@ -30,6 +30,7 @@
 			{label:"10-piece Down", data:"hc10p"},
 			{label:"Three Pawns", data:"hcfu3" },
 			{label:"Naked King", data:"hcnaked" },
+			{label:"Open-air Shogi", data:"vaoa" },
 			{label:"Mini-shogi", data:"vamini" },
 			{label:"GoroGoro-shogi", data:"va5656" },
 			{label:"3x3 Shogi", data:"va33" } ]
@@ -292,6 +293,7 @@
 			 <mx:Object label="{parentApplication.lan.hc_10p}" data="hc10p"/>
 			 <mx:Object label="{parentApplication.lan.hc_3pawns}" data="hcfu3"/>
 			 <mx:Object label="{parentApplication.lan.hc_naked}" data="hcnaked"/>
+			 <mx:Object label="{parentApplication.lan.hc_openair}" data="vaoa"/>
 			 <mx:Object label="{parentApplication.lan.hc_mini}" data="vamini"/>
 			 <mx:Object label="{parentApplication.lan.hc_56}" data="va5656"/>
 			 <mx:Object label="{parentApplication.lan.hc_33}" data="va33"/>

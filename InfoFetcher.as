@@ -222,6 +222,8 @@
 				return "Three Pawns Handicap (Non-rated)";
 			case "hcnaked":
 				return "Naked King Handicap (Non-rated)";
+			case "vaoa":
+				return "Open-air Shogi";
 			case "vamini":
 				return "Mini Shogi";
 			case "va5656":
@@ -264,6 +266,8 @@
 				return "Three Pawns";
 			case "hcnaked":
 				return "Naked King";
+			case "vaoa":
+				return "Open-air";
 			case "mini":
 			case "vamini":
 				return "Mini Shogi";
@@ -303,6 +307,8 @@
 				return "歩三兵";
 			case "hcnaked":
 				return "裸玉";
+			case "vaoa":
+				return "青空将棋";
 			case "vamini":
 				return "5五将棋";
 			case "va5656":
