@@ -286,7 +286,7 @@ package
 		}
 		
 		public function get isProvisional():Boolean {
-			return (total < 10);
+			return (total < 5);
 		}
 		
 	}
