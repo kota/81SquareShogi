@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/02/22";
+	public const VERSION:String = "ver.2012/03/11";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -97,6 +97,7 @@
 	private var _rematching:Boolean = false;
 	private var _leaving:Boolean = false;
 	private var _panelReplayColor:uint = 0xFF88CC;
+	private var _study_notified:Boolean = false;
 	private var _status_disconnected:Boolean = false;
 	private const arrow_comments:Array = new Array("", "Good move is this.", "My guess is this.", "How about this?", "This might not work.", "The aim here is this.");
 
@@ -338,7 +339,7 @@
 		  _writeUserMessage("Couldn't load initial condition file. Please refresh.\n", 1, "#008800");
 	  }
 	  var rank:String = "a " + InfoFetcher.makeRankFromRating(e.message.split(":")[1]);
-	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 10) rank = "a new player";
+	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 5) rank = "a new player";
 	  for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
 		  if (InfoFetcher.titleUser[i] == login_name.toLowerCase()) {
 			  rank = "the " + InfoFetcher.titleName[i];
@@ -348,7 +349,8 @@
 //	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + " (max:" + e.message.split(":")[11] + "), " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
-	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\nIDにハイフンが含まれているとバグが発生することが判明しています。管理者にID変更を依頼して下さい。\n", 1, "#FF0000", true);
+	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 3) _writeUserMessage(lan.msg_newlogin + "\n\n", 1, "#008800");
+//	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\nIDにハイフンが含まれているとバグが発生することが判明しています。管理者にID変更を依頼して下さい。\n", 1, "#FF0000", true);
 	  bulletin.loadAds();
     }
 
@@ -451,6 +453,7 @@
 					white.setFromList(parseInt(tokens[4]), parseInt(tokens[6]));
 				}
 				_games[tokens[1]] = new Game(tokens[1], black, white);
+				if (((black.name == login_name && tokens[8] != "true") || (white.name == login_name && tokens[9] != "true")) && tokens[7] == "game") _status_disconnected = true;
 			}
 			_games[tokens[1]].setFromList(parseInt(tokens[2]), tokens[7], tokens[8] == "true", tokens[9] == "true", parseInt(tokens[10]), tokens[11]);
 			
@@ -737,6 +740,7 @@
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
+	  _study_notified = false;
 	  if (board.piece_type == 6) _sendAutoChat("Pieces set to Blind, Middle.");
 	  else if (board.piece_type == 7) _sendAutoChat("Pieces set to Blind, Hard.");
 	  else if (board.piece_type == 8) _sendAutoChat("Pieces set to Blind, Extreme.");
@@ -799,6 +803,7 @@
 	  radioKifuReplay.enabled = false;
 	  board.onListen = true;
 	  sidePanel.setStyle('borderColor', undefined);
+	  _study_notified = false;
 	  
 	  board.startGame(_initPositionStr, _client.myTurn, _watch_game, moves);
 	  
@@ -836,17 +841,17 @@
 		  } else if (e.message.indexOf("#DISCONNECT") >= 0) {
 			  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
 		  } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
-			_writeUserMessage("Illegal Move.\n", 2, "#DD0088");
+			_writeUserMessage(lan.msg_illegal + "\n", 2, "#DD0088");
 			mv.setGameEnd(board.last_pos.turn, Movement.ILLEGAL);
 			board.kifu_list.push(mv);
 		  } else if (e.message.indexOf("#RESIGN") >= 0) {
 			  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 		  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
-			  _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
+			  _writeUserMessage(lan.msg_perpetual + "\n", 2, "#DD0088");
 			  mv.setGameEnd(board.last_pos.turn, Movement.OUTE_SENNICHITE);
 			  board.kifu_list.push(mv);		  
 		  } else if (e.message.indexOf("#SENNICHITE") >= 0) {
-			  _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
+			  _writeUserMessage(lan.msg_repetition + "\n", 2, "#DD0088");
 			  mv.setGameEnd(board.last_pos.turn, Movement.SENNICHITE);
 			  board.kifu_list.push(mv);
 		  }
@@ -891,6 +896,7 @@
 	  if (_disconnectAlertWindow) {
 		  _disconnectAlertWindow.terminate();
 		  _disconnectAlertWindow = null;
+		  var opponent_disconnected:Boolean = true;
 	  }
 	  board.post_game = true;
       if (e.message.indexOf("TIME_UP") >= 0) {
@@ -900,19 +906,19 @@
 		mv.setGameEnd(board.position.turn, Movement.TIMEUP);
         board.kifu_list.push(mv);
 	  } else if (e.message.indexOf("DISCONNECT") >= 0) {
-        _writeUserMessage("Opponent disconnected.\n", 2, "#DD0088");
+        _writeUserMessage(lan.msg_disconnected + "\n", 2, "#DD0088");
       } else if(e.message.indexOf("ILLEGAL_MOVE") >= 0){
-        _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
+        _writeUserMessage(lan.msg_illegal + "\n", 2, "#DD0088");
 		mv.setGameEnd(board.position.turn, Movement.ILLEGAL);
           board.kifu_list.push(mv);
       } else if (e.message.indexOf("RESIGN") >= 0) {
         _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
       } else if (e.message.indexOf("OUTE_SENNICHITE") >= 0) {
-        _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
+        _writeUserMessage(lan.msg_perpetual + "\n", 2, "#DD0088");
 		mv.setGameEnd(board.position.turn, Movement.OUTE_SENNICHITE);
 		board.kifu_list.push(mv);
       } else if (e.message.indexOf("SENNICHITE") >= 0) {
-        _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
+        _writeUserMessage(lan.msg_repetition + "\n", 2, "#DD0088");
 		mv.setGameEnd(board.position.turn, Movement.SENNICHITE);
 		board.kifu_list.push(mv);
       }
@@ -948,6 +954,10 @@
 			  board.isSubHost = true;
 		  }
 	  }
+	  if (opponent_disconnected && board.isSubHost) {
+		  board.isStudyHost = true;
+		  board.isSubHost = false;
+	  }
 	  allowWatcherChatCheckbox.visible = false;
       closeButton.enabled = true;
       resignButton.enabled = false;
@@ -964,7 +974,7 @@
       kifuDataGrid.selectedIndex = board.kifu_list.length - 1;
       kifuDataGrid.callLater(_scrollDownKifu); //kifuDataGrid.scrollToIndex(board.kifu_list.length+1);
 	  if (board.isStudyHost) _toggleHostStatus(true);
-	  if (board.isSubHost) _writeUserMessage("You are a sub-host of study mode. You can move the host's pieces.\n", 2, "#008800", true);
+	  if (board.isSubHost) _writeUserMessage(lan.msg_subhost + "\n", 2, "#008800", true);
       board.endGame();
 	  _status_disconnected = false;
     }
@@ -1084,7 +1094,7 @@
 			else _writeUserMessage("Study Host status given to " + match[1] + "\n", 2, "#008800", false);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
 			if (match[1] == login_name) {
-				_writeUserMessage("You are given Study sub-host status. You can move the host's pieces.\n", 2, "#008800", true);
+				_writeUserMessage(lan.msg_subhost_given + "\n", 2, "#008800", true);
 				board.isSubHost = true;
 			} else {
 				_writeUserMessage("Study Sub-host status given to " + match[1] + "\n", 2, "#008800", false);
@@ -1172,6 +1182,10 @@
 		board.clearArrows(Board.ARROWS_PUBLIC);
 		if (board.isStudyHost && name == login_name) return;
 		board.studyOrigin = base;
+		if (!_study_notified && board.post_game && !board.onListen && !board.isStudyHost) {
+			_writeUserMessage(lan.msg_study_notify + "\n", 2, "#008800");
+			_study_notified = true;
+		}
 		if (branch == "*") {
 			if (board.study_list.length > 0) board.study_list = new Array();
 			if (!(board.post_game && board.onListen) && !board.isStudyHost) return;
@@ -1319,7 +1333,7 @@
 		  _writeUserMessage("Player disconnected.\n", 2, "#DD0088");
       } else if(e.message.indexOf("#ILLEGAL_MOVE") >= 0){
 		end_game = true;
-        _writeUserMessage("Illegal Move.\n", 2, "#DD0088");
+        _writeUserMessage(lan.msg_illegal + "\n", 2, "#DD0088");
 		mv.setGameEnd(board.last_pos.turn, Movement.ILLEGAL);
 		board.kifu_list.push(mv);
       } else if (e.message.indexOf("#RESIGN") >= 0) {
@@ -1327,12 +1341,12 @@
 		  _writeUserMessage((board.last_pos.turn == Kyokumen.SENTE ? "Black" : "White")  + " resigned.\n", 2, "#DD0088");
 	  } else if (e.message.indexOf("#OUTE_SENNICHITE") >= 0) {
 		  end_game = true;
-          _writeUserMessage("Illegal Perpetual Check.\n", 2, "#DD0088");
+          _writeUserMessage(lan.msg_perpetual + "\n", 2, "#DD0088");
 		  mv.setGameEnd(board.last_pos.turn, Movement.OUTE_SENNICHITE);
 		  board.kifu_list.push(mv);		  
       } else if (e.message.indexOf("#SENNICHITE") >= 0) {
 		  end_game = true;
-          _writeUserMessage("Sennichite. (Repetition)\n", 2, "#DD0088");
+          _writeUserMessage(lan.msg_repetition + "\n", 2, "#DD0088");
 		  mv.setGameEnd(board.last_pos.turn, Movement.SENNICHITE);
 		  board.kifu_list.push(mv);
       } else if (e.message.indexOf("#SUSPEND") >= 0) {
@@ -1504,7 +1518,9 @@
 
      private function _waitForGame(total:int = 1500, byoyomi:int = 30, handicap:String = "r", tournament:String = ""):void {
 	  if (_status_disconnected) {
-		  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.","Error");
+		  Alert.show("You can only recconect to the game you disconnected from.\nIf your game is already over, re-login to clear your \"D\" status.", "Error");
+		  _waiting = false;
+		  _client.who();
 		  return;
 	  }
       _client.waitForGame(total,byoyomi,handicap,tournament);
@@ -1729,9 +1745,9 @@
 		  logoutButton.enabled = false;
 		  userMessage2.htmlText = "";
 		  if (board.gameType == "r") {
-			  _writeUserMessage("This game is Rated.\nPlayers CANNOT see watcher's chat until the game ends.\nWatcher can PM to players, but it will be notified to others.\n", 2, "#008800", true);
+			  _writeUserMessage(lan.msg_rated + "\n", 2, "#008800", true);
 		  } else {
-			  _writeUserMessage("This game is Non-rated.\nPlayers CAN see watcher's chat even during game.\n", 2, "#008800", true);
+			  _writeUserMessage(lan.msg_nonrated + "\n", 2, "#008800", true);
 		  }
 		  if (game_info[2].match(/\-\-..$/)) _imgUserMessage(IMAGE_DIRECTORY + "banners/" + game_info[2].substr(game_info[2].length - 2, 2) + ".jpg", 2);
 		  mainViewStack.selectedIndex = 2;
@@ -1752,6 +1768,7 @@
 		  radioKifuListen.enabled = true;
 		  board.onListen = true;
 		  sidePanel.setStyle('borderColor', undefined);
+		  _study_notified = false;
 	  } else {
 		  Alert.show("The game list has been refreshed.\nPlease select a game again.", lan.error, Alert.OK, gameListGrid);
 	  }
@@ -2002,6 +2019,12 @@
 		if (_game_name) _client.watchers(_game_name);
 	}
 	
+	private function _toggleWatcherChat():void {
+		_allowWatcherChat = allowWatcherChatCheckbox.selected;
+		if (_allowWatcherChat) _sendAutoChat("Allowed watcher's chat.");
+		else _sendAutoChat("Blocked watcher's chat.");
+	}
+	
 	private function _resignAlert():void {
 		if (board.my_turn == board.position.turn)
         Alert.show("","Resign?",Alert.YES|Alert.NO, controlPanel, _resign);
@@ -2161,6 +2184,8 @@
 	  if (radioKifuListen.selected) {
 		  board.onListen = true;
 		  sidePanel.setStyle('borderColor', undefined);
+		  _study_notified = false;
+		  if (board.isSubHost) _sendAutoChat("Back to Host's position.");
 		  board.clearArrows(Board.ARROWS_SELF);
 		  board.showArrows(Board.ARROWS_PUBLIC);
 		  kifuDataGrid.scrollToIndex(0);
@@ -2185,6 +2210,7 @@
 	  } else {
 		  board.onListen = false;
 		  sidePanel.setStyle('borderColor', _panelReplayColor);
+		  if (board.isSubHost) _sendAutoChat("Leaving Host's position.");
 		  if (!board.isStudyHost){
 			board.eraseArrows(Board.ARROWS_PUBLIC);
 			board.showArrows(Board.ARROWS_SELF);
@@ -2230,6 +2256,7 @@
 	if (board.onListen) {
 		board.onListen = false;
 		sidePanel.setStyle('borderColor', _panelReplayColor);
+		if (board.isSubHost) _sendAutoChat("Leaving Host's position.");
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	board.clearArrows(Board.ARROWS_SELF);
@@ -2276,6 +2303,7 @@
 	if (board.onListen) {
 		board.onListen = false;
 		sidePanel.setStyle('borderColor', _panelReplayColor);
+		if (board.isSubHost) _sendAutoChat("Leaving Host's position.");
 		board.eraseArrows(Board.ARROWS_PUBLIC);
 	}
 	var n:int = kifuDataGrid.selectedIndex;
@@ -2668,8 +2696,8 @@
 	  _so.data.rule_total = _newGameWindow.nonrated_total.selectedIndex;
 	  _so.data.rule_byoyomi = _newGameWindow.nonrated_byoyomi.selectedIndex;
 	  _so.data.rule_handicap = _newGameWindow.nonrated_handicap.selectedIndex;
-      _waitForGame(e.total, e.byoyomi, e.handicap, e.tournament);
 	  _waiting = true;
+      _waitForGame(e.total, e.byoyomi, e.handicap, e.tournament);
     }
 
 	//--------------------------------------------------------------------------------------------------------------------------------- OPTION WINDOW
@@ -2886,7 +2914,7 @@
 	
 	private function _toggleHostStatus(onoff:Boolean):void {
 		board.isStudyHost = true;
-		_writeUserMessage("You are the host of Study Mode. Your board is shared.\n", 2, "#008800", true);
+		_writeUserMessage(lan.msg_host + "\n", 2, "#008800", true);
 		board.onListen = false;
 		radioKifuReplay.selected = true;
 		radioKifuListen.enabled = false;
@@ -2954,7 +2982,7 @@
     }
 	
 	private function _checkTimerLag():void {
-		_writeUserMessage("Your timer is lagging by more than 5 sec due to CPU load. Time-up loss can occur earlier than your timer hits zero.", 2, "#FF0000", true);
+		_writeUserMessage(lan.msg_lag + "\n", 2, "#FF0000", true);
 		_sound_chat3.play();
 	}
 	
@@ -3092,7 +3120,7 @@
 		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 	  </mx:HBox>
-	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg" toolTip="" />
+	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg?{VERSION}" toolTip="" />
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
       <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
@@ -3287,10 +3315,10 @@
       </mx:HBox>
       </mx:VBox>
         <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
-		  <mx:HBox paddingBottom="-2" horizontalGap="2">
+		  <mx:HBox paddingBottom="-2" horizontalGap="10">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
-			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_watcherRefresh();"/>
-			<mx:CheckBox id="allowWatcherChatCheckbox" toolTip="Allow Watcher Chat" click="_allowWatcherChat = allowWatcherChatCheckbox.selected;"/>
+<!--			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_watcherRefresh();"/> -->
+			<mx:CheckBox id="allowWatcherChatCheckbox" label="{lan.allow_chat}" click="_toggleWatcherChat();"/>
 		  </mx:HBox>
 		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(watcherListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle">

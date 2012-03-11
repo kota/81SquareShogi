@@ -40,10 +40,10 @@
         ]]>
     </mx:Script>
 	<mx:VBox horizontalAlign="left" paddingLeft="10">
-		<mx:Label text="Opponent disconnected!" fontSize="12" fontWeight="bold" />
-		<mx:Label text="You can declare win after 30 seconds, or keep waiting." fontSize="11" paddingBottom="0" />
+		<mx:Label text="{parentApplication.lan.msg_disconnect}" fontSize="12" fontWeight="bold" />
+		<mx:Label text="{parentApplication.lan.msg_disconnect_alert1}" fontSize="11" paddingBottom="0" />
 		<mx:Spacer height="-17"/>
-		<mx:Label text="Declaration is automatically made after 300 seconds." fontSize="11" paddingTop="0" />
+		<mx:Label text="{parentApplication.lan.msg_disconnect_alert2}" fontSize="11" paddingTop="0" />
 	</mx:VBox>
 	<mx:VBox width="100%" horizontalAlign="center">
 		<mx:HBox>
