@@ -145,7 +145,9 @@
 				detail: "Detail",
 				favorite: "Favorite",
 				ignore: "Block",
-				allow: "Allow",
+				allow: "Give Study-mode rights",
+				give_host: "Hand over Host status",
+				give_subhost: "Allow Sub-host status",
 				set_rate: "Set Rate",
 				rated: "Rated",
 				nonrated: "Non-rated",
@@ -195,7 +197,8 @@
 				msg_repetition: "Sennichite. (Repetition)",
 				msg_lag: "Your timer is lagging by more than 5 sec due to CPU load. Time-up loss can occur earlier than your timer hits zero.",
 				msg_disconnect_alert1: "You can declare win after 30 seconds, or keep waiting.",
-				msg_disconnect_alert2: "Declaration is automatically made after 300 seconds."
+				msg_disconnect_alert2: "Declaration is automatically made after 300 seconds.",
+				msg_addlist: "Added to the list temporarily. Go to Option Window to set it permanent or cancel."
 			};
 			
 			[Bindable]

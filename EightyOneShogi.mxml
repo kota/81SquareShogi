@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/03/11";
+	public const VERSION:String = "ver.2012/03/12";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -1089,7 +1089,7 @@
 			}
 			trace(sender + "-" + match[1] + "-" + match[2] + "-" + match[3]);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##GIVEHOST\](.+)$/))) {
-			board.isSubHost = false;
+//			board.isSubHost = false;
 			if (match[1] == login_name) _toggleHostStatus(true);
 			else _writeUserMessage("Study Host status given to " + match[1] + "\n", 2, "#008800", false);
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##SUBHOST_ON\](.+)$/))) {
@@ -1956,7 +1956,7 @@
 				return;
 			}
 			_favorite_list.push(name.toLowerCase());
-			Alert.show("Added to favorite list temporarily.\nGo to Option Window to set it permanent or cancel.");
+			Alert.show(lan.msg_addlist);
 		}
 	}
 	
@@ -1967,13 +1967,36 @@
 				return;
 			}
 			_ignore_list.push(name.toLowerCase());
-			Alert.show("Added to ignore list temporarily.\nGo to Option Window to set it permanent or cancel.");
+			Alert.show(lan.msg_addlist);
 		}
 	}
 	
 	private function _handleAllowStudy(name:String):Function {
 		return function(e:MouseEvent):void {
-			if (_game_name && board.isStudyHost) _client.gameChat(_game_name, "[##SUBHOST_ON]" + name);
+			if (!_game_name || !board.isStudyHost) {
+				Alert.show("You are not a Host of Study Mode.");
+				return;
+			}
+			Alert.yesLabel = lan.give_subhost;
+			Alert.noLabel = lan.give_host;
+			Alert.buttonWidth = 220;
+			Alert.show(null, "Host status management", Alert.YES | Alert.NO, null, _allowStudy(name));
+			//set properties back to default.
+			Alert.yesLabel = "Yes";
+			Alert.noLabel = "No";
+			Alert.buttonWidth = 60;
+		}
+	}
+
+	private function _allowStudy(name:String):Function{
+		return function(e:CloseEvent):void {
+			if (e.detail == Alert.YES) {
+				_client.gameChat(_game_name, "[##SUBHOST_ON]" + name);
+			} else if (e.detail == Alert.NO) {
+				_toggleHostStatus(false);
+				_client.gameChat(_game_name, "[##GIVEHOST]" + name);
+				_playerInfoWindows[name].allowStudy.enabled = false;
+			}
 		}
 	}
 	
@@ -2913,13 +2936,24 @@
 	}
 	
 	private function _toggleHostStatus(onoff:Boolean):void {
-		board.isStudyHost = true;
-		_writeUserMessage(lan.msg_host + "\n", 2, "#008800", true);
-		board.onListen = false;
-		radioKifuReplay.selected = true;
-		radioKifuListen.enabled = false;
-		sidePanel.setStyle('borderColor', _panelReplayColor);
-		_sendStudy();
+		if (onoff) {
+			board.isStudyHost = true;
+			board.isSubHost = false;
+			_writeUserMessage(lan.msg_host + "\n", 2, "#008800", true);
+			board.onListen = false;
+			radioKifuReplay.selected = true;
+			radioKifuListen.enabled = false;
+			sidePanel.setStyle('borderColor', _panelReplayColor);
+			_sendStudy();
+		} else {
+			board.isStudyHost = false;
+			board.isSubHost = true;
+			_writeUserMessage(lan.msg_subhost + "\n", 2, "#008800", true);
+			radioKifuListen.selected = true;
+			radioKifuListen.enabled = true;
+			board.onListen = true;
+			sidePanel.setStyle('borderColor', undefined);
+		}
 	}
 	
 	private function _sendStudy(sendTo:String = null):void {
