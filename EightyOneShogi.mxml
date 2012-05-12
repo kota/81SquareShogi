@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/03/12";
+	public const VERSION:String = "ver.2012/04/08";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -508,12 +508,12 @@
 			rank = "A new player";
 		} else {
 			rank = "A " + InfoFetcher.makeRankFromRating(tokens[1]);
-			for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
-			  if (InfoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
-				  rank = "The " + InfoFetcher.titleName[i];
-				  break;
-			  }
-			}
+		}
+		for (var i:int = 0; i < InfoFetcher.titleUser.length; i++) {
+		  if (InfoFetcher.titleUser[i] == tokens[0].toLowerCase()) {
+			  rank = "The " + InfoFetcher.titleName[i];
+			  break;
+		  }
 		}
 		var isFavorite:Boolean = _favorite_list.indexOf(tokens[0].toLowerCase()) >= 0;
 		_writeUserMessage("  -  [" + tokens[0] + "] logged in. " + rank + " from " + InfoFetcher.country_names[tokens[3]] + ".\n", 1, "#008800", isFavorite);
