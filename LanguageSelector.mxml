@@ -32,7 +32,8 @@
 			 {label:"Українська", image:"804", fileName:"ukranian" },
 			 {label:"Česky", image:"203", fileName:"czech" },
 			 {label:"한국어", image:"410", fileName:"korean" },
-			 {label:"Nederlands", image:"528", fileName:"dutch"}]
+			 {label:"Nederlands", image:"528", fileName:"dutch" },
+			 {label:"עברית", image:"376", fileName:"hebrew"}]
           );
 		  
 		  private var _words:Object = {	// Default (ENGLISH)

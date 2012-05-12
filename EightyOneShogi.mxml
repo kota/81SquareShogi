@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/04/08";
+	public const VERSION:String = "ver.2012/05/12";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
