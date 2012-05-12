@@ -1946,7 +1946,7 @@
 				var match:Array = _client.waitingGamename.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)/);
 				var rule:String = (parseInt(match[3]) / 60) + "min - " + match[4] + "sec";
 				var hc:String = InfoFetcher.gameType(match[1]);
-				_sendPrivateChat(_challengeUser.name, "[auto-PM] INVITATION: I am waiting with " + rule + ", " + hc + ". Would you like a game with me?");
+				_sendPrivateChat(_challengeUser.name, "[Auto-INVITATION]: I'm waiting for a challenge with " + rule + ", " + hc + ".");
 			}
 		}
 	}
