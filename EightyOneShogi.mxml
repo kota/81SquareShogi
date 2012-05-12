@@ -3240,7 +3240,7 @@
 		<mx:Button id="optionButton1" icon="@Embed('images/icon_gear.png')" toolTip="{lan.options}" click="_showOptions();" enabled="true"/>
 		<mx:CheckBox id="muteCheck1" paddingRight="-8" click="_mute(muteCheck1.selected)" toolTip="{lan.mute}"/>
 		<mx:Image source="@Embed('images/icon_mute.png')" click="_mute(!muteCheck1.selected)" toolTip="{lan.mute}"/>
-		<mx:Button id="leaveButton" label="{lan.leave}" click="_leavePC();"/>
+		<mx:Button id="leaveButton" label="{lan.leave}" click="_leavePC();" visible="false" includeInLayout="false" />
 		<mx:Button id="logoutButton" label="{lan.logout}" click="_logout()"/>
 		<mx:Button id="backToGameButton" label="{lan.back_to_game}" click="_backToGame();" visible="false" color="#FF0000" />
 		<mx:Button id="adminButton" label="" click="_openAdminPanel();" visible="false"/>
