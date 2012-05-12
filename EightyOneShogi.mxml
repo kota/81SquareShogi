@@ -581,12 +581,12 @@
 	}
 	
 	private function _handleStart(e:ServerMessageEvent):void {
-		if (mainViewStack.selectedIndex != 1) return;
+		if (mainViewStack.selectedIndex == 1 || (mainViewStack.selectedIndex == 2 && rematchButton.visible))
 		var tokens:Array = e.message.split("+");
 		if (tokens[0] == "STUDY") {
 			var game_info:Array = tokens[1].match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 			_writeUserMessage(game_info[2] + " CREATED STUDY ROOM.\n", 1, "#008800");
-			if (_chat_sound1_play) {
+			if (_chat_sound1_play && mainViewStack.selectedIndex == 1) {
 				if (_favorite_list.indexOf(game_info[2].toLowerCase()) >= 0) _sound_game_start.play();
 				else _sound_chat1.play();
 			}
@@ -597,7 +597,7 @@
 			_games[e.message] = new Game(e.message, black, white);
 		} else {
 			_writeUserMessage("GAME STARTED: ▲" + tokens[2] + " vs △" + tokens[3] + "\n", 1, "#008800");
-			if (_chat_sound1_play) {
+			if (_chat_sound1_play && mainViewStack.selectedIndex == 1) {
 				if (_favorite_list.indexOf(tokens[0].toLowerCase()) >= 0 || _favorite_list.indexOf(tokens[3].toLowerCase()) >= 0) _sound_game_start.play();
 			}
 			if (_users[tokens[2]]) _users[tokens[2]].setFromStart(tokens[1], "+");
@@ -1116,6 +1116,8 @@
 					board.closeGame();
 					_rematching = true;
 					_client.rematch(_game_name.split("+")[1], board.my_turn);
+				} else {
+					rematchButton.visible = true;
 				}
 			}
 		} else {
@@ -1723,13 +1725,13 @@
 
     private function _watch(e:CloseEvent):void {
       _watch_game = gameListGrid.selectedItem;
+	  if (e.detail == Alert.NO) return;
+	  _execute_watch();
+	}
+	
+	private function _execute_watch():void {
       if (_watch_game != null) {
-		 if (e.detail == Alert.YES) {
-			board.my_turn = Kyokumen.SENTE;
-		 } else {
-			 return;
-//			 board.my_turn = Kyokumen.GOTE;
-		 }
+		 board.my_turn = Kyokumen.SENTE;
 		 _game_name = _watch_game.id;
 		 var game_info:Array = _watch_game.game_name.match(/^([0-9a-z]+?)_(.*)-([0-9]*)-([0-9]*)$/);
 		  if (game_info[1].match(/^hc/)) {
@@ -2093,7 +2095,25 @@
 	}
 	
 	private function _rematch():void {
-		if (_game_name && !board.rematch[board.my_turn]) {
+		if (!board.isPlayer) {
+			var match:Array = _game_name.split("+")[1].match(/^([0-9a-z]+?)_(.*)$/);
+			var found:Boolean = false;
+			for each (var game:Object in _game_list) {
+				if (game.id.split("+")[1] == match[1] + "_@" + match[2] && game.status == "game") {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				_writeUserMessage("The rematch game is already finished.\n", 2, "#008800");
+			} else {
+				_client.monitorOff(_game_name);
+				board.closeGame();
+				_monitoring = false;
+				_watch_game = game;
+				_execute_watch();
+			}
+		} else if (_game_name && !board.rematch[board.my_turn]) {
 			_sendAutoChat("Standing by for Rematch");
 			_client.gameChat(_game_name, "[##REMATCH]");
 		}
