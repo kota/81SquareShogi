@@ -22,6 +22,18 @@
 	{
 		private var _urlLoader:URLLoader = new URLLoader();
 		private const SOURCE:String = "http://81dojo.com/dojo/";
+		private const livebotsTitleUser:Array = new Array('akira_watanabe', 'toshiyuki_moriuchi', 'yoshiharu_habu', 'masataka_gouda', 'yasumitsu_satou',
+			'kouji_tanigawa', 'hifumi_katou',	'kunio_naitou', 'kiyozumi_kiriyama', 'keiji_mori',
+			'hitoshige_awaji', 'teruichi_aono', 'kenji_kobayashi', 'torahiko_tanaka', 'bungo_fukuzaki',
+			'michio_takahashi', 'osamu_nakamura', 'akira_shima', 'yoshikazu_minami', 'yasuaki_tsukada',
+			'keita_inoue', 'taku_morishita', 'nobuyuki_yashiki', 'tadahisa_maruyama', 'takeshi_fujii',
+			'kouichi_fukaura', 'toshiaki_kubo', 'takashi_abe', 'hiroki_nakata', 'daisuke_nakagawa',
+			'manabu_senzaki', 'hiroyuki_miura', 'hishashi_namekata', 'daisuke_suzuki', 'kazuki_kimura',
+			'takanori_hashimoto', 'chikara_akutsu', 'akihito_hirose', 'amahiko_satou', 'masayuki_toyoshima', 'taichi_nakamura',
+			'kana_satomi', 'hatsumi_ueda', 'momoko_katou', 'tomomi_kai', 'ichiyo_shimizu',
+			'hiroe_nakai', 'haruko_saida', 'rieko_yauchi', 'ryouko_chiba', 'kumi_yamada',
+			'sachiko_takamure', 'sayuri_takebe', 'chisa_hayamizu', 'marika_nakamura', 'shinobu_iwane',
+			'kanna_suzuki', 'aya_fujita', 'fusako_ajiki', 'io_murota', 'yuki_muroya');
 		public var newestVer:String;
 		public static var titleUser:Array;
 		public static var titleName:Array;
@@ -93,10 +105,14 @@
 		}
 		
 		public function refresh():void {
-			titleUser = new Array();
+			titleUser = livebotsTitleUser.slice();
+			titleAvatar = livebotsTitleUser.slice();
 			titleName = new Array();
 			titleSubName = new Array();
-			titleAvatar = new Array();
+			for (var i:int = 0; i < livebotsTitleUser.length; i++) {
+				titleName.push("livebot");
+				titleSubName.push("中継ボット");
+			}
 //			rank_thresholds = new Array();
 //			rank_names = new Array();
 			country_codes = new Array();
