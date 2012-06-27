@@ -480,7 +480,7 @@ package{
 		}
 
 		private function _handleSecurityError(e:SecurityErrorEvent):void{
-			if (e.toString().match(/\#2048/)) Alert.show("Login authentication failed.\nPlease reload and use VENUS server.\n(Please also notify 81Dojo staff about the problem.)");
+			if (e.toString().match(/\#2048/)) Alert.show("Network security problem.\nPlease check the security settings of Firewall etc.\nProbably some ports are blocked.");
 			else Alert.show(e.toString());
 		}
 
