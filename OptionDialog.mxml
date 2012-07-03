@@ -11,7 +11,7 @@
 			import PieceSet;
 			
 			public function loadPieceSets(sets:Array):void {
-				for (var i:int = 0; i < 6; i++ ) {
+				for (var i:int = 0; i < 1; i++ ) {
 					var hbox:HBox = new HBox();
 					hbox.setStyle('horizontalGap', 0);
 					var radioButton:RadioButton = new RadioButton();
@@ -47,9 +47,9 @@
 			<mx:VBox id="pieceSetVBox" verticalGap="0" height="290" width="100%" horizontalScrollPolicy="off" />
 				<mx:HBox>
 					<mx:Label text="{parentApplication.lan.blind_piece}"/>
-					<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="6"/>
-					<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="7"/>
-					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="8"/>
+					<mx:RadioButton label="Middle" groupName="RadioGroup2"  value="6" enabled="false" />
+					<mx:RadioButton label="Hard" groupName="RadioGroup2"  value="7" enabled="false" />
+					<mx:RadioButton label="Extreme" groupName="RadioGroup2"  value="8" enabled="false" />
 				</mx:HBox>
 			<mx:Spacer height="10"/>
 			<mx:CheckBox id="grabPieceCheckBox" label="{parentApplication.lan.op_grab}"/>
@@ -81,8 +81,8 @@
 				<mx:Label text="{parentApplication.lan.notation}" fontWeight="bold" paddingLeft="10"/>
 				<mx:RadioButtonGroup id="RadioGroup3"/>
 				<mx:RadioButton label="{parentApplication.lan.notation_uni}" groupName="RadioGroup3" value="0"/>
-				<mx:RadioButton label="{parentApplication.lan.notation_jp}" groupName="RadioGroup3" value="1"/>
-				<mx:RadioButton label="{parentApplication.lan.notation_west}" groupName="RadioGroup3" value="2"/>
+				<mx:RadioButton label="{parentApplication.lan.notation_jp}" groupName="RadioGroup3" value="1" enabled="false" />
+				<mx:RadioButton label="{parentApplication.lan.notation_west}" groupName="RadioGroup3" value="2" enabled="false" />
 			</mx:HBox>
 			<mx:HBox>
 				<mx:Label text="{parentApplication.lan.pm}" fontWeight="bold" paddingLeft="10" />
@@ -113,6 +113,6 @@
     <mx:HBox paddingTop="10"> 
         <mx:Button id="OkButton" click="PopUpManager.removePopUp(this);" label="OK"/> 
         <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
-		<mx:Button id="saveSettingsButton" label="{parentApplication.lan.save_settings}" click="Alert.show('Settings saved!');"/>
+		<mx:Button id="saveSettingsButton" label="{parentApplication.lan.save_settings}" click="Alert.show('Settings saved!');" enabled="false" />
     </mx:HBox>
 </mx:TitleWindow>

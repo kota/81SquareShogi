@@ -15,13 +15,15 @@ package  {
 		public static const SENNICHITE:int = 3;
 		public static const ILLEGAL:int = 4;
 		public static const OUTE_SENNICHITE:int = 5;
+		public static const CAPTURED:int = 6;
 		public static const LIST_UNIVERSAL:int = 0;
 		public static const LIST_JAPANESE:int = 1;
 		public static const LIST_WESTERN:int = 2;
 		private static const koma_japanese_names:Array = new Array('玉', '飛', '角', '金', '銀', '桂', '香', '歩', '', '龍', '馬', '', '成銀', '成桂', '成香', 'と');
 		private static const rank_japanese_names:Array = new Array('一','二','三','四','五','六','七','八','九');
 		private static const file_japanese_names:Array = new Array('１', '２', '３', '４', '５', '６', '７', '８', '９');
-		private static const koma_western_names:Array = new Array('Ｋ', 'Ｒ', 'Ｂ', 'Ｇ', 'Ｓ', 'Ｎ', 'Ｌ', 'Ｐ', '', 'Ｄ', 'Ｈ', '', '+S', '+N', '+L', 'Ｔ');
+		private static const koma_western_names:Array = new Array('玉', '象', '麒', '鳳', '獅', '奔', '龍', '馬', '飛', '角', '虎', '金', '銀', '銅', '豹', '竪', '横', '反', '香', '仲', '歩',
+													 '', '太', '獅', '奔', '', '', '鷲', '鷹', '龍', '馬', '鹿', '飛', '竪', '横', '角', '牛', '猪', '鯨', '駒', '象', 'と');
 //		private static const koma_western_names:Array = new Array(' K', ' R', ' B', ' G', ' S', ' N', ' L', ' P', '', ' D', ' H', '', '+S', '+N', '+L', ' T');
 		private static const rank_western_names:Array = new Array('ａ', 'ｂ', 'ｃ', 'ｄ', 'ｅ', 'ｆ', 'ｇ', 'ｈ', 'ｉ');
 //		private static const rank_western_names:Array = new Array('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i');
@@ -63,7 +65,7 @@ package  {
 		}
 
 		private function toHumanCoordinates(p:Point):Point{
-			return new Point(9-p.x,p.y+1);
+			return new Point(12-p.x,p.y+1);
 		}
 
 		public function toCSA():String{
@@ -75,7 +77,7 @@ package  {
 			}
 			var to:Point = toHumanCoordinates(_to);
 			var buff:String = _turn == 0 ? "+" : "-"
-			buff += from.x.toString() + from.y.toString() + to.x.toString() + to.y.toString();
+			buff += from.x.toString(16) + from.y.toString(16) + to.x.toString(16) + to.y.toString(16);
 			if (_promote) {
 				buff += Kyokumen.koma_names[_type + Koma.PROMOTE];
 			} else {
@@ -116,24 +118,26 @@ package  {
 						return " Repetition Draw";
 					case OUTE_SENNICHITE:
 						return " Perpetual Check";
+					case CAPTURED:
+						return " King captured";
 				}
 			}
 			var str:String = koma_western_names[_type];
 			if (_from.x >= Kyokumen.HAND) {
-				str += "* ";
+				str += "*";
 			} else if (_capture) {
-				str += "x ";
+				str += "x";
 			} else {
-				str += "- ";
+				str += "-";
 			}
 			if (_to.x != _last_to.x || _to.y != _last_to.y) {
-				str += 9 - _to.x
-				str += to.y + 1;// universal ? file_japanese_names[_to.y] : rank_western_names[_to.y];
+				str += (12 - _to.x).toString(16);
+				str += (to.y + 1).toString(16); // universal ? file_japanese_names[_to.y] : rank_western_names[_to.y];
 			}
 			if (_promote) {
-				str += " +";
+				str += "+";
 			} else if (_from.x != Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
-				if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += " =";
+				if ( (1 - _turn) * _from.y + _turn * (11 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (11 - _to.y) <= 2 ) str += " =";
 			} 
 			return str;	
 		}
@@ -152,6 +156,8 @@ package  {
 						return "千日手";
 					case OUTE_SENNICHITE:
 						return "連続王手の千日手";
+					case CAPTURED:
+						return "王取りにて終局";
 				}
 			}
 			if (_to.x != _last_to.x || _to.y != _last_to.y) {
@@ -167,7 +173,7 @@ package  {
 				if (_promote) {
 					str += "成";
 				} else if (!forFile && _from.x < Kyokumen.HAND && _type < Koma.PROMOTE && !_promote && _type != Koma.OU && _type != Koma.KI){
-					if ( (1 - _turn) * _from.y + _turn * (8 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (8 - _to.y) <= 2 ) str += "不成";
+					if ( (1 - _turn) * _from.y + _turn * (11 - _from.y) <= 2 || (1 - _turn) * _to.y + _turn * (11 - _to.y) <= 2 ) str += "不成";
 				} 
 			}
 			return str;
@@ -175,7 +181,7 @@ package  {
 		
 		public function toKIFNotation():String{
 			var str:String = toJapaneseNotation(true);
-			if (_from && _from.x < Kyokumen.HAND) str += "(" + String(9 - _from.x) + String(_from.y + 1) + ")";
+			if (_from && _from.x < Kyokumen.HAND) str += "(" + String(12 - _from.x) + String(_from.y + 1) + ")";
 			return str + "   ( " + int(_time/60) + ":" + _time % 60 + "/)";
 		}
 		

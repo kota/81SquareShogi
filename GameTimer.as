@@ -146,12 +146,19 @@ package {
 		public function suspend():void{
 			if(_timer.running){
 				_timer.stop();
-				if (_byoyomi_flag) {
-					_box.setStyle('backgroundColor',0xFFFF00);
-					_time_left = _byoyomi;
-				}
+			}
+			if (_byoyomi_flag) {
+				_box.setStyle('backgroundColor',0xFFFF00);
+				_time_left = _byoyomi;
 			}
 			_arrows.visible = false;
+			_display();
+		}
+		
+		public function pause():void {
+			if(_timer.running){
+				_timer.stop();
+			}
 			_display();
 		}
 

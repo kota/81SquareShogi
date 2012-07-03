@@ -668,7 +668,7 @@
 	  _refresh();
 	  _initPositionStr = "";
 	  for each(var line:String in e.message.split("\n")) {
-		  if (line.match(/^P[0-9\+\-]/)) _initPositionStr += line + "\n";
+		  if (line.match(/^P[0-9a-c\+\-]/)) _initPositionStr += line + "\n";
 	  }
 //	  _client.agree();
   }
@@ -693,7 +693,7 @@
 	  board.kid = parseInt(e.message.split(":")[2]);
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
-	  } else if (_game_name.split("+")[1].match(/^nr_/)) {
+	  } else if (_game_name.split("+")[1].match(/^(nr|vachu)_/)) {
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
@@ -753,7 +753,7 @@
 
 	  if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
-	  } else if (_game_name.split("+")[1].match(/^nr_/)) {
+	  } else if (_game_name.split("+")[1].match(/^(nr|vachu)_/)) {
 		  board.gameType = "nr";
 	  } else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
@@ -777,7 +777,7 @@
 		  if ((match = line.match(/^##\[RECONNECT\]\[(.+)\]\sTo_Move\:(\+|\-)$/))) {
 			  board.kid = parseInt(match[1]);
 			  _initPositionStr = "P0" + match[2] + "\n";
-		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s(P[0-9\+\-].*)$/))) {
+		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s(P[0-9a-c\+\-].*)$/))) {
 			  _initPositionStr += match[1] + "\n";	  
 		  } else if ((match = line.match(/^##\[RECONNECT\]\[.+\]\s([-+][0-9]{4}.{2}|%TORYO)$/))) {
 			  var move_and_time:Object = new Object();
@@ -913,9 +913,9 @@
           board.kifu_list.push(mv);
       } else if (e.message.indexOf("RESIGN") >= 0) {
         _writeUserMessage((board.position.turn == board.my_turn ? "You" : "Opponent") + " resigned.\n", 2, "#DD0088");
-      } else if (e.message.indexOf("OUTE_SENNICHITE") >= 0) {
-        _writeUserMessage(lan.msg_perpetual + "\n", 2, "#DD0088");
-		mv.setGameEnd(board.position.turn, Movement.OUTE_SENNICHITE);
+      } else if (e.message.indexOf("CATCH") >= 0) {
+        _writeUserMessage("King is captured!\n", 2, "#DD0088");
+		mv.setGameEnd(board.position.turn, Movement.CAPTURED);
 		board.kifu_list.push(mv);
       } else if (e.message.indexOf("SENNICHITE") >= 0) {
         _writeUserMessage(lan.msg_repetition + "\n", 2, "#DD0088");
@@ -1002,13 +1002,10 @@
 			board.since_last_move = 0;
 		}
 		board.makeMove(e.message, true, true);
+		board.highlightSecondMoves();
 	  }
 	  kifuDataGrid.dataProvider = board.kifu_list;
       kifuDataGrid.scrollToIndex(board.kifu_list.length + 1);
-	  if (_impasseStatusWindow) {
-		  board.position.calcImpasse();
-		  _impasseStatusWindow.setStatus(board.position.impasseStatus, board.position.turn == board.my_turn ? board.my_turn : -1);
-	  }
 	  if (board.isRelay) _checkRelaySwitch();
     }
   
@@ -1067,9 +1064,9 @@
 			if (board.post_game && !board.studyOn) return;
 			if (sender == login_name) sender = "";
 			if (board.isStudyHost || board.onListen) {
-				board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC, true);
+				board.addArrow(parseInt(match[1]), new Point(parseInt(match[2],16), parseInt(match[3],16)), new Point(parseInt(match[4],16), parseInt(match[5],16)), uint(match[6]), sender,Board.ARROWS_PUBLIC, true);
 			} else {
-				board.addArrow(parseInt(match[1]), new Point(Number(match[2]), Number(match[3])), new Point(Number(match[4]), Number(match[5])), uint(match[6]), sender,Board.ARROWS_PUBLIC);
+				board.addArrow(parseInt(match[1]), new Point(parseInt(match[2],16), parseInt(match[3],16)), new Point(parseInt(match[4],16), parseInt(match[5],16)), uint(match[6]), sender,Board.ARROWS_PUBLIC);
 			}
 		} else if ((match = e.message.substr(12).match(/^\[.+\]\s\[##M_(IN|OUT)\](\d+),(\d+)$/))) {
 			if (sender != login_name) {
@@ -1320,10 +1317,7 @@
 	  var study_room:Boolean = false;
 	  board.clearArrows(Board.ARROWS_PUBLIC);
 	  if (_watch_game != null) board.monitor(e.message, _watch_game);
-	  if (_impasseStatusWindow) {
-		  board.position.calcImpasse();
-		  _impasseStatusWindow.setStatus(board.position.impasseStatus, -1);
-	  }
+
       if(e.message.indexOf("#TIME_UP") >= 0){
 		end_game = true;
         board.timeout();
@@ -2076,16 +2070,6 @@
 		_client.gameChat(_game_name, e.target.label);
 	}
 	
-    private function _showImpasse():void {
-		board.position.calcImpasse();
-		_impasseStatusWindow =  ImpasseStatusWindow(PopUpManager.createPopUp(board, ImpasseStatusWindow, true));
-		_impasseStatusWindow.addEventListener("close_window", _handleImpasseStatusClose);
-		PopUpManager.centerPopUp(_impasseStatusWindow);
-		_impasseStatusWindow.title = "Impasse Status";
-		_impasseStatusWindow.kachiButton.addEventListener(MouseEvent.CLICK, _handleKachiDeclare);
-		_impasseStatusWindow.setStatus(board.position.impasseStatus, (_isDuringMyGame() && board.position.turn == board.my_turn) ? board.my_turn : -1);
-    }
-	
 	private function _handleImpasseStatusClose(e:Event):void {
 		_impasseStatusWindow = null;
 	}
@@ -2179,7 +2163,7 @@
 	
 	private function _shareKifu2():void {
 		var diagram:Object = new Object();
-		diagram.sfen = board.position.toSFEN() + "%20" + (kifuDataGrid.selectedIndex ? kifuDataGrid.selectedIndex : (kifuDataGrid.dataProvider.length - 1));
+		diagram.sfen = "";
 		diagram.sname = board.playerInfos[0].name;
 		diagram.gname = board.playerInfos[1].name;
 		diagram.lm = board.getLastSquareName();
@@ -2449,13 +2433,10 @@
 		var nDraw:int = 0;
 		for each (var kifu:Object in e.target.bufferData) {
 			match = kifu.game_id.split("+")[1].match(/^([0-9a-z]+?)_.+\-(\d+)\-(\d+)$/);
-			if (match[1] == "r") {
-				hc = "R";
-			} else if (match[1] == "nr") {
+			if (match[1] == "vachu") {
 				hc = "NR";
-			} else if (match[1].match(/^(hc|va|mini)/)) {
-				if (match[1].match(/^vazoo/)) continue;
-				hc = "* " + InfoFetcher.gameTypeShort(match[1]);
+			} else {
+				continue;
 			}
 			kifu.rule = hc + ": " + parseInt(match[2])/60 + "-" + parseInt(match[3])
 			kifu.black = kifu.game_id.split("+")[2];
@@ -2526,7 +2507,7 @@
 		for each(var line:String in e.target.kifuContents.split("\n")) {
 			if (line.match(/^To_Move/)) {
 			  _initPositionStr += "P0" + line.substring(8) + "\n";
-			} else if (line.match(/^P[0-9\+\-]/)) {
+			} else if (line.match(/^P[0-9a-c\+\-]/)) {
 			  _initPositionStr += line + "\n";
 			} else if (line.match(/^N\+.+$/)) {
 			  var black:User = new User(line.substring(2));
@@ -2539,7 +2520,7 @@
 			  white.setFromList(parseInt(line.substring(2).split(",")[0]), parseInt(line.substring(2).split(",")[1]));
 			  white.wins = line.match(/\*/) ? 0 : 10;
 			  var game:Game = new Game(_game_name, black, white);
-			} else if(line.match(/^([-+][0-9]{4}.{2}$)/) || line == "%TORYO" || line.match(/^#(TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
+			} else if(line.match(/^([-+][0-9a-c]{4}.{2}$)/) || line == "%TORYO" || line.match(/^#(TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|JISHOGI)/)) {
 			var move_and_time:Object = new Object();
 			move_and_time.move = line;
 			move_and_time.comment = "";
@@ -2557,7 +2538,7 @@
 		board.superior = game.superior;
 		if (_game_name.split("+")[1].match(/^r_/)) {
 		  board.gameType = "r";
-		} else if (_game_name.split("+")[1].match(/^nr_/)) {
+		} else if (_game_name.split("+")[1].match(/^(nr|vachu)_/)) {
 		  board.gameType = "nr";
 		} else if (_game_name.split("+")[1].match(/^hc/)) {
 		  board.gameType = "hc";
@@ -2816,14 +2797,16 @@
 		_chat_sound2_play = _infoFetcher.userSettings.chatSound2;
 		_chat_sound3_play = _infoFetcher.userSettings.chatSound3;
 		board.hold_piece = _infoFetcher.userSettings.grabPiece;
-		Movement.listType = _infoFetcher.userSettings.notation;
+//		Movement.listType = _infoFetcher.userSettings.notation;
+		Movement.listType = 0;
 		_pmAutoOpen = _infoFetcher.userSettings.pmAutoOpen;
 		_accept_arrows = _infoFetcher.userSettings.acceptArrow;
 		_arrow_color = _infoFetcher.userSettings.arrowColor;
 		if (_infoFetcher.userSettings.ignoreList != "") _ignore_list = _infoFetcher.userSettings.ignoreList.split("/");
 		if (_infoFetcher.userSettings.favoriteList != "") _favorite_list = _infoFetcher.userSettings.favoriteList.split("/");
 		GameTimer.soundType = _infoFetcher.userSettings.byoyomi;
-		board.setPieceType(_infoFetcher.userSettings.pieceType);
+//		board.setPieceType(_infoFetcher.userSettings.pieceType);
+		board.setPieceType(0);
 		board.piece_type34 = _infoFetcher.userSettings.pieceType34;
 		board.highlight_movable = _infoFetcher.userSettings.highlightMovable;
 	}
@@ -2947,7 +2930,7 @@
 	
 	private function _addMyArrow(fromType:int, from:Point, to:Point):void {
 		if (board.isStudyHost || board.onListen) {
-			_client.gameChat(_game_name, "[##ARROW]" + fromType + "," + from.x + "," + from.y + "," + to.x + "," + to.y + ",0x" + _arrow_color.toString(16));
+			_client.gameChat(_game_name, "[##ARROW]" + fromType + "," + from.x.toString(16) + "," + from.y.toString(16) + "," + to.x.toString(16) + "," + to.y.toString(16) + ",0x" + _arrow_color.toString(16));
 			if (arrowComent.selectedIndex != 0) _client.gameChat(_game_name, "[comment] " + arrowComent.selectedItem);
 			arrowComent.selectedIndex = 0;
 		} else {
@@ -3323,16 +3306,17 @@
     <mx:HBox id="boardBox">
 	<mx:Panel width="100%" height="100%" headerHeight="0" backgroundColor="#FFcccc" borderThicknessBottom="0" borderThicknessLeft="0" borderThicknessRight="0" borderThicknessTop="0" paddingLeft="0" paddingRight="0" backgroundAlpha="0">
 	<mx:HBox paddingLeft="3" paddingTop="3" horizontalGap="2">
-      <mx:VBox verticalGap="0">
-      <eightyOneSquare:Board id="board" width="782" height="474"/> 
-      <mx:HBox horizontalGap="2">
+
+      <eightyOneSquare:Board id="board" width="740" height="625"/> 
+      <mx:VBox verticalGap="2">
         <mx:Panel id="messagePanel" fontSize="11" title="Message Panel" width="444" height="200" headerHeight="22" borderThicknessLeft="8" borderThicknessRight="8">
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="428" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" fontFamily="Meiryo UI" leading="0" />
         </mx:Panel>
+		
+		<mx:HBox>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
             <mx:Button id="resignButton" label="{lan.resign}" click="_resignAlert();"/>
-            <mx:Button id="impasseButton" label="{lan.impasse}" click="_showImpasse();"/>
 			  <mx:HBox width="100%" horizontalAlign="right">
 				<mx:Button id="reverseButton" icon="@Embed('images/icon_flip.png')" toolTip="{lan.flip}" click="board.flipBoard();"/>
 				<mx:Button id="closeButton" icon="@Embed('images/icon_door.png')" toolTip="{lan.close_game}" click="_closeGame();" enabled="false"/>           
@@ -3366,8 +3350,7 @@
 			<mx:Button id="checkLobbyButton" label="{lan.check_lobby}" enabled="true" click="_checkLobby();" />
 		</mx:HBox>
         </mx:Panel>
-      </mx:HBox>
-      </mx:VBox>
+
         <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 		  <mx:HBox paddingBottom="-2" horizontalGap="10">
 			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
@@ -3407,6 +3390,8 @@
 			</mx:VBox>
 		  </mx:VDividedBox>
         </mx:Panel>
+		</mx:HBox>
+      </mx:VBox>
 	</mx:HBox>
 	</mx:Panel>
     </mx:HBox>

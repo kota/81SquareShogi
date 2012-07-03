@@ -20,53 +20,37 @@ package  {
 		private var _last_to:Point;
 		private var _promoteY1:int;
 		private var _promoteY2:int;
+		private var _half_move:Boolean = false;
+		private var _first_move:Movement;
 
-    public static const koma_names:Array = new Array('OU', 'HI', 'KA', 'KI', 'GI', 'KE', 'KY', 'FU', '', 'RY', 'UM', '', 'NG', 'NK', 'NY', 'TO' );
+    public static const koma_names:Array = new Array('OU', 'SZ', 'KR', 'HO', 'LI', 'HN', 'RY', 'UM', 'HI', 'KA', 'KO', 'KI', 'GI', 'DO', 'HY', 'SG', 'OG', 'HE', 'KY', 'CN', 'FU',
+													 '', 'TA', 'PL', 'PN', '', '', 'WS', 'TK', 'PR', 'PU', 'SK', 'PH', 'PS', 'PO', 'PK', 'GY', 'CH', 'KJ', 'HK', 'PZ', 'TO');
 	private static const koma_sfen_names:Array = new Array('K', 'R', 'B', 'G', 'S', 'N', 'L', 'P', '', '%2BR', '%2BB', '', '%2BS', '%2BN', '%2BL', '%2BP');
-	private static const koma_impasse_points:Array = new Array(100, 5, 5, 1, 1, 1, 1, 1, 0, 5, 5, 1, 1, 1, 1, 1);
-	private static const ALL_POINTS:int = 2 * (koma_impasse_points[0] + 27);
 	
 	public var initialPositionStr:String;
 
-//    public function initialPositionStr():String{
-//     var tmp:String = "";
-//      tmp += "P1-KY-KE-GI-KI-OU-KI-GI-KE-KY\n";
-//      tmp += "P2 * -HI *  *  *  *  * -KA * \n";
-//      tmp += "P3-FU-FU-FU-FU-FU-FU-FU-FU-FU\n";
-//      tmp += "P4 *  *  *  *  *  *  *  *  * \n";
-//      tmp += "P5 *  *  *  *  *  *  *  *  * \n";
-//      tmp += "P6 *  *  *  *  *  *  *  *  * \n";
-//      tmp += "P7+FU+FU+FU+FU+FU+FU+FU+FU+FU\n";
-//      tmp += "P8 * +KA *  *  *  *  * +HI * \n";
-//      tmp += "P9+KY+KE+GI+KI+OU+KI+GI+KE+KY\n";
-//      return tmp;
-//    }
-
     public static const HAND:int = 100;
-    public static const HAND_OU:int = HAND+0;
-    public static const HAND_HI:int = HAND+1;
-    public static const HAND_KA:int = HAND+2;
-    public static const HAND_KI:int = HAND+3;
-    public static const HAND_GI:int = HAND+4;
-    public static const HAND_KE:int = HAND+5;
-    public static const HAND_KY:int = HAND+6;
-    public static const HAND_FU:int = HAND+7;
+//    public static const HAND_OU:int = HAND+0;
+//    public static const HAND_HI:int = HAND+1;
+//    public static const HAND_KA:int = HAND+2;
+//    public static const HAND_KI:int = HAND+3;
+//    public static const HAND_GI:int = HAND+4;
+//    public static const HAND_KE:int = HAND+5;
+//    public static const HAND_KY:int = HAND+6;
+//    public static const HAND_FU:int = HAND+7;
 
-		public function Kyokumen(kyokumen_str:String, promoteY1:int = 2, promoteY2:int = 6):void {
+		public function Kyokumen(kyokumen_str:String, promoteY1:int = 3, promoteY2:int = 8):void {
 			initialPositionStr = kyokumen_str;
 			_promoteY1 = promoteY1;
 			_promoteY2 = promoteY2;
 			this._turn = SENTE;
-			this._ban = new Array(9);
-			for (var i:int; i < 9; i++ ) {
-				_ban[i] = new Array(9);
+			this._ban = new Array(12);
+			for (var i:int; i < 12; i++ ) {
+				_ban[i] = new Array(12);
 			}
 			_komadai = new Array(2);
-			_impasseStatus = new Array(2);
 			for (i = 0; i < 2; i++) {
 				_komadai[i] = new Komadai();
-				_impasseStatus[i] = new Object();
-				_impasseStatus[i] = { 'entered':false, 'pieces':0, 'points':0 };
 			}
 			loadFromString(initialPositionStr);
 			this._last_to = new Point(0, 0);
@@ -79,9 +63,9 @@ package  {
 	  } else {
 		  _turn = GOTE;
 	  }
-      for(var y:int=0;y<9;y++){
+      for(var y:int=0;y<12;y++){
         var line:String = lines[y+1].substr(2);
-        for(var x:int=0;x<9;x++){
+        for(var x:int=0;x<12;x++){
           var koma_str:String = line.slice(x*3,x*3+3)
           if(koma_str != " * "){
             var owner:int = koma_str.charAt(0) == '+' ? SENTE : GOTE
@@ -94,8 +78,8 @@ package  {
       }
 	  _komadai[0].clearKoma();
 	  _komadai[1].clearKoma();
-      if(lines.length > 10){
-        for(var i:int = 9; i< lines.length; i++){
+      if(lines.length > 13){
+        for(var i:int = 12; i< lines.length; i++){
           var match:Array = lines[i].match(/P([+-])00(.*)/);
           if(match != null){
             owner = match[1] == "+" ? SENTE : GOTE
@@ -117,9 +101,9 @@ package  {
 		} else {
 			str += "P0-\n";
 		}
-		for (var y:int = 0; y < 9; y++) {
-			var line:String = "P" + (y + 1);
-			for (var x:int = 0; x < 9; x++) {
+		for (var y:int = 0; y < 12; y++) {
+			var line:String = "P" + (y + 1).toString(16);
+			for (var x:int = 0; x < 12; x++) {
 				if (_ban[x][y]) {
 					if (_ban[x][y].ownerPlayer == SENTE) {
 						line += "+";
@@ -133,51 +117,6 @@ package  {
 			}
 			str += line + "\n";
 		}
-		for (y = 0; y < 2; y++) {
-			line = "P" + (y == SENTE ? "+" : "-");
-			for (x = 0; x < 8; x++) {
-				if (_komadai[y].getNumOfKoma(x) > 0) {
-					for (var i:int = 0; i < _komadai[y].getNumOfKoma(x); i++) {
-						line += "00" + koma_names[x];
-					}
-				}
-			}
-			if (line.length > 2) str += line + "\n";
-		}
-		return str;
-	}
-	
-	public function toSFEN():String {
-		var str:String = "";
-		var n:int = 0;
-		for (var y:int = 0; y < 9; y++) {
-			for (var x:int = 0; x < 9; x++) {
-				if (_ban[x][y]) {
-					if (n > 0) str += n;
-					n = 0;
-					if (_ban[x][y].ownerPlayer == SENTE) {
-						str += koma_sfen_names[_ban[x][y].type];
-					} else {
-						str += koma_sfen_names[_ban[x][y].type].toLowerCase();
-					}
-				} else {
-					n += 1;
-				}
-			}
-			if (n > 0) str += n;
-			n = 0;
-			if (y < 8) str += "/";
-		}
-		str += "%20" + (turn == SENTE ? "b" : "w");
-		var hand:String = ""
-		for (var j:int = 0; j < 2;j++) {
-			for (var i:int = 0; i < 8; i++) {
-				n = _komadai[j].getNumOfKoma(i);
-				if (n > 0) hand += (n > 1 ? n : "") + (j == 0 ? koma_sfen_names[i] : koma_sfen_names[i].toLowerCase());
-			}
-		}
-		if (hand == "") hand = "-";
-		str += "%20" + hand;
 		return str;
 	}
 		
@@ -191,6 +130,14 @@ package  {
 		
 		public function set turn(v:int):void {
 			this._turn = v;
+		}
+		
+		public function get half_move():Boolean {
+			return this._half_move;
+		}
+		
+		public function get first_move():Movement {
+			return this._first_move;
 		}
 		
 		public function get impasseStatus():Array {
@@ -213,69 +160,25 @@ package  {
       _ban[p.x][p.y] = koma;
     }
 		
-//		public function validateMovement(mv:Movement):Boolean {
-//			var koma:Koma = _ban[mv.from.x - 1][mv.from.y - 1]; 
-//			if (!koma) {
-//				return false;
-//			}
-//
-//			//invalid if from and to are the same.
-//			if (mv.from.x == mv.to.x && mv.from.y == mv.to.y) {
-//				return false;
-//			}
-//			
-//			//invalid if capturing own piece
-//			if (Koma(getKomaAt(mv.to)) && Koma(getKomaAt(mv.to)).ownerPlayer == mv.turn) {
-//				return false;
-//			}
-//			
-//			return true;
-//		}
-		
 		public function canPromote(from:Point,to:Point):Boolean {
 			to = translateHumanCoordinates(to);
-			var koma:Koma; 
+			var koma:Koma;
 			if (from.x > HAND) return false;
 			from = translateHumanCoordinates(from);
 			koma = getKomaAt(from);
 			if(koma.isPromoted()) return false;
-			if (koma.type == Koma.OU || koma.type == Koma.KI) return false;
+			if (koma.type == Koma.OU || koma.type == Koma.LI || koma.type == Koma.HN) return false;
 			if(koma.ownerPlayer == SENTE){
-				if(from.y <= _promoteY1 || to.y <= _promoteY1){
-					return true;
+				if (from.y > _promoteY1 && to.y <= _promoteY1) return true;
+				else if ((koma.type == Koma.FU || koma.type == Koma.KY) && to.y == 0) return true;
+				else if (from.y <= _promoteY1 || to.y <= _promoteY1){
+					if (getKomaAt(to)) return true;
 				}
 			} else {
-				if(from.y >= _promoteY2 || to.y >= _promoteY2){
-					return true;
-				}
-			}
-			return false;
-		}
-		
-		public function mustPromote(from:Point, to:Point):Boolean {
-			from = translateHumanCoordinates(from);
-			to = translateHumanCoordinates(to);
-			var koma:Koma = getKomaAt(from);
-			if (koma.type == Koma.FU || koma.type == Koma.KY) {
-				if (koma.ownerPlayer == SENTE && to.y == 0) return true;
-				if (koma.ownerPlayer == GOTE && to.y == 8) return true;
-			} else if (koma.type == Koma.KE) {
-				if (koma.ownerPlayer == SENTE && to.y <= 1) return true;
-				if (koma.ownerPlayer == GOTE && to.y >= 7) return true;
-			}
-			return false;
-		}
-		
-		public function isNifu(from:Point, to:Point):Boolean {
-			if (from.x == HAND_FU) {
-				to = translateHumanCoordinates(to);
-				for (var i:int = 0; i < 9; i++) {
-					var koma:Koma;
-					if ((koma = getKomaAt(new Point(to.x, i)))) {
-						if (koma.type == Koma.FU && koma.ownerPlayer == _turn) {
-							return true;
-						}
-					}
+				if (from.y < _promoteY2 && to.y >= _promoteY2) return true;
+				else if ((koma.type == Koma.FU || koma.type == Koma.KY) && to.y == 11) return true;
+				else if (from.y >= _promoteY2 || to.y >= _promoteY2){
+					if (getKomaAt(to)) return true;
 				}
 			}
 			return false;
@@ -285,48 +188,87 @@ package  {
 			if(from.x > HAND) return false;
 			from = translateHumanCoordinates(from);
 			to = translateHumanCoordinates(to);
-//			var koma:Koma; 
-//	        koma = getKomaAt(from);
+	        var to_koma:Koma = getKomaAt(to);
+			if (to_koma) {
+				if (to_koma.ownerPlayer == koma.ownerPlayer) return true;
+			}
 	        var dx:Number = to.x - from.x;
 	        var dy:Number = koma.ownerPlayer == SENTE ? to.y - from.y : from.y - to.y;
-	        switch (koma.type){
-	        	case Koma.OU:
-				case Koma.OU+Koma.PROMOTE:
-	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-	        		break;
-	        	case Koma.KI:
-	        	case Koma.GI+Koma.PROMOTE:
-	        	case Koma.KE+Koma.PROMOTE:
-	        	case Koma.KY+Koma.PROMOTE:
-	        	case Koma.FU+Koma.PROMOTE:
-	        		if (Math.abs(dx) == 1 && dy == 1) return true;
-	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-	        		break;
-	        	case Koma.GI:
-	        		if (Math.abs(dx) == 1 && dy == 0) return true;
-	        		if (dx == 0 && dy == 1) return true;
-	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-					break;
-				case Koma.HI+Koma.PROMOTE:
-					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
-	        	case Koma.HI:
+	        switch (koma.type) {
+				case Koma.KO+Koma.PROMOTE:
 					if (dx == 0) {
 						if (Math.abs(dy) == 1) return false;
 						for (var i:int = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
 							if (getKomaAt(new Point(from.x, i))) return true;
 						}
 						return false;
-					} else if (dy == 0) {
+					}
+				case Koma.SZ:
+				case Koma.CN+Koma.PROMOTE:
+					if (dx == 0 && dy == 1) return true;
+	        	case Koma.OU:
+				case Koma.OU + Koma.PROMOTE:
+				case Koma.SZ+Koma.PROMOTE:
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        		break;
+					
+				case Koma.KO:
+					if (dx == 0 && dy == -1) return true;
+					if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) return false;
+					break;
+					
+				case Koma.HY:
+					if (Math.abs(dx) == 1 && dy == 0) return true;
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        		break;
+					
+	        	case Koma.KI:
+	        	case Koma.FU+Koma.PROMOTE:
+	        		if (Math.abs(dx) == 1 && dy == 1) return true;
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        		break;
+					
+	        	case Koma.GI:
+	        		if (Math.abs(dx) == 1 && dy == 0) return true;
+	        		if (dx == 0 && dy == 1) return true;
+	        		if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+					break;
+					
+	        	case Koma.DO:
+	        		if (Math.abs(dx) <= 1 && dy == -1) return false;
+	        		if (dx == 0 && dy == 1) return false;
+					break;
+					
+				case Koma.RY:
+				case Koma.HI+Koma.PROMOTE:
+					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
+	        	case Koma.HI:
+				case Koma.KI + Koma.PROMOTE:
+					if (dy == 0) {
 						if (Math.abs(dx) == 1) return false;
 						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
 							if (getKomaAt(new Point(i, from.y))) return true;
 						}
 						return false;
 					}
+				case Koma.SG:
+				case Koma.GI + Koma.PROMOTE:
+					if (Math.abs(dx) == 1 && dy == 0) return false;
+				case Koma.HE:
+					if (dx == 0) {
+						if (Math.abs(dy) == 1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
 	        		break;
+					
+				case Koma.UM:
 				case Koma.KA + Koma.PROMOTE:
 					if (Math.abs(dx) <= 1 && Math.abs(dy) <=1) return false;
 	        	case Koma.KA:
+				case Koma.HY+Koma.PROMOTE:
 	        		if (Math.abs(dx) == Math.abs(dy)) {
 						if (Math.abs(dx) == 1) return false;
 						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
@@ -335,9 +277,22 @@ package  {
 						return false;
 					}
 	        		break;
+					
+				case Koma.OG:
+				case Koma.DO+Koma.PROMOTE:
+					if (dy == 0) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
+							if (getKomaAt(new Point(i, from.y))) return true;
+						}
+						return false;
+					}
+				case Koma.CN:
+					if (dx == 0 && dy == 1) return false;
 	        	case Koma.FU:
 	        		if (dx == 0 && dy == -1) return false;
 	        		break;
+					
 	        	case Koma.KY:
 	        		if (dx == 0 && dy < 0) {
 						if (dy == -1) return false;
@@ -347,11 +302,124 @@ package  {
 						return false;
 					}
 	        		break;
-	        	case Koma.KE:
-	        		if (Math.abs(dx) == 1 && dy == -2) return false;
+					
+				case Koma.HN:
+				case Koma.HO+Koma.PROMOTE:
+	        		if (dx == 0 && dy < 0) {
+						if (dy == -1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
+				case Koma.UM+Koma.PROMOTE:
+					if (dx == 0 && (dy == -1 || dy == -2)) return false;
+	        		if (dx == 0 && dy > 0) {
+						if (dy == 1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
+				case Koma.OG+Koma.PROMOTE:
+					if (dy == 0) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
+							if (getKomaAt(new Point(i, from.y))) return true;
+						}
+						return false;
+					}
+	        		if (Math.abs(dx) == Math.abs(dy)) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
+							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
+						}
+						return false;
+					}
+					break;
+					
+				case Koma.RY + Koma.PROMOTE:
+					if (Math.abs(dx) == 1 && dy == -1 || Math.abs(dx) == 2 && dy == -2) return false;
+					if (dy == 0) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = Math.min(from.x, to.x) + 1; i <= Math.max(from.x, to.x) - 1; i++) {
+							if (getKomaAt(new Point(i, from.y))) return true;
+						}
+						return false;
+					}
+				case Koma.HE + Koma.PROMOTE:
+					if (dx == 0) {
+						if (Math.abs(dy) == 1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
+	        		if (Math.abs(dx) == dy) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
+							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
+						}
+						return false;
+					}
+	        		break;
+					
+				case Koma.SG+Koma.PROMOTE:
+	        		if (Math.abs(dx) == dy) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
+							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
+						}
+						return false;
+					}
+				case Koma.KY + Koma.PROMOTE:
+	        		if (- Math.abs(dx) == dy) {
+						if (Math.abs(dx) == 1) return false;
+						for (i = 1; i <= int(Math.abs(dx)) - 1; i++) {
+							if (getKomaAt(new Point(from.x + (dx > 0 ? i : - i), from.y + (to.y > from.y ? i : - i)))) return true;
+						}
+						return false;
+					}
+					if (dx == 0) {
+						if (Math.abs(dy) == 1) return false;
+						for (i = Math.min(from.y, to.y) + 1; i <= Math.max(from.y, to.y) - 1; i++) {
+							if (getKomaAt(new Point(from.x, i))) return true;
+						}
+						return false;
+					}
+					break;
+					
+				case Koma.LI:
+				case Koma.KR + Koma.PROMOTE:
+					if (Math.abs(dx) <= 2 && Math.abs(dy) <= 2) return false;
+					break;
+					
+				case Koma.KR:
+					if (Math.abs(dx) == 1 && Math.abs(dy) == 1) return false;
+					if (dx == 0 && Math.abs(dy) == 2) return false;
+					if (dy == 0 && Math.abs(dx) == 2) return false;
+					break;
+					
+				case Koma.HO:
+					if (Math.abs(dx) == 2 && Math.abs(dy) == 2) return false;
+					if (dx == 0 && Math.abs(dy) == 1) return false;
+					if (dy == 0 && Math.abs(dx) == 1) return false;
+					break;
+					
 				default:
 	        }
 	        return true;
+		}
+		
+		public function isSecondMovableGrids(x:int, y:int):Boolean {
+			var p:Point = new Point(x, y);
+			p = translateHumanCoordinates(p);
+			if (_first_move.type == Koma.LI || _first_move.type == Koma.KR + Koma.PROMOTE) {
+				if (Math.abs(p.x - _first_move.to.x) <= 1 && Math.abs(p.y - _first_move.to.y) <= 1) return true;
+			} else if (_first_move.type == Koma.UM + Koma.PROMOTE || _first_move.type == Koma.RY + Koma.PROMOTE) {
+				if ((p.x == _first_move.from.x && p.y == _first_move.from.y) || (p.x == _first_move.to.x && p.y == _first_move.to.y) || (p.x == 2 * _first_move.to.x - _first_move.from.x && p.y == 2 * _first_move.to.y - _first_move.from.y)) return true;
+			}
+			return false;
 		}
 		
 		public function isSoundDouble(to:Point):Boolean {
@@ -369,7 +437,7 @@ package  {
 		}
 
     public static function translateHumanCoordinates(p:Point):Point{
-      return new Point(9-p.x,p.y-1);
+      return new Point(12-p.x,p.y-1);
     }
 
     public function generateMovementFromCoordinates(from:Point,to:Point,promote:Boolean):Movement{
@@ -381,7 +449,7 @@ package  {
         koma = getKomaAt(from);
       }
       to = translateHumanCoordinates(to);
-      var capture:Boolean = getKomaAt(to) != null
+      var capture:Boolean = ((to.x != from.x || to.y != from.y) && getKomaAt(to) != null)
 	  var mv:Movement = new Movement();
 	  mv.setFromKyokumen(_turn, from, to, koma.type, promote, capture, _last_to);
 	  return mv;
@@ -390,16 +458,16 @@ package  {
     public function generateMovementFromString(moveStr:String):Movement {
 	  if (!moveStr || moveStr.charAt(0) == "%") return null;
 	  var turn:int = moveStr.charAt(0) == "+" ? Kyokumen.SENTE : Kyokumen.GOTE;
-      var from:Point = new Point(parseInt(moveStr.charAt(1)),parseInt(moveStr.charAt(2)));
+      var from:Point = new Point(parseInt(moveStr.charAt(1), 16), parseInt(moveStr.charAt(2), 16));
       if(from.x == 0){
         from.x = HAND;
         from.y = HAND;
       } else {
         from = translateHumanCoordinates(from);
       }
-      var to:Point = new Point(parseInt(moveStr.charAt(3)),parseInt(moveStr.charAt(4)));
+      var to:Point = new Point(parseInt(moveStr.charAt(3),16),parseInt(moveStr.charAt(4),16));
       to = translateHumanCoordinates(to);
-      var capture:Boolean = getKomaAt(to) != null
+      var capture:Boolean = ((to.x != from.x || to.y != from.y) && getKomaAt(to) != null)
 	  var match:Array = moveStr.match(/,T([0-9]*)/);
 	  var time:int = parseInt(match[1]);
 	  if (from.x != HAND){
@@ -416,7 +484,7 @@ package  {
 				_komadai[mv.turn].removeKoma(mv.type);
 			}
 			//put piece into hand if capturing.
-			if (getKomaAt(mv.to) != null) {
+			if ((mv.to.x != mv.from.x || mv.to.y != mv.from.y) && getKomaAt(mv.to) != null) {
 				if(mv.from.x == HAND){
 					return; //illegal
 				} else {
@@ -431,6 +499,29 @@ package  {
 			}
 			setKomaAt(mv.to, mv.getResultKoma());
 			_last_to = mv.to;
+			if (_half_move) {
+				_half_move = false;
+			} else {
+				if (mv.type == Koma.LI || mv.type == Koma.KR + Koma.PROMOTE) {
+					if (Math.abs(mv.to.x - mv.from.x) <= 1 && Math.abs(mv.to.y - mv.from.y) <= 1) {
+						_half_move = true;
+						_first_move = mv;
+						return;
+					}
+				} else if (mv.type == Koma.UM + Koma.PROMOTE) {
+					if (mv.to.x == mv.from.x && (mv.to.y - mv.from.y == (_turn == SENTE ? -1 : 1))) {
+						_half_move = true;
+						_first_move = mv;
+						return;
+					}
+				} else if (mv.type == Koma.RY + Koma.PROMOTE) {
+					if (Math.abs(mv.to.x - mv.from.x) == 1 && (mv.to.y - mv.from.y == (_turn == SENTE ? -1 : 1))) {
+						_half_move = true;
+						_first_move = mv;
+						return;
+					}
+				}
+			}
 			_turn = _turn == SENTE ? GOTE : SENTE;
 		}
 
@@ -444,64 +535,6 @@ package  {
 			}
 			_komadai[turn].addKoma(koma);
 		}
-		
-		public function calcImpasse():void {
-			var turn:int;
-			var total_points:int = 0;
-			for (turn = 0; turn < 2; turn++) {
-				_impasseStatus[turn].entered = false;
-				_impasseStatus[turn].pieces = 0;
-				_impasseStatus[turn].points = 0;
-				for (var i:int = 0; i < 8; i++) {
-					_impasseStatus[turn].points += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
-				}
-				total_points += _impasseStatus[turn].points;
-			}
-			for (var y:int = 0; y < 9; y++) {
-				for (var x:int = 0; x < 9; x++) {
-					if (_ban[x][y]) {
-						total_points += koma_impasse_points[_ban[x][y].type];
-						if (y <= _promoteY1) {
-							turn = SENTE;
-						} else if (y >= _promoteY2) {
-							turn = GOTE;
-						} else {
-							continue;
-						}
-						if (_ban[x][y].ownerPlayer == turn) {
-							_impasseStatus[turn].pieces += 1;
-							_impasseStatus[turn].points += koma_impasse_points[_ban[x][y].type];
-						}
-					}
-				}
-			}
-			_impasseStatus[GOTE].points += ALL_POINTS - total_points;
-			for (turn = 0; turn < 2; turn++) {
-				if (_impasseStatus[turn].points >= koma_impasse_points[0]) {
-					_impasseStatus[turn].points -= koma_impasse_points[0];
-					_impasseStatus[turn].pieces -= 1;
-					_impasseStatus[turn].entered = true;
-				}
-			}
-		}
-		
-//		public function calcImpasse(turn:int):int {
-//			var n:int = 0;
-//			for (var y:int = 0; y < 9; y++) {
-//				if (turn == SENTE) {
-//					if (y > _promoteY1) continue;
-//				} else {
-//					if (y < _promoteY2) continue;
-//				}
-//				for (var x:int = 0; x < 9; x++) {
-//						if (_ban[x][y] && _ban[x][y].ownerPlayer == turn) n += koma_impasse_points[_ban[x][y].type];
-//				}
-//			}
-//			for (var i:int = 0; i < 8; i++) {
-//				n += _komadai[turn].getNumOfKoma(i) * koma_impasse_points[i];
-//			}
-//			return n;
-//		}
 
 	}
 	

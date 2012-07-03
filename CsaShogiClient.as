@@ -294,7 +294,7 @@ package{
 			trace("Response: " + _buffer + "***");
 			var lines:Array = _buffer.split("\n");
 			if (_buffer.match(/(^##\[MONITOR2\]|^##\[LIST\]|^##\[WHO\]|^##\[RECONNECT\])/)) {
-				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|[-+][0-9]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
+				if (!_buffer.match(/(\+OK$|##\[CHAT\].+$|##\[GAMECHAT\].+$|##\[PRIVATECHAT\].+$|START\:.+$|[-+][0-9a-c]{4}[A-Z]{2},T\d+$|Game_Summary$)/)) {
 					trace("buffer doesn't deserve dispatching.");
 					return;
 				}
@@ -312,7 +312,7 @@ package{
             _buffer_response(GAME_SUMMARY, match[1]);
 		  } else if ((match = line.match(/^To_Move\:([+-])/))) {
 			  _buffer_response(GAME_SUMMARY, "P0" + match[1]);
-		  } else if (line.match(/^P[0-9\+\-]/)) {
+		  } else if (line.match(/^P[0-9a-c\+\-]/)) {
 			  _buffer_response(GAME_SUMMARY, line);
           } else if(line == "END Game_Summary"){
             trace("state change to agree_wating");
@@ -327,7 +327,7 @@ package{
 		  dispatchEvent(new ServerMessageEvent(PRIVATECHAT, line + "\n"));
 		} else if(line.match(/^##\[CHAT\]/)){
           dispatchEvent(new ServerMessageEvent(CHAT,line + "\n"));
-        } else if(line.match(/^([-+][0-9]{4}[A-Z]{2}|%TORYO),T/)){
+        } else if(line.match(/^([-+][0-9a-c]{4}[A-Z]{2}|%TORYO),T/)){
           dispatchEvent(new ServerMessageEvent(MOVE, line));
 		} else if ((match = line.match(/^##\[LOBBY_IN\](.*)$/))) {
 		  dispatchEvent(new ServerMessageEvent(LOBBY_IN, match[1]));
@@ -448,7 +448,7 @@ package{
             case STATE_START_WAITING:
               break;
             case STATE_GAME:
-              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT)/))){
+              if((match = line.match(/^#(WIN|LOSE|DRAW|RESIGN|TIME_UP|ILLEGAL_MOVE|SENNICHITE|DISCONNECT|CATCH)/))){
                 _buffer_response(GAME_END,line);
                 if(match[1] == "WIN" || match[1] == "LOSE" || match[1] == "DRAW"){
                   trace("state change to connected");

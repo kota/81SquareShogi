@@ -118,11 +118,11 @@
 			var i:int;
 			var j:int;
 			if (myTurn == Kyokumen.SENTE) {
-				i = 9 - p.x;
+				i = 12 - p.x;
 				j = p.y - 1;
 			} else {
 				i = p.x - 1;
-				j = 9 - p.y;
+				j = 12 - p.y;
 			}
 			return new Point(Board.BAN_LEFT_MARGIN + Board.BAN_EDGE_PADDING + (i + 0.5) * Board.KOMA_WIDTH,
 								   Board.BAN_TOP_MARGIN + Board.BAN_EDGE_PADDING + (j + 0.5) * Board.KOMA_HEIGHT);

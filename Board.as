@@ -31,8 +31,8 @@ package  {
 
   public class Board extends Canvas {
     
-    public static const BAN_WIDTH:int = 410;
-    public static const BAN_HEIGHT:int = 454;
+    public static const BAN_WIDTH:int = 539;
+    public static const BAN_HEIGHT:int = 598;
     public static const BAN_LEFT_MARGIN:int = 185;
 	public static const BAN_TOP_MARGIN:int = 10;
 	public static const BAN_EDGE_PADDING:int = 10;
@@ -40,9 +40,9 @@ package  {
     public static const KOMA_HEIGHT:int = 48;
     public static const KOMADAI_WIDTH:int = 170;
     public static const KOMADAI_HEIGHT:int = 200;
-	public static const MY_HAND_X:int = BAN_LEFT_MARGIN + BAN_WIDTH + 5;
+	public static const MY_HAND_X:int = 0;
 	public static const MY_HAND_Y:int = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT;
-	public static const HIS_HAND_X:int = 10;
+	public static const HIS_HAND_X:int = MY_HAND_X;
 	public static const HIS_HAND_Y:int = 10;
 	public static const MAX_ARROWS:int = 8;
 	public static const ARROWS_SELF:int = 0;
@@ -84,15 +84,8 @@ package  {
 	private var Medal:Class;
 
 	public var pieceSets:Array = new Array(
-		new PieceSet("Ryoko1.swf", "Ryoko (1-kanji)"),
-		new PieceSet("Kinki.swf", "Kinki (2-kanji)"),
-		new PieceSet("Hidetchi.swf", "Hidetchi's Internationalized"),
-		new PieceSet("Alphabet.swf", "Hidetchi's Alphabet"),
-		new PieceSet("Dobutsu_v2.swf", "Dobutsu by pieco"),
-		new PieceSet("Kingyo.swf", "Goldfish Aquarium by Yoko Ikeda"),
-		new PieceSet("BlindMiddle.swf", "Middle"),
-		new PieceSet("BlindHard.swf", "Hard"),
-		new PieceSet("BlindExtreme.swf", "Extreme")
+		new PieceSet("ChuShogi1.swf", "Ryoko (1-kanji)"),
+		new PieceSet("ChuShogi1.swf", "Kinki (2-kanji)")
 		);
 
 	[Embed(source = "/sound/piece.mp3")]
@@ -159,11 +152,12 @@ package  {
 	private var _centerX:int;
 	private var _centerY:int;
 	private var _hoverTimer:Timer = new Timer(100, 1);
+	private var _secondMoveHighlighted:Boolean = false;
 	public var kid:int;
     public var piece_type:int = 0;
 	public var piece_type34:int = 0;
 	public var hold_piece:Boolean = true;
-	public var highlight_movable:Boolean = false;
+	public var highlight_movable:Boolean = true;
 	public var gameType:String;
 	public var superior:int = Kyokumen.SENTE;
     public var piece_sound_play:Boolean = true;
@@ -178,7 +172,7 @@ package  {
 	public var since_last_move:int = 0;
 	public var studyOn:Boolean = false;
 	public var rematch:Array = new Array(2);
-	public var sendHover:Boolean = false;
+	public var sendHover:Boolean = true;
 	public var isRelay:Boolean = false;
 
 	private var _time_sente:int;
@@ -192,9 +186,9 @@ package  {
 	  rmenu.addEventListener(ContextMenuEvent.MENU_SELECT, _rightClick);
 	  this.contextMenu = rmenu;
       super();
-      _cells = new Array(9);
-      for (var i:int; i < 9; i++ ) {
-        _cells[i] = new Array(9);
+      _cells = new Array(12);
+      for (var i:int; i < 12; i++ ) {
+        _cells[i] = new Array(12);
       }
       
       this.width = BAN_WIDTH;
@@ -221,19 +215,10 @@ package  {
       _board_coord_image.x = BAN_LEFT_MARGIN;
       _board_coord_image.y = BAN_TOP_MARGIN;
       
-      _board_shand_image.source = board_shand;
-      _board_shand_image.x = BAN_LEFT_MARGIN + BAN_WIDTH + 5
-      _board_shand_image.y = BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT
-      _board_ghand_image.source = board_ghand;
-      _board_ghand_image.x = 10
-      _board_ghand_image.y = 10
-      
       addChild(_board_bg_image);
       addChild(_board_back_image);
       addChild(_board_masu_image);
       addChild(_board_coord_image);
-      addChild(_board_shand_image);
-      addChild(_board_ghand_image);
 	
       handBoxes = new Array(2);
 	  infoBoxes = new Array(2);
@@ -246,7 +231,7 @@ package  {
 	  _board_coord_classes = new Array(board_scoord_e, board_gcoord_e);
       for(i=0;i<2;i++){
         var hand:Canvas = new Canvas();
-        
+		
         hand.width = KOMADAI_WIDTH;
         hand.height = KOMADAI_HEIGHT;
         hand.x = i == 0 ? MY_HAND_X : HIS_HAND_X;
@@ -258,15 +243,15 @@ package  {
  		var timer:GameTimer = new GameTimer();
 		timer.addEventListener(GameTimer.CHECK_TIMEOUT, _checkTimeout);
 		timer.addEventListener(GameTimer.TIMER_LAG, _checkTimerLag);
-		timer.x = i == 0 ? hand.x + 6 : hand.x + KOMADAI_WIDTH / 2 - 19;
-		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT/2 - 15 ;
+		timer.x = 80;
+		timer.y = BAN_TOP_MARGIN + BAN_HEIGHT / 2 + (i == 0 ? 55 : -80);
 		timers[i] = timer;
 		addChild(timer);
 		var flag_loader:SWFLoader = new SWFLoader();
 		flag_loader.width = 56;
 		flag_loader.height = 44;
-		flag_loader.x = hand.x + (i == 0 ? KOMADAI_WIDTH / 2 +28 : 3);
-		flag_loader.y = timer.y - (i == 0 ? 8 : 5);
+		flag_loader.x = 15;
+		flag_loader.y = timer.y - 5;
 		_player_flags[i] = flag_loader;
 		addChild(flag_loader);
 
@@ -301,8 +286,8 @@ package  {
 		i_box.verticalScrollPolicy = "off";
         i_box.width = KOMADAI_WIDTH - 10
         i_box.height = KOMADAI_HEIGHT - 10
-        i_box.x = i == 0 ? hand.x + 10 : hand.x
-        i_box.y = i == 0 ? BAN_TOP_MARGIN + 6 : BAN_TOP_MARGIN + hand.height + 57 ;
+        i_box.x = 10;
+        i_box.y = i == 0 ? BAN_TOP_MARGIN + BAN_HEIGHT - KOMADAI_HEIGHT + 10 : BAN_TOP_MARGIN;
         i_box.addChild(turn_symbol);
         i_box.addChild(name_label);
         i_box.addChild(info_label);
@@ -322,22 +307,22 @@ package  {
 		_board_back_image.source = pieceSets[piece_type].boardBackClass ? pieceSets[piece_type].boardBackClass : board_back;
 		_board_masu_image.source = pieceSets[piece_type].boardMasuClass ? pieceSets[piece_type].boardMasuClass : board_masu;
 		_board_coord_image.source = pieceSets[piece_type].getCoordClass(0) ? pieceSets[piece_type].getCoordClass(_my_turn == Kyokumen.SENTE ? 0 : 1) : _board_coord_classes[_my_turn == Kyokumen.SENTE ? 0 : 1];
-      for (var i:int = 0; i < 9; i++ ) {
-        for (var j:int = 0; j < 9;j++ ){
+      for (var i:int = 0; i < 12; i++ ) {
+        for (var j:int = 0; j < 12;j++ ){
           if(_cells[i][j] != null){
             removeChild(_cells[i][j]);
           }
         }
       }
-      for (i = 0; i < 9; i++ ) {
-        for (j = 0; j < 9;j++ ){
+      for (i = 0; i < 12; i++ ) {
+        for (j = 0; j < 12;j++ ){
           var square:Square;
           if(_my_turn == Kyokumen.SENTE){
-            square = new Square(9-j,i+1);
+            square = new Square(12-j,i+1);
             _cells[i][j] = square;
           } else {
-            square = new Square(10-(9-j),10-(i+1));
-            _cells[8-i][8-j] = square;
+            square = new Square(13-(12-j),13-(i+1));
+            _cells[11-i][11-j] = square;
           }
 		  if (gameType.match(/mini$/)) {
 			  if (i <= 1 || i >= 7 || j <= 1 || j >= 7) square.dead = true;
@@ -386,8 +371,8 @@ package  {
 
     public function setPosition(pos:Kyokumen):void {
       _position = pos
-      for(var y:int=0;y<9;y++){
-        for(var x:int=0;x<9;x++){
+      for(var y:int=0;y<12;y++){
+        for(var x:int=0;x<12;x++){
           var koma:Koma = _position.getKomaAt(new Point(x,y));
           if(koma != null){
             var image_index:int = koma.type;// + (koma.isPromoted() ? 8 : 0)
@@ -401,22 +386,6 @@ package  {
       }
       handBoxes[0].removeAllChildren();
       handBoxes[1].removeAllChildren();
-      for(var i:int=0;i<2;i++){
-        var hand:Komadai = _position.getKomadai(i);
-        for(var j:int=0;j<8;j++){
-          if(hand.getNumOfKoma(j) > 0){
-            for(var k:int=0;k<hand.getNumOfKoma(j);k++){
-              var handPiece:Square = new Square(Kyokumen.HAND + j, Kyokumen.HAND + j);
-			  handPiece.addEventListener(MouseEvent.MOUSE_DOWN, _handMouseDownHandler);
-              handPiece.addEventListener(MouseEvent.MOUSE_UP,_handMouseUpHandler);
-			  handPiece.source = pieceSets[piece_type].getPieceClass(i == _my_turn ? 0 : 1, j);
-              handPiece.x= 10 + (KOMADAI_WIDTH-20)/2 * ((j-1)%2) + (KOMADAI_WIDTH/(j == 7 ? 1.2 : 2)-35)*k/hand.getNumOfKoma(j)
-              handPiece.y= 10 + (KOMADAI_HEIGHT-20)/4 * int((j-1)/2)
-              handBoxes[i == _my_turn ? 0 : 1].addChild(handPiece);
-            }
-          }
-        }
-      }
     }
 
     public function makeMove(move:String, actual:Boolean, withSound:Boolean):void {
@@ -429,18 +398,18 @@ package  {
 			kifu_list_self.push(mv);
 		} else {
 			mv = _last_pos.generateMovementFromString(move);
-			if (!viewing) {
-				var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
-				var time:int = mv.time;
-				timers[running_timer].accumulateTime(time);
-				timers[running_timer].suspend();
-				timers[1 - running_timer].resume();
-			}
 			mv.n = kifu_list.length;
 			kifu_list.push(mv);
 		}
 		if (actual) {
 			_last_pos.move(mv);
+			if (!viewing) {
+				var running_timer:int = _my_turn == _last_pos.turn ? 0 : 1;
+				var time:int = mv.time;
+				if (!_last_pos.half_move) timers[1 - running_timer].accumulateTime(time);
+				timers[1 - running_timer].suspend();
+				timers[running_timer].resume();
+			}
 			if (piece_sound_play && withSound) isSoundDouble = _last_pos.isSoundDouble(mv.to);
 			if (onListen) _position.loadFromString(_last_pos.toString());
 		} else {
@@ -478,6 +447,27 @@ package  {
 			}
 		}
 	  }
+	  
+	public function highlightSecondMoves():void {
+		if (!_last_pos.half_move || _position.turn != _my_turn || !_in_game) return;		
+		  
+		_last_to_square.setStyle('backgroundColor', '0x33CCCC');
+		if (hold_piece) {
+			_last_to_square.hidePiece();
+			if (piece_type != 8) CursorManager.setCursor(Object(_last_to_square).source, 2, - Square.KOMA_WIDTH / 2, - Square.KOMA_HEIGHT / 2);
+		}
+		_grabPieceCallback(_last_to_square.coord_x, _last_to_square.coord_y);
+		_pieceGrab = true;
+		_selected_square = _last_to_square;
+		_from = new Point(_last_to_square.coord_x, _last_to_square.coord_y);
+
+		for (var i:int = 0; i < 12; i++) {
+			for (var j:int = 0; j < 12; j++) {
+				if (_last_pos.isSecondMovableGrids(_cells[i][j].coord_x, _cells[i][j].coord_y)) _cells[i][j].showMovable();
+			}
+		}
+		_secondMoveHighlighted = true;
+	}
 
     public function setMoveCallback(callback:Function):void{
       _playerMoveCallback = callback;
@@ -539,6 +529,7 @@ package  {
       _in_game = true;
 	  _client_timeout = false;
 	  studyOrigin = 0;
+	  _secondMoveHighlighted = false;
     }
 	
 	private function _arrangeInfos():void {
@@ -581,7 +572,7 @@ package  {
 		timers[0] = timers[1];
 		timers[1] = timer_tmp;
 		for (i = 0; i < 2; i++) {
-			timers[i].x = i == 0 ?  handBoxes[i].x + 6 : handBoxes[i].x + KOMADAI_WIDTH / 2 - 19;
+			timers[i].y = BAN_TOP_MARGIN + BAN_HEIGHT / 2 + (i == 0 ? 55 : -80);
 		}
 		_my_turn = 1 - _my_turn;
 		_arrangeInfos();
@@ -592,11 +583,11 @@ package  {
 		resetBoard();
 		setPosition(_position);
 		if (_last_to_square != null) {
-			_last_to_square = _cells[j_last_to - 1][9 - i_last_to];
+			_last_to_square = _cells[j_last_to - 1][12 - i_last_to];
 			_last_to_square.setStyle('backgroundColor', '0xCC3333');
 		}
 		if (_last_from_square != null) {
-			_last_from_square = _cells[j_last_from - 1][9 - i_last_from];
+			_last_from_square = _cells[j_last_from - 1][12 - i_last_from];
 			_last_from_square.setStyle('backgroundColor', '0xFF5555');
 		}
 		cancelSquareSelect();
@@ -629,6 +620,7 @@ package  {
     }
 	
 	private function _rightClick(e:ContextMenuEvent):void {
+		if (_secondMoveHighlighted) return;
 		cancelSquareSelect();
 		for each (var arr:Array in _cells) {
 			for each (var sq:Square in arr) sq.mouseOut();
@@ -642,7 +634,7 @@ package  {
 //		_hoverBoardCallback("OFF", "");
 		if (isPlayer && !post_game) _grabPieceCallback(0, 0);
 		CursorManager.removeCursor(CursorManager.currentCursorID);
-//		if (highlight_movable) _hideMovableSquares();
+		if (highlight_movable) _hideMovableSquares();
 		_pieceGrab = false;
         _from = null;
         _selected_square = null;
@@ -727,7 +719,7 @@ package  {
       if ((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[(.*)\] V2$/))) {
 		kid = parseInt(match[1]);
         _startMonitor(game_info, watch_game);
-      } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9]{4}.{2})$/))) {
+      } else if((match = game_info.split("\n")[0].match(/^##\[MONITOR2\]\[.*\] ([-+][0-9a-c]{4}.{2})$/))) {
         var time:String = game_info.split("\n")[1].match(/^##\[MONITOR2\]\[.*\] (T.*)$/)[1];
 		if (since_last_move > 0) {
 			timers[_my_turn == _last_pos.turn ? 0 : 1].accumulateTime(- since_last_move);
@@ -752,7 +744,7 @@ package  {
         var match:Array = line.match(/^##\[MONITOR2\]\[.*\] (.*)$/);
         if (match != null && match[1]) {
           var token:String = match[1];
-          if(token.match(/^([-+][0-9]{4}.{2}|%TORYO)$/)) {
+          if(token.match(/^([-+][0-9a-c]{4}.{2}|%TORYO)$/)) {
             var move_and_time:Object = new Object();
             move_and_time.move = token
             moves.push(move_and_time);
@@ -859,7 +851,7 @@ package  {
 		if (match != null) {
 			kyokumen_str += "P0" + match[1] + "\n";
 		} else {
-			match = line.match(/##\[MONITOR2\]\[.*\] (P[0-9+-].*)/);
+			match = line.match(/##\[MONITOR2\]\[.*\] (P[0-9a-c\+\-].*)/);
 			if(match != null) kyokumen_str += match[1] + "\n";
         }
       }
@@ -887,9 +879,6 @@ package  {
         var x:int = e.currentTarget.coord_x;
         var y:int = e.currentTarget.coord_y;
 		if (e.currentTarget.dead) return;
-//		if (gameType == "mini") {
-//			if (x <= 2 || x >= 8 || y <= 2 || y >= 8) return;
-//		}
         if(_from == null){
 		  if (_last_from_square != null) {
 			  _last_from_square.setStyle('backgroundColor', undefined);
@@ -907,11 +896,25 @@ package  {
 			_pieceGrab = true;
             _selected_square = Square(e.currentTarget);
             _from = new Point(x, y);
-//			if (highlight_movable) _showMovableSquares(_from);
+			if (highlight_movable) _showMovableSquares(_from);
           }
         } else {
-          koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x,y)));
-          if( koma != null && (koma.ownerPlayer == _position.turn || _from.x >= Kyokumen.HAND)){
+          koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(new Point(x, y)));
+		  if (_secondMoveHighlighted) {
+			if (_last_pos.isSecondMovableGrids(x, y)) {
+				_to = new Point(x, y);
+				if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+				_hideMovableSquares();
+				_secondMoveHighlighted = false;
+				_pieceGrab = false;
+				if (!_client_timeout){
+					_move_sent = true;
+					_playerMoveCallback(_from, _to, false);
+					if (isPlayer) timers[0].suspend();
+				}
+				_to = null;
+			}
+		  } else if (koma != null && (koma.ownerPlayer == _position.turn || _from.x >= Kyokumen.HAND)){
 			cancelSquareSelect();
           } else {
             _to = new Point(x,y);
@@ -921,33 +924,21 @@ package  {
             } else if (_position.canPromote(_from, _to)) {
 				if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
 				_pieceGrab = false;
-				if (_position.mustPromote(_from, _to)) {
-					if (!_client_timeout) {
-						if (isPlayer) timers[0].suspend();
-						_move_sent = true;
-						_playerMoveCallback(_from, _to, true);
-					}
-					_to = null;
-				} else {
-					var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
-					var cls:Class = pieceSets[piece_type].getPieceClass(_my_turn == _position.turn ? 0 : 1, koma_type + Koma.PROMOTE);
-					var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
-					alt.validateNow();
-					alt.width *= 0.8;
-					alt.x = mouseX - alt.width / 2 + 5;
-					alt.y = mouseY - 90;
-				}
-            } else if (isPlayer && (gameType == "nr" || (gameType == "hc" && _my_turn == Kyokumen.SENTE)) && _position.isNifu(_from, _to)) {
-					Alert.show("Nifu. (Double Pawn.)", "Illegal move!!");
-					cancelSquareSelect();
-					_to = null;
+				var koma_type:int = _position.getKomaAt(Kyokumen.translateHumanCoordinates(_from)).type;
+				var cls:Class = pieceSets[piece_type].getPieceClass(_my_turn == _position.turn ? 0 : 1, koma_type + Koma.PROMOTE);
+				var alt:Alert = Alert.show("Promote?", "", Alert.YES | Alert.NO, this, _promotionHandler, cls);
+				alt.validateNow();
+				alt.width *= 0.8;
+				alt.x = mouseX - alt.width / 2 + 5;
+				alt.y = mouseY - 90;
 			} else {
 			  if (hold_piece) CursorManager.removeCursor(CursorManager.currentCursorID);
+			  if (highlight_movable) _hideMovableSquares();
 			  _pieceGrab = false;
 			  if (!_client_timeout){
-				  if (isPlayer) timers[0].suspend();
 				  _move_sent = true;
 				  _playerMoveCallback(_from, _to, false);
+				  if (isPlayer) timers[0].pause();
 			  }
 			  _to = null;
             }
@@ -958,6 +949,7 @@ package  {
     }
 
     private function _promotionHandler(e:CloseEvent):void {
+	  if (highlight_movable) _hideMovableSquares();
       if (! _client_timeout) {
 		  timers[0].suspend();
 		  _move_sent = true;
@@ -1027,7 +1019,7 @@ package  {
 	}
 	
 	public function handleHover(x:int, y:int):void {
-		var sq:Square = _cells[y - 1][9 - x];
+		var sq:Square = _cells[y - 1][12 - x];
 		_hoverImage.x = sq.x;
 		_hoverImage.y = sq.y;
 		if (!contains(_hoverImage)) addChild(_hoverImage);
@@ -1057,7 +1049,7 @@ package  {
 				}
 			}
 		} else {
-			sq = _cells[y - 1][9 - x];
+			sq = _cells[y - 1][12 - x];
 			sq.setStyle('backgroundColor', '0x33CCCC');
 			_oppo_selected_square = sq;
 			_hoverImage.source = sq.source;
@@ -1100,7 +1092,7 @@ package  {
 				}
 			}
 		}
-		var pixel_to:Point = new Point(_cells[to.y - 1][9 - to.x].x + KOMA_WIDTH / 2, _cells[to.y - 1][9 - to.x].y + KOMA_HEIGHT / 2);
+		var pixel_to:Point = new Point(_cells[to.y - 1][12 - to.x].x + KOMA_WIDTH / 2, _cells[to.y - 1][12 - to.x].y + KOMA_HEIGHT / 2);
 		var arrow:BoardArrow = new BoardArrow(fromType, from, to , color, sender);
 		_arrows[target].push(arrow);
 		addChild(arrow);
@@ -1140,16 +1132,16 @@ package  {
 
 	private function _showMovableSquares(from:Point):void {
 		var koma:Koma = _position.getKomaAt(Kyokumen.translateHumanCoordinates(from));
-		for (var i:int = 0; i < 9; i++) {
-			for (var j:int = 0; j < 9; j++) {
+		for (var i:int = 0; i < 12; i++) {
+			for (var j:int = 0; j < 12; j++) {
 				if (!_position.cantMove(koma, from, new Point(_cells[i][j].coord_x, _cells[i][j].coord_y))) _cells[i][j].showMovable();
 			}
 		}
 	}
 	
 	private function _hideMovableSquares():void {
-		for (var i:int = 0; i < 9; i++) {
-			for (var j:int = 0; j < 9; j++) {
+		for (var i:int = 0; i < 12; i++) {
+			for (var j:int = 0; j < 12; j++) {
 				_cells[i][j].hideMovable();
 			}
 		}
