@@ -89,16 +89,6 @@
 //				if (parentApplication.serverName != "VENUS" && nonrated_handicap.selectedItem.data.match(/^va/)) return;
 				tournament = "";
 				break;
-			  case 5:
-				total = tournament_name.selectedItem.total;
-				byoyomi = tournament_name.selectedItem.byoyomi;
-				handicap = tournament_name.selectedItem.type;
-				tournament = "--" + tournament_name.selectedItem.code;
-				break;
-			  case 6:
-				dispatchEvent(new Event("study_room"));
-				PopUpManager.removePopUp(this);
-				return;
               default:
                 break;
             }
@@ -114,146 +104,17 @@
             nonrated_total.enabled = timeSetting.selectedValue == 4;
             nonrated_byoyomi.enabled = timeSetting.selectedValue == 4;
             nonrated_handicap.enabled = timeSetting.selectedValue == 4;
-			tournament_name.enabled = timeSetting.selectedValue == 5;
-			study_handicap.enabled = timeSetting.selectedValue == 6;
-			blackName.enabled = timeSetting.selectedValue == 6;
-			whiteName.enabled = timeSetting.selectedValue == 6;
-			loadKifuButton.enabled = timeSetting.selectedValue == 6;
-			kifuName.enabled = timeSetting.selectedValue == 6;
           }
 		  
-		  private function _loadKifu():void {
-			  kifuRef.addEventListener(Event.SELECT, _handleKifuSelect);
-			  kifuRef.addEventListener(Event.COMPLETE, _handleKifuComplete);
-			  kifuRef.browse();
-		  }
-		  
-		  private function _handleKifuSelect(e:Event):void {
-			  moves = new Array();
-			  kifuName.text = FileReference(e.target).name;
-			  FileReference(e.target).load();
-		  }
-		  
-		  private function _handleKifuComplete(e:Event):void {
-			  var hirate:Boolean = false;
-			  for each (var line:String in (String(FileReference(e.target).data)).split("\n")) {
-				if (line.match(/^手合割：平手/)) {
-					hirate = true;
-					continue;
-				}
-				var match:Array = line.match( /^\s+(\d+)\s+(同|[１２３４５６７８９][一二三四五六七八九])\s*(成?)([歩と香桂銀金角馬飛龍竜玉王])(不?成?)(\(\d+\)|打)/);
-				if (!match) continue;
-				var csa:String = "";
-				if (parseInt(match[1]) % 2 == (hirate ? 0 : 1)) {
-					csa += "-";
-				} else {
-					csa += "+";
-				}
-				if (match[6] == "打") {
-					csa += "00";
-				} else {
-					csa += match[6].substr(1, 2);
-				}
-				if (match[2] == "同") {
-					csa += prev;
-				} else {
-					switch (match[2].charAt(0)) {
-						case "１":
-							csa += "1"; prev = "1"; break;
-						case "２":
-							csa += "2"; prev = "2"; break;
-						case "３":
-							csa += "3"; prev = "3"; break;
-						case "４":
-							csa += "4"; prev = "4"; break;
-						case "５":
-							csa += "5"; prev = "5"; break;
-						case "６":
-							csa += "6"; prev = "6"; break;
-						case "７":
-							csa += "7"; prev = "7"; break;
-						case "８":
-							csa += "8"; prev = "8"; break;
-						case "９":
-							csa += "9"; prev = "9"; break;
-					}
-					switch (match[2].charAt(1)) {
-						case "一":
-							csa += "1"; prev += "1"; break;
-						case "二":
-							csa += "2"; prev += "2"; break; 
-						case "三":
-							csa += "3"; prev += "3"; break;
-						case "四":
-							csa += "4"; prev += "4"; break;
-						case "五":
-							csa += "5"; prev += "5"; break;
-						case "六":
-							csa += "6"; prev += "6"; break;
-						case "七":
-							csa += "7"; prev += "7"; break;
-						case "八":
-							csa += "8"; prev += "8"; break;
-						case "九":
-							csa += "9"; prev += "9"; break;
-					}
-				}
-				if (match[3] == "成" || match[5] == "成") {
-					switch (match[4]) {
-						case "歩":
-							csa += "TO"; break;
-						case "香":
-							csa += "NY"; break;
-						case "桂":
-							csa += "NK"; break;
-						case "銀":
-							csa += "NG"; break;
-						case "角":
-							csa += "UM"; break;
-						case "飛":
-							csa += "RY"; break;
-					}
-				} else {
-					switch (match[4]) {
-						case "歩":
-							csa += "FU"; break;
-						case "と":
-							csa += "TO"; break;
-						case "香":
-							csa += "KY"; break;
-						case "桂":
-							csa += "KE";  break;
-						case "銀":
-							csa += "GI"; break;
-						case "金":
-							csa += "KI"; break;
-						case "角":
-							csa += "KA"; break;
-						case "馬":
-							csa += "UM"; break;
-						case "飛":
-							csa += "HI"; break;
-						case "龍":
-							csa += "RY"; break;
-						case "竜":
-							csa += "RY"; break;
-						case "玉":
-							csa += "OU"; break;
-						case "王":
-							csa += "OU"; break;
-					}
-				}
-				moves.push(csa);
-			  }
-		  }
-
         ]]>
     </mx:Script>
 	<mx:RadioButtonGroup id="timeSetting" change="toggleTimeSelection();"/>
+<!--
 	<mx:RadioButton groupName="timeSetting" label="45{parentApplication.lan.min} - 60{parentApplication.lan.sec} , {parentApplication.lan.rated} (x2.0)" value="0" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label="15{parentApplication.lan.min} - 60{parentApplication.lan.sec} , {parentApplication.lan.rated} (x1.3)" value="1" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label=" 5{parentApplication.lan.min} - 30{parentApplication.lan.sec} , {parentApplication.lan.rated} (x1.0)" value="2" fontSize="11"/>
 	<mx:RadioButton groupName="timeSetting" label=" 0{parentApplication.lan.min} - 30{parentApplication.lan.sec} , {parentApplication.lan.rated} (x0.8)" value="3" fontSize="11"/>
+-->
 	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.nonrated}" value="4" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_total" enabled="false" selectedIndex="3">
@@ -271,17 +132,17 @@
 		<mx:ComboBox id="nonrated_byoyomi" enabled="false" selectedIndex="4">
 		  <mx:ArrayCollection>
 			 <mx:Object label="10{parentApplication.lan.sec}" data="10"/>
-			 <mx:Object label="20{parentApplication.lan.sec}" data="20"/>
-			 <mx:Object label="30{parentApplication.lan.sec}" data="30"/>
-			 <mx:Object label="60{parentApplication.lan.sec}" data="60"/>
+			 <mx:Object label="15{parentApplication.lan.sec}" data="20"/>
+			 <mx:Object label="20{parentApplication.lan.sec}" data="30"/>
+			 <mx:Object label="30{parentApplication.lan.sec}" data="60"/>
 		  </mx:ArrayCollection>
 		</mx:ComboBox>
 	</mx:HBox>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="nonrated_handicap" selectedIndex="0" enabled="false">
 		  <mx:ArrayCollection>
-			 <mx:Object label="{parentApplication.lan.hc_even}" data="nr"/>
-			 <mx:Object label="{parentApplication.lan.hc_fixed}" data="hcfixed"/>
+			 <mx:Object label="{parentApplication.lan.hc_even}" data="vachu"/>
+<!--			 <mx:Object label="{parentApplication.lan.hc_fixed}" data="hcfixed"/>
 			 <mx:Object label="{parentApplication.lan.hc_lance}" data="hclance"/>
 			 <mx:Object label="{parentApplication.lan.hc_bishop}" data="hcbishop"/>
 			 <mx:Object label="{parentApplication.lan.hc_rook}" data="hcrook"/>
@@ -299,27 +160,19 @@
 			 <mx:Object label="{parentApplication.lan.hc_mini}" data="vamini"/>
 			 <mx:Object label="{parentApplication.lan.hc_56}" data="va5656"/>
 			 <mx:Object label="{parentApplication.lan.hc_33}" data="va33"/>
+-->
 		  </mx:ArrayCollection>
 		</mx:ComboBox>
     </mx:HBox>
+<!--
     <mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.tournament}" value="5" fontSize="11"/>
 	<mx:HBox paddingLeft="50">
 		<mx:ComboBox id="tournament_name" selectedIndex="0" dataProvider="{tournaments}" enabled="false"/>
     </mx:HBox>
-	<mx:RadioButton groupName="timeSetting" label="{parentApplication.lan.study_room}" value="6" fontSize="11"/>
-	<mx:HBox paddingLeft="50">
-		<mx:ComboBox id="study_handicap" selectedIndex="0" dataProvider="{nonrated_handicap.dataProvider}" enabled="false"/>
-    </mx:HBox>
-	<mx:HBox paddingLeft="50">
-		<mx:TextInput id="blackName" text="Black" width="65" enabled="false"/>
-		<mx:TextInput id="whiteName" text="White" width="65" enabled="false"/>
-    </mx:HBox>
-	<mx:HBox paddingLeft="50">
-		<mx:Button id="loadKifuButton" label="{parentApplication.lan.load_kifu}" enabled="false" click="_loadKifu();" />
-		<mx:TextInput id="kifuName" editable="false" width="100" enabled="false" />
-	</mx:HBox>
+-->
     <mx:HBox paddingTop="15">
 	    <mx:Button id="Submit" click="submit();" label="{parentApplication.lan.wait}"/> 
 	    <mx:Button label="{parentApplication.lan.cancel}" click="PopUpManager.removePopUp(this);"/> 
     </mx:HBox>
+
 </mx:TitleWindow>

@@ -20,7 +20,7 @@
 					radioButton.groupName = "RadioGroup2";
 					radioButton.value = i;
 					hbox.addChild(radioButton);
-					for each (var j:int in [0, 10, 7]) {
+					for each (var j:int in [0, 4, 1]) {
 						var image:Image = new Image();
 						image.source = sets[i].getPieceClass(0, j);
 						image.width = 34;

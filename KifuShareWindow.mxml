@@ -16,7 +16,7 @@
 			private function _toURL():String {
 				var str:String;
 				if (RadioGroup1.selectedValue == 0) {
-					str = DIRECTORY + "kifuviewer.html?kid=" + kifu.id;
+					str = DIRECTORY + "kifuviewer114.html?kid=" + kifu.id;
 					if (pieceType != 0) str += "&piece=" + pieceType;
 					if (turn != 0) str += "&turn=" + turn;
 					if (moves != 0) str += "&moves=" + moves;
@@ -38,7 +38,7 @@
 			private function _copyHTML():void {
 				var str:String;
 				if (RadioGroup1.selectedValue == 0) {
-					str = "<embed src=\"http://81dojo.com/dojo/EightyOneKifuViewer.swf?kid=" + kifu.id;
+					str = "<embed src=\"http://81dojo.com/dojo/ChuKifuViewer.swf?kid=" + kifu.id;
 					if (pieceType != 0) str += "&piece=" + pieceType;
 					if (turn != 0) str += "&turn=" + turn;
 					if (moves != 0) str += "&moves=" + moves;
@@ -53,7 +53,7 @@
 			private function _sendTwitter():void {
 				var str:String = "http://twitter.com/share?text=";
 				if (RadioGroup1.selectedValue == 0) {
-					str += "81Dojo Kifu: [";
+					str += "81Dojo Chu-Shogi Kifu: [";
 					str += kifu.black + "(" + InfoFetcher.country_names3[kifu.blackCountryCode] + ", " + kifu.blackRank + ") vs ";
 					str += kifu.white + "(" + InfoFetcher.country_names3[kifu.whiteCountryCode] + ", " + kifu.whiteRank +")]";
 					if (kifu.opening != "") str += ", " + kifu.opening;
@@ -73,9 +73,9 @@
 			
 			public function toggleRadio(kifuEnabled:Boolean, diagramEnabled:Boolean):void{
 				kifuRadio.enabled = kifuEnabled;
-				diagramRadio.enabled = diagramEnabled;
-				if (!kifuEnabled) diagramRadio.selected = true;
-				else if (!diagramEnabled) kifuRadio.selected = true;
+//				diagramRadio.enabled = diagramEnabled;
+//				if (!kifuEnabled) diagramRadio.selected = true;
+//				else if (!diagramEnabled) kifuRadio.selected = true;
 			}
 			
         ]]>
@@ -83,7 +83,7 @@
 	<mx:VBox>
 		<mx:RadioButtonGroup id="RadioGroup1"/>
 		<mx:RadioButton id="kifuRadio" fontSize="11" label="Kifu (on 81Dojo Kifu Viewer)" groupName="RadioGroup1" value="0" selected="true" />
-		<mx:RadioButton id="diagramRadio" fontSize="11" label="Diagram (on cloud service by fantakeshi)" groupName="RadioGroup1"  value="1"/>
+<!--		<mx:RadioButton id="diagramRadio" fontSize="11" label="Diagram (on cloud service by fantakeshi)" groupName="RadioGroup1"  value="1"/> -->
 	</mx:VBox>
 	<mx:HBox horizontalAlign="center" paddingBottom="10">
 		<mx:Button icon="@Embed('images/icon_twitter.png')" toolTip="Twitter" click="_sendTwitter();" />

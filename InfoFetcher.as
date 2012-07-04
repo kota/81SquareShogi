@@ -137,13 +137,13 @@
 					filter = line.substr(3);
 				} else {
 					switch(filter) {
-						case "NEWEST_VERSION":
+						case "NEWEST_VERSION144":
 							newestVer = line;
 							break;
-						case "INITIAL_MESSAGE":
+						case "INITIAL_MESSAGE144":
 							initMessage += line + "\n";
 							break;
-						case "GAME_MESSAGE":
+						case "GAME_MESSAGE144":
 							gameMessage += line + "\n";
 							break;
 						case "TITLE_HOLDERS":
@@ -176,7 +176,7 @@
 								clock_differences.push(parseInt(diff));
 							}
 							break;
-						case "ADS":
+						case "ADS114":
 							ads_num.push(parseInt(line.split(",")[0]));
 							ads_title.push(line.split(",")[1]);
 							break;

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1180" height="690" backgroundColor="0xcccc77" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1280" height="690" backgroundColor="0xebcc66" creationComplete="{initApp()}" xmlns:eightyOneSquare="*" frameRate="24" initialize="systemManager.stage.scaleMode=StageScaleMode.SHOW_ALL">
 	<mx:Style>
 		global{ 
 		 layoutDirection: "ltr";
@@ -60,7 +60,7 @@
     import mx.utils.StringUtil;
 	import flash.system.Security;
 	
-	public const VERSION:String = "ver.2012/05/12";
+	public const VERSION:String = "ver.2012/07/03";
 	private const IMAGE_DIRECTORY:String = "http://81dojo.com/dojo/images/";
 	private var _servers: Array = new Array();
 	public var serverName: String;
@@ -133,18 +133,10 @@
     private var _sound_timeup:Sound = new Sound_timeup();
     [Embed(source = "/sound/challenger.mp3")]
     private var Sound_challenger:Class;
-    [Embed(source = "/images/earth.png")]
-    private var _icon_earth:Class
+    [Embed(source = "/images/jupiter.png")]
+    private var _icon_jupiter:Class
     [Embed(source = "/images/moon.png")]
     private var _icon_moon:Class
-    [Embed(source = "/images/mars.png")]
-    private var _icon_mars:Class
-    [Embed(source = "/images/venus.png")]
-    private var _icon_venus:Class
-    [Embed(source = "/images/mercury.png")]
-    private var _icon_mercury:Class
-	[Embed(source = "/images/saturn.png")]
-	private var _icon_saturn:Class
     private var _sound_challenger:Sound = new Sound_challenger();
     private var _end_sound_play:Boolean = true;
     private var _chat_sound1_play:Boolean = true;
@@ -214,15 +206,7 @@
 	  }
       _client = new CsaShogiClient();
   serverListGrid.dataProvider = { 'name':"Loading..."};
-  var server:Object = { 'name':"EARTH", 'description':"main", 'icon':_icon_earth, 'host':"81dojo.com", 'port':"4081", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"MARS", 'description':"sub", 'icon':_icon_mars, 'host':"81dojo.dyndns.org", 'port':"4081", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"VENUS", 'description':"sub", 'icon':_icon_venus, 'host':"81dojo.com", 'port':"4082", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"SATURN", 'description':"3X4", 'icon':_icon_saturn, 'host':"81dojo.com", 'port':"4083", 'alive':"NO" };
-  _servers.push(server);
-  server = { 'name':"MERCURY", 'description':"beta test", 'icon':_icon_mercury, 'host':"81dojo.com", 'port':"4084", 'alive':"NO" };
+  var server:Object = { 'name':"JUPITER", 'description':"Chu-Shogi", 'icon':_icon_jupiter, 'host':"81dojo.com", 'port':"4084", 'alive':"NO" };
   _servers.push(server);
   server = { 'name':"MOON", 'description':"for admin", 'icon':_icon_moon, 'host':"127.0.0.1", 'port':"4081", 'alive':"YES" };
   _servers.push(server);
@@ -349,7 +333,7 @@
 //	  if (!login_name.match(/^test\d$/)) _sendAutoChat("I've logged in. Hello. I'm " + rank + " from " + InfoFetcher.country_names[e.message.split(":")[2]] + ".");
 	  _writeUserMessage("Current status: R" + e.message.split(":")[1] + " (max:" + e.message.split(":")[11] + "), " + e.message.split(":")[3] + " win - " + e.message.split(":")[4] + " loss, " + Math.max(0, e.message.split(":")[5]) + " streak (best: " + e.message.split(":")[6] + ")\n", 1, "#008800", true);
 	  if (parseInt(e.message.split(":")[2]) <= 4) _writeUserMessage("Please register your country\n", 1, "#FF0000");
-	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 3) _writeUserMessage(lan.msg_newlogin + "\n\n", 1, "#008800");
+//	  if (parseInt(e.message.split(":")[3]) + parseInt(e.message.split(":")[4]) < 3) _writeUserMessage(lan.msg_newlogin + "\n\n", 1, "#008800");
 //	  if (login_name.match(/\-/)) _writeUserMessage("Having '-' in your nickname causes bug. Please ask admin to change your ID.\nIDにハイフンが含まれているとバグが発生することが判明しています。管理者にID変更を依頼して下さい。\n", 1, "#FF0000", true);
 	  bulletin.loadAds();
     }
@@ -498,7 +482,7 @@
       }
       _watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
       watcherListGrid.dataProvider = _watcher_list;
-	  watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
+	  watcherPanel.title = lan.watchers + " (" + _watcher_list.length +")";
     }
 	
 	private function _handleLobbyIn(e:ServerMessageEvent):void {
@@ -1247,7 +1231,7 @@
 			if (_users[e.message]) _watcher_list.push(_users[e.message]);
 			_watcher_list.sortOn("rating", Array.NUMERIC | Array.DESCENDING);
 			watcherListGrid.dataProvider = _watcher_list;
-			watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
+			watcherPanel.title = lan.watchers + " (" + _watcher_list.length +")";
 		}
 		if (board.isStudyHost && board.post_game) _sendStudy(e.message);
 	}
@@ -1269,7 +1253,7 @@
 				if (_watcher_list[i].name == e.message) {
 					_watcher_list.splice(i, 1);
 					watcherListGrid.dataProvider = _watcher_list;
-					watcherListTitle.text = lan.watchers + " (" + _watcher_list.length +")";
+					watcherPanel.title = lan.watchers + " (" + _watcher_list.length +")";
 					break;
 				}
 			}
@@ -3152,15 +3136,15 @@
     <mx:VBox id="loginBox" horizontalAlign="center" verticalAlign="middle" width="100%" height="100%" fontSize="11" hideEffect="{hideLogin}" verticalGap="4">
 	  <mx:HBox width="672" horizontalAlign="right" horizontalGap="0" paddingBottom="0" paddingTop="0" paddingRight="0" paddingLeft="0">
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
-		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="My Account" click="navigateToURL(new URLRequest('http://account-81dojo.dyndns-web.com/'), 'quote')"/>
+		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="My Account" click="navigateToURL(new URLRequest('http://49.212.52.151/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 		<mx:LinkButton paddingTop="-2" paddingBottom="0"  label="81Dojo Top" click="navigateToURL(new URLRequest('http://81dojo.com/'), 'quote')"/>
 		<mx:Label text="|" paddingLeft="-2" paddingRight="-11" />
 	  </mx:HBox>
-	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}81Dojo.jpg?{VERSION}" toolTip="" />
+	  <mx:Image id="titleBanner" source="{IMAGE_DIRECTORY}ChuShogi.jpg?{VERSION}" toolTip="" />
 	  <mx:Label paddingTop="-2" paddingBottom="0" text="{VERSION}"/>
 	  <mx:Spacer height="-10"/>
-      <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/>
+<!--      <mx:Label paddingTop="-3" text="(powered by shogi-server and 81SquareUniverse.com)"/> -->
 	  <mx:HBox verticalAlign="middle" horizontalGap="35" >
 		  <mx:Form paddingBottom="0">
 			<mx:FormItem label="{lan.language}" paddingTop="-2">
@@ -3193,11 +3177,11 @@
 		  </mx:DataGrid>
 	  </mx:HBox>
       <!-- <mx:LinkButton paddingTop="-2" label="Sign Up" fontSize="15" click="navigateToURL(new URLRequest('http://81dojo.dyndns.org:8000'), 'quote')" /> -->
-      <mx:Label paddingTop="5" text="(c) Chief Programmer: Kota" fontSize="14" />
+      <mx:Label paddingTop="5" text="(c) 81Dojo" fontSize="14" />
 	  <mx:HBox paddingTop="-3">
 <!--		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(1);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(2);"/> -->
-		  <mx:Label text="(c) Administrative Co-programmer: Hidetchi" fontSize="12"/>
+<!--		  <mx:Label text="(c) Administrative Co-programmer: Hidetchi" fontSize="12"/> -->
 <!--		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(3);"/>
 		  <mx:Label text=" " doubleClickEnabled="true" doubleClick="_testLogin(4);"/> -->
 	  </mx:HBox>
@@ -3313,7 +3297,30 @@
         <mx:TextArea id="userMessage2" wordWrap="true" editable="false" width="428" height="168" fontSize="12" doubleClickEnabled="true" doubleClick="_playerInfoFromText(userMessage2);" fontFamily="Meiryo UI" leading="0" />
         </mx:Panel>
 		
-		<mx:HBox>
+		<mx:HBox horizontalGap="1">
+			
+        <mx:Panel id="sidePanel" title="{lan.kifu}" width="176" height="430" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
+			<mx:VBox height="453">
+				<mx:HBox horizontalGap="2">
+<!--					<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="_copyKIF();"/>
+					<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" /> -->
+					<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
+				</mx:HBox>
+				  <mx:HBox paddingLeft="2" paddingTop="-3">
+						<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
+						<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
+						<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
+				  </mx:HBox>
+				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20" paddingTop="0" paddingBottom="0">
+				 <mx:columns>
+				  <mx:DataGridColumn headerText="No." dataField="numStr" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
+				  <mx:DataGridColumn headerText="Moves" dataField="toListString" fontFamily="Meiryo UI" fontSize="12" paddingLeft="2" />
+				 </mx:columns>
+				</mx:DataGrid>
+			</mx:VBox>
+        </mx:Panel>
+		
+		<mx:VBox>
         <mx:Panel id="controlPanel" fontSize="11" title="Control Panel" status="{VERSION}" width="336" height="200" verticalAlign="middle" paddingLeft="8" headerHeight="22" horizontalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
           <mx:HBox width="300">			
             <mx:Button id="resignButton" label="{lan.resign}" click="_resignAlert();"/>
@@ -3350,14 +3357,8 @@
 			<mx:Button id="checkLobbyButton" label="{lan.check_lobby}" enabled="true" click="_checkLobby();" />
 		</mx:HBox>
         </mx:Panel>
-
-        <mx:Panel id="sidePanel" title="Side Panel" width="176" height="674" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
-		  <mx:HBox paddingBottom="-2" horizontalGap="10">
-			<mx:Label id="watcherListTitle" text="{lan.watchers}" fontWeight="bold" paddingRight="0" />
-<!--			<mx:Button id="refreshWatchersButton" icon="@Embed('images/icon_refresh.png')" toolTip="{lan.refresh}" click="_watcherRefresh();"/> -->
+		<mx:Panel id="watcherPanel" title="{lan.watchers}" width="176" height="220" headerHeight="22" horizontalScrollPolicy="off" verticalScrollPolicy="off" borderThicknessLeft="8" borderThicknessRight="8">
 			<mx:CheckBox id="allowWatcherChatCheckbox" label="{lan.allow_chat}" click="_toggleWatcherChat();"/>
-		  </mx:HBox>
-		  <mx:VDividedBox dividerRelease="kifuDataGrid.callLater(_scrollDownKifu);" liveDragging="true">
 			<mx:DataGrid id="watcherListGrid" width="160" height="152" rowHeight="20" headerHeight="21" doubleClickEnabled="true" doubleClick="_openPlayerInfo(watcherListGrid.selectedItem.name);" paddingTop="0" paddingBottom="0" verticalAlign="middle">
 			 <mx:columns>
 			  <mx:DataGridColumn itemRenderer="{playerListNameRenderer}" headerText="{lan.name}" width="90" paddingLeft="2" sortCompareFunction="_sortName" />
@@ -3365,31 +3366,9 @@
 			  <mx:DataGridColumn dataField="rateStr" headerText="{lan.rate}" width="40" paddingLeft="0" paddingRight="0" textAlign="right" sortCompareFunction="_sortRate" sortDescending="true" />
 			 </mx:columns>
 			</mx:DataGrid>
-			<mx:VBox height="453">
-				<mx:HBox paddingBottom="3">
-					<mx:Label text="{lan.kifu}" fontWeight="bold"/>
-					<mx:VBox>
-						<mx:HBox>
-							<mx:Button id="kifuCopyButton" icon="@Embed('images/icon_copy.png')" toolTip="{lan.copy}" click="_copyKIF();"/>
-							<mx:Button id="kifuSaveButton" icon="@Embed('images/icon_save.png')" toolTip="{lan.save}" click="_saveKIF();" />
-						</mx:HBox>
-					<mx:Button id="shareKifuButton2" icon="@Embed('images/icon_share.png')" toolTip="{lan.share}" click="_shareKifu2();"/>
-					</mx:VBox>
-				</mx:HBox>
-				  <mx:HBox paddingLeft="2" paddingTop="-3">
-						<mx:RadioButtonGroup id="RadioGroupKifu" change="_toggleListen();" />
-						<mx:RadioButton id="radioKifuReplay" groupName="RadioGroupKifu" label="{lan.replay}" />
-						<mx:RadioButton id="radioKifuListen" groupName="RadioGroupKifu" label="{lan.listen}" />
-				  </mx:HBox>
-				<mx:DataGrid id="kifuDataGrid" sortableColumns="false" width="160" height="100%" change="kifuListSelected();" selectable="false" fontSize="10" rowHeight="20" paddingTop="0" paddingBottom="0">
-				 <mx:columns>
-				  <mx:DataGridColumn headerText="No." dataField="numStr" width="35" textAlign="right" paddingRight="3" paddingLeft="0" />
-				  <mx:DataGridColumn headerText="Moves" dataField="toListString" fontFamily="Meiryo UI" fontSize="12" paddingLeft="2" />
-				 </mx:columns>
-				</mx:DataGrid>
-			</mx:VBox>
-		  </mx:VDividedBox>
-        </mx:Panel>
+		</mx:Panel>
+		</mx:VBox>
+
 		</mx:HBox>
       </mx:VBox>
 	</mx:HBox>

@@ -51,6 +51,7 @@ package  {
 		var tokens:Array;
 		var lines:Array = _urlLoader.data.split("\n");
 		var type:String;
+/*
 		for each(var line:String in lines) {
 			if (line.match(/^TITLE:/)) {
 				var page:Canvas = new Canvas();
@@ -176,17 +177,18 @@ package  {
 			}
 			y += 15;
 		}
+*/
 		//Ads
-		page = new Canvas();
+		var page:Canvas = new Canvas();
 		page.width = 175;
 		page.height = 625;
 		page.horizontalScrollPolicy = "off";
 		page.setStyle('backgroundColor', '#EEFFCC');
 		page.setStyle('showEffect', _showEffect);
 		page.setStyle('hideEffect', _hideEffect);
-		label = new Label();
+		var label:Label = new Label();
 		label.addEventListener(MouseEvent.CLICK, _handleFlip);
-		label.text = "New Shogi Goods Overview";
+		label.text = "Chu-Shogi Goods Overview";
 		label.setStyle('textAlign', 'center');
 		label.width = page.width
 		label.setStyle('color', '#FF0000');
